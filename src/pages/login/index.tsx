@@ -206,7 +206,7 @@ export default function Login() {
                 ]}
                 hidden={!showcaptcha}
               >
-                <Input placeholder={t('请输入验证码')} onPressEnter={handleSubmit} prefix={<SafetyCertificateTwoTone className='site-form-item-icon' />} />
+                <Input className='code1' placeholder={t('请输入验证码')} onPressEnter={handleSubmit} prefix={<SafetyCertificateTwoTone className='site-form-item-icon' />} />
               </Form.Item>
               <img
                 ref={verifyimgRef}

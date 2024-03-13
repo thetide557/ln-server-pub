@@ -324,6 +324,7 @@ export default function () {//{ selectMenu?:any }
     if (
       location.pathname === '/login' ||
       location.pathname.startsWith('/chart/') ||
+      location.pathname.startsWith('/screenView') ||
       location.pathname.startsWith('/dashboards/share/') ||
       location.pathname === '/callback' ||
       location.pathname.indexOf('/polaris/screen') === 0
@@ -351,6 +352,11 @@ export default function () {//{ selectMenu?:any }
     }
   };
 
+  const goScreen = () => {
+    history.push('/screenView')
+    // window.location.href = '/screenView'
+  }
+
   const topRightMenu = (
     <Menu>
       <Menu.Item
@@ -377,7 +383,7 @@ export default function () {//{ selectMenu?:any }
 
   return hideSideMenu() ? null : (
     <div className='top-menu1'>
-      <div className='logoImg'>
+      <div className='logoImg' onClick={goScreen}>
         <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>        
         {theme?.title}</div>
       <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />

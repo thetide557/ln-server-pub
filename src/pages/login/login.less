@@ -7,9 +7,10 @@
   height: 100vh;
   display: flex;
   overflow: hidden;
-  justify-content: right;
+  // justify-content: right;
   align-items: center;
-  background-image: url("/public/image/topmenu/sysbk.png");
+  // background-image: url("/image/topmenu/sysbk.png");
+  background-image: url("/image/login/bg.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -98,11 +99,13 @@
     }
   }
   .login-panel {
-    // position: relative;
-    display:flex;
-    width: 90%;
-    height: 90%;
-    // background-image: url('/public/image/topmenu/whitebg.png') !important;
+    position: absolute;
+    left: 60%;
+    width: 500px;
+    // display:flex;
+    // width: 90%;
+    // height: 90%;
+    // background-image: url('/image/topmenu/whitebg.png') !important;
     background-size: cover;
     background-attachment: fixed;
     background-position: center center;
@@ -110,17 +113,17 @@
     // justify-content: center;
     object-fit: cover;
     // align-items: center;
-    background-color: #fff;
+    // background-color: #fff;
     overflow: hidden;
-    color: #000;
-    margin: 0 auto;
+    // color: #000;
+    // margin: 0 auto;
     .login-main {
       display: block;
       // position: absolute;
       left: 0%;
       // height: 100%;
       margin-top: 5%;
-      width: 50%;
+      // width: 50%;
       // border: 1px solid red;
       padding-top: 30px;
       .title {
@@ -130,14 +133,14 @@
         text-align: center;
         font-size:34px;
         font-family: "douyuzhuiguangti";
-        left: 10%;
+        left: 5%;
       }
       .main {
-        margin-top: 20px;
+        // margin-top: 20px;
         width: 100%;
         display: block;
         left: 3%;
-        background-image: url("/public/image/topmenu/mainshow.png");
+        background-image: url("/image/topmenu/mainshow.png");
         background-repeat: no-repeat;
         background-position: center;
         background-size: 50% 80%;
@@ -149,13 +152,13 @@
     .integration {
         // border: 1px solid red;
         display: block;
-        right: 10%;
+        // right: 10%;
         // position: absolute;
-        width: 40%;
+        // width: 40%;
         height: 80%;
         margin-top: 10%;
         .form_title {
-          width: 80%;
+          // width: 80%;
           display: flex;
           
           justify-content: center;
@@ -166,10 +169,10 @@
         }
         .login_form  {
              padding-left: 10px;
-             height: 60%;
-             width: 80%;
+            //  height: 60%;
+            //  width: 80%;
              .ant-form-item-control {
-               width: 80%;
+              //  width: 80%;
              }
             .ant-form-item {
               height: 50px;
@@ -183,10 +186,10 @@
             }
             .submit_button {
               border-radius: 8px;
-              height: 38px;
-              width: 80%;
+              height: 48px;
+              width: 90%;
               background-color: #128BF1;
-              margin-left: 15%;
+              margin-left: 5%;
               border: 1px solid #128BF1;
             }
         }
@@ -206,6 +209,8 @@
 
         input {
           font-size: 14px;
+          background-color: transparent!important;
+          color: #fff!important;
         }
 
         .ant-btn {
@@ -239,7 +244,22 @@
 
         .ant-input {
           // background: transparent;
-          color: @fontColorLevel2;
+          // color: @fontColorLevel2;
+          background-color: transparent;
+          color: #fff;
+          &:hover {
+            background-color: transparent;
+            color: #fff;
+          }
+        }
+        // .ant-checkbox {
+        //   border-color: #fff;
+        //   &:hover {
+        //     border-color: #fff;
+        //   }
+        // }
+        .ant-checkbox-inner {
+          background: #fff;
         }
 
         .ant-form-item-explain.ant-form-item-explain-error {
@@ -264,6 +284,7 @@
   .verifyimg-div {
     font-size: 14px;
     display: inline-flex;
+    justify-content: space-between;
     width: 88%;
     strong {
       font-weight: 500;
@@ -272,6 +293,12 @@
       width: 50%;
       padding: 0;
       margin-right: -45px;
+      .code1 {
+        width: 200px;
+      }
+    }
+    .ant-input {
+      width: 30%;
     }
   }
   @media screen and (max-width: 1070px) {

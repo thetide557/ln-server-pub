@@ -102,6 +102,7 @@ import Topo from '@/pages/topoGraph/Designer';
 import Apiservice, {Add as ApiServiceAdd, Edit as ApiServiceEdit, Detail as ApiServiceDetail} from '@/pages/apiService';
 import Board from '@/pages/dashboard/Detail/Board'
 import DataRoom from '@/pages/dataRoom';
+import ScreenView from '@/pages/sxxc/screenView';
 
 
 const Packages = dynamicPackages();
@@ -252,6 +253,7 @@ export default function Content() {
         <Route exact path='/bigScreen/api-service/add' component={ApiServiceAdd}/>
         <Route exact path='/bigScreen/api-service/:id/edit' component={ApiServiceEdit}/>
         <Route exact path='/bigScreen/api-service/:id' component={ApiServiceDetail}/>
+        <Route path='/screenView' component={ScreenView} exact />
 
 
         {lazyRoutes.map((route, i) => (

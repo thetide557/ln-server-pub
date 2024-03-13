@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useEffect, useState, createContext, useRef, useLayoutEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 // Modal 会被注入的代码所使用，请不要删除
@@ -299,7 +300,7 @@ function App() {
   }
 
   return (
-    <div className='App' style={path.startsWith('/login') ? { overflow: 'hidden' } : { overflow: 'auto' }}>
+    <div className='App' style={(path.startsWith('/login') || path.startsWith('/screenView')) ? { overflow: 'hidden' } : { overflow: 'auto' }}>
       <audio ref={audioRef} src='/music/y2168.mp3' />
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
@@ -310,7 +311,7 @@ function App() {
               <>
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
-                <div className='content-box'>
+                <div className={(path.startsWith('/screenView')) ? '' : 'content-box'}>
                   <Content />
                 </div>
               </>
