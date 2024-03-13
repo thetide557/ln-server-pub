@@ -151,7 +151,7 @@ export default function Login() {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
         if (!err) {
-           window.location.href = redirect || '/home';
+           window.location.href = '/screenView' || redirect || 'home';
         }
       })
       .catch(() => {
@@ -208,13 +208,13 @@ export default function Login() {
               >
                 <Input className='code1' placeholder={t('请输入验证码')} onPressEnter={handleSubmit} prefix={<SafetyCertificateTwoTone className='site-form-item-icon' />} />
               </Form.Item>
-              <img
+              <img className='img11'
                 ref={verifyimgRef}
                 style={{
                   display: showcaptcha ? 'inline-block' : 'none',
                   float: 'right',
                   width:'110px',
-                  height: '36px'
+                  height: '36px',
                 }}
                 onClick={refreshCaptcha}
                 alt='点击获取验证码'

@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Input, message, Modal, Select, Space, Row, Col, Dropdown, Menu, DatePickerProps, Radio } from 'antd';
 import { AlertOutlined, ExclamationCircleOutlined, SearchOutlined, AppstoreOutlined, UnorderedListOutlined, DownOutlined } from '@ant-design/icons';

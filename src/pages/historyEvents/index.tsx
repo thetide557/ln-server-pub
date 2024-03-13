@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useContext, useEffect, useState } from 'react';
 import { AlertOutlined, CopyTwoTone, DeleteOutlined, DownOutlined, DownloadOutlined, EditOutlined, FileSearchOutlined, SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';

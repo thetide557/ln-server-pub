@@ -62,8 +62,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/n9e-plus': {
-        // target: 'http://10.206.16.17:17001/',
-        target: 'http://113.137.42.69:17000/',
+        target: 'http://10.206.16.17:17001/',
         changeOrigin: true,
       },
       '/api/n9e/proxy': {
@@ -83,8 +82,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api/fc-brain': {
-        // target: 'http://10.206.16.17:28000/',
-        target: 'http://113.137.42.69:17000/',
+        target: 'http://10.206.16.17:28000/',
         changeOrigin: true,
       },
     },

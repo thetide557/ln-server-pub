@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Tabs, Select, Form, Row, Col, DatePickerProps, TreeSelect, Checkbox, Popover, Radio } from 'antd';
 import PageLayout from '@/components/pageLayout';

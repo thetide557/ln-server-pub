@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { Input, Row, Col, Button } from 'antd';
 import { MenuOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';

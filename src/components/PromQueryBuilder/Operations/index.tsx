@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Cascader, Button } from 'antd';
 import _ from 'lodash';

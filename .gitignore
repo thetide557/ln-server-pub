@@ -1,1 +1,16 @@
 node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.vscode
+.idea/*
+pub
+pub.zip
+deploy.sh
+src/Packages/*
+stats.html
+build.sh
+.env.advanced
+scripts/n9e_locale.json
+src/plus

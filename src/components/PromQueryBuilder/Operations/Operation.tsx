@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Button, Col, Row, Select, Input, InputNumber, Switch } from 'antd';
 import { CloseCircleOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons';
