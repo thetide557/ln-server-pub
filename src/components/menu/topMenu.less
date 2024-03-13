@@ -1,0 +1,107 @@
+.top-menu1 {
+  display: inline-flex;
+  width: 100%;
+  position: fixed;
+  // justify-content: space-between;
+  background: url('/public/image/topmenu/topbg.png') no-repeat;
+  background-position: center;
+  .xh_logo_image_size {
+    width: 41px;
+    height: 41px;
+    margin-right:5px;
+  }
+  .logoImg {
+    background-position: center;
+    height: 60px;
+    font-size: 15px;
+    color: #f5f5f5;
+    font-family: 'douyuzhuiguangti';
+    white-space: nowrap;
+    // overflow: hidden;
+    line-height: 63px !important;
+    padding-left: 10px;
+    padding-right: 6px;
+  }
+
+  .ant-menu-horizontal {
+    border-bottom: 0;
+  }
+
+  .layer_1_menu {
+    // background-color: #2979DE;
+    background: #f0f0f000;
+    left: 10px;
+    height: 60px;
+    width: 75%;
+    line-height: 60px;
+    align-items: center;
+    display: flow-root;
+    overflow: hidden;
+    // width: 80%;
+    z-index: 10;
+
+    .ant-menu-item,
+    .ant-menu-submenu {
+      color: #fff;
+    }
+
+    .ant-menu-item-selected {
+      background-color: #fff;
+    }
+
+    .ant-menu {
+      background: #f5f5f500;
+      color: #fff;
+    }
+  }
+
+  .top_right {
+    position: absolute;
+    right: 0px;
+    height: 60px;
+    line-height: 60px;
+    z-index: 10;
+  }
+
+  .ant-menu-item-active {
+    background-color: @primary-background;
+  }
+
+  .ant-menu-item:hover {
+    background-color: @primary-background;
+  }
+
+  .ant-menu-submenu-active {
+    background-color: @primary-background;
+  }
+
+  .ant-menu-submenu-selected {
+    background-color: @primary-background;
+  }
+}
+
+.avator {
+  line-height: @baseFontSizeMiddle;
+
+  img {
+    width: @baseFontSizeMiddle;
+    height: @baseFontSizeMiddle;
+    border-radius: 50%;
+    transform: scale(1.5);
+    margin-right: 10px;
+    vertical-align: text-bottom;
+    display: inline-block;
+    // background: url('/image/avatar1.png') 100% 100% / cover;
+  }
+
+  padding-right: 20px;
+  color: #f5f5f5;
+}
+
+.language {
+  margin-right: 20px;
+  color: #f5f5f5;
+}
+.my_portrait {
+  cursor: pointer;
+}

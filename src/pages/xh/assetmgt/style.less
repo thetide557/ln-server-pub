@@ -1,0 +1,220 @@
+.assets-list {
+    padding: 0 15px 15px 15px;
+    flex: 1;
+    overflow: auto;
+
+    .name-column {
+        max-width: 250px;
+    }
+
+    .tags-column {
+        min-width: 100px;
+    }
+}
+
+.left-area {
+    &.collapse {
+        width: 0px;
+        padding: 0px;
+        margin: 0px;
+        .collapse-btn {
+            right: 0px;
+        }
+    }
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-shrink: 0;
+    position: relative;
+    padding: 16px;
+
+    &-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 16px;
+
+        &-title {
+            color: @fontColorLevel2;
+            font-size: @baseFontSizeSmall;
+            font-weight: bold;
+            line-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        &-search {
+            margin-bottom: 10px;
+        }
+
+        .radio-list {
+            flex-shrink: 1;
+            overflow: auto;
+
+            .radio-list-group-item {
+                margin-right: 0;
+            }
+
+            &-group,
+            &-group-space,
+            &-group-item {
+                width: 100%;
+            }
+        }
+
+        &:last-of-type {
+            margin-bottom: 0;
+        }
+
+        &.group-shrink {
+            flex: initial;
+            overflow: auto;
+        }
+
+        .ant-checkbox-group-item {
+            display: flex;
+            margin-bottom: 6px;
+        }
+    }
+
+    .collapse-btn {
+        cursor: pointer;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        top: 50%;
+        margin-top: -29px;
+        right: -10px;
+        height: 58px;
+        width: 10px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.table-view {
+    .ant-table-thead .ant-table-cell {
+        white-space: nowrap;
+    }
+}
+
+.table-header {
+    padding: 15px 15px 0 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.ant-tree .ant-tree-treenode {
+    display: flex;
+    align-items: flex-start;
+    padding: 4px 0 4px 0;
+    outline: none;
+    // background-color: red;
+    width: 100%;
+}
+
+.ant-tree .ant-tree-node-content-wrapper {
+    width: 100%;
+    height: 25px;
+    line-height: 25px;
+
+
+}
+.tip_title {
+    width: 100%;
+    /* background: aqua; */
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+.ant-tree {
+    box-sizing: border-box;
+    padding: 0;
+    margin-top: 10px;
+    color: #262626;
+    font-size: 12px;
+    font-variant: tabular-nums;
+    line-height: 1.5715;
+    list-style: none;
+    font-feature-settings: 'tnum';
+    background: #fff;
+    border-radius: 2px;
+    transition: background-color 0.3s;
+}
+
+.ant-tree-list-holder-inner {
+    align-items: flex-start;
+    width: 100%;
+}
+
+.asset_organize_cls {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 36px;
+    display: flex;
+    position: relative;
+
+    .switch {
+        position: absolute;
+        right: 0px;
+        margin-top: 5px;
+        margin-right: 10px;
+    }
+
+    .ant-switch-checked {
+        background: #7F7F7F;
+    }
+}
+.other_infos {
+    right: 44px;
+    padding: 1px;
+    .other_table {
+       margin: 5px;
+    }
+}
+.asset_list_view {
+    width: 100%;
+    display: flex !important;
+    background-color: #fff;
+    .asset-operate_xh {
+        background-color: #fff;
+        overflow: scroll;
+        z-index: 2;
+        margin-right: 1px;
+        width: 100%;
+        padding: 16px;
+        .table-content_xh {
+            display: flex;
+            width: 100%;
+            position: relative;
+            justify-content: space-between;
+
+            .tool_right {
+                display: flex;
+                align-content: flex-end;
+            }
+        }
+
+        .assets-list-1 {
+             background-color: #fff;
+             height: 100%;
+             margin-top: 5px;
+            .table-view {
+                 width: 100%;
+                 scroll-behavior: auto;
+                .anticon-video-camera,.anticon-file-protect, .anticon-file-search, .anticon-edit,.anticon-fund, .anticon-search{
+                    color:#1890FF;
+                    font-size: 16px;
+                    font-weight: 900;
+                }
+                .anticon-delete {
+                    color:rgb(245, 49, 70);
+                    font-size: 16px;
+                    font-weight: 900;
+                }
+            }
+        }
+    }
+}

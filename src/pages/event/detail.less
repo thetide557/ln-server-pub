@@ -1,0 +1,107 @@
+.event-detail-container {
+  display: block;
+  
+  .pr16 {
+    padding-right: 16px;
+  }
+  .alert_detail_action-btns {
+    .ant-space-align-center {
+       width: 300px;
+       .ant-space-item {
+        width: 50%;
+        .ant-btn {
+           width: 80px;
+
+        }
+       }
+    }
+    .ant-btn-primary {
+       
+    }
+  }
+  .event-detail-nav {
+    position: relative;
+    width: 100%;
+    height: 30px;
+    span {
+      position: absolute;
+      cursor: pointer;
+      right: 13px;
+      width: 100px;
+      height: 30px;
+      line-height: 30px;
+      background-color: #2A8DFD;
+      color: #fff;
+      text-align: center;
+      justify-items: center;
+      border-radius: 3px;
+    }
+  }
+  .ant-spin-nested-loading {
+    background: transparent !important;
+  }
+  .ant-spin-container {
+    height: 100%;
+  }
+  .desc-container {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    font-size: 12px;
+    max-height: 100%;
+    .ant-card-body {
+      box-sizing: border-box;
+      flex: auto;
+      overflow: auto;
+    }
+    .desc-row {
+      display: flex;
+      min-height: 26px;
+      margin-bottom: 8px;
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+      .desc-label {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 3px;
+        width: 120px;
+        color: @colorGray4;
+      }
+      .desc-content {
+        flex: 1;
+        display: flex;
+        flex-flow: row wrap;
+        align-items: center;
+        color: @colorGray1;
+        .ant-row {
+          flex: 1;
+        }
+      }
+      .rule-link-btn {
+        padding: 0;
+        border: 0;
+      }
+      .promql-row {
+        .promql-editor {
+          font-size: 12px;
+        }
+        .run-btn {
+          padding: 0 10px;
+          height: 28px;
+          .run-icon {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+    .ant-tag {
+      margin: 2px 4px;
+    }
+    .action-btns {
+      display: flex;
+      justify-content: flex-start;
+      padding: 0 24px;
+    }
+  }
+}
