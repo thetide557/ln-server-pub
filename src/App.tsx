@@ -300,7 +300,7 @@ function App() {
   }
 
   return (
-    <div className='App' style={(path.startsWith('/login') || path.startsWith('/screenView')) ? { overflow: 'hidden' } : { overflow: 'auto' }}>
+    <div className='App' style={path.startsWith('/login') ? { overflow: 'hidden' } : { overflow: 'auto' }}>
       <audio ref={audioRef} src='/music/y2168.mp3' />
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
@@ -311,7 +311,7 @@ function App() {
               <>
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
-                <div className={(path.startsWith('/screenView')) ? '' : 'content-box'}>
+                <div className='content-box'>
                   <Content />
                 </div>
               </>

@@ -26,10 +26,12 @@ export default function ScreenView() {
   }
   return (
     <div className='screen-view'>
-      <div className='back1' onClick={goBack}>
-        <img src="/image/back.png" alt="" title='返回' />
+      <div className='screen1'>
+        <div className='back1' onClick={goBack}>
+          <img src="/image/back.png" alt="" title='返回' />
+        </div>
+        <iframe id="logFrame" src="http://113.141.79.47:17000/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1" sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
       </div>
-      <iframe id="logFrame" src="http://113.141.79.47:17000/dataroom/#/bigscreen/preview?code=preview_bigScreen_pMc6MKqse1" sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
     </div>
   );
 }
