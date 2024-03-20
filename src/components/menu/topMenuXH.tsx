@@ -109,6 +109,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('接口管理'),
         },
+        // {
+        //   key: '/bigscreen/address',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('大屏首页配置'),
+        // }
       ],
     },
     {
@@ -372,7 +377,8 @@ export default function () {//{ selectMenu?:any }
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
-            history.push('/login');
+            // history.push('/login');
+            window.location.href = '/login'
           });
         }}
       >

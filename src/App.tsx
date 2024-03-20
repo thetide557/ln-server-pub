@@ -181,6 +181,7 @@ function App() {
   });
 
   useLayoutEffect(() => {
+    // console.log('anonymous', anonymous);
     alertWebsocket.current = new WebSocket(WebSocketURL + 232443);//获取推送过来的告警消息
     alertWebsocket.current.onmessage = e => {
       if (!anonymous) {

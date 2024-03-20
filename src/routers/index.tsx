@@ -100,6 +100,7 @@ import plusLoader from 'plus:/utils/loader';
 import useIsPlus from 'plus:/components/useIsPlus';
 import Topo from '@/pages/topoGraph/Designer';
 import Apiservice, {Add as ApiServiceAdd, Edit as ApiServiceEdit, Detail as ApiServiceDetail} from '@/pages/apiService';
+import ScreenAddress, {Add as ScreenAddressAdd, Edit as ScreenAddressEdit, Detail as ScreenAddressDetail} from '@/pages/sxxc/screenAddress';
 import Board from '@/pages/dashboard/Detail/Board'
 import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
@@ -254,7 +255,10 @@ export default function Content() {
         <Route exact path='/bigScreen/api-service/:id/edit' component={ApiServiceEdit}/>
         <Route exact path='/bigScreen/api-service/:id' component={ApiServiceDetail}/>
         <Route path='/screenView' component={ScreenView} exact />
-
+        <Route exact path='/bigscreen/address' component={ScreenAddress}/>
+        <Route exact path='/bigscreen/address/add' component={ScreenAddressAdd}/>
+        <Route exact path='/bigscreen/address/:id/edit' component={ScreenAddressEdit}/>
+        <Route exact path='/bigscreen/address/:id' component={ScreenAddressDetail}/>
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

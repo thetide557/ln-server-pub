@@ -1,5 +1,8 @@
 .screen-view {
   position: fixed;
+  ::-webkit-scrollbar {
+    // display: none;
+  }
   top: 0;
   .screen1 {
     position: relative;
@@ -21,7 +24,5 @@
   min-width: 100vw;
   min-height: 100vh;
   border: 0;
-}
-::-webkit-scrollbar {
-  display: none;
+  overflow: hidden;
 }
