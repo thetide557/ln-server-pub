@@ -66,4 +66,3 @@ server {
 - `vite.config.js` and `tsconfig.json` should both configure to make sure alias works
 - Add `"css.validate": false` in vscode setting.json to ignore the css warning
 - Install the Prettier plugin in vscode and set the format on save
-

@@ -1,0 +1,25 @@
+.explorer-container {
+  height: 100%;
+  .ant-card,.ant-card-body,.ant-form {
+    height: 100%;
+  }
+}
+.explorer-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.metrics-explorer-modal {
+  .metric-list {
+    max-height: 56vh;
+    overflow: auto;
+    &-item {
+      padding: 6px 8px;
+      &:hover {
+        cursor: pointer;
+        background-color: @colorGray2;
+      }
+    }
+  }
+}
