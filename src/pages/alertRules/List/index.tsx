@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, Link } from 'react-router-dom';
@@ -173,9 +174,15 @@ export default function List(props: ListProps) {
       },
     },
     {
+      title: '资产类型',
+      width: 150,
+      dataIndex: 'asset_type',
+      align: 'center',
+    },
+    {
       title: '更新时间',
       dataIndex: 'update_at',
-      width: 120,
+      width: 150,
       align: 'center',
       render: (text: string) => {
         return <div className='table-text'>{moment.unix(Number(text)).format('YYYY-MM-DD HH:mm:ss')}</div>;

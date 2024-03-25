@@ -13,6 +13,8 @@ import queryString from 'query-string';
 import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import { factories } from '../catalog';
+import { AutoComplete } from 'antd';
+import { tuple } from 'antd/lib/_util/type';
 const { Option } = Select;
 export default function () {
   const { t } = useTranslation('assets');
@@ -36,6 +38,7 @@ export default function () {
   const [currentType, setCurrentType] = useState();
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
+  // const [assetOptions1, setAssetOptions1] = useState<any[]>([]);
 
   const panelBaseProps: any = {
     size: 'small',
@@ -135,7 +138,7 @@ export default function () {
           delete dat.exps;
         }
         // setAssetData(dat);
-        const params = {ident: dat.ip }
+        const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
         form.setFieldsValue(dat);
@@ -145,10 +148,30 @@ export default function () {
   };
 
   const handleChange = (value: string) => {
-    console.log(`selected ${value}`);
+    // console.log(`selected ${value}`);
     form.setFieldsValue({ ident: value });
-    console.log('form', form.getFieldsValue(true));
+    // console.log('form', form.getFieldsValue(true));
   };
+
+  // const mockVal = (str: string) => ({
+  //   value: assetOptions.indexOf(str) === 0
+  // });
+
+  // const getPanelValue = (searchText: string) => {
+  //   // console.log('getPanelValue', searchText);
+  //   // console.log('getPanelValu2', assetOptions);
+  //   if (searchText) {
+  //     const arr = assetOptions1.filter(item => {
+  //       if (item.value.includes(searchText)) {
+  //         return true
+  //       }
+  //     })
+  //     setAssetOptions(arr)
+  //   } else {
+  //     setAssetOptions(assetOptions1)
+  //   }
+  // }
+  
 
   useEffect(() => {
     getAssetstypes().then((res) => {
@@ -176,6 +199,7 @@ export default function () {
       });
       options = options.sort((a, b) => localeCompare(a.label, b.label));
       setAssetOptions(options);
+      // setAssetOptions1(options);
       setAssetList({ ...assetList });
       let ipOptions = new Array();
       res.dat.list.map((v) => {
@@ -251,9 +275,9 @@ export default function () {
   };
 
   const updateData = (changedValues, values) => {
-    console.log(changedValues);
-    console.log(values);
-    const params = {ident: values.ip }
+    // console.log(changedValues);
+    // console.log(values);
+    const params = { ident: values.ip }
     setAssetData({ ...assetData, ...values, ...params });
   };
 
@@ -316,7 +340,7 @@ export default function () {
                     <Input placeholder='请输入IP地址' />
                   </Form.Item> */}
                   <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }]}>
-                    <Select
+                    {/* <Select
                       showSearch
                       options={assetOptions}
                       placeholder='请选择IP地址'
@@ -329,6 +353,16 @@ export default function () {
                       //   buildPromqlWithAsset({});
                       //   setShowExcludes(v === 0);
                       // }}
+                    /> */}
+                    <AutoComplete
+                      allowClear={true}
+                      options={assetOptions}
+                      onChange={handleChange}
+                      // onSearch={(text) => getPanelValue(text)}
+                      filterOption={(inputValue, assetOptions) =>
+                        assetOptions!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                      }
+                      placeholder="请输入IP地址"
                     />
                   </Form.Item>
                 </Col>
