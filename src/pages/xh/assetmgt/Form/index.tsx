@@ -10,6 +10,8 @@ import { MinusCircleOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
+import { getAssetsByCondition } from '@/services/assets';
+import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import { factories } from '../catalog';
 const { Option } = Select;
 export default function () {
@@ -32,6 +34,8 @@ export default function () {
   const [form] = Form.useForm();
   const [assetData, setAssetData] = useState<any>({}); // 集中保存提交的数据
   const [currentType, setCurrentType] = useState();
+  const [assetList, setAssetList] = useState<any>({});
+  const [assetOptions, setAssetOptions] = useState<any[]>([]);
 
   const panelBaseProps: any = {
     size: 'small',
@@ -87,7 +91,7 @@ export default function () {
       setProperties(properties);
       setFormItems(items);
     }
-  }, [assetTypes,currentType]);
+  }, [assetTypes, currentType]);
 
   const loadAssetInfo = (id) => {
     if (!!id) {
@@ -130,12 +134,20 @@ export default function () {
           });
           delete dat.exps;
         }
-        setAssetData(dat);
+        // setAssetData(dat);
+        const params = {ident: dat.ip }
+        setAssetData({ ...dat, ...params });
         form.resetFields();
         form.setFieldsValue(dat);
         setCurrentType(dat.type);
       });
     }
+  };
+
+  const handleChange = (value: string) => {
+    console.log(`selected ${value}`);
+    form.setFieldsValue({ ident: value });
+    console.log('form', form.getFieldsValue(true));
   };
 
   useEffect(() => {
@@ -149,6 +161,30 @@ export default function () {
       });
       setAssetTypes(items);
     });
+    let param = {};
+    param['limit'] = -1;
+    getAssetsByCondition(param).then((res) => {
+      let options = new Array();
+      res.dat.list.map((v) => {
+        assetList[v.id] = v;
+        options.push({
+          key: v.id,
+          // value: v.id,
+          value: v.ip,
+          label: `[${v.type}]-[${v.ip}]-${v.name}`,
+        });
+      });
+      options = options.sort((a, b) => localeCompare(a.label, b.label));
+      setAssetOptions(options);
+      setAssetList({ ...assetList });
+      let ipOptions = new Array();
+      res.dat.list.map((v) => {
+        ipOptions.push({
+          value: v.id,
+          label: v.ip,
+        });
+      });
+    });
   }, []);
 
   useEffect(() => {
@@ -158,7 +194,7 @@ export default function () {
   }, [id]);
 
   const TabOperteClick = (tabIndex: string) => {
-    
+
     setTabIndex(tabIndex);
     if (tabIndex != 'base_set' && id == null) {
       setHasSave(false);
@@ -215,7 +251,10 @@ export default function () {
   };
 
   const updateData = (changedValues, values) => {
-    setAssetData({ ...assetData, ...values });
+    console.log(changedValues);
+    console.log(values);
+    const params = {ident: values.ip }
+    setAssetData({ ...assetData, ...values, ...params });
   };
 
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
@@ -252,7 +291,7 @@ export default function () {
         </Form.Item>
         {tabIndex == 'base_set' && (
           <div className='card-wrapper'>
-            <Card {...panelBaseProps}  className='card_base'>
+            <Card {...panelBaseProps} className='card_base'>
               <Row gutter={10}>
                 <Col span={12}>
                   <Form.Item label='类型' name='type' rules={[{ required: true }]}>
@@ -273,8 +312,24 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='IP地址' name='ip' rules={[{ required: true }]}>
+                  {/* <Form.Item label='IP地址' name='ip' rules={[{ required: true }]}>
                     <Input placeholder='请输入IP地址' />
+                  </Form.Item> */}
+                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }]}>
+                    <Select
+                      showSearch
+                      options={assetOptions}
+                      placeholder='请选择IP地址'
+                      onChange={handleChange}
+                      // onChange={(v) => {
+                      //   onAssetChange({
+                      //     includes: v !== 0 ? [v] : [],
+                      //     excludes: form.getFieldValue('excludes'),
+                      //   });
+                      //   buildPromqlWithAsset({});
+                      //   setShowExcludes(v === 0);
+                      // }}
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -282,14 +337,14 @@ export default function () {
                     <Select
                       style={{ width: '100%' }}
                       allowClear
-                      showSearch filterOption optionFilterProp={"label"}                      
+                      showSearch filterOption optionFilterProp={"label"}
                       options={factories.map(({ key, value }) => ({
                         label: value,
                         value: value,
                       }))}
                       placeholder='请选择厂商'
                     >
-                    {/* {factories.map(({key, value}) => (
+                      {/* {factories.map(({key, value}) => (
                       <Option value={value} key={key}>
                         <div style={{display:"flex"}}>
                           <div className='factory_icon_title'>{value}</div>
@@ -354,7 +409,7 @@ export default function () {
                 return (
                   <Fragment>
                     {groupItem.base.length > 0 && (
-                      <Card {...panelBaseProps} key={'groupItem' + index}  className='card_group'>
+                      <Card {...panelBaseProps} key={'groupItem' + index} className='card_group'>
                         <Row gutter={10}>
                           {groupItem.base.map((v) => {
                             return (
@@ -377,12 +432,12 @@ export default function () {
                       {(field, { add, remove }) => {
                         return (
                           <Fragment>
-                            
+
                             <Card
                               {...panelBaseProps}
                               key={'groupItem-' + index}
-                              className='card_group' 
-                              extra={(mode == 'edit')?
+                              className='card_group'
+                              extra={(mode == 'edit') ?
                                 <div>
                                   {mode == 'edit' && (
                                     <Button
@@ -397,7 +452,7 @@ export default function () {
                                     </Button>
                                   )}
                                 </div>
-                              :null}
+                                : null}
                             >
                               {field.map((item, _suoyi) => (
                                 <Fragment>
@@ -420,7 +475,7 @@ export default function () {
                                         <Col key={property.name + pindex_} span={12}>
                                           <Form.Item
                                             label={property.label}
-                                            key={property.name+"_" + pindex_}
+                                            key={property.name + "_" + pindex_}
                                             name={[item.name, property.name]}
                                             rules={[{ required: property.required ? property.required : false, message: `请选择您的${property.label}` }]}
                                           >
