@@ -109,11 +109,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('接口管理'),
         },
-        // {
-        //   key: '/bigscreen/address',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('大屏首页配置'),
-        // }
+        {
+          key: '/bigscreen/address',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('大屏配置'),
+        }
       ],
     },
     {
@@ -176,6 +176,22 @@ const getMenuList = (t) => {
             {
               key: '/log/syslog',
               label: t('系统日志'),
+            },
+          ],
+        },
+        {
+          key: 'log1',
+          icon: <IconFont type='icon-Menu_LogAnalysis' />,
+          // activeIcon: <Icon component={menuIcon.LogAnalysis as any} />,
+          label: t('监控日志'),
+          children: [
+            {
+              key: '/log/explorer',
+              label: t('即时查询'),
+            },
+            {
+              key: '/log/index-patterns',
+              label: t('索引模式'),
             },
           ],
         },

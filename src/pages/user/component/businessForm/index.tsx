@@ -29,7 +29,7 @@ const TeamForm = React.forwardRef<ReactNode, TeamProps>((props, ref) => {
   const [form] = Form.useForm();
   const [userTeam, setUserTeam] = useState<Team[]>([]);
   const [initialValues, setInitialValues] = useState({
-    label_enable: false,
+    label_enable: true,
     label_value: '',
     members: [{ perm_flag: true }],
     name: '',
@@ -92,12 +92,13 @@ const TeamForm = React.forwardRef<ReactNode, TeamProps>((props, ref) => {
             <Input />
           </Form.Item>
           <Form.Item
+            // style={{display: 'none'}}
             label={t('business.label_enable')}
             name='label_enable'
             valuePropName='checked'
             tooltip={{ title: t('business.label_enable_tip'), getPopupContainer: () => document.body }}
           >
-            <Switch />
+            <Switch disabled />
           </Form.Item>
 
           <Form.Item noStyle shouldUpdate={(prevValues, curValues) => prevValues.label_enable !== curValues.label_enable}>

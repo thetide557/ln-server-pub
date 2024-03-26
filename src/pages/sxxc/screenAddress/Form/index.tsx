@@ -1,8 +1,9 @@
 import PageLayout from '@/components/pageLayout';
 import { executeApiService } from '@/services/api_service';
 import { Button, Col, Divider, Form, Input, Row, Space, InputNumber, Select, Modal } from 'antd';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { listAllNotBoundScreenCode, listAllNotBoundGroupName } from '@/services/sxxc/bigScreen';
 
 interface IProps {
   title?: string;
@@ -19,10 +20,25 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
     wrapperCol: { span: 22, offset: 1 },
   };
   const hiddenLayout = { span: 0 };
+  const [groupList, setGroupList] = useState([])
+  const [addressList, setAddressList] = useState([])
 
   useEffect(() => {
     form.setFieldsValue(initialValues);
   }, [initialValues]);
+
+  useEffect(() => {
+    listAllNotBoundScreenCode().then(res => {
+      if (res.code == 200) {
+        setAddressList(res.data[1])
+      }
+    })
+    listAllNotBoundGroupName().then(res => {
+      if (res.code == 200) {
+        setGroupList(res.data[1])
+      }
+    })
+  }, [])
 
   return (
     <PageLayout title={title} showBack>
@@ -32,20 +48,32 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
         </Form.Item>
         <Row>
           <Col span={12}>
-            <Form.Item name='name' label='名称' rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name='type' label='类型' rules={[{ required: true }]}>
+            <Form.Item name='groupName' label='项目组' rules={[{ required: true }]}>
               <Select
-                options={[
-                  { value: 'sql', label: 'sql' },
-                ]}
-              />
+                placeholder='请选择项目组'
+              >
+                {groupList.map((item, index) => (
+                  <Select.Option value={item} key={index}>
+                    {item}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
           </Col>
           <Col span={12}>
+            <Form.Item name='screenCode' label='大屏code' rules={[{ required: true }]}>
+              <Select
+                placeholder='请选择大屏code'
+              >
+                {addressList.map((item, index) => (
+                  <Select.Option value={item} key={index}>
+                    {item}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          {/* <Col span={12}>
             <Form.Item name='datasource_id' label='数据源' rules={[{ required: true }]}>
               <Select options={[{ value: 0, label: 'default' }]} />
             </Form.Item>
@@ -59,7 +87,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
             <Form.Item name='script' label='执行脚本' rules={[{ required: true }]}>
               <Input.TextArea />
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
         <Divider></Divider>
         <Row justify='center'>
@@ -67,7 +95,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
             <Button type='primary' htmlType='submit'>
               确定
             </Button>
-            <Button
+            {/* <Button
               type='default'
               onClick={() => {
                 const id = form.getFieldValue('id');
@@ -80,7 +108,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
               }}
             >
               测试
-            </Button>
+            </Button> */}
             <Button
               onClick={() => {
                 history.goBack();

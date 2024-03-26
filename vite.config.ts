@@ -87,12 +87,12 @@ export default defineConfig({
         target: 'http://113.137.42.69:17000/',
         changeOrigin: true,
       },
-      '/bigScreen': {
+      '/bigScreenServer': {
         target: 'http://10.0.20.95:8081/',
         // target: 'http://10.0.20.66:8086/',
         // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
-        // rewrite: path => path.replace(/^\/bigScreen/, '')
+        // rewrite: path => path.replace(/^\/bigScreenServer/, '')
       },
     },
   },
