@@ -60,6 +60,7 @@ export default function Login() {
   const verifyimgRef = useRef<HTMLImageElement>(null);
   const captchaidRef = useRef<string>();
   const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false)
   const refreshCaptcha = () => {
     getCaptcha().then((res) => {
       if (res.dat && verifyimgRef.current) {
@@ -135,6 +136,7 @@ export default function Login() {
   
 
   const login = async () => {
+    setLoading(true)
     let { username, password, verifyvalue } = form.getFieldsValue();
      // 将用户的登录信息存储到 localStorage 中
      localStorage.setItem('username', username);
@@ -152,19 +154,39 @@ export default function Login() {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
         if (!err) {
-          getListGroupScreen().then(res => {
-            if (res.code == 200 && res.data.length > 1 && res.data[1].length > 0) {
-              window.location.href = '/screenView'
-            } else {
+          try {
+            getListGroupScreen().then(res => {
+              if (res?.code == 200 && res.data?.length > 1 && res.data[1]?.length > 0) {
+                // setLoading(false)
+                window.location.href = '/screenView'
+              } else {
+                // setLoading(false)
+                window.location.href = '/home';
+              }
+            }).catch(_ => {
+              // setLoading(false)
+              // console.log('err');
               window.location.href = '/home';
-            }
-          }).catch(_ => {
-            // console.log('err');
+            })
+          } catch (error) {
+            console.log(error);
+            // setLoading(false)
             window.location.href = '/home';
-          })
+          }
+          // getListGroupScreen().then(res => {
+          //   if (res.code == 200 && res.data.length > 1 && res.data[1].length > 0) {
+          //     window.location.href = '/screenView'
+          //   } else {
+          //     window.location.href = '/home';
+          //   }
+          // }).catch(_ => {
+          //   // console.log('err');
+          //   window.location.href = '/home';
+          // })
         }
       })
       .catch(() => {
+        setLoading(false)
         if (showcaptcha) {
           refreshCaptcha();
         }
@@ -235,7 +257,7 @@ export default function Login() {
             </Form.Item>
 
             <Form.Item>
-              <Button type='primary' className='submit_button' onClick={handleSubmit} onKeyPress={e=>{
+              <Button loading={loading} type='primary' className='submit_button' onClick={handleSubmit} onKeyPress={e=>{
                  handleSubmit
               }}>
                 {t('登录')}

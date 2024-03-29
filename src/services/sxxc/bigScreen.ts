@@ -1,11 +1,38 @@
 
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
+import { message, notification } from 'antd';
 
 // 查询分组对应大屏
 export const getListGroupScreen = function () {
     return request(`/bigScreenServer/bigScreen/design/listGroupScreen`, {
-        method: RequestMethod.Get
+        method: RequestMethod.Get,
+        timeout: 2000,
+        errorHandler(error) {
+            console.log(error.message)
+            // 忽略掉 setting getter-only property "data" 的错误
+            // 这是 umi-request 的一个 bug，当触发 abort 时 catch callback 里面不能 set data
+            if (error.name !== 'AbortError' && error.message !== 'setting getter-only property "data"' && error.message !== 'timeout of 2000ms exceeded') {
+                // @ts-ignore
+                if (!error.silence) {
+                    // notification.error({
+                    //   message: error.message,
+                    // });
+                    message.error(error.message)
+                    throw error;
+                }
+                // 暂时认定只有开启 silence 的时候才需要传递 error 详情以便更加精确的处理错误
+                // @ts-ignore
+                if (error.silence) {
+                    throw error;
+                } else {
+                    message.error(error.message)
+                    // throw new Error();
+                    throw error;
+                }
+            }
+            // throw error;
+        },
     })
 }
 
@@ -56,11 +83,11 @@ export const getGroupScreenById = function (id: any) {
 // 仪表盘列表
 export const getDashboards = function (id: number | string) {
     return request(`/api/n9e/busi-group/${id}/boards`, {
-      method: RequestMethod.Get,
+        method: RequestMethod.Get,
     }).then((res) => {
-      return res.dat;
+        return res.dat;
     });
-  };
+};
 
 
 

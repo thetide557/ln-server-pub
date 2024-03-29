@@ -375,11 +375,20 @@ export default function () {//{ selectMenu?:any }
   };
 
   const goScreen = () => {
-    getListGroupScreen().then(res => {
-      if (res.code == 200 && res.data.length > 1 && res.data[1].length > 0) {
-        history.push('/screenView')
-      }
-    })
+    try {
+      getListGroupScreen().then(res => {
+        if (res?.code == 200 && res.data?.length > 1 && res.data[1]?.length > 0) {
+          history.push('/screenView')
+        }
+      })
+    } catch (error) {
+      console.log(error);
+    }
+    // getListGroupScreen().then(res => {
+    //   if (res.code == 200 && res.data.length > 1 && res.data[1].length > 0) {
+    //     history.push('/screenView')
+    //   }
+    // })
     // window.location.href = '/screenView'
   }
 

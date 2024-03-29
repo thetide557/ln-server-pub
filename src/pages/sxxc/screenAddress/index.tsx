@@ -39,8 +39,8 @@ const ApiService = () => {
     //   setItems(res.dat.list);
     // });
     getListGroupScreen().then(res => {
-      if (res.code == 200) {
-        setItems(res.data[1]);
+      if (res?.code == 200) {
+        setItems(res?.data[1]);
       }
     })
   }, [searchVal, refreshKey]);
