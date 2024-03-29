@@ -33,6 +33,8 @@ const ApiService = () => {
   const history = useHistory();
 
   useEffect(() => {
+    console.log(location);
+    
     // listApiService().then((res) => {
     //   setItems(res.dat.list);
     // });
@@ -76,8 +78,8 @@ const ApiService = () => {
             dataSource={items}
             rowKey='id'
             columns={[
-              { title: '项目组', dataIndex: 'groupName' },
-              { title: '大屏名称', dataIndex: 'screenName' },
+              { title: '大屏名称', dataIndex: 'groupName' },
+              // { title: '大屏名称', dataIndex: 'screenName' },
               { title: '大屏code', dataIndex: 'screenCode' },
               // { title: '数据源', dataIndex: 'datasource_id' },
               // { title: 'URL', dataIndex: 'url' },

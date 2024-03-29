@@ -1,8 +1,5 @@
 .screen-view {
   position: fixed;
-  // ::-webkit-scrollbar {
-    // display: none;
-  // }
   top: 0;
   .screen1 {
     position: relative;
@@ -10,7 +7,7 @@
       display: flex;
       align-items: center;
       position: absolute;
-      right: 1%;
+      right: 2%;
       top: 2%;
       z-index: 9999;
       .back1 {
@@ -20,25 +17,40 @@
         cursor: pointer;
         margin-left: 5px;
         img {
-          width: 25px;
-          height: 25px;
+          width: 20px;
+          height: 20px;
         }
       }
       .choose_screen1 {
         // z-index: 9999;
-        color: #fff;
-        .ant-select:not(.ant-select-customize-input) .ant-select-selector {
-          background: transparent;
-        }
-        .ant-select-arrow {
-          color: #fff;
-        }
-        .ant-select {
-          color: #fff;
-        } 
+        cursor: pointer;
+        color: #f0f0f0;
+        padding: 0 7px;
+        // font-size: 14px;
+        // .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+        //   background: transparent;
+        // }
+        // .ant-select-arrow {
+        //   color: #fff;
+        // }
+        // .ant-select-clear {
+        //   background: #000;
+        //   color: #fff;
+        // }
+        // .ant-select {
+        //   color: #fff;
+        // } 
       }
     }
    
+  }
+  .screen-icon {
+    cursor: pointer;
+    color: #f0f0f0;
+    width: 30px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
   }
 }
 #logFrame {
@@ -46,4 +58,7 @@
   min-height: 100vh;
   border: 0;
   overflow: hidden;
+  // ::-webkit-scrollbar {
+  //   display: none;
+  // }
 }

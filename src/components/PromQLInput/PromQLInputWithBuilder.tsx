@@ -53,7 +53,7 @@ export function PromQLInputWithBuilder(props: CMExpressionInputProps & { datasou
               datasourceValue: props.datasourceValue,
               value: props.value,
               onChange: (val) => {
-                debugger;
+                // debugger;
                 props.onChange && props.onChange(val);
               },
               labels: labels,

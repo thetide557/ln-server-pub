@@ -14,6 +14,7 @@ import './locale';
 import { Logout } from '@/services/login';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
+import { getListGroupScreen } from '@/services/sxxc/bigScreen';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -374,7 +375,11 @@ export default function () {//{ selectMenu?:any }
   };
 
   const goScreen = () => {
-    history.push('/screenView')
+    getListGroupScreen().then(res => {
+      if (res.code == 200 && res.data.length > 1 && res.data[1].length > 0) {
+        history.push('/screenView')
+      }
+    })
     // window.location.href = '/screenView'
   }
 

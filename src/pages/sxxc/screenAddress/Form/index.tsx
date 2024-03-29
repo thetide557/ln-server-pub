@@ -33,11 +33,11 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
         setAddressList(res.data[1])
       }
     })
-    listAllNotBoundGroupName().then(res => {
-      if (res.code == 200) {
-        setGroupList(res.data[1])
-      }
-    })
+    // listAllNotBoundGroupName().then(res => {
+    //   if (res.code == 200) {
+    //     setGroupList(res.data[1])
+    //   }
+    // })
   }, [])
 
   return (
@@ -48,8 +48,8 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
         </Form.Item>
         <Row>
           <Col span={12}>
-            <Form.Item name='groupName' label='项目组' rules={[{ required: true }]}>
-              <Select
+            <Form.Item name='groupName' label='大屏名称' rules={[{ required: true }]}>
+              {/* <Select
                 placeholder='请选择项目组'
               >
                 {groupList.map((item, index) => (
@@ -57,7 +57,8 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                     {item}
                   </Select.Option>
                 ))}
-              </Select>
+              </Select> */}
+              <Input placeholder='请输入大屏名称' />
             </Form.Item>
           </Col>
           <Col span={12}>

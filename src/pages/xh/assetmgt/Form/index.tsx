@@ -1,3 +1,4 @@
+// @ts-nocheck
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
@@ -195,9 +196,15 @@ export default function () {
           // value: v.id,
           value: v.ip,
           label: `[${v.type}]-[${v.ip}]-${v.name}`,
+          type: v.type
         });
       });
-      options = options.sort((a, b) => localeCompare(a.label, b.label));
+      let options1= options.sort((a, b) => localeCompare(a.label, b.label));
+      options = options1.filter(item => {
+        if (item.type.includes('服务器') || item.type.includes('虚拟')) {
+          return true
+        }
+      })
       setAssetOptions(options);
       // setAssetOptions1(options);
       setAssetList({ ...assetList });
@@ -257,7 +264,8 @@ export default function () {
         await addXHAssetExpansion(subItem, id, v.name);
       });
       message.success('操作成功');
-      loadAssetInfo(id);
+      history.goBack();
+      // loadAssetInfo(id);
     }
   };
 
@@ -424,7 +432,7 @@ export default function () {
                           name={['params', v.name]}
                           key={`formitem=${v.name}`}
                           valuePropName={v.type === 'checkbox' ? 'checked' : 'value'}
-                          rules={[{ required: v.required }]}
+                          rules={[{ required: v.required === 'true' ? true : false }]}
                         >
                           {renderFormItem(v)}
                         </Form.Item>

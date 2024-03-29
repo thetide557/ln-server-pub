@@ -331,7 +331,7 @@ export default function () {
         />
         <ItemForm
           onSubmit={async (values) => {
-            debugger
+            // debugger
             let success = false;
              var items = new Array
              values.users.forEach(element => {

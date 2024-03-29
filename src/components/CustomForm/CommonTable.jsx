@@ -205,7 +205,7 @@ class CommonTable extends Component {
               }
               return false;
             });
-            debugger
+            // debugger
             this.setState({ selectedRowKeys: newSelectedRowKeys });
           },
         },

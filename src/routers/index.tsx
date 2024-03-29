@@ -104,7 +104,7 @@ import ScreenAddress, {Add as ScreenAddressAdd, Edit as ScreenAddressEdit, Detai
 import Board from '@/pages/dashboard/Detail/Board'
 import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
-
+import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -259,6 +259,10 @@ export default function Content() {
         <Route exact path='/bigscreen/address/add' component={ScreenAddressAdd}/>
         <Route exact path='/bigscreen/address/:id/edit' component={ScreenAddressEdit}/>
         <Route exact path='/bigscreen/address/:id' component={ScreenAddressDetail}/>
+        <Route path='/dashboardxc/:id' exact component={DashboardDetailxc} />
+        <Route path='/dashboardsxc/:id' exact component={DashboardDetailxc} />
+        <Route path='/dashboardsxc/share/:id' component={DashboardSharexc} />
+        <Route path='/dashboardsxc' component={Dashboardxc} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

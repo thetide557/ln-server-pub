@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
 import _ from 'lodash';
 import { useLocalStorage } from 'react-use';
+import { getListGroupScreen } from '@/services/sxxc/bigScreen';
 
 export interface DisplayName {
   oidc: string;
@@ -151,7 +152,16 @@ export default function Login() {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
         if (!err) {
-           window.location.href = '/screenView' || redirect || 'home';
+          getListGroupScreen().then(res => {
+            if (res.code == 200 && res.data.length > 1 && res.data[1].length > 0) {
+              window.location.href = '/screenView'
+            } else {
+              window.location.href = '/home';
+            }
+          }).catch(_ => {
+            // console.log('err');
+            window.location.href = '/home';
+          })
         }
       })
       .catch(() => {

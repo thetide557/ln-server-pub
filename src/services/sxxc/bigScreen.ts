@@ -53,5 +53,14 @@ export const getGroupScreenById = function (id: any) {
     })
 }
 
+// 仪表盘列表
+export const getDashboards = function (id: number | string) {
+    return request(`/api/n9e/busi-group/${id}/boards`, {
+      method: RequestMethod.Get,
+    }).then((res) => {
+      return res.dat;
+    });
+  };
+
 
 

@@ -14,39 +14,84 @@
  * limitations under the License.
  *
  */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { CommonStateContext } from '@/App';
 import { useHistory } from 'react-router-dom';
-import { getListGroupScreen } from '@/services/sxxc/bigScreen';
-import { Button, Col, Divider, Form, Input, Row, Space, InputNumber, Select, Modal } from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
+import _ from 'lodash';
+import { getListGroupScreen, getDashboards } from '@/services/sxxc/bigScreen';
+import { Dropdown, Menu, message, Select } from 'antd';
+import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import './index.less'
 
 export default function ScreenView() {
+  const origin = window.location.origin
   const history = useHistory();
-  const [items, setItems] = useState<any>([]);
-  const [url, setUrl] = useState<any>('http://113.141.79.47:17000/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1')
-  let baseUrl = 'http://113.141.79.47:17000/dataroom/#/bigscreen/preview'
+  const [screenList, setScreenList] = useState<any>([]);
+  const [selectGroup, setSelectGroup] = useState<any>('')
+  const { busiGroups } = useContext(CommonStateContext);
+  // const [url, setUrl] = useState<any>('http://113.141.79.47:17000/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1')
+  const [url, setUrl] = useState<any>('')
+  // const [url, setUrl] = useState<any>(`${origin}/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1`)
+  const baseUrl = 'http://113.141.79.47:17000/dataroom/#/bigscreen/preview'
+  // const baseUrl = `${origin}/dataroom/#/bigscreen/preview`
+  // console.log('baseUrl', baseUrl);
+  // console.log('url', url);
+  console.log(busiGroups);
+  
+  const goBoard = ({key}) => {
+    console.log(key);
+    getDashboards(key).then(res => {
+      if (res.length > 0) {
+        // const groupUrl = `/dashboards/${res[0].id}?themeMode=dark&viewMode=fullscreen`
+        // setUrl(groupUrl)
+        setSelectGroup(key)
+        history.push(`/dashboardsxc/${res[0].id}?themeMode=dark&viewMode=fullscreen`)
+      } else {
+        message.warning("当前业务组暂未配置仪表盘");
+      }
+    })
+  }
+
+  const menu = (
+    <Menu
+      onClick={ goBoard }
+      selectedKeys={[selectGroup]}
+    >
+      {_.map(busiGroups, (item) => {
+        return <Menu.Item key={item.id}>{item.name}</Menu.Item>;
+      })}
+    </Menu>
+  );
+  
+
   const goBack = () => {
     history.push('/home')
     // window.location.href = '/home'
   }
-  const handleChange = (value: string) => {
-    console.log(`selected ${value}`);
-    let screenUrl = ''
-    if (value) {
-      screenUrl = `${baseUrl}?code=${value}`
-    } else {
-      screenUrl = `http://113.141.79.47:17000/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1`
-    }
-    setUrl(screenUrl)
-  }
+  // const handleClick = () => {
+  //   if (screenList.length > 0) {
+  //     const screenUrl = `${baseUrl}?code=${screenList[0].screenCode}`
+  //     setUrl(screenUrl)
+  //   }
+  // }
+  // const handleChange = (value: string) => {
+  //   console.log(`selected ${value}`);
+  //   let screenUrl = ''
+  //   if (value) {
+  //     screenUrl = `${baseUrl}?code=${value}`
+  //   } else {
+  //     screenUrl = `http://113.141.79.47:17000/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1`
+  //     // screenUrl = `${origin}/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1`
+  //   }
+  //   setUrl(screenUrl)
+  // }
   useEffect(() => {
-    // listApiService().then((res) => {
-    //   setItems(res.dat.list);
-    // });
     getListGroupScreen().then(res => {
       if (res.code == 200) {
-        setItems(res.data[1]);
+        setScreenList(res.data[1]);
+        let firstUrl = res.data[1][0]['screenCode']
+        let screenUrl = `${baseUrl}?code=${firstUrl}`
+        setUrl(screenUrl)
       }
     })
   }, []);
@@ -54,7 +99,15 @@ export default function ScreenView() {
     <div className='screen-view'>
       <div className='screen1'>
         <div className='screen1-cont'>
-          <div className='choose_screen1'>
+          <div className='screen-groups'>
+            <Dropdown overlay={menu} arrow placement="bottomCenter">
+              <div className='screen-icon'>
+                  <AppstoreOutlined />
+                  <DownOutlined />
+              </div>
+            </Dropdown>
+          </div>
+          {/* <div className='choose_screen1' onClick={handleClick}>
             <Select
               placeholder='请选择项目组'
               style={{ width: 180 }}
@@ -68,7 +121,8 @@ export default function ScreenView() {
                 </Select.Option>
               ))}
             </Select>
-          </div>
+            首页
+          </div> */}
           <div className='back1' onClick={goBack}>
             <img src="/image/back.png" alt="" title='返回' />
           </div>

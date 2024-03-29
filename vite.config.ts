@@ -64,27 +64,31 @@ export default defineConfig({
       '/api/n9e-plus': {
         // target: 'http://10.206.16.17:17001/',
         target: 'http://113.137.42.69:17000/',
+        // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e/proxy': {
         //target: 'http://192.168.20.19:17000/',
         target: 'http://113.137.42.69:17000/',
+        // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e/datasource': {
         //target: 'http://192.168.20.19:17000/',
         target: 'http://113.137.42.69:17000/',
-
+        // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e': {
         //target: 'http://192.168.20.19:17000/',
         target: 'http://113.137.42.69:17000/',
+        // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/fc-brain': {
         // target: 'http://10.206.16.17:28000/',
         target: 'http://113.137.42.69:17000/',
+        // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/bigScreenServer': {
