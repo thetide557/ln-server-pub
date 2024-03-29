@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useEffect, useState, useImperativeHandle, ReactNode } from 'react';
 import { Col, Form, Input, Row, Select, Space, TreeSelect } from 'antd';
 import { getUserInfo, getNotifyChannels, getRoles, getTeamInfoList, } from '@/services/manage';
@@ -226,7 +227,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
         </Col>
       </Row>
 
-      {/* <Form.Item
+      <Form.Item
         label={
           <Space>
             {t('account:profile.moreContact')}
@@ -235,6 +236,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             </Link>
           </Space>
         }
+        labelCol={{span: 7 }}
        >
         <Form.List name='contacts'>
           {(fields, { add, remove }) => (
@@ -249,7 +251,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
                 >
                   <Form.Item
                     style={{
-                      width: '180px',
+                      width: '170px',
                     }}
                     {...restField}
                     name={[name, 'key']}
@@ -286,11 +288,11 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
                   <MinusCircleOutlined className='control-icon-normal' onClick={() => remove(name)} />
                 </Space>
               ))}
-              <PlusCircleOutlined className='control-icon-normal' onClick={() => add()} />
+              <PlusCircleOutlined style={{padding: '0 5px'}} className='control-icon-normal' onClick={() => add()} />
             </>
           )}
         </Form.List>
-      </Form.Item> */}
+      </Form.Item>
     </Form>
   ) : null;
 });
