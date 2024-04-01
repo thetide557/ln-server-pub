@@ -67,6 +67,9 @@ function renderLabels(labels: PromVisualQueryLabelFilter[]) {
 }
 
 export function renderQuery(query: PromVisualQuery, nested?: boolean) {
+  console.log('query1', query);
+  console.log('nested', nested);
+  
   let queryString = `${query.metric ?? ''}${renderLabels(query.labels)}`;
   queryString = renderOperations(queryString, query.operations);
 
