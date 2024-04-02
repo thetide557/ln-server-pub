@@ -89,5 +89,12 @@ export const getDashboards = function (id: number | string) {
     });
 };
 
+// 更新仪表盘
+export const updateBoards = function (id: number | string) {
+    return request(`/api/n9e/board/${id}/update`, {
+        method: RequestMethod.Post,
+    })
+};
+
 
 
