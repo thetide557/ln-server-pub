@@ -181,7 +181,7 @@ const getMenuList = (t) => {
           ],
         },
         {
-          key: 'log1',
+          key: 'monitorLog',
           icon: <IconFont type='icon-Menu_LogAnalysis' />,
           // activeIcon: <Icon component={menuIcon.LogAnalysis as any} />,
           label: t('监控日志'),
@@ -196,6 +196,21 @@ const getMenuList = (t) => {
             },
           ],
         },
+        // {
+        //   key: 'inspection',
+        //   icon: <IconFont type='icon-Menu_LinkAnalysis' />,
+        //   label: t('巡检管理'),
+        //   children: [
+        //     {
+        //       key: '/inspection/plans',
+        //       label: t('巡检任务'),
+        //     },
+        //     {
+        //       key: '/inspection/applylist',
+        //       label: t('巡检历史'),
+        //     },
+        //   ],
+        // },
         {
           key: '/help/other',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
