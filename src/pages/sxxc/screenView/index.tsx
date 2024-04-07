@@ -24,7 +24,7 @@ import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import './index.less'
 
 export default function ScreenView() {
-  const origin = window.location.origin
+  // const origin = window.location.origin
   const history = useHistory();
   const [screenList, setScreenList] = useState<any>([]);
   const [selectGroup, setSelectGroup] = useState<any>('')
@@ -33,7 +33,7 @@ export default function ScreenView() {
   const [url, setUrl] = useState<any>('')
   // const [url, setUrl] = useState<any>(`${origin}/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1`)
   // const baseUrl = 'http://113.141.79.47:17000/dataroom/#/bigscreen/preview'
-  const baseUrl = `${origin}/dataroom/#/bigscreen/preview`
+  const baseUrl = `/dataroom/#/bigscreen/preview`
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
   console.log(busiGroups);
