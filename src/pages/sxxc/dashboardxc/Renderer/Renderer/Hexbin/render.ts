@@ -120,13 +120,13 @@ function renderHoneyComb(svgGroup, data, { width, height, fontAutoScale = true, 
 
   // 六边形
   hexagons
-    .enter()
-    .append(function () {
+    ?.enter()
+    ?.append(function () {
       const nodeToAdd = document.createElementNS(xmlns, 'path');
       return nodeToAdd;
     })
-    .attr('class', 'hexagon')
-    .on('mousemove', function (_d, i) {
+    ?.attr('class', 'hexagon')
+    ?.on('mousemove', function (_d, i) {
       const metricObj = data[i]?.metric;
       const metricName = metricObj?.__name__ || 'value';
       const metricNameRow = `<div><strong>${metricName}: ${data[i]?.value}</strong></div>`;
@@ -143,41 +143,41 @@ function renderHoneyComb(svgGroup, data, { width, height, fontAutoScale = true, 
       const curPath = svgGroup.selectAll('.hexagon').nodes()[i];
       curPath.setAttribute('stroke', themeMode === 'dark' ? '#fff' : '#2A2D3C');
     })
-    .on('mouseout', function (_d, i) {
+    ?.on('mouseout', function (_d, i) {
       div.style('opacity', 0);
       const curPath = svgGroup.selectAll('.hexagon').nodes()[i];
       curPath.setAttribute('stroke', data[i]?.color);
     })
-    .on('mousedown', (_d, i) => {
+    ?.on('mousedown', (_d, i) => {
       if (detailUrl) {
         window.open(detailFormatter(data[i]), '_blank');
       }
     })
-    .attr('stroke', (_d, i) => {
+    ?.attr('stroke', (_d, i) => {
       return data[i]?.color;
     })
-    .attr('stroke-width', '2px')
-    .style('fill', (_d, i) => {
+    ?.attr('stroke-width', '2px')
+    ?.style('fill', (_d, i) => {
       return data[i]?.color;
     })
-    .style('fill-opacity', 1)
-    .transition(t)
-    .attr('d', function (d) {
+    ?.style('fill-opacity', 1)
+    // ?.transition(t)
+    ?.attr('d', function (d) {
       return 'M' + d.x + ',' + d.y + hexbin.hexagon([hexRadius - 3]);
     });
 
   if (textMode === 'valueAndName' || textMode === 'name') {
     // 指标名
     hexagons
-      .enter()
-      .append('text')
-      .attr('x', function (d) {
+      ?.enter()
+      ?.append('text')
+      ?.attr('x', function (d) {
         return d.x;
       })
-      .attr('y', function (d) {
+      ?.attr('y', function (d) {
         return d.y + (textMode === 'valueAndName' ? labelWithValueTextAlignment : 0);
       })
-      .text(function (_d, i) {
+      ?.text(function (_d, i) {
         let name = data[i]?.name;
         if (isShowEllipses) {
           name = name.substring(0, numOfChars) + '...';
@@ -185,12 +185,12 @@ function renderHoneyComb(svgGroup, data, { width, height, fontAutoScale = true, 
         }
         return name;
       })
-      .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'central')
-      .style('pointer-events', 'none')
-      .style('font-size', activeLabelFontSize + 'px')
-      .style('fill', 'black')
-      .each(function (this, d) {
+      ?.attr('text-anchor', 'middle')
+      ?.attr('alignment-baseline', 'central')
+      ?.style('pointer-events', 'none')
+      ?.style('font-size', activeLabelFontSize + 'px')
+      ?.style('fill', 'black')
+      ?.each(function (this, d) {
         d.bbox = this.getBBox();
       });
   }
@@ -198,24 +198,24 @@ function renderHoneyComb(svgGroup, data, { width, height, fontAutoScale = true, 
   if (textMode === 'valueAndName' || textMode === 'value') {
     // 指标值
     hexagons
-      .enter()
-      .append('text')
-      .attr('x', function (d) {
+      ?.enter()
+      ?.append('text')
+      ?.attr('x', function (d) {
         return d.x;
       })
-      .attr('y', function (d) {
+      ?.attr('y', function (d) {
         return d.y + (textMode === 'valueAndName' ? valueWithLabelTextAlignment : 0);
       })
-      .text(function (_d, i) {
+      ?.text(function (_d, i) {
         const value = data[i]?.value;
         return value;
       })
-      .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'central')
-      .style('font-size', activeValueFontSize + 'px')
-      .style('fill', 'black')
-      .style('pointer-events', 'none')
-      .each(function (this, d) {
+      ?.attr('text-anchor', 'middle')
+      ?.attr('alignment-baseline', 'central')
+      ?.style('font-size', activeValueFontSize + 'px')
+      ?.style('fill', 'black')
+      ?.style('pointer-events', 'none')
+      ?.each(function (this, d) {
         d.bbox = this.getBBox();
       });
   }

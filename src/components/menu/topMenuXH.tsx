@@ -55,6 +55,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('即时查询'),
         },
+        // {
+        //   key: '/health/report',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('健康报告'),
+        // },
       ],
     },
     {

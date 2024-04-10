@@ -91,12 +91,13 @@ export default defineConfig({
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      '/bigScreenServer': {
-        target: 'http://10.0.20.95:8081/',
-        // target: 'http://10.0.20.66:8086/',
+      '/dataroomxc': {
+        // target: 'http://10.0.20.95:8081/',
+        target: 'http://192.168.30.188:8081/',
+        // target: 'http://10.0.20.164:8090/',
         // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
-        // rewrite: path => path.replace(/^\/bigScreenServer/, '')
+        // rewrite: path => path.replace(/^\/dataroomxc/, '')
       },
     },
   },

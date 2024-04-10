@@ -105,6 +105,7 @@ import Board from '@/pages/dashboard/Detail/Board'
 import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
+import HealthReport from '@/pages/sxxc/healthReport'
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -263,6 +264,7 @@ export default function Content() {
         <Route path='/dashboardsxc/:id' exact component={DashboardDetailxc} />
         <Route path='/dashboardsxc/share/:id' component={DashboardSharexc} />
         <Route path='/dashboardsxc' component={Dashboardxc} />
+        <Route path='/health/report' component={HealthReport} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

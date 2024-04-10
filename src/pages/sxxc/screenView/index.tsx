@@ -37,6 +37,7 @@ export default function ScreenView() {
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
   console.log(busiGroups);
+  const token = localStorage.getItem('access_token')
   
   const goBoard = ({key}) => {
     console.log(key);
@@ -90,7 +91,7 @@ export default function ScreenView() {
       if (res.code == 200) {
         setScreenList(res.data[1]);
         let firstUrl = res.data[1][0]['screenCode']
-        let screenUrl = `${baseUrl}?code=${firstUrl}`
+        let screenUrl = `${baseUrl}?code=${firstUrl}&token=${token}`
         setUrl(screenUrl)
       }
     })
