@@ -55,11 +55,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('即时查询'),
         },
-        // {
-        //   key: '/health/report',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('健康报告'),
-        // },
+        {
+          key: '/health/report',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('健康报告'),
+        },
       ],
     },
     {
@@ -96,6 +96,26 @@ const getMenuList = (t) => {
           key: '/help/notification-tpls',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('通知模板'),
+        },
+        {
+          key: 'job',
+          icon: <IconFont type='icon-Menu_AlarmSelfhealing' />,
+          // activeIcon: <Icon component={menuIcon.AlarmSelfhealing as any} />,
+          label: t('告警自愈'),
+          children: [
+            {
+              key: '/job-tpls',
+              label: t('自愈脚本'),
+            },
+            {
+              key: '/job-tasks',
+              label: t('执行历史'),
+            },
+            {
+              key: '/ibex-settings',
+              label: t('自愈配置'),
+            },
+          ],
         },
       ],
     },
