@@ -3,7 +3,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 
 // import { createApiService } from '@/services/api_service';
-import { addGroupScreen } from '@/services/sxxc/bigScreen';
+import { addBigScreen } from '@/services/sxxc/bigScreen';
 
 import { ApiServiceType } from './';
 import Form from './Form';
@@ -13,11 +13,9 @@ export default () => {
 
   const saveData = (val: ApiServiceType) => {
     console.log(val);
-    addGroupScreen(val).then(res => {
-      if (res.code == 200) {
+    addBigScreen(val).then(res => {
         message.success('添加成功');
         history.goBack();
-      }
     });
   };
 

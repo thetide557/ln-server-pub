@@ -1,5 +1,5 @@
 // import { getApiService } from '@/services/api_service';
-import { getGroupScreenById } from '@/services/sxxc/bigScreen';
+import { getScreenById } from '@/services/sxxc/bigScreen';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ApiServiceType } from '.';
@@ -10,8 +10,8 @@ export default () => {
   const [data, setData] = useState<ApiServiceType>();
 
   useEffect(() => {
-    getGroupScreenById(id).then((res) => {
-      setData(res.data);
+    getScreenById(id).then((res) => {
+      setData(res.dat);
     });
   }, [id]);
 

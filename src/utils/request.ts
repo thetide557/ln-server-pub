@@ -86,12 +86,6 @@ request.interceptors.response.use(
           // proxy/elasticsearch 返回的数据结构是 { ...data }
           // proxy/jeager 返回的数据结构是 { data: [], errors: [] }
           if (
-            _.some([`/bigScreenServer`], (item) => {
-              return url.includes(item);
-            })
-          ) {
-            return data;
-          } else if (
             _.some(['/api/n9e/proxy', '/probe/v1'], (item) => {
               return url.includes(item);
             })

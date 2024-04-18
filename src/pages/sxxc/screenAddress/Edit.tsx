@@ -1,5 +1,5 @@
 // import { getApiService, updateApiService } from '@/services/api_service';
-import { getGroupScreenById, editGroupScreen } from '@/services/sxxc/bigScreen';
+import { getScreenById, editBigScreen } from '@/services/sxxc/bigScreen';
 import { message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -12,17 +12,15 @@ export default () => {
   const history = useHistory();
 
   useEffect(() => {
-    getGroupScreenById(id).then((res) => {
-      setData(res.data);
+    getScreenById(id).then((res) => {
+      setData(res.dat);
     });
   }, [id]);
 
   const saveData = (val: ApiServiceType) => {
-    editGroupScreen(val).then(res => {
-      if (res.code == 200) {
+    editBigScreen(val).then(res => {
         message.success('修改成功');
         history.goBack();
-      }
     });
   };
 

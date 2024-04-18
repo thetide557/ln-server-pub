@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
-import { getListGroupScreen, deleteGroupScreen } from '@/services/sxxc/bigScreen';
+import { deleteScreenById, getBigScreen } from '@/services/sxxc/bigScreen';
 import Add from './Add';
 import Edit from './Edit';
 import Detail from './Detail';
@@ -19,8 +19,9 @@ import './index.less';
 
 export type ApiServiceType = {
   id?: number;
-  groupName: string;
-  screenCode: string;
+  title: string;
+  desc: string;
+  config: string;
   // datasource_id: number;
   // url: string;
   // script: string;
@@ -33,15 +34,9 @@ const ApiService = () => {
   const history = useHistory();
 
   useEffect(() => {
-    console.log(location);
-    
-    // listApiService().then((res) => {
-    //   setItems(res.dat.list);
-    // });
-    getListGroupScreen().then(res => {
-      if (res?.code == 200) {
-        setItems(res?.data[1]);
-      }
+    // console.log(location);
+    getBigScreen().then(res => {
+      setItems(res.dat.list)
     })
   }, [searchVal, refreshKey]);
 
@@ -78,18 +73,20 @@ const ApiService = () => {
             dataSource={items}
             rowKey='id'
             columns={[
-              { title: '大屏名称', dataIndex: 'groupName' },
+              { title: '标题', dataIndex: 'title' },
               // { title: '大屏名称', dataIndex: 'screenName' },
-              { title: '大屏code', dataIndex: 'screenCode' },
+              { title: '配置', dataIndex: 'config' },
+              { title: '简介', dataIndex: 'desc' },
+              { title: '创建人', dataIndex: 'created_by' },
               // { title: '数据源', dataIndex: 'datasource_id' },
               // { title: 'URL', dataIndex: 'url' },
-              // {
-              //   title: '创建时间',
-              //   dataIndex: 'created_at',
-              //   render: (value) => {
-              //     return new Date(value * 1000).toLocaleString();
-              //   },
-              // },
+              {
+                title: '创建时间',
+                dataIndex: 'created_at',
+                render: (value) => {
+                  return new Date(value * 1000).toLocaleString();
+                },
+              },
               {
                 title: '操作',
                 width: '120px',
@@ -97,11 +94,11 @@ const ApiService = () => {
                 fixed: 'right',
                 render: (value: string, record: any) => (
                   <Space>
-                    {/* <SearchOutlined
+                    <SearchOutlined
                       onClick={() => {
                         history.push(`address/${record.id}`);
                       }}
-                    ></SearchOutlined> */}
+                    ></SearchOutlined>
                     <EditOutlined
                       onClick={() => {
                         history.push(`address/${record.id}/edit`);
@@ -112,11 +109,9 @@ const ApiService = () => {
                         Modal.confirm({
                           title: '是否确认删除?',
                           onOk: () => {
-                            deleteGroupScreen(record.id).then(res => {
-                              if (res.code == 200) {
-                                message.success('删除成功');
-                                setRefreshKey(_.uniqueId());
-                              }
+                            deleteScreenById(record.id).then(res => {
+                              message.success('删除成功');
+                              setRefreshKey(_.uniqueId());
                             });
                           },
                           onCancel() {},

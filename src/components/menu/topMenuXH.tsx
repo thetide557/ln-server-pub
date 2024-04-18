@@ -14,7 +14,7 @@ import './locale';
 import { Logout } from '@/services/login';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
-import { getListGroupScreen } from '@/services/sxxc/bigScreen';
+import { getBigScreen } from '@/services/sxxc/bigScreen';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -415,21 +415,11 @@ export default function () {//{ selectMenu?:any }
   };
 
   const goScreen = () => {
-    try {
-      getListGroupScreen().then(res => {
-        if (res?.code == 200 && res.data?.length > 1 && res.data[1]?.length > 0) {
-          history.push('/screenView')
-        }
-      })
-    } catch (error) {
-      console.log(error);
-    }
-    // getListGroupScreen().then(res => {
-    //   if (res.code == 200 && res.data.length > 1 && res.data[1].length > 0) {
-    //     history.push('/screenView')
-    //   }
-    // })
-    // window.location.href = '/screenView'
+    getBigScreen().then(res => {
+      if (res.dat.list.length > 0) {
+        history.push('/screenView')
+      }
+    })
   }
 
   const topRightMenu = (

@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { CommonStateContext } from '@/App';
 import { useHistory } from 'react-router-dom';
 import _ from 'lodash';
-import { getListGroupScreen, getDashboards } from '@/services/sxxc/bigScreen';
+import { getBigScreen, getDashboards } from '@/services/sxxc/bigScreen';
 import { Dropdown, Menu, message, Select } from 'antd';
 import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import './index.less'
@@ -87,13 +87,13 @@ export default function ScreenView() {
   //   setUrl(screenUrl)
   // }
   useEffect(() => {
-    getListGroupScreen().then(res => {
-      if (res.code == 200) {
-        setScreenList(res.data[1]);
-        let firstUrl = res.data[1][0]['screenCode']
-        let screenUrl = `${baseUrl}?code=${firstUrl}&token=${token}`
-        setUrl(screenUrl)
-      }
+    getBigScreen().then(res => {
+        if (res.dat.list.length > 0) {
+          setScreenList(res.dat.list[0]);
+          let firstUrl = res.dat.list[0]['config']
+          let screenUrl = `${baseUrl}?code=${firstUrl}&token=${token}`
+          setUrl(screenUrl)
+        }
     })
   }, []);
   return (
