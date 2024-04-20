@@ -59,6 +59,7 @@ request.interceptors.request.use((url, options) => {
   };  
   headers['Authorization'] = `Bearer ${localStorage.getItem('access_token') || ''}`;  
   headers['X-Language'] = localStorage.getItem('language') === 'en_US' ? 'en' : 'zh';
+  headers['Bg-debug'] = 1
   return {
     url,
     options: { ...options, headers },
@@ -86,6 +87,12 @@ request.interceptors.response.use(
           // proxy/elasticsearch 返回的数据结构是 { ...data }
           // proxy/jeager 返回的数据结构是 { data: [], errors: [] }
           if (
+            _.some([`sxxc`], (item) => {
+              return url.includes(item);
+            })
+          ) {
+            return data;
+          } else if (
             _.some(['/api/n9e/proxy', '/probe/v1'], (item) => {
               return url.includes(item);
             })

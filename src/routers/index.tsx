@@ -106,6 +106,12 @@ import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import HealthReport from '@/pages/sxxc/healthReport'
+import TaskStrategy from '@/pages/sxxc/taskStrategy';
+import TaskManage from '@/pages/sxxc/taskManage'
+import TaskInstance from '@/pages/sxxc/taskInstance'
+import InspectionList from '@/pages/sxxc/inspectionList'
+import InspectionLog from '@/pages/sxxc/inspectionList/log'
+import InspectionReport from '@/pages/sxxc/inspectionReport'
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -265,6 +271,13 @@ export default function Content() {
         <Route path='/dashboardsxc/share/:id' component={DashboardSharexc} />
         <Route path='/dashboardsxc' component={Dashboardxc} />
         <Route path='/health/report' component={HealthReport} />
+        <Route path='/taskManage/taskManage' component={TaskManage} />
+        <Route path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />
+
+        <Route path='/inspection/inspectionList' component={InspectionList} />
+        <Route path='/inspection/inspectionLog/:inspectionId?' component={InspectionLog} />
+        <Route path='/inspection/inspectionReport/:inspectionId?' component={InspectionReport} />
+        <Route path='/taskManage/strategy' component={TaskStrategy} exact />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

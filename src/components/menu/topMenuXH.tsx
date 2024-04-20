@@ -119,7 +119,50 @@ const getMenuList = (t) => {
         },
       ],
     },
-    
+    {
+      key: 'inspection',
+      icon: <ProjectOutlined />,
+      label: t('巡检中心'),
+      children: [
+        {
+          key: '/inspection/inspectionList',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检任务'),
+        },
+        {
+          key: '/inspection/inspectionReport',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检报告'),
+        },
+        {
+          key: '/inspection/inspectionLog',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检日志'),
+        }
+      ],
+    },
+    {
+      key: 'taskManage',
+      icon: <ProjectOutlined />,
+      label: t('任务中心'),
+      children: [
+        {
+          key: '/taskManage/taskManage',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务管理'),
+        },
+        {
+          key: '/taskManage/strategy',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务策略'),
+        },
+        {
+          key: '/taskManage/taskInstance',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务实例'),
+        }
+      ],
+    },
     {
       key: 'bigscreen',
       icon: <ProjectOutlined />,
@@ -288,6 +331,7 @@ const getMenuList = (t) => {
         },
       ],
     },
+
   ];
   if (import.meta.env['VITE_IS_COLLECT']) {
     const targets: any = _.find(menuList, (item) => item.key === 'targets');
