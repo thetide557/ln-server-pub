@@ -93,8 +93,8 @@ export default defineConfig({
       },
       '/sxxc': {
         // target: 'http://10.0.20.212:8086/',
-        // target: 'http://10.0.20.66:8086/',
-        target: 'http://172.22.1.184:8086/',
+        target: 'http://10.0.23.12:8094/',
+        // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/sxxc/, '')
       },

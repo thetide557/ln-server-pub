@@ -50,7 +50,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     const { TextArea } = Input;
     const [subTypeList, setSubTypeList] = useState([] as any);
     const [strategyList, setStrategyList] = useState([] as any);
-    const [type, setType] = useState(Number)
+    const [type, setType] = useState<any>('')
     const [typeList, Task] = useState([
         { id: 1, value: '每日' },
         { id: 2, value: '每周' },
@@ -216,15 +216,15 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     const getInspectionInfo = (id: string) => {
         getInspectionDetail(id).then((res) => {
             console.log(res.data)
-            setType(res.data.type)
+            setType(res.data.executeCycle)
             setScope(res.data.scope)
             res.data.excuteTime = dayjs(res.data.excuteTime,timeFormat)
             console.log('--->time',res.data.excuteTime)
-            setSelectedRowKeys(res.data.scriptId.split(',').map(item=>Number(item)))
+            setSelectedRowKeys(res.data.scriptId?.split(',').map(item=>Number(item)))
 
-            if (res.data.type == 2) {
+            if (res.data.executeCycle == 2) {
                 res.data.week = res.data.week.split(',').map(item=>Number(item))
-            }else if(res.data.type == 3){
+            }else if(res.data.executeCycle == 3){
                 res.data.excuteDate = dayjs(res.data.excuteDate,dateFormat)
             }
             if(res.data.scope == 2){
@@ -244,10 +244,21 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         <>
             <Form form={form} initialValues={initialValues} preserve={false}>
                 <Form.Item label={'巡检名称：'} name='name' rules={[{required:true,message:'请输入巡检名称'}]}>
-                    <Input placeholder='20字不能重复' max={20} />
+                    <Input placeholder='巡检名称' max={20} />
                 </Form.Item>
-                <Form.Item label={'巡检类型：'} name='type' rules={[{required:true,message:'请选择巡检类型'}]}>
+                {/* <Form.Item label={'巡检类型：'} name='type' rules={[{required:true,message:'请选择巡检类型'}]}>
                     <Select allowClear placeholder={'巡检类型'} style={{ width: 200 }} onChange={onChangeType}>
+                        {_.map(typeList, (item) => {
+                            return (
+                                <Select.Option key={item.value} value={item.id}>
+                                    {item.value}
+                                </Select.Option>
+                            );
+                        })}
+                    </Select>
+                </Form.Item> */}
+                <Form.Item label={'执行周期：'} name='executeCycle' rules={[{required:true,message:'请选择执行周期'}]}>
+                    <Select allowClear placeholder={'执行周期'} style={{ width: 200 }} onChange={onChangeType}>
                         {_.map(typeList, (item) => {
                             return (
                                 <Select.Option key={item.value} value={item.id}>
@@ -264,10 +275,12 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                 )}
                 {type == 3 && (
                     <Form.Item name='excuteDate' rules={[{required:true,message:'请选择时间'}]}>
+                        {/* @ts-ignore */}
                         <DatePicker style={{ marginLeft: '65px' }} format={dateFormat} />
                     </Form.Item>
                 )}
                 <Form.Item label={'执行时间：'} name='excuteTime' rules={[{required:true,message:'请选择执行时间'}]}>
+                     {/* @ts-ignore */}
                     <TimePicker value={excuteTime} onChange={onChangeTime}/>
                 </Form.Item>
                 <Form.Item label={'执行范围：'} name='scope' rules={[{required:true,message:'请选择执行范围'}]}>
@@ -316,7 +329,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                     </Select>
                 </Form.Item>
                 <Form.Item label={'任务名称：'} name='title'>
-                    <Input placeholder='20字不能重复' max={20} onPressEnter={() => run({ current: 1, pageSize: pagination.pageSize })} />
+                    <Input placeholder='任务名称' max={20} onPressEnter={() => run({ current: 1, pageSize: pagination.pageSize })} />
                 </Form.Item>
             </Form>
             <Table

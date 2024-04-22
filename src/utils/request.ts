@@ -71,6 +71,7 @@ request.interceptors.request.use((url, options) => {
  */
 request.interceptors.response.use(
   async (response, options) => {
+    // console.log(response);
     const { status } = response;
     if (status === 200) {
       if(options.responseType=="blob"){

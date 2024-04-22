@@ -43,14 +43,14 @@ export function removeInspection (ids: any) {
 };
 // 获取巡检日志列表
 export function getInspectionLogList(params) {
-    return request(`/sxxc/biz/task/inspection/log/list`, {
+    return request(`/sxxc/biz/inspection/log/list`, {
         method: RequestMethod.Get,
         params,
     });
 }
 // 获取巡检报告列表
 export function getInspectionReportList(params) {
-    return request(`/sxxc/biz/task/inspection/log/listReport`, {
+    return request(`/sxxc/biz/inspection/log/listReport`, {
         method: RequestMethod.Get,
         params,
     });
@@ -58,7 +58,7 @@ export function getInspectionReportList(params) {
 
 // 获取巡检报告内容
 export function getInspectionReport(params) {
-    return request(`/sxxc/biz/task/inspection/log/report`, {
+    return request(`/sxxc/biz/inspection/log/report`, {
         method: RequestMethod.Get,
         params,
     });

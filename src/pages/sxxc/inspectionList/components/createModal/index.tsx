@@ -36,17 +36,18 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
             let selectedRowKeys = inspectionRef.current.selectedRowKeys;
             let params = {
                 ...values,
-                scriptId:selectedRowKeys.join(',')
+                scriptId:selectedRowKeys ? selectedRowKeys.join(',') : '',
+                type: 2
             }
             params.excuteTime = moment(params.excuteTime.$d).format('HH:mm:ss');
 
-            if(params.type == 1){
+            if(params.executeCycle == 1){
                 delete params.week
                 delete params.excuteDate
-            }else if(params.type == 2){
+            }else if(params.executeCycle == 2){
                 delete params.excuteDate
                 params.week = params.week.join(',')
-            }else if(params.type == 3){
+            }else if(params.executeCycle == 3){
                 delete params.week
                 params.excuteDate = moment(params.excuteDate).format('YYYY-MM-DD');
             }

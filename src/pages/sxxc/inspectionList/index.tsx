@@ -71,8 +71,10 @@ const Resource: React.FC = () => {
             dataIndex: 'name',
         },
         {
-            title: '类型',
-            dataIndex: 'type',
+            title: '执行周期',
+            // title: '类型',
+            // dataIndex: 'type',
+            dataIndex: 'executeCycle',
             render: (text, record, index) => typeList.filter(item => item.id == text)[0].value,
         },
         {
@@ -239,8 +241,8 @@ const Resource: React.FC = () => {
                             <Form.Item label={'巡检名称'} name='name'>
                                 <Input
                                     className='left-area-group-search'
-                                    placeholder='20个字不能重复'
-                                    maxLength={20}
+                                    placeholder='巡检名称'
+                                    // maxLength={20}
                                     style={{ width: '270px' }}
                                     onPressEnter={(e) => {
                                         e.preventDefault();
@@ -253,8 +255,8 @@ const Resource: React.FC = () => {
                             <Form.Item label={'添加人'} name='createBy'>
                                 <Input
                                     className='left-area-group-search'
-                                    placeholder='20个字不能重复'
-                                    maxLength={20}
+                                    placeholder='添加人'
+                                    // maxLength={20}
                                     style={{ width: '270px' }}
                                     onPressEnter={(e) => {
                                         e.preventDefault();
@@ -263,9 +265,22 @@ const Resource: React.FC = () => {
                                 />
                             </Form.Item>
                         </Space>
-                        <Space style={{ marginRight: 16 }}>
+                        {/* <Space style={{ marginRight: 16 }}>
                             <Form.Item label={'巡检类型'} name='type'>
                                 <Select allowClear placeholder={'巡检类型'} style={{ width: 200 }}>
+                                    {_.map(typeList, (item) => {
+                                        return (
+                                            <Select.Option key={item.id} value={item.id}>
+                                                {item.value}
+                                            </Select.Option>
+                                        );
+                                    })}
+                                </Select>
+                            </Form.Item>
+                        </Space> */}
+                        <Space style={{ marginRight: 16 }}>
+                            <Form.Item label={'执行周期'} name='executeCycle'>
+                                <Select allowClear placeholder={'执行周期'} style={{ width: 200 }}>
                                     {_.map(typeList, (item) => {
                                         return (
                                             <Select.Option key={item.id} value={item.id}>
