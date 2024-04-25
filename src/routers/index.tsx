@@ -272,7 +272,7 @@ export default function Content() {
         <Route path='/dashboardsxc/share/:id' component={DashboardSharexc} />
         <Route path='/dashboardsxc' component={Dashboardxc} />
         <Route path='/health/report' component={HealthReport} />
-        <Route path='/inspect/autoInspect' component={autoInspect} />
+        <Route path='/inspection/autoInspect' component={autoInspect} />
         <Route path='/taskManage/taskManage' component={TaskManage} />
         <Route path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />
 

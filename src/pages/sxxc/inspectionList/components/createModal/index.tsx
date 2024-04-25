@@ -39,6 +39,8 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
                 scriptId:selectedRowKeys ? selectedRowKeys.join(',') : '',
                 type: 2
             }
+            console.log('params',params);
+            
             params.excuteTime = moment(params.excuteTime.$d).format('HH:mm:ss');
 
             if(params.executeCycle == 1){

@@ -209,8 +209,9 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     };
 
     const onChangeTime = (time: Dayjs)=>{
-        console.log(time)
+        console.log('time', time)
         setExcuteTime(time)
+        form.setFieldsValue({ excuteTime: time });
     }
 
     const getInspectionInfo = (id: string) => {
