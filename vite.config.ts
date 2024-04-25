@@ -91,12 +91,12 @@ export default defineConfig({
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      '/sxxc': {
+      '/sxxcTask': {
         // target: 'http://10.0.20.212:8086/',
-        target: 'http://10.0.23.12:8094/',
+        target: 'http://10.0.23.12:8090/',
         // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/sxxc/, '')
+        rewrite: path => path.replace(/^\/sxxcTask/, '')
       },
       // '/dataroomxc': {
       //   // target: 'http://10.0.20.95:8081/',

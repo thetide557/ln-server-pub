@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import React, { useEffect, useState, useContext, useRef } from 'react';

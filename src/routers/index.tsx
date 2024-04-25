@@ -106,6 +106,7 @@ import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import HealthReport from '@/pages/sxxc/healthReport'
+import autoInspect from '@/pages/sxxc/autoInspect'
 import TaskStrategy from '@/pages/sxxc/taskStrategy';
 import TaskManage from '@/pages/sxxc/taskManage'
 import TaskInstance from '@/pages/sxxc/taskInstance'
@@ -271,6 +272,7 @@ export default function Content() {
         <Route path='/dashboardsxc/share/:id' component={DashboardSharexc} />
         <Route path='/dashboardsxc' component={Dashboardxc} />
         <Route path='/health/report' component={HealthReport} />
+        <Route path='/inspect/autoInspect' component={autoInspect} />
         <Route path='/taskManage/taskManage' component={TaskManage} />
         <Route path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />
 

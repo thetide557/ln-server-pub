@@ -60,6 +60,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('健康报告'),
         },
+        // {
+        //   key: '/inspect/autoInspect',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('自动化巡检'),
+        // },
       ],
     },
     {

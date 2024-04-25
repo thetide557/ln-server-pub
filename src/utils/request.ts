@@ -88,7 +88,7 @@ request.interceptors.response.use(
           // proxy/elasticsearch 返回的数据结构是 { ...data }
           // proxy/jeager 返回的数据结构是 { data: [], errors: [] }
           if (
-            _.some([`sxxc`], (item) => {
+            _.some([`sxxcTask`], (item) => {
               return url.includes(item);
             })
           ) {
