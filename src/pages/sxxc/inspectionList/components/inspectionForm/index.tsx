@@ -34,6 +34,7 @@ import { getInspectionList, getInspectionDetail } from '@/services/sxxc/inspecti
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import './index.less'
 
 dayjs.extend(customParseFormat);
 const dateFormat = 'YYYY-MM-DD';
