@@ -314,7 +314,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                 )}
                 {scope == 3 && (
                     <Form.Item name="hosts" rules={[{ required: true, message: '请选择Ip' }]}>
-                        <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.ip, value: item.ip } })} />
+                        <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.ip, value: item.ident } })} />
                     </Form.Item>
                 )}
             </Form>
