@@ -91,7 +91,7 @@ export default function ScreenView() {
         if (res.dat.list.length > 0) {
           setScreenList(res.dat.list[0]);
           let firstUrl = res.dat.list[0]['config']
-          let screenUrl = `${baseUrl}?code=${firstUrl}&token=${token}`
+          let screenUrl = `${baseUrl}?code=${firstUrl}`
           setUrl(screenUrl)
         }
     })

@@ -56,9 +56,14 @@ const getMenuList = (t) => {
           label: t('即时查询'),
         },
         {
-          key: '/health/report',
+          key: '/healthReport',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('健康报告'),
+        },
+        {
+          key: '/workorder',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('工单'),
         },
         // {
         //   key: '/inspection/autoInspect',
@@ -391,6 +396,8 @@ export default function () {//{ selectMenu?:any }
       if (profile?.roles.indexOf('Admin') === -1) {
         getMenuPerm().then((res) => {
           const { dat } = res;
+          console.log(dat);
+          
           // 过滤掉没有权限的菜单
           const newMenus: any = _.filter(
             _.map(menuList, (menu) => {

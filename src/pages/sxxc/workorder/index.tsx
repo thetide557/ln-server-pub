@@ -2,14 +2,14 @@ import React, { useRef, useEffect } from 'react';
 // import PageLayout from '@/components/pageLayout';
 // import { DeleteOutlined, DownOutlined, EditOutlined, PlusSquareOutlined, PoweroffOutlined, SearchOutlined, UndoOutlined, UserOutlined } from '@ant-design/icons';
 
-const healthReport = function () {
+const workorder = function () {
   const token = localStorage.getItem('access_token')
   // const iframeRef = useRef(null);
   // const handleload = () => {
   //   const domElement:any = iframeRef?.current;
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
-  return <iframe src={`/health`} style={{ width: '100%', height: '100%', overflow: 'hidden' }} scrolling='no'></iframe>;
+  return <iframe src={`/workorder?token=${token}`} style={{ width: '100%', height: '100%', overflow: 'hidden' }} scrolling='no'></iframe>;
   // return (
   //   <PageLayout title={'健康报告'} icon={<UserOutlined />}>
   //     <iframe src={`http://localhost/health?token=${token}`} style={{ width: '100%', height: '100%', overflow: 'hidden' }} scrolling='no'></iframe>
@@ -17,4 +17,4 @@ const healthReport = function () {
   // );
 };
 
-export default healthReport;
+export default workorder;

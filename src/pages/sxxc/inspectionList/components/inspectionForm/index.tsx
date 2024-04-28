@@ -23,6 +23,7 @@ import React, { ReactNode, useEffect, useImperativeHandle, useState } from 'reac
 import { useTranslation } from 'react-i18next';
 import { getBusiGroups } from '@/services/common';
 import { getMonObjectList } from '@/services/targets';
+import { getAssets1 } from '@/services/assets';
 import { Task, TaskType } from '@/store/sxxc/taskInterface';
 import { ColumnsType } from 'antd/lib/table';
 import usePagination from '@/components/usePagination';
@@ -80,7 +81,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     const [taskSubType, setTaskSubType] = useState<string>();
     const [taskTypeList, setTaskTypeList] = useState([] as any);
     const [taskSubTypeList, setTaskSubTypeList] = useState([] as any);
-    const [excuteTime,setExcuteTime] = useState<Dayjs | null>(null);
+    const [excuteTime, setExcuteTime] = useState<Dayjs | null>(null);
 
     const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
     const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
@@ -117,7 +118,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
 
     useImperativeHandle(ref, () => ({
         form: form,
-        ipList:ipList,
+        ipList: ipList,
         selectedRowKeys: selectedRowKeys
     }));
 
@@ -166,14 +167,24 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
             limit: 5000,
             p: 1,
         };
-        getMonObjectList(query).then(res => {
-            let list = res.dat.list
+        // getMonObjectList(query).then(res => {
+        //     let list = res.dat.list
+        //     setIpList(list)
+        // })
+        getAssets1(query).then(res => {
+            let list = res.dat?.filter(item => {
+                if (item.type == '物理服务器' || item.type == '虚拟服务器') {
+                    return true
+                }
+            })
+            console.log('list', list);
+            
             setIpList(list)
         })
     }
 
     const getTaskType = () => {
-        getTaskTypeList({parentId:0}).then((res) => {
+        getTaskTypeList({ parentId: 0 }).then((res) => {
             console.log('任务类型', res)
             setTaskTypeList(res.rows)
         })
@@ -209,7 +220,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         setScope(val);
     };
 
-    const onChangeTime = (time: Dayjs)=>{
+    const onChangeTime = (time: Dayjs) => {
         console.log('time', time)
         setExcuteTime(time)
         form.setFieldsValue({ excuteTime: time });
@@ -220,21 +231,21 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
             console.log(res.data)
             setType(res.data.executeCycle)
             setScope(res.data.scope)
-            res.data.excuteTime = dayjs(res.data.excuteTime,timeFormat)
-            console.log('--->time',res.data.excuteTime)
-            setSelectedRowKeys(res.data.scriptId?.split(',').map(item=>Number(item)))
+            res.data.excuteTime = dayjs(res.data.excuteTime, timeFormat)
+            console.log('--->time', res.data.excuteTime)
+            setSelectedRowKeys(res.data.scriptId?.split(',').map(item => Number(item)))
 
             if (res.data.executeCycle == 2) {
-                res.data.week = res.data.week.split(',').map(item=>Number(item))
-            }else if(res.data.executeCycle == 3){
-                res.data.excuteDate = dayjs(res.data.excuteDate,dateFormat)
+                res.data.week = res.data.week.split(',').map(item => Number(item))
+            } else if (res.data.executeCycle == 3) {
+                res.data.excuteDate = dayjs(res.data.excuteDate, dateFormat)
             }
-            if(res.data.scope == 2){
-                res.data.scopeContext = res.data.scopeContext.split(',').map(item=>Number(item))
-            }else if(res.data.scope == 3){
+            if (res.data.scope == 2) {
+                res.data.scopeContext = res.data.scopeContext.split(',').map(item => Number(item))
+            } else if (res.data.scope == 3) {
                 res.data.hosts = res.data.hosts.split(',')
             }
-            console.log('初始化表单',res.data)
+            console.log('初始化表单', res.data)
             setInitialValues(
                 Object.assign({}, res.data),
             );
@@ -245,7 +256,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     return !loading ? (
         <>
             <Form form={form} initialValues={initialValues} preserve={false}>
-                <Form.Item label={'巡检名称：'} name='name' rules={[{required:true,message:'请输入巡检名称'}]}>
+                <Form.Item label={'巡检名称：'} name='name' rules={[{ required: true, message: '请输入巡检名称' }]}>
                     <Input placeholder='巡检名称' max={20} />
                 </Form.Item>
                 {/* <Form.Item label={'巡检类型：'} name='type' rules={[{required:true,message:'请选择巡检类型'}]}>
@@ -259,7 +270,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                         })}
                     </Select>
                 </Form.Item> */}
-                <Form.Item label={'执行周期：'} name='executeCycle' rules={[{required:true,message:'请选择执行周期'}]}>
+                <Form.Item label={'执行周期：'} name='executeCycle' rules={[{ required: true, message: '请选择执行周期' }]}>
                     <Select allowClear placeholder={'执行周期'} style={{ width: 200 }} onChange={onChangeType}>
                         {_.map(typeList, (item) => {
                             return (
@@ -271,21 +282,21 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                     </Select>
                 </Form.Item>
                 {type == 2 && (
-                    <Form.Item name='week'  rules={[{required:true,message:'请至少选择一个'}]}>
+                    <Form.Item name='week' rules={[{ required: true, message: '请至少选择一个' }]}>
                         <Checkbox.Group style={{ marginLeft: '65px' }} options={weekOption} />
                     </Form.Item>
                 )}
                 {type == 3 && (
-                    <Form.Item name='excuteDate' rules={[{required:true,message:'请选择时间'}]}>
+                    <Form.Item name='excuteDate' rules={[{ required: true, message: '请选择时间' }]}>
                         {/* @ts-ignore */}
                         <DatePicker style={{ marginLeft: '65px' }} format={dateFormat} />
                     </Form.Item>
                 )}
-                <Form.Item label={'执行时间：'} name='excuteTime' rules={[{required:true,message:'请选择执行时间'}]}>
-                     {/* @ts-ignore */}
-                    <TimePicker value={excuteTime} onChange={onChangeTime}/>
+                <Form.Item label={'执行时间：'} name='excuteTime' rules={[{ required: true, message: '请选择执行时间' }]}>
+                    {/* @ts-ignore */}
+                    <TimePicker value={excuteTime} onChange={onChangeTime} />
                 </Form.Item>
-                <Form.Item label={'执行范围：'} name='scope' rules={[{required:true,message:'请选择执行范围'}]}>
+                <Form.Item label={'执行范围：'} name='scope' rules={[{ required: true, message: '请选择执行范围' }]}>
                     <Select allowClear placeholder={'执行范围'} style={{ width: 200 }} onChange={onChangeScope}>
                         {_.map(scopeList, (item) => {
                             return (
@@ -297,17 +308,17 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                     </Select>
                 </Form.Item>
                 {scope == 2 && (
-                    <Form.Item name="scopeContext" rules={[{required:true,message:'请选择项目'}]}>
+                    <Form.Item name="scopeContext" rules={[{ required: true, message: '请选择项目' }]}>
                         <Checkbox.Group style={{ marginLeft: '65px' }} options={serveList.map(item => { return { label: item.name, value: item.id } })} />
                     </Form.Item>
                 )}
                 {scope == 3 && (
-                    <Form.Item name="hosts" rules={[{required:true,message:'请选择Ip'}]}>
-                        <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.ident, value: item.ident } })}/>
+                    <Form.Item name="hosts" rules={[{ required: true, message: '请选择Ip' }]}>
+                        <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.ident, value: item.ident } })} />
                     </Form.Item>
                 )}
             </Form>
-            <Form form={taskForm} layout='inline' style={{borderTop:'2px solid #dcdcdc',paddingTop:'20px'}}>
+            <Form form={taskForm} layout='inline' style={{ borderTop: '2px solid #dcdcdc', paddingTop: '20px' }}>
                 <Form.Item label={'任务类型：'}>
                     <Select allowClear placeholder={'任务类型'} style={{ width: 200 }} value={taskType} onChange={onChangeTaskType} onClear={clearType}>
                         {_.map(taskTypeList, (item) => {

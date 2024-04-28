@@ -12,6 +12,14 @@ export const getAssets = function (bgid, query, organization_id) {
     },
   });
 };
+
+export const getAssets1 = function (params) {
+  return request('/api/n9e/assets', {
+    method: RequestMethod.Get,
+    params
+  });
+};
+
 export const getAssetsByCondition = function (params) {
   return request('/api/n9e/xh/assets/filter', {
     method: RequestMethod.Get,
