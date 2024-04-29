@@ -258,6 +258,8 @@ export default function Content() {
 
         <Route exact path='/bigscreen/topo' component={Topo} />
         <Route exact path='/bigscreen' component={DataRoom} />
+        <Route exact path='/healthReport' component={HealthReport} />
+        <Route exact path='/workorder' component={workorder} />
 
         <Route exact path='/bigScreen/api-service' component={Apiservice}/>
         <Route exact path='/bigScreen/api-service/add' component={ApiServiceAdd}/>
@@ -270,18 +272,17 @@ export default function Content() {
         <Route exact path='/bigscreen/address/:id' component={ScreenAddressDetail}/>
         <Route path='/dashboardxc/:id' exact component={DashboardDetailxc} />
         <Route path='/dashboardsxc/:id' exact component={DashboardDetailxc} />
-        <Route path='/dashboardsxc/share/:id' component={DashboardSharexc} />
-        <Route path='/dashboardsxc' component={Dashboardxc} />
-        <Route path='/healthReport' component={HealthReport} />
-        <Route path='/workorder' component={workorder} />
-        <Route path='/inspection/autoInspect' component={autoInspect} />
-        <Route path='/taskManage/taskManage' component={TaskManage} />
-        <Route path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />
+        <Route exact path='/dashboardsxc/share/:id' component={DashboardSharexc} />
+        <Route exact path='/dashboardsxc' component={Dashboardxc} />
+       
+        <Route exact path='/inspection/autoInspect' component={autoInspect} />
+        <Route exact path='/taskManage/taskManage' component={TaskManage} />
+        <Route exact path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />
 
-        <Route path='/inspection/inspectionList' component={InspectionList} />
-        <Route path='/inspection/inspectionLog/:inspectionId?' component={InspectionLog} />
-        <Route path='/inspection/inspectionReport/:inspectionId?' component={InspectionReport} />
-        <Route path='/taskManage/strategy' component={TaskStrategy} exact />
+        <Route exact path='/inspection/inspectionList' component={InspectionList} />
+        <Route exact path='/inspection/inspectionLog/:inspectionId?' component={InspectionLog} />
+        <Route exact path='/inspection/inspectionReport/:inspectionId?' component={InspectionReport} />
+        <Route exact path='/taskManage/strategy' component={TaskStrategy} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />
@@ -292,9 +293,9 @@ export default function Content() {
         <Route path='/' exact>
           <Redirect to='/home' />
         </Route>
-        <Route path='/403' component={Page403} />
-        <Route path='/404' component={NotFound} />
-        <Route path='*' component={NotFound} />
+        <Route exact path='/403' component={Page403} />
+        <Route exact path='/404' component={NotFound} />
+        <Route exact path='*' component={NotFound} />
       </Switch>
     </div>
   );

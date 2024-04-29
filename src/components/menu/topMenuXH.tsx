@@ -1,8 +1,8 @@
-import { CommonStateContext,initTheme } from '@/App';
+import { CommonStateContext, initTheme } from '@/App';
 import { getMenuPerm } from '@/services/common';
 import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
-import { Dropdown, Menu, Space,Image } from 'antd';
+import { Dropdown, Menu, Space, Image } from 'antd';
 import _ from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -54,22 +54,7 @@ const getMenuList = (t) => {
           key: '/metric/explorer',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('即时查询'),
-        },
-        {
-          key: '/healthReport',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('健康报告'),
-        },
-        {
-          key: '/workorder',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('工单'),
-        },
-        // {
-        //   key: '/inspection/autoInspect',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('自动化巡检'),
-        // },
+        }
       ],
     },
     {
@@ -107,6 +92,43 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('通知模板'),
         },
+      ],
+    },
+    {
+      key: 'inspection',
+      icon: <ProjectOutlined />,
+      label: t('巡检中心'),
+      children: [
+        {
+          key: '/inspection/inspectionList',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检任务'),
+        },
+        {
+          key: '/inspection/inspectionReport',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检报告'),
+        },
+        {
+          key: '/inspection/inspectionLog',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检日志'),
+        },
+        {
+          key: '/taskManage/taskManage',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务管理'),
+        },
+        {
+          key: '/taskManage/strategy',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务策略'),
+        },
+        {
+          key: '/taskManage/taskInstance',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务实例'),
+        },
         {
           key: 'job',
           icon: <IconFont type='icon-Menu_AlarmSelfhealing' />,
@@ -130,48 +152,28 @@ const getMenuList = (t) => {
       ],
     },
     {
-      key: 'inspection',
+      key: 'healthReport',
       icon: <ProjectOutlined />,
-      label: t('巡检中心'),
+      label: t('健康报告'),
       children: [
         {
-          key: '/inspection/inspectionList',
+          key: '/healthReport',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('巡检任务'),
+          label: t('健康报告'),
         },
-        {
-          key: '/inspection/inspectionReport',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('巡检报告'),
-        },
-        {
-          key: '/inspection/inspectionLog',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('巡检日志'),
-        }
-      ],
+      ]
     },
     {
-      key: 'taskManage',
-      icon: <ProjectOutlined />,
-      label: t('任务中心'),
+      key: 'workorder',
+      icon: <IconFont type='icon-Menu_Infrastructure' />,
+      label: t('运维工单'),
       children: [
         {
-          key: '/taskManage/taskManage',
+          key: '/workorder',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('任务管理'),
+          label: t('运维工单'),
         },
-        {
-          key: '/taskManage/strategy',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('任务策略'),
-        },
-        {
-          key: '/taskManage/taskInstance',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('任务实例'),
-        }
-      ],
+      ]
     },
     {
       key: 'bigscreen',
@@ -221,7 +223,7 @@ const getMenuList = (t) => {
               key: '/permissions',
               label: t('角色管理'),
             },
-            
+
           ],
         },
         {
@@ -339,6 +341,11 @@ const getMenuList = (t) => {
             },
           ],
         },
+        // {
+        //   key: '/inspection/autoInspect',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('自动化检测'),
+        // },
       ],
     },
 
@@ -374,7 +381,7 @@ export default function () {//{ selectMenu?:any }
   const [home] = useLocalStorageState('HOME_URL');
   const [imageUrl, setImageUrl] = useState<string>();
 
-  const [theme, setTheme] = useLocalStorage<any>("platform_theme",initTheme);
+  const [theme, setTheme] = useLocalStorage<any>("platform_theme", initTheme);
 
   useEffect(() => {
     setDefaultSelectedKeys([]);
@@ -383,13 +390,13 @@ export default function () {//{ selectMenu?:any }
   useEffect(() => {
     if (location.pathname != '/login') {
       getMyPortrait().then((res) => {
-        if(res.dat!=null && res.dat!=""){
-          setImageUrl(_.cloneDeep("/api/n9e/"+res.dat+"?"+Math.random()));
+        if (res.dat != null && res.dat != "") {
+          setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
         }
       })
     }
   }, []);
-  
+
 
   useEffect(() => {
     if (profile?.roles?.length > 0) {
@@ -397,7 +404,7 @@ export default function () {//{ selectMenu?:any }
         getMenuPerm().then((res) => {
           const { dat } = res;
           console.log(dat);
-          
+
           // 过滤掉没有权限的菜单
           const newMenus: any = _.filter(
             _.map(menuList, (menu) => {
@@ -410,6 +417,8 @@ export default function () {//{ selectMenu?:any }
               return item.children && item.children.length > 0;
             },
           );
+          console.log(newMenus);
+          
           setMenus(newMenus);
         });
       } else {
@@ -428,7 +437,7 @@ export default function () {//{ selectMenu?:any }
         //         handleClick(item);
         //       }
         //   }
-          
+
 
         // }
         setMenus(menuList);
@@ -462,7 +471,7 @@ export default function () {//{ selectMenu?:any }
 
   const handleClick = (item) => {
 
-    if((item.key as string) === "home") {
+    if ((item.key as string) === "home") {
       window.location.href = '/prod-api/'
     }
     if ((item.key as string).startsWith('/')) {
@@ -506,11 +515,11 @@ export default function () {//{ selectMenu?:any }
   return hideSideMenu() ? null : (
     <div className='top-menu1'>
       <div className='logoImg' onClick={goScreen}>
-        <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>        
+        <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>
         {theme?.title}</div>
       <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
       <div className='top_right'>
-       <span
+        <span
           className='language'
           onClick={() => {
             let language = i18n.language == 'en_US' ? 'zh_CN' : 'en_US';
@@ -522,7 +531,7 @@ export default function () {//{ selectMenu?:any }
         </span>
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
-            <img src={imageUrl?imageUrl:'/image/avatar1.png'} alt='' />
+            <img src={imageUrl ? imageUrl : '/image/avatar1.png'} alt='' />
             <span className='display-name'>{profile.nickname || profile.username}</span>
             <DownOutlined />
           </span>

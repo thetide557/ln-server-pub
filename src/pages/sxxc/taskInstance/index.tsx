@@ -50,14 +50,14 @@ const Resource: React.FC = () => {
   const [subType, setSubType] = useState<string>();
   const [strategyList, setStrategyList] = useState([] as any);
   const [createTime, setCreateTime] = useState<string>();
-  const [resultList, setResultList] = useState(['success','waiting','running','timeout']);
+  const [resultList, setResultList] = useState(['success', 'waiting', 'running', 'timeout']);
   const [form] = Form.useForm();
-  const { profile } = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
   const taskColumn: ColumnsType<Log> = [
     {
       title: '序号',
-      render:(text,record,index)=>`${index+1}`,
+      render: (text, record, index) => `${index + 1}`,
     },
     {
       title: '任务名称',
@@ -102,50 +102,55 @@ const Resource: React.FC = () => {
       title: '操作',
       render: (text: string, record) => (
         <>
-          <a
-            onClick={() => {
-              confirm({
-                title: '是否重新执行',
-                content:`${record?.host}将执行任务${record.taskName}`,
-                onOk: () => {
-                  console.log(record)
-                  getBizScriptInfo(record.scriptId).then(res=>{
-                    console.log(res)
-                    if(res.code == 200){
-                      let params = {
-                        id:record.scriptId,
-                        title:record.taskName,
-                        content:res.data.content,
-                        hosts:[`${record.host}`],
-                        strategyName:record.strategyName,
-                        taskTypeName:record.taskType,
-                        taskSubName:record.taskSubType,
-                        projectName:record.projectName
-                      }
-                      runTask(params).then((res1) => {
-                        if(res1.code == 200){
-                          message.success('执行成功');
-                          handleClose();
-                        }else{
-                          message.error(res1.msg);
-                          handleClose();
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/run')) && <a
+              onClick={() => {
+                confirm({
+                  title: '是否重新执行',
+                  content: `${record?.host}将执行任务${record.taskName}`,
+                  onOk: () => {
+                    console.log(record)
+                    getBizScriptInfo(record.scriptId).then(res => {
+                      console.log(res)
+                      if (res.code == 200) {
+                        let params = {
+                          id: record.scriptId,
+                          title: record.taskName,
+                          content: res.data.content,
+                          hosts: [`${record.host}`],
+                          strategyName: record.strategyName,
+                          taskTypeName: record.taskType,
+                          taskSubName: record.taskSubType,
+                          projectName: record.projectName
                         }
-                      });
-                    }else{
-                      message.error(res.msg);
-                      handleClose();
-                    }
-                  })
-                },
-                onCancel: () => {},
-              });
-            }}
-          >
-            执行
-          </a>
-          <Button className='oper-name' type='link' onClick={()=>getLog(record)}>
-            日志
-          </Button>
+                        runTask(params).then((res1) => {
+                          if (res1.code == 200) {
+                            message.success('执行成功');
+                            handleClose();
+                          } else {
+                            message.error(res1.msg);
+                            handleClose();
+                          }
+                        });
+                      } else {
+                        message.error(res.msg);
+                        handleClose();
+                      }
+                    })
+                  },
+                  onCancel: () => { },
+                });
+              }}
+            >
+              执行
+            </a>
+          }
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskType/list')) && <Button className='oper-name' type='link' onClick={() => getLog(record)}>
+              日志
+            </Button>
+          }
+
         </>
       ),
     },
@@ -155,11 +160,11 @@ const Resource: React.FC = () => {
     // taskColumns.pop(); //普通用户不展示操作列
   }
 
-  const getLog = (item)=>{
+  const getLog = (item) => {
     console.log(item)
-    if(item.taskReslut == 'success'){
+    if (item.taskReslut == 'success') {
       setStdout(item.stdout)
-    }else{
+    } else {
       setStdout(item.stderr)
     }
     setVisible(true)
@@ -185,10 +190,10 @@ const Resource: React.FC = () => {
   const getTableData = ({ current, pageSize }): Promise<any> => {
     const params = {
       ...form.getFieldsValue(),
-      taskType:taskType != '' ? taskType : undefined,
-      taskSubType:subType != '' ? subType : undefined,
-      executeDate:createTime != '' ? createTime : undefined,
-      inspectionLogId:inspectionLogId ? inspectionLogId:undefined,
+      taskType: taskType != '' ? taskType : undefined,
+      taskSubType: subType != '' ? subType : undefined,
+      executeDate: createTime != '' ? createTime : undefined,
+      inspectionLogId: inspectionLogId ? inspectionLogId : undefined,
       pageSize: pageSize,
       pageNum: current,
     };
@@ -210,46 +215,46 @@ const Resource: React.FC = () => {
   const handleSubmit = async () => {
     try {
       await form.validateFields();
-      run({current:1, pageSize:pagination.pageSize});
+      run({ current: 1, pageSize: pagination.pageSize });
     } catch (e) {
       console.log(e);
     }
   };
 
-  const getTaskType = ()=>{
-    getTaskTypeList({parentId:0}).then((res)=>{
-      console.log('任务类型',res)
+  const getTaskType = () => {
+    getTaskTypeList({ parentId: 0 }).then((res) => {
+      console.log('任务类型', res)
       setTypeList(res.rows)
     })
   }
 
-  const getSubType = (val)=>{
-    getTaskTypeList({parentId:val}).then((res)=>{
-      console.log('任务子类',res)
+  const getSubType = (val) => {
+    getTaskTypeList({ parentId: val }).then((res) => {
+      console.log('任务子类', res)
       setSubTypeList(res.rows)
     })
   }
 
-  const getStrategy = ()=>{
-    getStrategyList({}).then((res)=>{
-      console.log('策略',res)
+  const getStrategy = () => {
+    getStrategyList({}).then((res) => {
+      console.log('策略', res)
       setStrategyList(res.rows)
     })
   }
 
-  const onChangeType = (val)=>{
+  const onChangeType = (val) => {
     console.log(val)
-    let name = typeList.filter(item=>item.id == val)[0].name
+    let name = typeList.filter(item => item.id == val)[0].name
     setTaskType(name)
     setSubType(undefined)
     getSubType(val)
   }
 
-  const clearType = ()=>{
+  const clearType = () => {
     setTaskType(undefined)
   }
 
-  const onChangeSubType = (val)=>{
+  const onChangeSubType = (val) => {
     console.log(val)
     setSubType(val)
   }
@@ -270,12 +275,12 @@ const Resource: React.FC = () => {
         <div className='task-content'>
           <Form form={form}>
             <Space style={{ marginRight: 16 }}>
-              <Form.Item label={'任务名称'} name='taskName' rules={[{ max:20, message: '20个字不能重复' }]}>
+              <Form.Item label={'任务名称'} name='taskName' rules={[{ max: 20, message: '20个字不能重复' }]}>
                 <Input
                   className='left-area-group-search'
                   placeholder='20个字不能重复'
                   maxLength={20}
-                  style={{width:'270px'}}
+                  style={{ width: '270px' }}
                   onPressEnter={(e) => {
                     e.preventDefault();
                     const value = e.currentTarget.value;
@@ -339,12 +344,12 @@ const Resource: React.FC = () => {
               </Form.Item>
             </Space>
             <Space style={{ marginRight: 16 }}>
-              <Form.Item label={'巡检计划'} name='inspectionLogName' rules={[{ max:20, message: '20个字不能重复' }]}>
+              <Form.Item label={'巡检计划'} name='inspectionLogName' rules={[{ max: 20, message: '20个字不能重复' }]}>
                 <Input
                   className='left-area-group-search'
                   placeholder='20个字不能重复'
                   maxLength={20}
-                  style={{width:'270px'}}
+                  style={{ width: '270px' }}
                   onPressEnter={(e) => {
                     e.preventDefault();
                     const value = e.currentTarget.value;
@@ -357,7 +362,7 @@ const Resource: React.FC = () => {
             </Space>
             <Space style={{ marginRight: 16 }}>
               <Form.Item label={'执行日期'}>
-                <DatePicker onChange={onChangeDate}/>
+                <DatePicker onChange={onChangeDate} />
               </Form.Item>
             </Space>
             <Space>
@@ -377,22 +382,22 @@ const Resource: React.FC = () => {
           />
         </div>
         <Modal
-            title={'任务日志'}
-            visible={visible}
-            width={ 800}
-            onCancel={handleClose}
-            destroyOnClose={true}
-            footer={[
-                <Button key='back' onClick={handleClose}>
-                关闭
-                </Button>,
-            ]}
+          title={'任务日志'}
+          visible={visible}
+          width={800}
+          onCancel={handleClose}
+          destroyOnClose={true}
+          footer={[
+            <Button key='back' onClick={handleClose}>
+              关闭
+            </Button>,
+          ]}
         >
           <pre style={{ fontSize: 12, padding: 10 }}>
             {stdout}
           </pre>
         </Modal>
-        
+
       </div>
     </PageLayout>
   );

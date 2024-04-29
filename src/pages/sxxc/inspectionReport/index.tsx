@@ -47,6 +47,7 @@ interface Param {
 
 const Resource: React.FC = () => {
     const history = useHistory();
+    const { profile, permList } = useContext(CommonStateContext);
     const { inspectionId } = useParams<Param>();
     const [typeList, setTypeList] = useState([
         { id: 1, value: '每日' },
@@ -98,7 +99,7 @@ const Resource: React.FC = () => {
         {
             title: '类型',
             dataIndex: 'type',
-            render: (text, record, index) => typeList.filter(item => item.id == text)[0].value,
+            render: (text, record, index) => typeList.filter(item => item.id == text)[0]?.value,
         },
         {
             title: '执行时间',
@@ -129,7 +130,7 @@ const Resource: React.FC = () => {
         {
             title: '失败',
             // dataIndex: 'failCount',
-            render: (text, record, index) => record.successCount ?record.taskCount-record.successCount:record.taskCount,
+            render: (text, record, index) => record.successCount ? record.taskCount - record.successCount : record.taskCount,
         },
     ];
     const taskColumns: ColumnsType<Inspection> = [
@@ -141,9 +142,12 @@ const Resource: React.FC = () => {
                     {/* <Button className='oper-name' type='link' onClick={() => changeStatus(record)}>
                         详情
                     </Button> */}
-                    <Button className='oper-name' type='link' onClick={() => changeReport(record)}>
-                        报告
-                    </Button>
+                    {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionLog')) && <Button className='oper-name' type='link' onClick={() => changeReport(record)}>
+                            报告
+                        </Button>
+                    }
+
                 </>
             ),
         },
@@ -171,9 +175,9 @@ const Resource: React.FC = () => {
 
             //有两个高度需要区分，一个是html页面的实际高度，和生成pdf的页面高度(841.89)
             //当内容未超过pdf一页显示的范围，无需分页
-            console.log(leftHeight,pageHeight)
+            console.log(leftHeight, pageHeight)
             if (leftHeight < pageHeight) {
-                console.log(imgWidth,imgHeight)
+                console.log(imgWidth, imgHeight)
                 pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
             } else {    // 分页
                 while (leftHeight > 0) {
@@ -197,7 +201,7 @@ const Resource: React.FC = () => {
 
     const changeReport = (val) => {
         console.log(val)
-        let params = { id: val.inspectionLogId,project:val.projectName }
+        let params = { id: val.inspectionLogId, project: val.projectName }
         getInspectionReport(params).then(res => {
             console.log(res)
             setReport(res.data)
@@ -262,7 +266,7 @@ const Resource: React.FC = () => {
     }
     const onChangeIp = (checkedValues: CheckboxValueType[]) => {
         let arr = checkedValues.map(item => {
-            return ipList.filter(res => item == res.id)[0].remote_addr
+            return ipList.filter(res => item == res.id)[0]?.remote_addr
         })
         console.log('checked = ', checkedValues);
         setCheckedIp(arr)
@@ -304,10 +308,10 @@ const Resource: React.FC = () => {
 
     const handleSubmit = async () => {
         try {
-          await form.validateFields();
-          run({current:1, pageSize:pagination.pageSize});
+            await form.validateFields();
+            run({ current: 1, pageSize: pagination.pageSize });
         } catch (e) {
-          console.log(e);
+            console.log(e);
         }
     };
 
@@ -325,7 +329,7 @@ const Resource: React.FC = () => {
                                     style={{ width: '270px' }}
                                     onPressEnter={(e) => {
                                         e.preventDefault();
-                                        const value = e.currentTarget.value;
+                                        const value = e.currentTarget?.value;
                                     }}
                                 />
                             </Form.Item>
@@ -373,7 +377,7 @@ const Resource: React.FC = () => {
                             </Form.Item>
                         </Space>
                         <Space>
-                            <Button style={{marginLeft:'16px'}} onClick={handleSubmit}
+                            <Button style={{ marginLeft: '16px' }} onClick={handleSubmit}
                             >查询</Button>
                         </Space>
                     </Form>
@@ -405,7 +409,7 @@ const Resource: React.FC = () => {
                     </Button>
                 ]}
             >
-                <div ref={elementRef} style={{minHeight:'300px'}}>
+                <div ref={elementRef} style={{ minHeight: '300px' }}>
                     <Report
                         report={report}
                     />

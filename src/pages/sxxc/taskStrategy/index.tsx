@@ -45,7 +45,8 @@ const Resource: React.FC = () => {
   // const [isEdit, setIsEdit] = useState(false)
   const [form] = Form.useForm();
   const [form1] = Form.useForm();
-  const { profile } = useContext(CommonStateContext);
+  // const { profile } = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
   const { TextArea } = Input;
   const [open, setOpen] = useState(false)
@@ -85,32 +86,38 @@ const Resource: React.FC = () => {
       title: '操作',
       render: (text: string, record) => (
         <>
-          <Button className='oper-name' type='link' onClick={() => handleEdit(record.id)}>
-            修改
-          </Button>
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/strategyEdit')) && <Button className='oper-name' type='link' onClick={() => handleEdit(record.id)}>
+              修改
+            </Button>
+          }
+
           {/* <Button className='oper-name' type='link' onClick={() => handleClick(TaskType.RunTask, record.id)}>
             执行
           </Button> */}
-          <a
-            style={{
-              color: 'red',
-              marginLeft: '16px',
-            }}
-            onClick={() => {
-              confirm({
-                title: t('common:confirm.delete'),
-                onOk: () => {
-                  removeBizStrategy(record.id).then((res) => {
-                    message.success('删除成功');
-                    handleClose();
-                  });
-                },
-                onCancel: () => { },
-              });
-            }}
-          >
-            删除
-          </a>
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/strategyRemove')) && <a
+              style={{
+                color: 'red',
+                marginLeft: '16px',
+              }}
+              onClick={() => {
+                confirm({
+                  title: t('common:confirm.delete'),
+                  onOk: () => {
+                    removeBizStrategy(record.id).then((res) => {
+                      message.success('删除成功');
+                      handleClose();
+                    });
+                  },
+                  onCancel: () => { },
+                });
+              }}
+            >
+              删除
+            </a>
+          }
+
         </>
       ),
     },
@@ -192,11 +199,11 @@ const Resource: React.FC = () => {
       })
     })
     setOpen(true)
-    
-   
+
+
   }
 
-  const handleOk = async() => {
+  const handleOk = async () => {
     const values = await form1.validateFields();
     // console.log(form1.getFieldsValue(true));
     console.log(values);
@@ -308,9 +315,12 @@ const Resource: React.FC = () => {
             </Space>
 
           </Form>
-          <div style={{textAlign: 'right'}}>
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/strategyAdd')) && <div style={{ textAlign: 'right' }}>
             <Button type='primary' onClick={handleAdd}>新增</Button>
           </div>
+          }
+
           <Table
             size='small'
             rowKey='id'

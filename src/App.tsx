@@ -29,7 +29,7 @@ import TaskHostOutput from '@/pages/taskOutput/host';
 import { getAuthorizedDatasourceCates, Cate } from '@/components/AdvancedWrap';
 import { GetProfile } from '@/services/account';
 import { WebSocketURL } from './utils/constant';
-import { getBusiGroups, getDatasourceBriefList } from '@/services/common';
+import { getBusiGroups, getDatasourceBriefList, getMenuPerm } from '@/services/common';
 import { getLicense } from '@/components/AdvancedWrap';
 import { getVersions } from '@/components/pageLayout/Version/services';
 import Content from './routers';
@@ -76,6 +76,8 @@ export interface ICommonState {
   }[];
   setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
+  permList: string[],
+  setPermList: ([]) => void;
   organizationId: number;
   queryCondition: string;
   setCurBusiId: (id: number) => void;
@@ -145,6 +147,10 @@ function App() {
           }[];
         },
       }));
+    },
+    permList: [],
+    setPermList: (permList) => {
+      setCommonState((state) => ({ ...state, permList }));
     },
     busiGroups: [],
     setBusiGroups: (busiGroups) => {
@@ -235,6 +241,7 @@ function App() {
         if (!anonymous) {
           const { dat: profile } = await GetProfile();
           const { dat: busiGroups } = await getBusiGroups();
+          const { dat: permList } = await getMenuPerm()
           const datasourceList = await getDatasourceBriefList();
           const { licenseRulesRemaining, licenseExpireDays, feats } = await getLicense(t);
           let versions = { version: '', github_verison: '', newVersion: false };
@@ -253,6 +260,7 @@ function App() {
               ...state,
               profile,
               busiGroups,
+              permList,
               datasourceCateOptions: getAuthorizedDatasourceCates(feats, isPlus),
               groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type'),
               datasourceList: datasourceList,

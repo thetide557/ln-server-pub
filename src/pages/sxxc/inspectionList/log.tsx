@@ -48,6 +48,7 @@ interface Param {
 const Resource: React.FC = () => {
     const history = useHistory();
     const { inspectionId } = useParams<Param>();
+    const { profile, permList } = useContext(CommonStateContext);
     const [typeList, setTypeList] = useState([
         { id: 1, value: '每日' },
         { id: 2, value: '每周' },
@@ -137,12 +138,18 @@ const Resource: React.FC = () => {
             title: '操作',
             render: (text: string, record) => (
                 <>
-                    <Button className='oper-name' type='link' onClick={() => changeStatus(record)}>
-                        详情
-                    </Button>
-                    <Button className='oper-name' type='link' onClick={() => changeReport(record)}>
-                        报告
-                    </Button>
+                    {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionLog')) && <Button className='oper-name' type='link' onClick={() => changeStatus(record)}>
+                            详情
+                        </Button>
+                    }
+                    {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionReport')) && <Button className='oper-name' type='link' onClick={() => changeReport(record)}>
+                            报告
+                        </Button>
+                    }
+
+
                 </>
             ),
         },
@@ -170,9 +177,9 @@ const Resource: React.FC = () => {
 
             //有两个高度需要区分，一个是html页面的实际高度，和生成pdf的页面高度(841.89)
             //当内容未超过pdf一页显示的范围，无需分页
-            console.log(leftHeight,pageHeight)
+            console.log(leftHeight, pageHeight)
             if (leftHeight < pageHeight) {
-                console.log(imgWidth,imgHeight)
+                console.log(imgWidth, imgHeight)
                 pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
             } else {    // 分页
                 while (leftHeight > 0) {
@@ -304,10 +311,10 @@ const Resource: React.FC = () => {
 
     const handleSubmit = async () => {
         try {
-          await form.validateFields();
-          run({current:1, pageSize:pagination.pageSize});
+            await form.validateFields();
+            run({ current: 1, pageSize: pagination.pageSize });
         } catch (e) {
-          console.log(e);
+            console.log(e);
         }
     };
 
@@ -373,7 +380,7 @@ const Resource: React.FC = () => {
                             </Form.Item>
                         </Space>
                         <Space>
-                            <Button style={{marginLeft:'16px'}} onClick={handleSubmit}
+                            <Button style={{ marginLeft: '16px' }} onClick={handleSubmit}
                             >查询</Button>
                         </Space>
                     </Form>
@@ -405,7 +412,7 @@ const Resource: React.FC = () => {
                     </Button>
                 ]}
             >
-                <div ref={elementRef} style={{minHeight:'300px'}}>
+                <div ref={elementRef} style={{ minHeight: '300px' }}>
                     <Report
                         report={report}
                     />

@@ -38,15 +38,27 @@ export default function ScreenView() {
   // console.log('url', url);
   console.log(busiGroups);
   const token = localStorage.getItem('access_token')
-  
-  const goBoard = ({key}) => {
+
+  const goBoard = ({ key }) => {
     console.log(key);
+    const labelValue = busiGroups.filter(item => item.id == key)[0]?.label_value
     getDashboards(key).then(res => {
       if (res.length > 0) {
         // const groupUrl = `/dashboards/${res[0].id}?themeMode=dark&viewMode=fullscreen`
         // setUrl(groupUrl)
         setSelectGroup(key)
-        history.push(`/dashboardsxc/${res[0].id}?themeMode=dark&viewMode=fullscreen`)
+        if (labelValue) {
+          const arr = res.filter(item => item.tags == labelValue)
+          if (arr.length > 0) {
+            const id = arr[0].id
+            history.push(`/dashboardsxc/${id}?themeMode=dark&viewMode=fullscreen`)
+          } else {
+            history.push(`/dashboardsxc/${res[0].id}?themeMode=dark&viewMode=fullscreen`)
+          }
+        } else {
+          history.push(`/dashboardsxc/${res[0].id}?themeMode=dark&viewMode=fullscreen`)
+        }
+
       } else {
         message.warning("当前业务组暂未配置仪表盘");
       }
@@ -55,7 +67,7 @@ export default function ScreenView() {
 
   const menu = (
     <Menu
-      onClick={ goBoard }
+      onClick={goBoard}
       selectedKeys={[selectGroup]}
     >
       {_.map(busiGroups, (item) => {
@@ -63,7 +75,7 @@ export default function ScreenView() {
       })}
     </Menu>
   );
-  
+
 
   const goBack = () => {
     history.push('/home')
@@ -88,12 +100,12 @@ export default function ScreenView() {
   // }
   useEffect(() => {
     getBigScreen().then(res => {
-        if (res.dat.list.length > 0) {
-          setScreenList(res.dat.list[0]);
-          let firstUrl = res.dat.list[0]['config']
-          let screenUrl = `${baseUrl}?code=${firstUrl}`
-          setUrl(screenUrl)
-        }
+      if (res.dat.list.length > 0) {
+        setScreenList(res.dat.list[0]);
+        let firstUrl = res.dat.list[0]['config']
+        let screenUrl = `${baseUrl}?code=${firstUrl}`
+        setUrl(screenUrl)
+      }
     })
   }, []);
   return (
@@ -103,8 +115,8 @@ export default function ScreenView() {
           <div className='screen-groups'>
             <Dropdown overlay={menu} arrow>
               <div className='screen-icon'>
-                  <AppstoreOutlined />
-                  <DownOutlined />
+                <AppstoreOutlined />
+                <DownOutlined />
               </div>
             </Dropdown>
           </div>

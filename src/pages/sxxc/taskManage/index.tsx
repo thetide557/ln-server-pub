@@ -27,7 +27,7 @@ import TaskInfoModal from './components/createModal';
 // import { getTaskInfoList, deleteTask } from '@/services/manage';
 import { getBizScriptList, addBizScript, removeBizScript, editBizScript, getBizScriptInfo, runTask, getTaskLog, getTaskLogList, getTaskTypeList } from '@/services/sxxc/taskManage'
 // import { Task, TaskType, ActionType } from '@/store/manageInterface';
-import { Task,TaskType } from '@/store/sxxc/taskInterface';
+import { Task, TaskType } from '@/store/sxxc/taskInterface';
 import { CommonStateContext } from '@/App';
 import usePagination from '@/components/usePagination';
 import './index.less';
@@ -44,12 +44,12 @@ const Resource: React.FC = () => {
   const [taskTypeName, setTaskTypeName] = useState<string>('');
   const [subTypeList, setSubTypeList] = useState([] as any);
   const [form] = Form.useForm();
-  const { profile } = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
   const taskColumn: ColumnsType<Task> = [
     {
       title: '序号',
-      render:(text,record,index)=>`${index+1}`,
+      render: (text, record, index) => `${index + 1}`,
     },
     {
       title: '任务名称',
@@ -83,40 +83,49 @@ const Resource: React.FC = () => {
       width: '240px',
       render: (text: string, record) => (
         <>
-          <Button className='oper-name' type='link' onClick={() => handleClick(TaskType.EditTask, record.id)}>
-            修改
-          </Button>
-          <Button className='oper-name' type='link' onClick={() => handleClick(TaskType.RunTask, record.id)}>
-            执行
-          </Button>
-          <a
-            style={{
-              color: 'red',
-              marginLeft: '16px',
-            }}
-            onClick={() => {
-              confirm({
-                title: '删除',
-                onOk: () => {
-                  removeBizScript(record.id).then((res) => {
-                    if(res.code){
-                      message.success('删除成功');
-                    }else{
-                      message.error(res.msg);
-                    }
-                    handleClose();
-                  });
-                },
-                onCancel: () => {},
-              });
-            }}
-          >
-            删除
-          </a>
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/taskManageEdit')) && <Button className='oper-name' type='link' onClick={() => handleClick(TaskType.EditTask, record.id)}>
+              修改
+            </Button>
+          }
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/run')) && <Button className='oper-name' type='link' onClick={() => handleClick(TaskType.RunTask, record.id)}>
+              执行
+            </Button>
+          }
+          {
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/taskManageRemove')) && <a
+              style={{
+                color: 'red',
+                marginLeft: '16px',
+              }}
+              onClick={() => {
+                confirm({
+                  title: '删除',
+                  onOk: () => {
+                    removeBizScript(record.id).then((res) => {
+                      if (res.code) {
+                        message.success('删除成功');
+                      } else {
+                        message.error(res.msg);
+                      }
+                      handleClose();
+                    });
+                  },
+                  onCancel: () => { },
+                });
+              }}
+            >
+              删除
+            </a>
+          }
         </>
       ),
     },
   ];
+  // console.log(profile);
+  // console.log('per', permList);
+
 
   if (!profile.roles?.includes('Admin')) {
     // taskColumns.pop(); //普通用户不展示操作列
@@ -143,7 +152,7 @@ const Resource: React.FC = () => {
   const getTableData = ({ current, pageSize }): Promise<any> => {
     const params = {
       ...form.getFieldsValue(),
-      taskTypeName:taskTypeName,
+      taskTypeName: taskTypeName,
       pageSize: pageSize,
       pageNum: current,
     };
@@ -165,29 +174,29 @@ const Resource: React.FC = () => {
   const handleSubmit = async () => {
     try {
       await form.validateFields();
-      run({current:1, pageSize:pagination.pageSize});
+      run({ current: 1, pageSize: pagination.pageSize });
     } catch (e) {
       console.log(e);
     }
   };
 
-  const getTaskType = ()=>{
-    getTaskTypeList({parentId:0}).then((res)=>{
-      console.log('任务类型',res)
+  const getTaskType = () => {
+    getTaskTypeList({ parentId: 0 }).then((res) => {
+      console.log('任务类型', res)
       setTypeList(res.rows)
     })
   }
 
-  const getSubType = (val)=>{
-    getTaskTypeList({parentId:val}).then((res)=>{
-      console.log('任务子类',res)
+  const getSubType = (val) => {
+    getTaskTypeList({ parentId: val }).then((res) => {
+      console.log('任务子类', res)
       setSubTypeList(res.rows)
     })
   }
 
-  const onChangeType = (val)=>{
+  const onChangeType = (val) => {
     console.log(val)
-    let name = typeList.filter(item=>item.id == val)[0].name
+    let name = typeList.filter(item => item.id == val)[0].name
     setTaskTypeName(name)
     getSubType(val)
   }
@@ -202,12 +211,12 @@ const Resource: React.FC = () => {
         <div className='task-content'>
           <Form form={form}>
             <Space style={{ marginRight: 16 }}>
-              <Form.Item label={'任务名称'} name='title' rules={[{ max:20, message: '20个字不能重复' }]}>
+              <Form.Item label={'任务名称'} name='title' rules={[{ max: 20, message: '20个字不能重复' }]}>
                 <Input
                   className='left-area-group-search'
                   placeholder='20个字不能重复'
                   maxLength={20}
-                  style={{width:'270px'}}
+                  style={{ width: '270px' }}
                   onPressEnter={(e) => {
                     e.preventDefault();
                     const value = e.currentTarget.value;
@@ -219,12 +228,12 @@ const Resource: React.FC = () => {
               </Form.Item>
             </Space>
             <Space style={{ marginRight: 16 }}>
-              <Form.Item label={'策略名称'} name='strategyName' rules={[{ max:20, message: '20个字不能重复' }]}>
+              <Form.Item label={'策略名称'} name='strategyName' rules={[{ max: 20, message: '20个字不能重复' }]}>
                 <Input
                   className='left-area-group-search'
                   placeholder='20个字不能重复'
                   maxLength={20}
-                  style={{width:'270px'}}
+                  style={{ width: '270px' }}
                   onPressEnter={(e) => {
                     e.preventDefault();
                     const value = e.currentTarget.value;
@@ -262,11 +271,13 @@ const Resource: React.FC = () => {
               </Form.Item>
             </Space>
             <Space>
-              <Button style={{marginRight:'16px'}} onClick={handleSubmit}
+              <Button style={{ marginRight: '16px' }} onClick={handleSubmit}
               >查询</Button>
             </Space>
             <Space>
-              <Button type='primary' onClick={() => handleClick(TaskType.CreateTask)}>新增</Button>
+              {
+                (profile.roles?.includes('Admin') || permList.includes('/taskManage/taskManageAdd')) && <Button type='primary' onClick={() => handleClick(TaskType.CreateTask)}>新增</Button>
+              }
             </Space>
           </Form>
           <Table

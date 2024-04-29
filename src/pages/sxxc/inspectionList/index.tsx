@@ -18,14 +18,14 @@ import React, { useEffect, useState, useContext } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import type { DatePickerProps } from 'antd';
-import { Button, Input, message, Row, Modal, Table, Form, Space, Select, DatePicker,Switch } from 'antd';
+import { Button, Input, message, Row, Modal, Table, Form, Space, Select, DatePicker, Switch } from 'antd';
 import { useHistory, Link } from 'react-router-dom';
 import { SearchOutlined, UserOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/lib/table';
 import { useTranslation } from 'react-i18next';
 import { useAntdTable } from 'ahooks';
 import PageLayout from '@/components/pageLayout';
-import { getInspectionList, addInspection, editInspectionStatus,editInspection,removeInspection } from '@/services/sxxc/inspection'
+import { getInspectionList, addInspection, editInspectionStatus, editInspection, removeInspection } from '@/services/sxxc/inspection'
 import { InspectionType, Inspection } from '@/store/sxxc/inspection';
 import { CommonStateContext } from '@/App';
 import usePagination from '@/components/usePagination';
@@ -58,7 +58,7 @@ const Resource: React.FC = () => {
     const [createTime, setCreateTime] = useState<string>();
     const [resultList, setResultList] = useState(['success', 'waiting', 'running']);
     const [form] = Form.useForm();
-    const { profile } = useContext(CommonStateContext);
+    const { profile, permList } = useContext(CommonStateContext);
     const pagination = usePagination({ PAGESIZE_KEY: 'inspectionList' });
 
     const taskColumn: ColumnsType<Inspection> = [
@@ -94,10 +94,10 @@ const Resource: React.FC = () => {
             title: '状态',
             dataIndex: 'status',
             // render: (text, record, index) => statusList.filter(item => item.id == text)[0].value,
-            render: (text, record, index) =>(
+            render: (text, record, index) => (
                 <>
-                    <Switch checkedChildren="有效" unCheckedChildren="无效" checked={text == 0} onChange={()=>changeStatus(record)}/>
-                </>    
+                    <Switch checkedChildren="有效" unCheckedChildren="无效" checked={text == 0} onChange={() => changeStatus(record)} />
+                </>
             )
         },
     ];
@@ -111,34 +111,42 @@ const Resource: React.FC = () => {
                     {/* <Button className='oper-name' type='link' onClick={() => changeStatus(record)}>
                         {record?.status == '0'?'失效':'有效'}
                     </Button> */}
-                    <Button className='oper-name' type='link' onClick={() => handleClick(InspectionType.EditInspection, record.id)}>
-                        修改
-                    </Button>
-                    <a
-                        style={{
-                            marginLeft: '16px',
-                        }}
-                        onClick={() => {
-                            confirm({
-                                title: '删除巡检任务',
-                                content: `将删除巡检任务${record?.name}`,
-                                onOk: () => {
-                                    console.log(record)
-                                    removeInspection(record.id).then(res=>{
-                                        console.log(res)
-                                        message.success('删除成功');
-                                        handleClose();
-                                    })
-                                },
-                                onCancel: () => { },
-                            });
-                        }}
-                    >
-                        删除
-                    </a>
-                    <Button className='oper-name' type='link' onClick={() => goLog(record)}>
-                        日志
-                    </Button>
+                    {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionEdit')) && <Button className='oper-name' type='link' onClick={() => handleClick(InspectionType.EditInspection, record.id)}>
+                            修改
+                        </Button>
+                    }
+                    {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionRemove')) && <a
+                            style={{
+                                marginLeft: '16px',
+                            }}
+                            onClick={() => {
+                                confirm({
+                                    title: '删除巡检任务',
+                                    content: `将删除巡检任务${record?.name}`,
+                                    onOk: () => {
+                                        console.log(record)
+                                        removeInspection(record.id).then(res => {
+                                            console.log(res)
+                                            message.success('删除成功');
+                                            handleClose();
+                                        })
+                                    },
+                                    onCancel: () => { },
+                                });
+                            }}
+                        >
+                            删除
+                        </a>
+                    }
+
+                    {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionReport')) && <Button className='oper-name' type='link' onClick={() => goLog(record)}>
+                            日志
+                        </Button>
+                    }
+
                 </>
             ),
         },
@@ -159,18 +167,18 @@ const Resource: React.FC = () => {
         setVisible(true);
     }
 
-    const changeStatus = (val)=>{
+    const changeStatus = (val) => {
         let status
-        if(val.status == 0){
+        if (val.status == 0) {
             status = 1
-        }else{
+        } else {
             status = 0
         }
         let params = {
-            id:val.id,
-            status:status
+            id: val.id,
+            status: status
         }
-        editInspectionStatus(params).then(res=>{
+        editInspectionStatus(params).then(res => {
             console.log(res)
             run({ current: 1, pageSize: pagination.pageSize });
         })
@@ -318,11 +326,13 @@ const Resource: React.FC = () => {
                             </Form.Item>
                         </Space> */}
                         <Space>
-                            <Button style={{marginRight:'16px'}} onClick={handleSubmit}
+                            <Button style={{ marginRight: '16px' }} onClick={handleSubmit}
                             >查询</Button>
                         </Space>
                         <Space>
-                            <Button type='primary' onClick={() => handleClick(InspectionType.CreateInspection)}>新增</Button>
+                            {
+                                (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionAdd')) && <Button type='primary' onClick={() => handleClick(InspectionType.CreateInspection)}>新增</Button>
+                            }
                         </Space>
                     </Form>
                     <Table
