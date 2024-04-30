@@ -341,11 +341,11 @@ const getMenuList = (t) => {
             },
           ],
         },
-        // {
-        //   key: '/inspection/autoInspect',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('自动化检测'),
-        // },
+        {
+          key: '/autoInspect',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('自动化检测'),
+        },
       ],
     },
 

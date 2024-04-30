@@ -9,7 +9,7 @@ const autoInspect = function () {
   //   const domElement:any = iframeRef?.current;
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
-  return <iframe src={`http://10.0.23.47:81/inspect?token=${token}`} style={{ width: '100%', height: '100%', overflow: 'hidden' }} scrolling='no'></iframe>;
+  return <iframe src={`/autoinspect`} style={{ width: '100%', height: '100%' }}></iframe>;
   // return (
   //   <PageLayout title={'健康报告'} icon={<UserOutlined />}>
   //     <iframe src={`http://localhost/health?token=${token}`} style={{ width: '100%', height: '100%', overflow: 'hidden' }} scrolling='no'></iframe>
