@@ -75,7 +75,7 @@ const Resource: React.FC = () => {
             // title: '类型',
             // dataIndex: 'type',
             dataIndex: 'executeCycle',
-            render: (text, record, index) => typeList.filter(item => item.id == text)[0].value,
+            render: (text, record, index) => typeList.filter(item => item.id == text)[0]?.value,
         },
         {
             title: '执行时间',
@@ -84,7 +84,7 @@ const Resource: React.FC = () => {
         {
             title: '执行范围',
             dataIndex: 'scope',
-            render: (text, record, index) => scopeList.filter(item => item.id == text)[0].value,
+            render: (text, record, index) => scopeList.filter(item => item.id == text)[0]?.value,
         },
         {
             title: '添加人',

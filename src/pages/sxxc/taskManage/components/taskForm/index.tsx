@@ -36,6 +36,12 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   const [typeList, setTypeList] = useState([] as any);
   const [subTypeList, setSubTypeList] = useState([] as any);
   const [strategyList, setStrategyList] = useState([] as any);
+  const [sysList, setSysList] = useState(
+    [
+      {id: 0, value: 'linux'},
+      {id: 1, value: 'windows'},
+    ]
+  )
   
 
   const getTaskType = ()=>{
@@ -106,6 +112,17 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
           placeholder='20字不能重复'
           max={20}
         />
+      </Form.Item>
+      <Form.Item label={'任务执行的系统：'} name='os' rules={[{required: true,message: '请选择任务执行的系统'}]}>
+        <Select allowClear placeholder={'任务执行的系统'} style={{ width: 200 }}>
+          {_.map(sysList, (item) => {
+            return (
+              <Select.Option key={item.id} value={item.id}>
+                {item.value}
+              </Select.Option>
+            );
+          })}
+        </Select>
       </Form.Item>
       <Form.Item label={'任务类型：'} name='taskParentId' rules={[{required: true,message: '请选择任务类型'}]}>
         <Select allowClear placeholder={'任务类型'} style={{ width: 200 }} onChange={onChangeType}>

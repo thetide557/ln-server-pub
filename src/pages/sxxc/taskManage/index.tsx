@@ -46,6 +46,12 @@ const Resource: React.FC = () => {
   const [form] = Form.useForm();
   const { profile, permList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
+  const [sysList, setSysList] = useState(
+    [
+      {id: 0, value: 'linux'},
+      {id: 1, value: 'windows'},
+    ]
+  )
   const taskColumn: ColumnsType<Task> = [
     {
       title: '序号',
@@ -54,6 +60,11 @@ const Resource: React.FC = () => {
     {
       title: '任务名称',
       dataIndex: 'title',
+    }, 
+    {
+      title: '任务执行系统',
+      dataIndex: 'os',
+      render: (text, record, index) => sysList.filter(item => item.id == text)[0]?.value
     },
     {
       title: '任务类型',
