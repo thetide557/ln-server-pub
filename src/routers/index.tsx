@@ -105,9 +105,10 @@ import Board from '@/pages/dashboard/Detail/Board'
 import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
-import HealthReport from '@/pages/sxxc/healthReport'
-import workorder from '@/pages/sxxc/workorder'
+import healthReport from '@/pages/sxxc/healthReport'
+import workOrder from '@/pages/sxxc/workOrder'
 import autoInspect from '@/pages/sxxc/autoInspect'
+import topology from '@/pages/sxxc/topology'
 import TaskStrategy from '@/pages/sxxc/taskStrategy';
 import TaskManage from '@/pages/sxxc/taskManage'
 import TaskInstance from '@/pages/sxxc/taskInstance'
@@ -255,12 +256,8 @@ export default function Content() {
         <Route exact path='/permissions' component={Permissions} />
         <Route exact path='/organizations' component={Organization} />
         <Route exact path='/target/version' component={TargetVersion} />
-
         <Route exact path='/bigscreen/topo' component={Topo} />
         <Route exact path='/bigscreen' component={DataRoom} />
-        <Route exact path='/healthReport' component={HealthReport} />
-        <Route exact path='/workorder' component={workorder} />
-
         <Route exact path='/bigScreen/api-service' component={Apiservice}/>
         <Route exact path='/bigScreen/api-service/add' component={ApiServiceAdd}/>
         <Route exact path='/bigScreen/api-service/:id/edit' component={ApiServiceEdit}/>
@@ -274,8 +271,10 @@ export default function Content() {
         <Route path='/dashboardsxc/:id' exact component={DashboardDetailxc} />
         <Route exact path='/dashboardsxc/share/:id' component={DashboardSharexc} />
         <Route exact path='/dashboardsxc' component={Dashboardxc} />
-       
         <Route exact path='/autoInspect' component={autoInspect} />
+        <Route exact path='/healthReport' component={healthReport} />
+        <Route exact path='/workOrder' component={workOrder} />
+        <Route exact path='/bigscreen/topology' component={topology} />
         <Route exact path='/taskManage/taskManage' component={TaskManage} />
         <Route exact path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />
 

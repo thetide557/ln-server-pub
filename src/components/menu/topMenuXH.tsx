@@ -164,12 +164,12 @@ const getMenuList = (t) => {
       ]
     },
     {
-      key: 'workorder',
+      key: 'workOrder',
       icon: <IconFont type='icon-Menu_Infrastructure' />,
       label: t('运维工单'),
       children: [
         {
-          key: '/workorder',
+          key: '/workOrder',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('运维工单'),
         },
@@ -184,6 +184,11 @@ const getMenuList = (t) => {
           key: '/bigscreen',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('大屏设计'),
+        },
+        {
+          key: '/bigscreen/topology',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('拓扑管理'),
         },
         {
           key: '/bigscreen/api-service',
