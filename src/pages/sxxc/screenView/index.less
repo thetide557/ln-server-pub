@@ -7,7 +7,7 @@
       display: flex;
       align-items: center;
       position: absolute;
-      right: 2%;
+      right: 1%;
       top: 2%;
       z-index: 9999;
       .back1 {
@@ -15,17 +15,20 @@
         // position: absolute;
         color: #fff;
         cursor: pointer;
-        margin-left: 5px;
+        // margin-left: 5px;
         img {
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
         }
+      }
+      .screen-groups {
+        margin-right: 4px;
       }
       .choose_screen1 {
         // z-index: 9999;
         cursor: pointer;
         color: #f0f0f0;
-        padding: 0 7px;
+        margin: 0 7px;
         // font-size: 14px;
         // .ant-select:not(.ant-select-customize-input) .ant-select-selector {
         //   background: transparent;
@@ -52,6 +55,10 @@
     justify-content: space-around;
     align-items: center;
   }
+}
+.ant-dropdown-menu-item-selected {
+  background-color: #fff!important;
+  color: #4D83FF;
 }
 #logFrame {
   min-width: 100vw;

@@ -78,9 +78,9 @@ function index(props: IProps) {
     draggableHandle: '.dashboards-panels-item-drag-handle',
   };
   const updateDashboardConfigs = (dashboardId, options) => {
-    if (!editable) {
-      message.warning('仪表盘已经被别人修改，为避免相互覆盖，请刷新仪表盘查看最新配置和数据');
-    }
+    // if (!editable) {
+    //   message.warning('仪表盘已经被别人修改，为避免相互覆盖，请刷新仪表盘查看最新配置和数据');
+    // }
     if (!_.isEmpty(roles) && isAuthorized && editable) {
       return updateDashboardConfigsFunc(dashboardId, options);
     }

@@ -187,7 +187,7 @@ function index(props: IProps) {
               </Tooltip>
             ) : null}
           </div>
-          <div
+          {/* <div
             className='renderer-header-controllers'
             style={{
               width: name ? 28 : 52,
@@ -286,7 +286,7 @@ function index(props: IProps) {
                 }}
               ></FullscreenOutlined>
             )}
-          </div>
+          </div> */}
         </div>
         <div className='renderer-body' style={{ height: values.name ? `calc(100% - 34px)` : '100%' }}>
           {_.isEmpty(series) && values.type !== 'text' && values.type !== 'iframe' && values.type !== 'topo' ? (

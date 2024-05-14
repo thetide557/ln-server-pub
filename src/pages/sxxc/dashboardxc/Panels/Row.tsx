@@ -59,7 +59,7 @@ export default function Row(props: IProps) {
         <span style={{ paddingRight: 6 }}>{replaceFieldWithVariable(name, dashboardMeta.dashboardId, dashboardMeta.variableConfigWithOptions)}</span>
         {row.collapsed ? <CaretDownOutlined /> : <CaretRightOutlined />}
       </div>
-      {!isPreview && (
+      {/* {!isPreview && (
         <Space>
           <AddPanelIcon
             onClick={() => {
@@ -79,7 +79,7 @@ export default function Row(props: IProps) {
           />
           {row.collapsed === false && <HolderOutlined className='dashboards-panels-item-drag-handle' />}
         </Space>
-      )}
+      )} */}
       <Modal
         title={t('row.edit_title')}
         visible={editVisble}

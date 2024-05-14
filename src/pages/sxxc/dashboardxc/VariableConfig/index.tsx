@@ -187,7 +187,7 @@ function index(props: IProps) {
             />
           );
         })}
-        {editable && !isPreview ? (
+        {/* {editable && !isPreview ? (
           <EditOutlined
             className='icon'
             onClick={() => {
@@ -195,8 +195,8 @@ function index(props: IProps) {
               onOpenFire && onOpenFire();
             }}
           />
-        ) : null}
-        {(data ? _.filter(data, (item) => item.type != 'constant')?.length === 0 : true) && editable && !isPreview && (
+        ) : null} */}
+        {/* {(data ? _.filter(data, (item) => item.type != 'constant')?.length === 0 : true) && editable && !isPreview && (
           <div
             className='add-variable-tips'
             onClick={() => {
@@ -206,7 +206,7 @@ function index(props: IProps) {
           >
             {t('var.btn')}
           </div>
-        )}
+        )} */}
       </div>
       <EditItems
         visible={editing}

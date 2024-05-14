@@ -59,7 +59,7 @@ export default function Title(props: IProps) {
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
-  const { viewMode, themeMode,showback } = query;
+  const { viewMode, themeMode, showback } = query;
 
 
 
@@ -121,7 +121,7 @@ export default function Title(props: IProps) {
   return (
     <div className='dashboard-detail-header'>
       <div className='dashboard-detail-header-left'>
-        {showback==undefined && (
+        {showback == undefined && (
           <>
             {isPreview && !isBuiltin ? null : (
               <RollbackOutlined
@@ -143,7 +143,7 @@ export default function Title(props: IProps) {
       {
         <div className='dashboard-detail-header-right' style={{ display: isHome ? 'none' : '' }}>
           <Space>
-            {isAuthorized && (
+            {/* {isAuthorized && (
               <Dropdown
                 trigger={['click']}
                 overlay={
@@ -167,7 +167,7 @@ export default function Title(props: IProps) {
                   {t('add_panel')}
                 </Button>
               </Dropdown>
-            )}
+            )} */}
             {variableConfig && (
               <VariableConfig isPreview={!isAuthorized} onChange={handleVariableChange} value={variableConfig} range={range} id={id} onOpenFire={stopAutoRefresh} />
             )}
@@ -215,10 +215,10 @@ export default function Title(props: IProps) {
                 }}
               />
             )} */}
-            {!dashboard.tags?.includes('template') && !dashboard.tags?.includes('homepage') && (
-              <>
-                {/* <Button onClick={() => setHomePage()}>设为首页</Button> */}
-                <Button
+            {/* {!dashboard.tags?.includes('template') && !dashboard.tags?.includes('homepage') && (
+              <> */}
+            {/* <Button onClick={() => setHomePage()}>设为首页</Button> */}
+            {/* <Button
                   onClick={() => {
                     setdefaultModal(true);
                   }}
@@ -233,23 +233,31 @@ export default function Title(props: IProps) {
                   重置初始
                 </Button>
               </>
-            )}
+            )} */}
+            <div className='dashboard-detail-header-right'>
+              <Button
+                onClick={() => {
+                  // setOpenView(true);
+                  history.push(`/dashboards/${dashboard.id}`);
+                }}
+              >
+                修改
+              </Button>
+            </div>
           </Space>
         </div>
       }
-      {isHome && (
-        <div className='dashboard-detail-header-right'>
+      {/* <div className='dashboard-detail-header-right'>
           <Button
             onClick={() => {
               // setOpenView(true);
-              history.push(`/dashboards/${dashboard.id}?${location.search}`);
+              history.push(`/dashboards/${dashboard.id}`);
             }}
           >
-            设置
+            修改
           </Button>
-        </div>
-      )}
-      <Modal
+        </div> */}
+      {/* <Modal
         title={'默认看板设置'}
         visible={defaultModal}
         onOk={formSubmit}
@@ -265,9 +273,9 @@ export default function Title(props: IProps) {
             <Checkbox></Checkbox>
           </Form.Item>
         </Form>
-      </Modal>
+      </Modal> */}
 
-      <Modal title='重置初始' visible={openView} footer={null} onCancel={() => setOpenView(false)}>
+      {/* <Modal title='重置初始' visible={openView} footer={null} onCancel={() => setOpenView(false)}>
         <Form onFinish={(form) => {
           putDashboardTemplte(id, {
             ...form
@@ -289,7 +297,7 @@ export default function Title(props: IProps) {
             </Space>
           </Form.Item>
         </Form>
-      </Modal>
+      </Modal> */}
     </div>
   );
 }
