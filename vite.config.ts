@@ -63,40 +63,40 @@ export default defineConfig({
     proxy: {
       '/api/n9e-plus': {
         // target: 'http://10.206.16.17:17001/',
-        target: 'http://113.137.42.69:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e/proxy': {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://113.137.42.69:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e/datasource': {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://113.137.42.69:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e': {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://113.137.42.69:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/fc-brain': {
         // target: 'http://10.206.16.17:28000/',
-        target: 'http://113.137.42.69:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/sxxcTask': {
         // target: 'http://10.0.20.212:8086/',
-        target: 'http://10.0.23.12:8090/',
+        target: 'http://10.250.250.9:8090/',
         // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/sxxcTask/, '')
+        // rewrite: path => path.replace(/^\/sxxcTask/, '')
       },
       // '/dataroomxc': {
       //   // target: 'http://10.0.20.95:8081/',
