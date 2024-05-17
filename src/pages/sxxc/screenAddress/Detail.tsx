@@ -1,4 +1,5 @@
-import { getApiService } from '@/services/api_service';
+// import { getApiService } from '@/services/api_service';
+import { getScreenById } from '@/services/sxxc/bigScreen';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ApiServiceType } from '.';
@@ -9,10 +10,10 @@ export default () => {
   const [data, setData] = useState<ApiServiceType>();
 
   useEffect(() => {
-    getApiService(id).then((res) => {
+    getScreenById(id).then((res) => {
       setData(res.dat);
     });
   }, [id]);
 
-  return <Form title='接口管理-详情' initialValues={data} disabled></Form>;
+  return <Form title='大屏配置-详情' initialValues={data} disabled></Form>;
 };

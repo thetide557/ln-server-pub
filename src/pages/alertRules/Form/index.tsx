@@ -152,6 +152,8 @@ export default function index(props: IProps) {
                             const res = EditStrategy(data, initialValues.group_id, initialValues.id);
                             handleMessage(res);
                           } else {
+                            // console.log('groupId', initialValues.group_id);
+                            // console.log('bgid', bgid);
                             const curBusiId = initialValues?.group_id || Number(bgid);
                             addStrategy([data], curBusiId).then(res=>{
                                 handleMessage(res);

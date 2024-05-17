@@ -29,7 +29,7 @@ import TaskHostOutput from '@/pages/taskOutput/host';
 import { getAuthorizedDatasourceCates, Cate } from '@/components/AdvancedWrap';
 import { GetProfile } from '@/services/account';
 import { WebSocketURL } from './utils/constant';
-import { getBusiGroups, getDatasourceBriefList } from '@/services/common';
+import { getBusiGroups, getDatasourceBriefList, getMenuPerm } from '@/services/common';
 import { getLicense } from '@/components/AdvancedWrap';
 import { getVersions } from '@/components/pageLayout/Version/services';
 import Content from './routers';
@@ -76,6 +76,8 @@ export interface ICommonState {
   }[];
   setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
+  permList: string[],
+  setPermList: ([]) => void;
   organizationId: number;
   queryCondition: string;
   setCurBusiId: (id: number) => void;
@@ -146,6 +148,10 @@ function App() {
         },
       }));
     },
+    permList: [],
+    setPermList: (permList) => {
+      setCommonState((state) => ({ ...state, permList }));
+    },
     busiGroups: [],
     setBusiGroups: (busiGroups) => {
       setCommonState((state) => ({ ...state, busiGroups }));
@@ -202,14 +208,18 @@ function App() {
   }, [alertWebsocket]);
 
   useLayoutEffect(() => {
+    let flag = true
     licenseWebsocket.current = new WebSocket(WebSocketURL + 758493);//获取推送过来的许可到期的消息
     licenseWebsocket.current.onmessage = e => {
-      if (!anonymous) {
+      if (!anonymous && flag) {
         let data = JSON.parse(e.data);
         Modal.warning({
           title: '许可信息提醒',
           content: data.dat,
+          keyboard: false,
+          okButtonProps: { type: 'default', disabled: true }
         });
+        flag = false
       }
     };
     return () => {
@@ -235,6 +245,7 @@ function App() {
         if (!anonymous) {
           const { dat: profile } = await GetProfile();
           const { dat: busiGroups } = await getBusiGroups();
+          const { dat: permList } = await getMenuPerm()
           const datasourceList = await getDatasourceBriefList();
           const { licenseRulesRemaining, licenseExpireDays, feats } = await getLicense(t);
           let versions = { version: '', github_verison: '', newVersion: false };
@@ -253,6 +264,7 @@ function App() {
               ...state,
               profile,
               busiGroups,
+              permList,
               datasourceCateOptions: getAuthorizedDatasourceCates(feats, isPlus),
               groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type'),
               datasourceList: datasourceList,
@@ -320,7 +332,7 @@ function App() {
           </Router>
         </ConfigProvider>
       </CommonStateContext.Provider>
-      
+
       <div className='special_alert_dialog' style={dialogShow == '0' ? { display: 'none' } : { display: 'block' }}>
         <div className='close_button'>
           <p>告警提醒</p>

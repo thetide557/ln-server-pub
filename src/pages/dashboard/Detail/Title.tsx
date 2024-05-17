@@ -32,6 +32,7 @@ import { GetAssetType } from '@/services/metric';
 import { getDashboardTemplate, putDashboardTemplte, setDashboardAssetType } from '@/services/dashboardV2';
 import { updateSelfBoard } from '@/services/account';
 import { CommonStateContext } from '@/App';
+import { updateBoards } from '@/services/sxxc/bigScreen';
 import { useTimeout, useTimeoutFn } from 'react-use';
 
 interface IProps {
@@ -59,6 +60,8 @@ export default function Title(props: IProps) {
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
+  // console.log(id);
+  
   const { viewMode, themeMode,showback } = query;
 
 
@@ -66,6 +69,7 @@ export default function Title(props: IProps) {
   const [defaultModal, setdefaultModal] = useState(false);
   const [form] = Form.useForm();
   const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false)
   const { profile, setProfile } = useContext(CommonStateContext);
   const setHomePage = () => {
     // setHome(id);
@@ -100,6 +104,17 @@ export default function Title(props: IProps) {
       });
     });
   };
+  const updateBoard = () => {
+    setLoading(true)
+    updateBoards(id).then(_ => {
+      // console.log(location);
+      // const path = `${location.pathname}${location.search}`
+      // history.push(path)
+      window.location.reload()
+    }).catch(_ => {
+      setLoading(false)
+    })
+  }
 
   useEffect(() => {
     // document.title = `${dashboard.name} - ${cachePageTitle}`;
@@ -179,7 +194,9 @@ export default function Title(props: IProps) {
               onChange={setRange}
             />
             {!isPreview && (
-              <Button
+              <>
+                 <Button type="primary" onClick={updateBoard}>更新</Button>
+                 <Button
                 onClick={() => {
                   const newQuery = _.omit(query, ['viewMode', 'themeMode']);
                   if (!viewMode) {
@@ -197,6 +214,7 @@ export default function Title(props: IProps) {
               >
                 {viewMode === 'fullscreen' ? t('exit_full_screen') : t('full_screen')}
               </Button>
+              </>
             )}
             {viewMode === 'fullscreen' && (
               <Switch
@@ -240,6 +258,7 @@ export default function Title(props: IProps) {
       {isHome && (
         <div className='dashboard-detail-header-right'>
           <Button
+            loading={loading}
             onClick={() => {
               // setOpenView(true);
               history.push(`/dashboards/${dashboard.id}?${location.search}`);

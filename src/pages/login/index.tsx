@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
 import _ from 'lodash';
 import { useLocalStorage } from 'react-use';
+import { getBigScreen } from '@/services/sxxc/bigScreen';
 
 export interface DisplayName {
   oidc: string;
@@ -59,6 +60,7 @@ export default function Login() {
   const verifyimgRef = useRef<HTMLImageElement>(null);
   const captchaidRef = useRef<string>();
   const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false)
   const refreshCaptcha = () => {
     getCaptcha().then((res) => {
       if (res.dat && verifyimgRef.current) {
@@ -134,6 +136,7 @@ export default function Login() {
   
 
   const login = async () => {
+    setLoading(true)
     let { username, password, verifyvalue } = form.getFieldsValue();
      // 将用户的登录信息存储到 localStorage 中
      localStorage.setItem('username', username);
@@ -151,10 +154,19 @@ export default function Login() {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
         if (!err) {
-           window.location.href = '/screenView' || redirect || 'home';
+          getBigScreen().then(res => {
+            if (res.dat.list.length > 0) {
+              window.location.href = '/screenView'
+            } else {
+              window.location.href = '/home';
+            }
+          }).catch(_ => {
+            window.location.href = '/home';
+          })
         }
       })
       .catch(() => {
+        setLoading(false)
         if (showcaptcha) {
           refreshCaptcha();
         }
@@ -225,7 +237,7 @@ export default function Login() {
             </Form.Item>
 
             <Form.Item>
-              <Button type='primary' className='submit_button' onClick={handleSubmit} onKeyPress={e=>{
+              <Button loading={loading} type='primary' className='submit_button' onClick={handleSubmit} onKeyPress={e=>{
                  handleSubmit
               }}>
                 {t('登录')}

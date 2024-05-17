@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
-import { listApiService, deleteApiService, getApiInEffect } from '@/services/sxxc/bigScreen';
+import { deleteScreenById, getBigScreen } from '@/services/sxxc/bigScreen';
 import Add from './Add';
 import Edit from './Edit';
 import Detail from './Detail';
@@ -19,11 +19,12 @@ import './index.less';
 
 export type ApiServiceType = {
   id?: number;
-  name: string;
-  type: string;
-  datasource_id: number;
-  url: string;
-  script: string;
+  title: string;
+  desc: string;
+  config: string;
+  // datasource_id: number;
+  // url: string;
+  // script: string;
 };
 
 const ApiService = () => {
@@ -33,17 +34,15 @@ const ApiService = () => {
   const history = useHistory();
 
   useEffect(() => {
-    listApiService().then((res) => {
-      setItems(res.dat.list);
-    });
-    getApiInEffect().then(res => {
-
+    // console.log(location);
+    getBigScreen().then(res => {
+      setItems(res.dat.list)
     })
   }, [searchVal, refreshKey]);
 
   return (
     <>
-      <PageLayout title={'接口管理'}>
+      <PageLayout title={'大屏配置'}>
         <div className='table-content'>
           <div className='table-header'>
             <Space>
@@ -61,7 +60,7 @@ const ApiService = () => {
                 <Button
                   type='primary'
                   onClick={() => {
-                    history.push(`api-service/add`);
+                    history.push(`address/add`);
                   }}
                 >
                   新建
@@ -70,13 +69,17 @@ const ApiService = () => {
             </Space>
           </div>
           <Table
+            pagination={false}
             dataSource={items}
             rowKey='id'
             columns={[
-              { title: '名称', dataIndex: 'name' },
-              { title: '类型', dataIndex: 'type' },
-              { title: '数据源', dataIndex: 'datasource_id' },
-              { title: 'URL', dataIndex: 'url' },
+              { title: '标题', dataIndex: 'title' },
+              // { title: '大屏名称', dataIndex: 'screenName' },
+              { title: '配置', dataIndex: 'config' },
+              { title: '简介', dataIndex: 'desc' },
+              { title: '创建人', dataIndex: 'created_by' },
+              // { title: '数据源', dataIndex: 'datasource_id' },
+              // { title: 'URL', dataIndex: 'url' },
               {
                 title: '创建时间',
                 dataIndex: 'created_at',
@@ -93,12 +96,12 @@ const ApiService = () => {
                   <Space>
                     <SearchOutlined
                       onClick={() => {
-                        history.push(`api-service/${record.id}`);
+                        history.push(`address/${record.id}`);
                       }}
                     ></SearchOutlined>
                     <EditOutlined
                       onClick={() => {
-                        history.push(`api-service/${record.id}/edit`);
+                        history.push(`address/${record.id}/edit`);
                       }}
                     />
                     <DeleteOutlined
@@ -106,7 +109,7 @@ const ApiService = () => {
                         Modal.confirm({
                           title: '是否确认删除?',
                           onOk: () => {
-                            deleteApiService(record.id).then(() => {
+                            deleteScreenById(record.id).then(res => {
                               message.success('删除成功');
                               setRefreshKey(_.uniqueId());
                             });

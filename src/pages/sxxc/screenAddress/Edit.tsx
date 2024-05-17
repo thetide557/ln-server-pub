@@ -1,4 +1,5 @@
-import { getApiService, updateApiService } from '@/services/api_service';
+// import { getApiService, updateApiService } from '@/services/api_service';
+import { getScreenById, editBigScreen } from '@/services/sxxc/bigScreen';
 import { message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -11,17 +12,17 @@ export default () => {
   const history = useHistory();
 
   useEffect(() => {
-    getApiService(id).then((res) => {
+    getScreenById(id).then((res) => {
       setData(res.dat);
     });
   }, [id]);
 
   const saveData = (val: ApiServiceType) => {
-    updateApiService(val).then(() => {
-      message.success('修改成功');
-      history.goBack();
+    editBigScreen(val).then(res => {
+        message.success('修改成功');
+        history.goBack();
     });
   };
 
-  return <Form title='接口管理-编辑' initialValues={data} onFinish={saveData}></Form>;
+  return <Form title='大屏配置-编辑' initialValues={data} onFinish={saveData}></Form>;
 };

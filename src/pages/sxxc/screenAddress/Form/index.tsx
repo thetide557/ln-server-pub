@@ -1,7 +1,6 @@
 import PageLayout from '@/components/pageLayout';
-import { executeApiService } from '@/services/api_service';
 import { Button, Col, Divider, Form, Input, Row, Space, InputNumber, Select, Modal } from 'antd';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 interface IProps {
@@ -32,32 +31,20 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
         </Form.Item>
         <Row>
           <Col span={12}>
-            <Form.Item name='name' label='名称' rules={[{ required: true }]}>
-              <Input />
+            <Form.Item name='title' label='标题' rules={[{ required: true }]}>
+              <Input placeholder='请输入标题' />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name='type' label='类型' rules={[{ required: true }]}>
-              <Select
-                options={[
-                  { value: 'sql', label: 'sql' },
-                ]}
-              />
+            <Form.Item name='config' label='配置' rules={[{ required: true }]}>
+              <Input placeholder='请输入配置' />
             </Form.Item>
           </Col>
+        </Row>
+        <Row>
           <Col span={12}>
-            <Form.Item name='datasource_id' label='数据源' rules={[{ required: true }]}>
-              <Select options={[{ value: 0, label: 'default' }]} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name='value_field' label='取值字段' rules={[{ required: true }]}>
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name='script' label='执行脚本' rules={[{ required: true }]}>
-              <Input.TextArea />
+          <Form.Item name='desc' label='简介'>
+              <Input.TextArea placeholder='请输入简介' />
             </Form.Item>
           </Col>
         </Row>
@@ -66,20 +53,6 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
           <Space>
             <Button type='primary' htmlType='submit'>
               确定
-            </Button>
-            <Button
-              type='default'
-              onClick={() => {
-                const id = form.getFieldValue('id');
-                executeApiService(id).then((res) => {
-                  Modal.info({
-                    title: '测试结果',
-                    content: JSON.stringify(res.dat),
-                  });
-                });
-              }}
-            >
-              测试
             </Button>
             <Button
               onClick={() => {

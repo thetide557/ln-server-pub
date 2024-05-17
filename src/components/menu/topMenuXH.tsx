@@ -1,8 +1,8 @@
-import { CommonStateContext,initTheme } from '@/App';
+import { CommonStateContext, initTheme } from '@/App';
 import { getMenuPerm } from '@/services/common';
 import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
-import { Dropdown, Menu, Space,Image } from 'antd';
+import { Dropdown, Menu, Space, Image } from 'antd';
 import _ from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import './locale';
 import { Logout } from '@/services/login';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
+import { getBigScreen } from '@/services/sxxc/bigScreen';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -53,7 +54,7 @@ const getMenuList = (t) => {
           key: '/metric/explorer',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('即时查询'),
-        },
+        }
       ],
     },
     {
@@ -93,7 +94,87 @@ const getMenuList = (t) => {
         },
       ],
     },
-    
+    {
+      key: 'inspection',
+      icon: <ProjectOutlined />,
+      label: t('巡检中心'),
+      children: [
+        {
+          key: '/inspection/inspectionList',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检任务'),
+        },
+        {
+          key: '/inspection/inspectionReport',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检报告'),
+        },
+        {
+          key: '/inspection/inspectionLog',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检日志'),
+        },
+        {
+          key: '/taskManage/taskManage',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务管理'),
+        },
+        {
+          key: '/taskManage/strategy',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务策略'),
+        },
+        {
+          key: '/taskManage/taskInstance',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('任务实例'),
+        },
+        {
+          key: 'job',
+          icon: <IconFont type='icon-Menu_AlarmSelfhealing' />,
+          // activeIcon: <Icon component={menuIcon.AlarmSelfhealing as any} />,
+          label: t('告警自愈'),
+          children: [
+            {
+              key: '/job-tpls',
+              label: t('自愈脚本'),
+            },
+            {
+              key: '/job-tasks',
+              label: t('执行历史'),
+            },
+            {
+              key: '/ibex-settings',
+              label: t('自愈配置'),
+            },
+          ],
+        },
+      ],
+    },
+    {
+      key: 'healthReport',
+      icon: <ProjectOutlined />,
+      label: t('健康报告'),
+      children: [
+        {
+          key: '/healthReport',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('健康报告'),
+        },
+      ]
+    },
+    {
+      key: 'workOrder',
+      icon: <IconFont type='icon-Menu_Infrastructure' />,
+      label: t('运维工单'),
+      children: [
+        {
+          key: '/workOrder',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('运维工单'),
+        },
+      ]
+    },
     {
       key: 'bigscreen',
       icon: <ProjectOutlined />,
@@ -105,15 +186,20 @@ const getMenuList = (t) => {
           label: t('大屏设计'),
         },
         {
+          key: '/bigscreen/topology',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('拓扑管理'),
+        },
+        {
           key: '/bigscreen/api-service',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('接口管理'),
         },
-        // {
-        //   key: '/bigscreen/address',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('大屏首页配置'),
-        // }
+        {
+          key: '/bigscreen/address',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('大屏配置'),
+        }
       ],
     },
     {
@@ -142,7 +228,7 @@ const getMenuList = (t) => {
               key: '/permissions',
               label: t('角色管理'),
             },
-            
+
           ],
         },
         {
@@ -179,6 +265,37 @@ const getMenuList = (t) => {
             },
           ],
         },
+        {
+          key: 'monitorLog',
+          icon: <IconFont type='icon-Menu_LogAnalysis' />,
+          // activeIcon: <Icon component={menuIcon.LogAnalysis as any} />,
+          label: t('监控日志'),
+          children: [
+            {
+              key: '/log/explorer',
+              label: t('即时查询'),
+            },
+            {
+              key: '/log/index-patterns',
+              label: t('索引模式'),
+            },
+          ],
+        },
+        // {
+        //   key: 'inspection',
+        //   icon: <IconFont type='icon-Menu_LinkAnalysis' />,
+        //   label: t('巡检管理'),
+        //   children: [
+        //     {
+        //       key: '/inspection/plans',
+        //       label: t('巡检任务'),
+        //     },
+        //     {
+        //       key: '/inspection/applylist',
+        //       label: t('巡检历史'),
+        //     },
+        //   ],
+        // },
         {
           key: '/help/other',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
@@ -229,8 +346,14 @@ const getMenuList = (t) => {
             },
           ],
         },
+        {
+          key: '/autoInspect',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('自动化检测'),
+        },
       ],
     },
+
   ];
   if (import.meta.env['VITE_IS_COLLECT']) {
     const targets: any = _.find(menuList, (item) => item.key === 'targets');
@@ -263,7 +386,7 @@ export default function () {//{ selectMenu?:any }
   const [home] = useLocalStorageState('HOME_URL');
   const [imageUrl, setImageUrl] = useState<string>();
 
-  const [theme, setTheme] = useLocalStorage<any>("platform_theme",initTheme);
+  const [theme, setTheme] = useLocalStorage<any>("platform_theme", initTheme);
 
   useEffect(() => {
     setDefaultSelectedKeys([]);
@@ -272,19 +395,21 @@ export default function () {//{ selectMenu?:any }
   useEffect(() => {
     if (location.pathname != '/login') {
       getMyPortrait().then((res) => {
-        if(res.dat!=null && res.dat!=""){
-          setImageUrl(_.cloneDeep("/api/n9e/"+res.dat+"?"+Math.random()));
+        if (res.dat != null && res.dat != "") {
+          setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
         }
       })
     }
   }, []);
-  
+
 
   useEffect(() => {
     if (profile?.roles?.length > 0) {
       if (profile?.roles.indexOf('Admin') === -1) {
         getMenuPerm().then((res) => {
           const { dat } = res;
+          console.log(dat);
+
           // 过滤掉没有权限的菜单
           const newMenus: any = _.filter(
             _.map(menuList, (menu) => {
@@ -297,6 +422,8 @@ export default function () {//{ selectMenu?:any }
               return item.children && item.children.length > 0;
             },
           );
+          console.log(newMenus);
+          
           setMenus(newMenus);
         });
       } else {
@@ -315,7 +442,7 @@ export default function () {//{ selectMenu?:any }
         //         handleClick(item);
         //       }
         //   }
-          
+
 
         // }
         setMenus(menuList);
@@ -349,7 +476,7 @@ export default function () {//{ selectMenu?:any }
 
   const handleClick = (item) => {
 
-    if((item.key as string) === "home") {
+    if ((item.key as string) === "home") {
       window.location.href = '/prod-api/'
     }
     if ((item.key as string).startsWith('/')) {
@@ -358,8 +485,11 @@ export default function () {//{ selectMenu?:any }
   };
 
   const goScreen = () => {
-    history.push('/screenView')
-    // window.location.href = '/screenView'
+    getBigScreen().then(res => {
+      if (res.dat.list.length > 0) {
+        history.push('/screenView')
+      }
+    })
   }
 
   const topRightMenu = (
@@ -390,11 +520,11 @@ export default function () {//{ selectMenu?:any }
   return hideSideMenu() ? null : (
     <div className='top-menu1'>
       <div className='logoImg' onClick={goScreen}>
-        <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>        
+        <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>
         {theme?.title}</div>
       <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
       <div className='top_right'>
-       <span
+        <span
           className='language'
           onClick={() => {
             let language = i18n.language == 'en_US' ? 'zh_CN' : 'en_US';
@@ -406,7 +536,7 @@ export default function () {//{ selectMenu?:any }
         </span>
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
-            <img src={imageUrl?imageUrl:'/image/avatar1.png'} alt='' />
+            <img src={imageUrl ? imageUrl : '/image/avatar1.png'} alt='' />
             <span className='display-name'>{profile.nickname || profile.username}</span>
             <DownOutlined />
           </span>

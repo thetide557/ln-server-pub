@@ -104,7 +104,17 @@ import ScreenAddress, {Add as ScreenAddressAdd, Edit as ScreenAddressEdit, Detai
 import Board from '@/pages/dashboard/Detail/Board'
 import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
-
+import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
+import healthReport from '@/pages/sxxc/healthReport'
+import workOrder from '@/pages/sxxc/workOrder'
+import autoInspect from '@/pages/sxxc/autoInspect'
+import topology from '@/pages/sxxc/topology'
+import TaskStrategy from '@/pages/sxxc/taskStrategy';
+import TaskManage from '@/pages/sxxc/taskManage'
+import TaskInstance from '@/pages/sxxc/taskInstance'
+import InspectionList from '@/pages/sxxc/inspectionList'
+import InspectionLog from '@/pages/sxxc/inspectionList/log'
+import InspectionReport from '@/pages/sxxc/inspectionReport'
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -246,10 +256,8 @@ export default function Content() {
         <Route exact path='/permissions' component={Permissions} />
         <Route exact path='/organizations' component={Organization} />
         <Route exact path='/target/version' component={TargetVersion} />
-
         <Route exact path='/bigscreen/topo' component={Topo} />
         <Route exact path='/bigscreen' component={DataRoom} />
-
         <Route exact path='/bigScreen/api-service' component={Apiservice}/>
         <Route exact path='/bigScreen/api-service/add' component={ApiServiceAdd}/>
         <Route exact path='/bigScreen/api-service/:id/edit' component={ApiServiceEdit}/>
@@ -259,6 +267,21 @@ export default function Content() {
         <Route exact path='/bigscreen/address/add' component={ScreenAddressAdd}/>
         <Route exact path='/bigscreen/address/:id/edit' component={ScreenAddressEdit}/>
         <Route exact path='/bigscreen/address/:id' component={ScreenAddressDetail}/>
+        <Route path='/dashboardxc/:id' exact component={DashboardDetailxc} />
+        <Route path='/dashboardsxc/:id' exact component={DashboardDetailxc} />
+        <Route exact path='/dashboardsxc/share/:id' component={DashboardSharexc} />
+        <Route exact path='/dashboardsxc' component={Dashboardxc} />
+        <Route exact path='/autoInspect' component={autoInspect} />
+        <Route exact path='/healthReport' component={healthReport} />
+        <Route exact path='/workOrder' component={workOrder} />
+        <Route exact path='/bigscreen/topology' component={topology} />
+        <Route exact path='/taskManage/taskManage' component={TaskManage} />
+        <Route exact path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />
+
+        <Route exact path='/inspection/inspectionList' component={InspectionList} />
+        <Route exact path='/inspection/inspectionLog/:inspectionId?' component={InspectionLog} />
+        <Route exact path='/inspection/inspectionReport/:inspectionId?' component={InspectionReport} />
+        <Route exact path='/taskManage/strategy' component={TaskStrategy} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />
@@ -269,9 +292,9 @@ export default function Content() {
         <Route path='/' exact>
           <Redirect to='/home' />
         </Route>
-        <Route path='/403' component={Page403} />
-        <Route path='/404' component={NotFound} />
-        <Route path='*' component={NotFound} />
+        <Route exact path='/403' component={Page403} />
+        <Route exact path='/404' component={NotFound} />
+        <Route exact path='*' component={NotFound} />
       </Switch>
     </div>
   );

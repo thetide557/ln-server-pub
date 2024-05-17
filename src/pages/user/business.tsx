@@ -32,11 +32,12 @@ import { listToTree, getLocaleCollapsedNodes, setLocaleCollapsedNodes } from '@/
 import '@/components/BlankBusinessPlaceholder/index.less';
 import './index.less';
 
+
 const { confirm } = Modal;
 export const PAGE_SIZE = 200;
 
 const Resource: React.FC = () => {
-  const { setBusiGroups } = useContext(CommonStateContext);
+  const { setBusiGroups, setCurBusiId } = useContext(CommonStateContext);
   const { t } = useTranslation('user');
   const urlQuery = useQuery();
   const id = urlQuery.get('id');
@@ -141,6 +142,9 @@ const Resource: React.FC = () => {
       setTeamList(data.dat || []);
       if ((!teamId || isDelete) && data.dat.length > 0) {
         setTeamId(data.dat[0].id);
+        // console.log('data', data.dat[0].id);
+        // localStorage.setItem('curBusiId', _.toString(data.dat[0].id));
+        setCurBusiId(data.dat[0].id);
       }
       setBusiGroups(data.dat || []);
     });
@@ -148,6 +152,8 @@ const Resource: React.FC = () => {
 
   // 获取业务组详情
   const getTeamInfoDetail = (id: string) => {
+    // console.log('teamId', id);
+    // localStorage.setItem('curBusiId', _.toString(id));
     setMemberLoading(true);
     getBusinessTeamInfo(id).then((data) => {
       setTeamInfo(data);

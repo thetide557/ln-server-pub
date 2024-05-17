@@ -18,6 +18,8 @@ export default function index() {
   const [search, setSearch] = useState<string>('');
   const [data, setData] = useState<NotifyTplsType[]>([]);
   const [active, setActive] = useState<NotifyTplsType>();
+  console.log('active', active);
+  
   const fetchData = () => {
     getNotifyTpls().then((res) => {
       setData(res);
