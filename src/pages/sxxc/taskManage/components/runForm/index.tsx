@@ -134,7 +134,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
 
   return !loading ? (
     <div>
-      <Form layout='inline' form={form} initialValues={initialValues} preserve={false}>
+      <Form layout='inline' form={form} initialValues={initialValues} preserve={false} style={{marginBottom: '10px'}}>
         <Form.Item label={'项目名称：'} name='bgid'>
           <Select allowClear placeholder={'项目名称'} style={{ width: 200 }} onClick={()=>run({current:1, pageSize:pagination.pageSize})}>
             {_.map(busiGroups, (item) => {

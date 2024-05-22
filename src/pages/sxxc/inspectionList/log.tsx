@@ -48,7 +48,8 @@ interface Param {
 const Resource: React.FC = () => {
     const history = useHistory();
     const { inspectionId } = useParams<Param>();
-    const { profile, permList } = useContext(CommonStateContext);
+    const { profile, permList, busiGroups } = useContext(CommonStateContext);
+    const groupIds = busiGroups?.map(item => item.id)
     const [typeList, setTypeList] = useState([
         { id: 1, value: '每日' },
         { id: 2, value: '每周' },
@@ -225,6 +226,7 @@ const Resource: React.FC = () => {
             checkedIp: checkedIp.length != 0 ? checkedIp.join(',') : undefined,
             pageSize: pageSize,
             pageNum: current,
+            // groupIds: groupIds?.toString()
         };
 
         return getInspectionLogList({
@@ -319,11 +321,11 @@ const Resource: React.FC = () => {
     };
 
     return (
-        <PageLayout title={'巡检日志'} icon={<UserOutlined />}>
+        <PageLayout title={'巡检日志'} icon={<UserOutlined />} showBack>
             <div className='task-manage-content'>
                 <div className='task-content'>
                     <Form form={form}>
-                        <Space style={{ marginRight: 16 }}>
+                        {/* <Space style={{ marginRight: 16 }}>
                             <Form.Item label={'巡检名称'} name='name'>
                                 <Input
                                     className='left-area-group-search'
@@ -336,10 +338,10 @@ const Resource: React.FC = () => {
                                     }}
                                 />
                             </Form.Item>
-                        </Space>
+                        </Space> */}
                         <Space>
-                            <Form.Item label={'执行时间：'} name='type'>
-                                <Select allowClear placeholder={'执行时间'} style={{ width: 200 }} onChange={onChangeType}>
+                            <Form.Item label={'执行周期：'} name='type'>
+                                <Select allowClear placeholder={'执行周期'} style={{ width: 200 }} onChange={onChangeType}>
                                     {_.map(typeList, (item) => {
                                         return (
                                             <Select.Option key={item.value} value={item.id}>

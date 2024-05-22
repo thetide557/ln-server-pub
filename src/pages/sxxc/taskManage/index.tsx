@@ -44,7 +44,8 @@ const Resource: React.FC = () => {
   const [taskTypeName, setTaskTypeName] = useState<string>('');
   const [subTypeList, setSubTypeList] = useState([] as any);
   const [form] = Form.useForm();
-  const { profile, permList } = useContext(CommonStateContext);
+  const { profile, permList, busiGroups } = useContext(CommonStateContext);
+  const groupIds = busiGroups?.map(item => item.id)
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
   const [sysList, setSysList] = useState(
     [
@@ -166,6 +167,7 @@ const Resource: React.FC = () => {
       taskTypeName: taskTypeName,
       pageSize: pageSize,
       pageNum: current,
+      // groupIds: groupIds?.toString()
     };
 
     return getBizScriptList({

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useEffect, useState, useImperativeHandle, ReactNode } from 'react';
+import React, { useEffect, useState, useImperativeHandle, ReactNode, useContext } from 'react';
 import { Form, Input, Select, Space, Switch } from 'antd';
 // import { getTaskInfo, getNotifyChannels, getRoles } from '@/services/manage';
 import { getBizScriptList, addBizScript, removeBizScript, editBizScript, getBizScriptInfo, runTask, getTaskLog, getTaskLogList, getTaskTypeList, getStrategyList } from '@/services/sxxc/taskManage'
@@ -22,6 +22,7 @@ import { TaskAndPasswordFormProps, Contacts, ContactsItem, Task } from '@/store/
 import { MinusCircleOutlined, PlusCircleOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
+import { CommonStateContext } from '@/App';
 // import { Link, Switch } from 'react-router-dom';
 
 const { Option } = Select;
@@ -31,36 +32,37 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   const [form] = Form.useForm();
   const [initialValues, setInitialValues] = useState<Task>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [strategy,setStrategy] = useState<boolean>(false)
+  const [strategy, setStrategy] = useState<boolean>(false)
   const { TextArea } = Input;
   const [typeList, setTypeList] = useState([] as any);
   const [subTypeList, setSubTypeList] = useState([] as any);
   const [strategyList, setStrategyList] = useState([] as any);
+  const { busiGroups } = useContext(CommonStateContext);
   const [sysList, setSysList] = useState(
     [
-      {id: 0, value: 'linux'},
-      {id: 1, value: 'windows'},
+      { id: 0, value: 'linux' },
+      { id: 1, value: 'windows' },
     ]
   )
-  
 
-  const getTaskType = ()=>{
-    getTaskTypeList({parentId:0}).then((res)=>{
-      console.log('任务类型',res)
+
+  const getTaskType = () => {
+    getTaskTypeList({ parentId: 0 }).then((res) => {
+      console.log('任务类型', res)
       setTypeList(res.rows)
     })
   }
 
-  const onChangeType = (val)=>{
-    getTaskTypeList({parentId:val}).then((res)=>{
-      console.log('任务子类',res)
+  const onChangeType = (val) => {
+    getTaskTypeList({ parentId: val }).then((res) => {
+      console.log('任务子类', res)
       setSubTypeList(res.rows)
     })
   }
-  
-  const getStrategy = ()=>{
-    getStrategyList({}).then((res)=>{
-      console.log('策略',res)
+
+  const getStrategy = () => {
+    getStrategyList({}).then((res) => {
+      console.log('策略', res)
       setStrategyList(res.rows)
     })
   }
@@ -78,17 +80,18 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
       getStrategy()
     }
   }, []);
-  
+
 
   const onChange = (checked: boolean) => {
-    setStrategy(()=>checked)
+    setStrategy(() => checked)
   };
 
 
   const getTaskInfoDetail = (id: string) => {
     getBizScriptInfo(id).then((res) => {
       console.log(res.data)
-      if(!res.data.taskSubName){
+      res.data.groupId = Number(res.data.groupId)
+      if (!res.data.taskSubName) {
         res.data.taskParentId = res.data.taskTypeId
         res.data.taskTypeId = null
       }
@@ -98,8 +101,8 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
       getTaskType()
       onChangeType(res.data.taskParentId)
       getStrategy()
-      if (res.data.strategyId){
-        setStrategy(()=>true)
+      if (res.data.strategyId) {
+        setStrategy(() => true)
       }
       setLoading(false);
     });
@@ -107,13 +110,24 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
 
   return !loading ? (
     <Form layout='vertical' form={form} initialValues={initialValues} preserve={false}>
-      <Form.Item label={'任务名称：'} name='title' rules={[{required: true,message: '请输入任务名称'}]}>
-        <Input 
+      <Form.Item label={'任务名称：'} name='title' rules={[{ required: true, message: '请输入任务名称' }]}>
+        <Input
           placeholder='20字不能重复'
           max={20}
         />
       </Form.Item>
-      <Form.Item label={'任务执行的系统：'} name='os' rules={[{required: true,message: '请选择任务执行的系统'}]}>
+      {/* <Form.Item label={'业务组： '} name='groupId' rules={[{ required: true, message: '请选择业务组' }]}>
+        <Select allowClear placeholder={'业务组'} style={{ width: 200 }}>
+          {_.map(busiGroups, (item) => {
+            return (
+              <Select.Option key={item.id} value={item.id}>
+                {item.name}
+              </Select.Option>
+            );
+          })}
+        </Select>
+      </Form.Item> */}
+      <Form.Item label={'任务执行的系统：'} name='os' rules={[{ required: true, message: '请选择任务执行的系统' }]}>
         <Select allowClear placeholder={'任务执行的系统'} style={{ width: 200 }}>
           {_.map(sysList, (item) => {
             return (
@@ -124,7 +138,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
           })}
         </Select>
       </Form.Item>
-      <Form.Item label={'任务类型：'} name='taskParentId' rules={[{required: true,message: '请选择任务类型'}]}>
+      <Form.Item label={'任务类型：'} name='taskParentId' rules={[{ required: true, message: '请选择任务类型' }]}>
         <Select allowClear placeholder={'任务类型'} style={{ width: 200 }} onChange={onChangeType}>
           {_.map(typeList, (item) => {
             return (
@@ -167,7 +181,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
       <Form.Item label={'备注：'} name='remark'>
         <TextArea showCount rows={4} placeholder="100字" maxLength={100} />
       </Form.Item>
-      <Form.Item label={'任务脚本：'} name='content' rules={[{required: true,message: '请输入任务脚本'}]}>
+      <Form.Item label={'任务脚本：'} name='content' rules={[{ required: true, message: '请输入任务脚本' }]}>
         <TextArea showCount rows={10} placeholder="1000字" maxLength={1000} />
       </Form.Item>
     </Form>

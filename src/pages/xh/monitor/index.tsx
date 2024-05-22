@@ -37,6 +37,7 @@ import { unitTypes } from '../assetmgt/catalog';
 import { useLocalStorage } from 'react-use';
 import { renderQuery } from '@/components/PromQueryBuilder/RawQuery';
 import { PromVisualQuery } from '@/components/PromQueryBuilder/types';
+import { CommonStateContext } from '@/App';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -96,6 +97,9 @@ export default function () {
   const history = useHistory();
   const [unitOptions, setUnitOptions] = useState<any>(unitTypes);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
+
+  const { busiGroups } = useContext(CommonStateContext);
+  const groupIds = busiGroups?.map(item => item.id)
 
   const onSelectNone = () => {
     setSelectedAssets([]);
@@ -425,6 +429,7 @@ export default function () {
     const param = {
       page: current,
       limit: pageSize,
+      gId: groupIds?.toString()
     };
 
     if (currentAssetId > 0) {

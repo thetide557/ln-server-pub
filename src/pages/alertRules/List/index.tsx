@@ -58,12 +58,15 @@ interface Filter {
 
 export default function List(props: ListProps) {
   const { bgid, assetid, from } = props;
+  const { busiGroups } = useContext(CommonStateContext);
+  const groupIds = busiGroups?.map(item => item.id)
   const { t } = useTranslation('alertRules');
   const history = useHistory();
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
   const [params, setParams] = useState<any>({
     limit: 10,
     page: 1,
+    gid: groupIds?.toString(),
   });
   const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));

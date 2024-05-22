@@ -19,7 +19,7 @@ import { Form, Input, Select, Switch, Checkbox, DatePicker, TimePicker, Table } 
 import type { DatePickerProps } from 'antd';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import _ from 'lodash';
-import React, { ReactNode, useEffect, useImperativeHandle, useState } from 'react';
+import React, { ReactNode, useEffect, useImperativeHandle, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getBusiGroups } from '@/services/common';
 import { getMonObjectList } from '@/services/targets';
@@ -35,6 +35,7 @@ import { getInspectionList, getInspectionDetail } from '@/services/sxxc/inspecti
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { CommonStateContext } from '@/App';
 import './index.less'
 
 dayjs.extend(customParseFormat);
@@ -53,6 +54,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     const [subTypeList, setSubTypeList] = useState([] as any);
     const [strategyList, setStrategyList] = useState([] as any);
     const [type, setType] = useState<any>('')
+    const { busiGroups } = useContext(CommonStateContext);
     const [typeList, Task] = useState([
         { id: 1, value: '每日' },
         { id: 2, value: '每周' },
@@ -178,7 +180,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                 }
             })
             console.log('list', list);
-            
+
             setIpList(list)
         })
     }
@@ -232,6 +234,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
             setType(res.data.executeCycle)
             setScope(res.data.scope)
             res.data.excuteTime = dayjs(res.data.excuteTime, timeFormat)
+            res.data.groupId = Number(res.data.groupId)
             console.log('--->time', res.data.excuteTime)
             setSelectedRowKeys(res.data.scriptId?.split(',').map(item => Number(item)))
 
@@ -255,7 +258,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
 
     return !loading ? (
         <>
-            <Form form={form} initialValues={initialValues} preserve={false}>
+            <Form form={form} initialValues={initialValues} preserve={false}  labelCol={{ span: 2 }}>
                 <Form.Item label={'巡检名称：'} name='name' rules={[{ required: true, message: '请输入巡检名称' }]}>
                     <Input placeholder='巡检名称' max={20} />
                 </Form.Item>
@@ -265,6 +268,17 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                             return (
                                 <Select.Option key={item.value} value={item.id}>
                                     {item.value}
+                                </Select.Option>
+                            );
+                        })}
+                    </Select>
+                </Form.Item> */}
+                {/* <Form.Item label={'业务组：'} name='groupId' rules={[{ required: true, message: '请选择业务组' }]}>
+                    <Select allowClear placeholder={'业务组'} style={{ width: 200 }}>
+                        {_.map(busiGroups, (item) => {
+                            return (
+                                <Select.Option key={item.id} value={item.id}>
+                                    {item.name}
                                 </Select.Option>
                             );
                         })}

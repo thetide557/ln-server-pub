@@ -52,7 +52,8 @@ const Resource: React.FC = () => {
   const [createTime, setCreateTime] = useState<string>();
   const [resultList, setResultList] = useState(['success', 'waiting', 'running', 'timeout']);
   const [form] = Form.useForm();
-  const { profile, permList } = useContext(CommonStateContext);
+  const { profile, permList, busiGroups } = useContext(CommonStateContext);
+  const groupIds = busiGroups?.map(item => item.id)
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
   const taskColumn: ColumnsType<Log> = [
     {
@@ -196,6 +197,7 @@ const Resource: React.FC = () => {
       inspectionLogId: inspectionLogId ? inspectionLogId : undefined,
       pageSize: pageSize,
       pageNum: current,
+      // groupIds: groupIds?.toString()
     };
 
     return getTaskLogList({
@@ -270,7 +272,7 @@ const Resource: React.FC = () => {
   }, []);
 
   return (
-    <PageLayout title={'任务实例'} icon={<UserOutlined />}>
+    <PageLayout title={'任务实例'} icon={<UserOutlined />} showBack>
       <div className='task-manage-content'>
         <div className='task-content'>
           <Form form={form}>

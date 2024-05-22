@@ -102,18 +102,30 @@ const getMenuList = (t) => {
         {
           key: '/inspection/inspectionList',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('巡检任务'),
+          label: t('巡检管理'),
         },
-        {
-          key: '/inspection/inspectionReport',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('巡检报告'),
-        },
-        {
-          key: '/inspection/inspectionLog',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('巡检日志'),
-        },
+      ],
+    },
+    {
+      key: 'task',
+      icon: <ProjectOutlined />,
+      label: t('任务中心'),
+      children: [
+        // {
+        //   key: '/inspection/inspectionList',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('巡检任务'),
+        // },
+        // {
+        //   key: '/inspection/inspectionReport',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('巡检报告'),
+        // },
+        // {
+        //   key: '/inspection/inspectionLog',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('巡检日志'),
+        // },
         {
           key: '/taskManage/taskManage',
           icon: <IconFont type='icon-Menu_Infrastructure' />,

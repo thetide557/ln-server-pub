@@ -18,7 +18,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import React, { useEffect, useState, useContext, useRef } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import moment from 'moment';
 import _ from 'lodash';
 import type { DatePickerProps } from 'antd';
@@ -36,6 +36,7 @@ import usePagination from '@/components/usePagination';
 import { getBusiGroups } from '@/services/common';
 import { getMonObjectList } from '@/services/targets';
 import Report from './report'
+import queryString from 'query-string';
 import './index.less';
 // import './locale';
 
@@ -47,8 +48,16 @@ interface Param {
 
 const Resource: React.FC = () => {
     const history = useHistory();
-    const { profile, permList } = useContext(CommonStateContext);
+    const { profile, permList, busiGroups } = useContext(CommonStateContext);
+    const groupIds = busiGroups?.map(item => item.id)
+    console.log(1, useParams());
+    console.log(2, useLocation());
+    
     const { inspectionId } = useParams<Param>();
+    const { search } = useLocation()
+    const { name } = queryString.parse(search);
+    console.log(name);
+    
     const [typeList, setTypeList] = useState([
         { id: 1, value: '每日' },
         { id: 2, value: '每周' },
@@ -222,6 +231,8 @@ const Resource: React.FC = () => {
             checkedIp: checkedIp.length != 0 ? checkedIp.join(',') : undefined,
             pageSize: pageSize,
             pageNum: current,
+            // groupIds: groupIds?.toString(),
+            name: name
         };
 
         return getInspectionReportList({
@@ -316,11 +327,11 @@ const Resource: React.FC = () => {
     };
 
     return (
-        <PageLayout title={'巡检日志'} icon={<UserOutlined />}>
+        <PageLayout title={'巡检报告'} icon={<UserOutlined />} showBack>
             <div className='task-manage-content'>
                 <div className='task-content'>
                     <Form form={form}>
-                        <Space style={{ marginRight: 16 }}>
+                        {/* <Space style={{ marginRight: 16 }}>
                             <Form.Item label={'巡检名称'} name='name'>
                                 <Input
                                     className='left-area-group-search'
@@ -333,10 +344,10 @@ const Resource: React.FC = () => {
                                     }}
                                 />
                             </Form.Item>
-                        </Space>
+                        </Space> */}
                         <Space>
-                            <Form.Item label={'执行时间：'} name='type'>
-                                <Select allowClear placeholder={'执行时间'} style={{ width: 200 }} onChange={onChangeType}>
+                            <Form.Item label={'执行周期：'} name='type'>
+                                <Select allowClear placeholder={'执行周期'} style={{ width: 200 }} onChange={onChangeType}>
                                     {_.map(typeList, (item) => {
                                         return (
                                             <Select.Option key={item.value} value={item.id}>
@@ -384,7 +395,7 @@ const Resource: React.FC = () => {
 
                     <Table
                         size='small'
-                        rowKey='id'
+                        rowKey='inspectionLogId'
                         columns={taskColumns}
                         {...tableProps}
                         pagination={{

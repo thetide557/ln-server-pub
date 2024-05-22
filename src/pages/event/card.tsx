@@ -47,7 +47,8 @@ function containerWidthToColumn(width: number): number {
 function Card(props: Props, ref) {
   const { t } = useTranslation('AlertCurEvents');
   const { filter, header, refreshFlag } = props;
-  const { groupedDatasourceList } = useContext(CommonStateContext);
+  const { groupedDatasourceList, busiGroups } = useContext(CommonStateContext);
+  const groupIds = busiGroups?.map(item => item.id)
   const Ref = useRef<HTMLDivElement>(null);
   const history = useHistory();
   const [span, setSpan] = useState<number>(4);
@@ -76,6 +77,7 @@ function Card(props: Props, ref) {
         delete filter.end;
       }
       filter['group_id'] = groupId.trim();
+      filter['gid'] = groupIds?.toString()
       getAlertCards(filter).then((res) => {
         setCardList(res.dat);
       });

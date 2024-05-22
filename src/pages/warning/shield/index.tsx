@@ -48,6 +48,8 @@ const Shield: React.FC = () => {
   const { search } = useLocation();
   const { id } = queryString.parse(search);
   const commonState = useContext(CommonStateContext);
+  const { busiGroups } = useContext(CommonStateContext);
+  const groupIds = busiGroups?.map(item => item.id)
   const bgid = id ? Number(id) : commonState.curBusiId>0?commonState.curBusiId:1;
   const { datasourceList, groupedDatasourceList } = commonState;
   const [query, setQuery] = useState<string>('');
@@ -312,8 +314,11 @@ const Shield: React.FC = () => {
 
   const getList = async () => {
     if (bgid) {
+      const params:any = {
+        gid: groupIds?.toString()
+      }
       setLoading(true);
-      const { success, dat } = await getShieldList({ id: Number(bgid) });
+      const { success, dat } = await getShieldList({ id: Number(bgid) }, params);
       if (success) {
         setCurrentShieldDataAll(dat || []);
         setLoading(false);

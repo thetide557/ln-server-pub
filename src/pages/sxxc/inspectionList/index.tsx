@@ -31,6 +31,7 @@ import { CommonStateContext } from '@/App';
 import usePagination from '@/components/usePagination';
 import './index.less';
 import InspectionInfoModal from './components/createModal/index'
+
 // import './locale';
 
 const { confirm } = Modal;
@@ -58,7 +59,8 @@ const Resource: React.FC = () => {
     const [createTime, setCreateTime] = useState<string>();
     const [resultList, setResultList] = useState(['success', 'waiting', 'running']);
     const [form] = Form.useForm();
-    const { profile, permList } = useContext(CommonStateContext);
+    const { profile, permList, busiGroups } = useContext(CommonStateContext);
+    const groupIds = busiGroups?.map(item => item.id)
     const pagination = usePagination({ PAGESIZE_KEY: 'inspectionList' });
 
     const taskColumn: ColumnsType<Inspection> = [
@@ -117,6 +119,16 @@ const Resource: React.FC = () => {
                         </Button>
                     }
                     {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionReport')) && <Button className='oper-name' type='link' onClick={() => goReport(record)}>
+                            报告
+                        </Button>
+                    }
+                     {
+                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionLog')) && <Button className='oper-name' type='link' onClick={() => goLog(record)}>
+                            日志
+                        </Button>
+                    }
+                    {
                         (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionRemove')) && <a
                             style={{
                                 marginLeft: '16px',
@@ -140,13 +152,6 @@ const Resource: React.FC = () => {
                             删除
                         </a>
                     }
-
-                    {
-                        (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionReport')) && <Button className='oper-name' type='link' onClick={() => goLog(record)}>
-                            日志
-                        </Button>
-                    }
-
                 </>
             ),
         },
@@ -189,6 +194,11 @@ const Resource: React.FC = () => {
         history.push(`/inspection/inspectionLog/${item.id}`);
     }
 
+    const goReport = (item) => {
+        console.log(item)
+        history.push(`/inspection/inspectionReport?name=${item.name}`);
+    }
+
     // 弹窗关闭回调
     const handleClose = () => {
         setVisible(false);
@@ -201,6 +211,7 @@ const Resource: React.FC = () => {
             ...form.getFieldsValue(),
             pageSize: pageSize,
             pageNum: current,
+            // groupIds: groupIds?.toString()
         };
 
         return getInspectionList({

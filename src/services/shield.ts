@@ -17,9 +17,10 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-export const getShieldList = function (params: { id: number }) {
+export const getShieldList = function (params: { id: number }, queryParams: any) {
   return request(`/api/n9e/busi-group/${params.id}/alert-mutes`, {
     method: RequestMethod.Get,
+    params: queryParams
   });
 };
 

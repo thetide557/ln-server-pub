@@ -93,7 +93,7 @@ const Resource: React.FC = () => {
                     }}
                     title="删除团队"
                     onClick={() => {
-                      if (memberList.length <= 1) return;
+                      if (memberList.length <= 1) return message.warning('业务组中至少保留一个团队');
         
                       let params = [
                         {

@@ -92,7 +92,7 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
-  const groupIds = busiGroups.map(item => item.id)
+  const groupIds = busiGroups?.map(item => item.id)
   // console.log(groupIds);
   
 
@@ -489,7 +489,7 @@ export default function () {
     const param = {
       page: current,
       limit: pageSize,
-      groupIds: groupIds.toString()
+      groupIds: groupIds?.toString()
     };
 
     if (searchVal != null && searchVal.length > 0) {

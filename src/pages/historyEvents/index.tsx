@@ -34,6 +34,7 @@ import locale from 'antd/es/date-picker/locale/zh_CN';
 import './locale';
 import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
 import { useLocalStorage } from 'react-use';
+
 const { RangePicker } = DatePicker;
 export const getDefaultHours = () => {
   const locale = window.localStorage.getItem('alert_events_hours');
@@ -60,6 +61,7 @@ export const setDefaultHours = (hours: number) => {
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
   const { busiGroups } = useContext(CommonStateContext);
+  const groupIds = busiGroups?.map(item => item.id)
   const [filterType, setFilterType] = useLocalStorage<any>('history_filter_types', 'input');
   const [searchVal, setSearchVal] = useLocalStorage<any>('history_filter_value', null);
   const [filterParam, setFilterParam] = useLocalStorage<any>('history_filter_param', 'ip');
@@ -429,6 +431,7 @@ const Event: React.FC = () => {
     return getEvents({
       page: current,
       limit: pageSize,
+      gid: groupIds?.toString(),
       ...filterObj,
     }).then(async (res) => {
       let list = res.dat.list;
