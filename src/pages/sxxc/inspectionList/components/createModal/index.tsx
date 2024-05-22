@@ -32,12 +32,17 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
     const onOk = async (val?: string) => {
         if (isInspection) {
             let form = inspectionRef.current.form;
+            let form1 = inspectionRef.current.form.getFieldsValue(true)
+            // console.log('form1', form1);
+            
+            
             const values = await form.validateFields();
             let selectedRowKeys = inspectionRef.current.selectedRowKeys;
             let params = {
                 ...values,
                 scriptId:selectedRowKeys ? selectedRowKeys.join(',') : '',
-                type: 2
+                type: 2,
+                status: form1.status
             }
             console.log('params',params);
             
@@ -65,17 +70,26 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
             }
             if (inspection === InspectionType.CreateInspection) {
                 console.log('新增巡检',params)
-                addInspection(params).then((_) => {
-                  message.success('新增成功');
-                  onClose(true);
+                addInspection(params).then((res) => {
+                    if (res.code == 200) {
+                        message.success('新增成功');
+                        onClose(true);
+                    } else {
+                        message.error(res.msg)
+                    }
+                
                 });
             }
 
             if (inspection === InspectionType.EditInspection && inspectionId) {
                 console.log('--->最终传参',{...params,id:inspectionId})
-                editInspection({...params,id:inspectionId}).then((_) => {
-                  message.success('修改成功');
-                  onClose(true);
+                editInspection({...params,id:inspectionId}).then((res) => {
+                    if (res.code == 200) {
+                        message.success('修改成功');
+                        onClose(true);
+                    } else {
+                        message.error(res.msg)
+                    }
                 });
             }
 
