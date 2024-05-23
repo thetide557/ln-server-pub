@@ -106,8 +106,8 @@ const Resource: React.FC = () => {
             dataIndex: 'name',
         },
         {
-            title: '类型',
-            dataIndex: 'type',
+            title: '执行周期',
+            dataIndex: 'executeCycle',
             render: (text, record, index) => typeList.filter(item => item.id == text)[0]?.value,
         },
         {
@@ -222,7 +222,8 @@ const Resource: React.FC = () => {
         const params = {
             ...form.getFieldsValue(),
             id: inspectionId,
-            type: type == 0 ? undefined : type,
+            // type: type == 0 ? undefined : type,
+            executeCycle: type == 0 ? undefined : type,
             scope: scope == 0 ? undefined : scope,
             excuteDate: excuteDate,
             excuteTime: excuteTime,
@@ -346,7 +347,7 @@ const Resource: React.FC = () => {
                             </Form.Item>
                         </Space> */}
                         <Space>
-                            <Form.Item label={'执行周期：'} name='type'>
+                            <Form.Item label={'执行周期：'} name='executeCycle'>
                                 <Select allowClear placeholder={'执行周期'} style={{ width: 200 }} onChange={onChangeType}>
                                     {_.map(typeList, (item) => {
                                         return (

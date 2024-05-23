@@ -260,7 +260,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         <>
             <Form form={form} initialValues={initialValues} preserve={false}  labelCol={{ span: 2 }}>
                 <Form.Item label={'巡检名称：'} name='name' rules={[{ required: true, message: '请输入巡检名称' }]}>
-                    <Input placeholder='巡检名称' max={20} />
+                    <Input placeholder='巡检名称' max={20} disabled={inspectionId ? true : false} />
                 </Form.Item>
                 {/* <Form.Item label={'巡检类型：'} name='type' rules={[{required:true,message:'请选择巡检类型'}]}>
                     <Select allowClear placeholder={'巡检类型'} style={{ width: 200 }} onChange={onChangeType}>
