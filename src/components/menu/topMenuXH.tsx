@@ -420,7 +420,7 @@ export default function () {//{ selectMenu?:any }
       if (profile?.roles.indexOf('Admin') === -1) {
         getMenuPerm().then((res) => {
           const { dat } = res;
-          console.log(dat);
+          // console.log(dat);
 
           // 过滤掉没有权限的菜单
           const newMenus: any = _.filter(
@@ -433,9 +433,19 @@ export default function () {//{ selectMenu?:any }
             (item) => {
               return item.children && item.children.length > 0;
             },
-          );
+          ) || [];
+          const flag = newMenus.some(item => item.key == '/home')
+          // console.log(flag);
+          if (!flag) {
+            newMenus.unshift(
+              {
+                key: '/home',
+                icon: <IconFont type='icon-Menu_Infrastructure' />,
+                label: t('首页'),
+              },
+            )
+          }
           console.log(newMenus);
-          
           setMenus(newMenus);
         });
       } else {
