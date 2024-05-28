@@ -220,7 +220,8 @@ const getMenuList = (t) => {
       label: t('系统配置'),
       children: [
         {
-          key: 'manage',
+          // key: 'manage',
+          key: '/users',
           icon: <IconFont type='icon-Menu_PersonnelOrganization' />,
           label: t('人员组织'),
           children: [
@@ -259,7 +260,8 @@ const getMenuList = (t) => {
           label: t('探针管理'),
         },
         {
-          key: 'log',
+          // key: 'log',
+          key: '/log/operlog',
           icon: <IconFont type='icon-Menu_LogAnalysis' />,
           label: t('日志分析'),
           children: [
@@ -278,7 +280,8 @@ const getMenuList = (t) => {
           ],
         },
         {
-          key: 'monitorLog',
+          // key: 'monitorLog',
+          key: '/log/explorer',
           icon: <IconFont type='icon-Menu_LogAnalysis' />,
           // activeIcon: <Icon component={menuIcon.LogAnalysis as any} />,
           label: t('监控日志'),
@@ -309,7 +312,8 @@ const getMenuList = (t) => {
         //   ],
         // },
         {
-          key: '/help/other',
+          // key: '/help/other',
+          key: '/help/source',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('其它设置'),
           children: [
@@ -344,7 +348,8 @@ const getMenuList = (t) => {
           ],
         },
         {
-          key: '/license/management',
+          // key: '/license/management',
+          key: '/license/base',
           icon: <ProfileOutlined />,
           label: t('许可管理'),
           children: [

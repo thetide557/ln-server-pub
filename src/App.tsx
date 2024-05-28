@@ -291,13 +291,13 @@ function App() {
             });
           }
         } else {
-          const datasourceList = await getDatasourceBriefList();
+          // const datasourceList = await getDatasourceBriefList();
           initialized.current = true;
           setCommonState((state) => {
             return {
               ...state,
-              groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type'),
-              datasourceList: datasourceList,
+              // groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type'),
+              // datasourceList: datasourceList,
             };
           });
         }
