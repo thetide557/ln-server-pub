@@ -432,7 +432,16 @@ export default function () {//{ selectMenu?:any }
             _.map(menuList, (menu) => {
               return {
                 ...menu,
-                children: _.filter(menu.children, (item) => item && dat.includes(item.key)),
+                children: _.filter(menu.children, (item) => {
+                  if (item && item.children && item.children.length > 0) {
+                    item.children = item.children.filter(item2 => dat.includes(item2.key))
+                    if (item.children.length > 0) {
+                      return item
+                    }
+                  } else if (item) {
+                    return dat.includes(item.key)
+                  }
+                }),
               };
             }),
             (item) => {
