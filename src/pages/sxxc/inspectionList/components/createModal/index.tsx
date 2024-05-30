@@ -22,7 +22,8 @@ import Inspection from '../inspectionForm';
 import { getMonObjectList } from '@/services/targets';
 import { ModalProps, InspectionType, } from '@/store/sxxc/inspection';
 import { useTranslation } from 'react-i18next';
-import { getInspectionList,addInspection,editInspection} from '@/services/sxxc/inspection'
+import { getInspectionList, addInspection, editInspection } from '@/services/sxxc/inspection'
+
 
 const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
     const { visible, onClose, inspection, inspectionId, width } = props;
@@ -34,37 +35,45 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
             let form = inspectionRef.current.form;
             let form1 = inspectionRef.current.form.getFieldsValue(true)
             // console.log('form1', form1);
-            
-            
+
+
             const values = await form.validateFields();
+            // console.log('values', values);
+
             let selectedRowKeys = inspectionRef.current.selectedRowKeys;
             let params = {
                 ...values,
-                scriptId:selectedRowKeys ? selectedRowKeys.join(',') : '',
+                scriptId: selectedRowKeys ? selectedRowKeys.join(',') : '',
                 type: 2,
-                status: form1.status
+                status: form1.status,
             }
-            console.log('params',params);
-            
-            params.excuteTime = moment(params.excuteTime.$d).format('HH:mm:ss');
+            // console.log('$d',values.excuteTime.$d);
+            // console.log('_d',values.excuteTime._d);
+            if (values.excuteTime.$d) {
+                params.excuteTime = moment(params.excuteTime.$d).format('HH:mm:ss');
+                // console.log('params', params);
+            } else if (values.excuteTime._d) {
+                params.excuteTime = moment(params.excuteTime._d).format('HH:mm:ss');
+                // console.log('params', params);
+            }
 
-            if(params.executeCycle == 1){
+            if (params.executeCycle == 1) {
                 delete params.week
                 delete params.excuteDate
-            }else if(params.executeCycle == 2){
+            } else if (params.executeCycle == 2) {
                 delete params.excuteDate
                 params.week = params.week.join(',')
-            }else if(params.executeCycle == 3){
+            } else if (params.executeCycle == 3) {
                 delete params.week
                 params.excuteDate = moment(params.excuteDate).format('YYYY-MM-DD');
             }
-            if(params.scope == 1){
+            if (params.scope == 1) {
                 delete params.scopeContext
                 delete params.hosts
-            }else if(params.scope == 2){
+            } else if (params.scope == 2) {
                 delete params.hosts
                 params.scopeContext = params.scopeContext.join(',')
-            }else if(params.scope == 3){
+            } else if (params.scope == 3) {
                 delete params.scopeContext
                 params.hosts = params.hosts.join(',')
             }
@@ -77,7 +86,7 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
                     } else {
                         message.error(res.msg)
                     }
-                
+
                 });
             }
 

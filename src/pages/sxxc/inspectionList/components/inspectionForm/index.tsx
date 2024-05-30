@@ -36,7 +36,6 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { CommonStateContext } from '@/App';
-import './index.less'
 
 dayjs.extend(customParseFormat);
 const dateFormat = 'YYYY-MM-DD';
@@ -222,10 +221,10 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         setScope(val);
     };
 
-    const onChangeTime = (time: Dayjs) => {
-        console.log('time', time)
+    const onChangeTime = (time) => {
+        // console.log('time', time)
         setExcuteTime(time)
-        form.setFieldsValue({ excuteTime: time });
+        // form.setFieldsValue({ excuteTime: moment(time.$d).format('HH:mm:ss') });
     }
 
     const getInspectionInfo = (id: string) => {
@@ -308,7 +307,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
                 )}
                 <Form.Item label={'执行时间：'} name='excuteTime' rules={[{ required: true, message: '请选择执行时间' }]}>
                     {/* @ts-ignore */}
-                    <TimePicker value={excuteTime} onChange={onChangeTime} />
+                    <TimePicker onChange={onChangeTime} />
                 </Form.Item>
                 <Form.Item label={'执行范围：'} name='scope' rules={[{ required: true, message: '请选择执行范围' }]}>
                     <Select allowClear placeholder={'执行范围'} style={{ width: 200 }} onChange={onChangeScope}>
