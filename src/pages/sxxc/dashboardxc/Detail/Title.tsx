@@ -20,7 +20,7 @@ import querystring from 'query-string';
 import _, { isNumber } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { Button, Space, Dropdown, Menu, Switch, Modal, Form, Select, message, Checkbox, Row, Col } from 'antd';
-import { RollbackOutlined } from '@ant-design/icons';
+import { RollbackOutlined, DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
 import { AddPanelIcon } from '../config';
 import { visualizations } from '../Editor/config';
@@ -32,7 +32,9 @@ import { GetAssetType } from '@/services/metric';
 import { getDashboardTemplate, putDashboardTemplte, setDashboardAssetType } from '@/services/dashboardV2';
 import { updateSelfBoard } from '@/services/account';
 import { CommonStateContext } from '@/App';
+import { getBigScreen, getDashboards } from '@/services/sxxc/bigScreen';
 import { useTimeout, useTimeoutFn } from 'react-use';
+import './titleStyle.less'
 
 interface IProps {
   dashboard: any;
@@ -59,14 +61,14 @@ export default function Title(props: IProps) {
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
+  
   const { viewMode, themeMode, showback } = query;
-
-
-
+  const [selectGroup, setSelectGroup] = useState<any>(dashboard.group_id)
   const [defaultModal, setdefaultModal] = useState(false);
   const [form] = Form.useForm();
   const [options, setOptions] = useState([]);
-  const { profile, setProfile } = useContext(CommonStateContext);
+   
+  const { profile, setProfile, busiGroups } = useContext(CommonStateContext);
   const setHomePage = () => {
     // setHome(id);
     updateSelfBoard({
@@ -101,12 +103,68 @@ export default function Title(props: IProps) {
     });
   };
 
+  const goBoard = ({ key }) => {
+    // console.log(key);
+    const labelValue = busiGroups.filter(item => item.id == key)[0]?.label_value
+    getDashboards(key).then(res => {
+      if (res.length > 0) {
+        // const groupUrl = `/dashboards/${res[0].id}?themeMode=dark&viewMode=fullscreen`
+        // setUrl(groupUrl)
+        // setSelectGroup(key)
+        if (labelValue) {
+          const arr = res.filter(item => item.tags == labelValue)
+          if (arr.length > 0) {
+            const id = arr[0].id
+            history.push(`/dashboardsxc/${id}?themeMode=dark&viewMode=fullscreen`)
+          } else {
+            history.push(`/dashboardsxc/${res[0].id}?themeMode=dark&viewMode=fullscreen`)
+          }
+        } else {
+          history.push(`/dashboardsxc/${res[0].id}?themeMode=dark&viewMode=fullscreen`)
+        }
+
+      } else {
+        message.warning("当前业务组暂未配置仪表盘");
+      }
+    })
+  }
+
+  const menu = (
+    <Menu
+      selectable
+      onClick={goBoard}
+      defaultSelectedKeys={[selectGroup]}
+    >
+      {_.map(busiGroups, (item) => {
+        return <Menu.Item key={item.id}>{item.name}</Menu.Item>;
+      })}
+    </Menu>
+  );
+
+  const goBack = () => {
+    history.push('/home')
+    // window.location.href = '/home'
+  }
+
+ 
+  
+
   useEffect(() => {
     // document.title = `${dashboard.name} - ${cachePageTitle}`;
     // return () => {
     //   document.title = cachePageTitle;
     // };
   }, [dashboard.name]);
+
+  useEffect(() => {
+    if (dashboard.group_id) {
+      setSelectGroup(dashboard.group_id)
+    }
+    // document.title = `${dashboard.name} - ${cachePageTitle}`;
+    // return () => {
+    //   document.title = cachePageTitle;
+    // };
+  }, [dashboard.id]);
 
   useEffect(() => {
     getAssetstypes().then((res) => {
@@ -123,12 +181,20 @@ export default function Title(props: IProps) {
       <div className='dashboard-detail-header-left'>
         {showback == undefined && (
           <>
-            {isPreview && !isBuiltin ? null : (
+            {/* {isPreview && !isBuiltin ? null : (
               <RollbackOutlined
                 className='back'
                 onClick={() => {
                   if (props.gobackPath) history.push(props.gobackPath);
                   else history.goBack();
+                }}
+              />
+            )} */}
+             {isPreview && !isBuiltin ? null : (
+              <RollbackOutlined
+                className='back'
+                onClick={() => {
+                 history.push('/screenView')
                 }}
               />
             )}
@@ -243,6 +309,41 @@ export default function Title(props: IProps) {
               >
                 修改
               </Button>
+            </div>
+            <div className='screen1-cont'>
+              {/* <div className='screen-groups'>
+            <Dropdown overlay={menu1} arrow>
+              <div className='screen-icon'>
+                <AppstoreOutlined />
+                <DownOutlined />
+              </div>
+            </Dropdown>
+          </div> */}
+              <div className='screen-groups'>
+                <Dropdown overlay={menu} arrow>
+                  <div className='screen-icon'>
+                    <AddPanelIcon />
+                    <DownOutlined />
+                  </div>
+                </Dropdown>
+              </div>
+              {/* <div className='choose_screen1'>
+            <Select
+              placeholder='请选择项目组'
+              style={{ width: 180 }}
+              onChange={handleChange}
+              showSearch
+            >
+              {items.map((item, index) => (
+                <Select.Option value={item.id} key={index}>
+                  {item.title}
+                </Select.Option>
+              ))}
+            </Select>
+          </div> */}
+              <div className='back1' onClick={goBack}>
+                <img src="/image/back.png" alt="" title='返回' />
+              </div>
             </div>
           </Space>
         </div>

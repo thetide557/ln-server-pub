@@ -31,16 +31,20 @@ export default function ScreenView() {
   const [selectGroup, setSelectGroup] = useState<any>('')
   // const [items, setItems] = useState<any>([])
   const { busiGroups } = useContext(CommonStateContext);
-  // const [url, setUrl] = useState<any>('http://113.141.79.47:17000/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1')
   const [url, setUrl] = useState<any>('')
   const [first, setFirst] = useState<any>('')
-  // const [url, setUrl] = useState<any>(`${origin}/dataroom/#/bigscreen/preview?code=bigScreen_pMc6MKqse1`)
-  // const baseUrl = 'http://113.141.79.47:17000/dataroom/#/bigscreen/preview'
-  const baseUrl = `/dataroom/#/bigscreen/preview`
+  const baseUrl = '/dataroom/#/bigscreen/preview'
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
   // console.log(busiGroups);
-  // const token = localStorage.getItem('access_token')
+  const token = localStorage.getItem('access_token')
+
+  const sendToken = window.onload = function() {
+    var iframe:any = document.getElementById('logFrame');
+    iframe.onload = function() {
+      iframe.contentWindow.postMessage({ token: token }, '*');
+    };
+  };
 
   const goBoard = ({ key }) => {
     // console.log(key);
@@ -72,8 +76,20 @@ export default function ScreenView() {
     // console.log(`selected ${key}`);
     let code = screenList.find(item => item.id == key).config
     // console.log(code);
-    let screenUrl = `${baseUrl}?code=${code}`
-    setUrl(screenUrl)
+    if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
+      if (code.includes('?')) {
+        let code1 = code + `&token=${token}`
+        setUrl(code1)
+      } else {
+        let code1 = code + `?token=${token}`
+        setUrl(code1)
+      }
+      sendToken()
+    } else {
+      const screenUrl = `${baseUrl}?code=${code}`
+      setUrl(screenUrl)
+      // sendToken()
+    }
   }
 
   const menu = (
@@ -116,9 +132,22 @@ export default function ScreenView() {
         setScreenList(res.dat.list)
         const id = res.dat.list[0].id.toString()
         setFirst(id)
-        const firstUrl = res.dat.list[0]['config']
-        const screenUrl = `${baseUrl}?code=${firstUrl}`
-        setUrl(screenUrl)
+        const code = res.dat.list[0]['config']
+        // 外部链接
+        if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
+          if (code.includes('?')) {
+            let code1 = code + `&token=${token}`
+            setUrl(code1)
+          } else {
+            let code1 = code + `?token=${token}`
+            setUrl(code1)
+          }
+          sendToken()
+        } else {
+          const screenUrl = `${baseUrl}?code=${code}`
+          setUrl(screenUrl)
+          // sendToken()
+        }
       }
     })
   }, []);
