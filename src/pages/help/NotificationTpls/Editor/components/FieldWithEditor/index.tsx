@@ -63,7 +63,7 @@ export default function FieldWithEditor(props: IProps) {
           <div>
             <span>{titleExtra}</span>
           </div>
-          {renderPreview && value && (
+          {renderPreview && (
             <div
               className='cursor-pointer'
               onClick={() => {

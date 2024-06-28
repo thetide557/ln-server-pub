@@ -98,7 +98,7 @@ export default function index() {
                   <DeleteOutlined
                     onClick={() => {
                       Modal.confirm({
-                        title: t('common:confirm.delete'),
+                        title: t('确认删除吗'),
                         onOk: () => {
                           if (active?.id) {
                             deleteNotifyTpl(active.id).then(() => {
