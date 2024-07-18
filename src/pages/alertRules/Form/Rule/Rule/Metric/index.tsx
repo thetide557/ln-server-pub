@@ -28,6 +28,8 @@ import Prometheus from './Prometheus';
 import XhPrometheus from './Prometheus/XHindex';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
+import { AlertRule as TDengine } from '@/plugins/TDengine';
+import { DatasourceCateEnum } from '@/utils/constant';
 
 export default function index({ form, type, assets }) {
   const { t } = useTranslation('alertRules');
@@ -74,6 +76,9 @@ export default function index({ form, type, assets }) {
             }
             if (cate === 'prometheus' && type === 1) {
               return <XhPrometheus datasourceCate={cate} datasourceValue={datasourceValue} />;
+            }
+            if (cate === DatasourceCateEnum.tdengine) {
+              return <TDengine form={form as any} datasourceValue={datasourceValue} />;
             }
             return <PlusAlertRule cate={cate} form={form} datasourceValue={datasourceValue} />;
           }}

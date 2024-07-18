@@ -62,9 +62,14 @@ export const chartDefaultOptions = {
 enum BaseDatasourceCateEnum {
   prometheus = 'prometheus',
   elasticsearch = 'elasticsearch',
+  tdengine = 'tdengine',
+  loki = 'loki',
 }
 
 export const DatasourceCateEnum = { ...BaseDatasourceCateEnum, ...AdvancedDatasourceCateEnum };
 export type DatasourceCateEnum = BaseDatasourceCateEnum | AdvancedDatasourceCateEnum;
+export const IS_ENT = import.meta.env.VITE_IS_ENT === 'true';
+export const IS_PLUS = import.meta.env.VITE_IS_ENT === 'true' || import.meta.env.VITE_IS_PRO === 'true';
+export const N9E_PATHNAME = IS_PLUS ? 'n9e-plus' : 'n9e';
 
 export const WebSocketURL =`ws://${location.host}/alert/ws/`;

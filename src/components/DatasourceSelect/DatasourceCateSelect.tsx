@@ -33,7 +33,9 @@ export const ProSvg = ({ type = 'normal' }) => (
 export default function DatasourceCateSelect({ filterCates, scene, disabled, ...props }: IProps) {
   const { datasourceCateOptions } = useContext(CommonStateContext);
   const cates = filterCates ? filterCates(datasourceCateOptions) : datasourceCateOptions;
-
+  console.log('data', datasourceCateOptions);
+  console.log('cates', cates);
+  
   return (
     <Select {...props} optionLabelProp='label' disabled={disabled}>
       {_.map(cates, (item) => {

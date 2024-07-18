@@ -33,6 +33,15 @@ export const baseCates: Cate[] = [
     alertPro: true,
   },
   {
+    value: 'tdengine',
+    label: 'TDengine',
+    type: ['metric'],
+    alertRule: true,
+    dashboard: true,
+    graphPro: false,
+    alertPro: false,
+  },
+  {
     value: 'api',
     label: '数据接口',
     type: ['api'],
