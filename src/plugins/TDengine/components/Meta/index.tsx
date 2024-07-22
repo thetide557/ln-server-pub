@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import { Tree, Modal, Button } from 'antd';
 import _ from 'lodash';

@@ -9,7 +9,7 @@ import { getLogsQuery } from './services';
 import TimeRangePicker, { IRawTimeRange, isMathString, parseRange } from '@/components/TimeRangePicker';
 import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
 import { createPortal } from 'react-dom';
-import LogQLInput from '@/components/LogQLInput';
+// import LogQLInput from '@/components/LogQLInput';
 import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
 import queryString from 'query-string';
 import { LogSortItem, Row, getKeywords, parseResponse } from './util';
@@ -209,9 +209,9 @@ export default function index(props: IProps) {
       )}
       <div className='log-expression-input'>
         <Input.Group>
-          <span className='ant-input-affix-wrapper'>
+          {/* <span className='ant-input-affix-wrapper'>
             <LogQLInput ref={logQLInputRef} value={value} onChange={setValue} completeEnabled={true} datasourceValue={datasourceValue} />
-          </span>
+          </span> */}
           <span
             className='ant-input-group-addon'
             style={{
