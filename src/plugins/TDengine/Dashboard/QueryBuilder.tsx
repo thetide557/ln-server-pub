@@ -143,12 +143,12 @@ export default function TDengineQueryBuilder({ chartForm, variableConfig, dashbo
                       </Col>
                       <Col flex='100px'>
                         <Form.Item
-                          label={t('query.time')}
+                          label={t('query.prometheus.time')}
                           {...field}
                           name={[field.name, 'time']}
                           tooltip={{
                             getPopupContainer: () => document.body,
-                            title: t('query.time_tip'),
+                            title: t('query.prometheus.time_tip'),
                           }}
                           normalize={(val) => {
                             return {

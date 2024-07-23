@@ -71,5 +71,5 @@ export type DatasourceCateEnum = BaseDatasourceCateEnum | AdvancedDatasourceCate
 export const IS_ENT = import.meta.env.VITE_IS_ENT === 'true';
 export const IS_PLUS = import.meta.env.VITE_IS_ENT === 'true' || import.meta.env.VITE_IS_PRO === 'true';
 export const N9E_PATHNAME = IS_PLUS ? 'n9e-plus' : 'n9e';
-
+export const PRIMARY_COLOR = '#6C53B1';
 export const WebSocketURL =`ws://${location.host}/alert/ws/`;

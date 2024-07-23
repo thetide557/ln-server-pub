@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Space, Form, Radio } from 'antd';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
+import { DatasourceCateEnum } from '@/utils/constant';
 // @ts-ignore
 import OrganizeFields from '../TransformationsEditor/OrganizeFields';
 import DatasourceSelect from './components/DatasourceSelect';
@@ -9,8 +10,9 @@ import Prometheus from './Prometheus';
 import Elasticsearch from './Elasticsearch';
 import Monitoring from './Monitoring';
 import ApiService from './ApiService';
+import { QueryBuilder as TDengine } from '@/plugins/TDengine';
 
-export default function index({ chartForm, type, variableConfig, dashboardId }) {
+export default function index({ chartForm, type, variableConfig, dashboardId, time }) {
   const { t } = useTranslation('dashboard');
   const [mode, setMode] = useState('query');
 
@@ -29,7 +31,7 @@ export default function index({ chartForm, type, variableConfig, dashboardId }) 
             <Radio.Button value='transform'>{t('query.transform')} (beta)</Radio.Button>
           </Radio.Group>
         )}
-        <DatasourceSelect chartForm={chartForm} variableConfig={variableConfig} />
+        <DatasourceSelect dashboardId={dashboardId} chartForm={chartForm} variableConfig={variableConfig} />
       </Space>
       <div
         style={{
@@ -39,11 +41,14 @@ export default function index({ chartForm, type, variableConfig, dashboardId }) 
         <Form.Item shouldUpdate={(prev, curr) => prev.datasourceCate !== curr.datasourceCate} noStyle>
           {({ getFieldValue }) => {
             const cate = getFieldValue('datasourceCate') || 'prometheus';
-            if (cate === 'prometheus') {
-              return <Prometheus chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
+            if (cate === DatasourceCateEnum.prometheus) {
+              return <Prometheus chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} time={time} />;
             }
-            if (cate === 'elasticsearch') {
+            if (cate === DatasourceCateEnum.elasticsearch) {
               return <Elasticsearch chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
+            }
+            if (cate === DatasourceCateEnum.tdengine) {
+              return <TDengine chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
             }
             if (cate === 'api') {
               return <ApiService chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId}></ApiService>

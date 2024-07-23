@@ -60,8 +60,8 @@ export default function useQuery(props: IProps) {
   const { run: fetchData } = useDebounceFn(
     () => {
       if (!datasourceCate) return;
-      setLoading(true);
-      fetchQueryMap[datasourceCate](props)
+      setLoading(false);
+      fetchQueryMap[datasourceCate]?.(props)
         .then((res: any[]) => {
           setSeries(res);
           setError('');
