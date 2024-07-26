@@ -73,7 +73,11 @@ export const visualizations = [
   {
     type: 'topo',
     name: '拓扑图',
-  }
+  },
+  {
+    type: 'barchart',
+    name: '柱状图(g2)',
+  },
 ];
 
 export const IRefreshMap = {

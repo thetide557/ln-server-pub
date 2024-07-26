@@ -72,6 +72,7 @@ export interface IOptions {
   thresholds?: IThresholds;
   xThresholds?: IThresholds;
   standardOptions?: {
+    displayName: any;
     util?: string;
     min?: number;
     max?: number;

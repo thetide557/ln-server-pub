@@ -14,18 +14,15 @@
  * limitations under the License.
  *
  */
-import _ from 'lodash';
+import React from 'react';
+import GraphStyles from './GraphStyles';
+import StandardOptions from '../../Fields/StandardOptions';
 
-const getOverridePropertiesByName = (overrides: any[], type: string, name: string) => {
-  let properties: any = {};
-  _.forEach(overrides, (item) => {
-    if (type === 'byFrameRefID' && item?.matcher?.value === name) {
-      properties = item?.properties;
-    } else if (type === 'byName' && item?.matcher?.value === name) {
-      properties = item?.properties;
-    }
-  });
-  return properties;
-};
-
-export default getOverridePropertiesByName;
+export default function Pie() {
+  return (
+    <>
+      <GraphStyles />
+      <StandardOptions  />
+    </>
+  );
+}

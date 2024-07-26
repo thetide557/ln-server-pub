@@ -16,13 +16,9 @@
       color: #24292e80
     }
   }
-  .ant-table.ant-table-small .ant-table-thead > tr > th {
-    padding: 4px 8px;
-  }
 }
 .renderer-timeseries-legend-container {
   position: relative;
-  height: calc(100% - 8px);
 }
 .renderer-timeseries-legend-list {
   overflow-y: auto;
@@ -32,58 +28,38 @@
   flex-wrap: wrap;
   column-gap: 20px;
   align-content: flex-start;
-  padding: 4px 8px;
+  padding: 0 8px 8px 8px;
   margin: 8px;
   cursor: pointer;
   user-select: none;
-  background: var(--fc-fill-3);
-  .renderer-timeseries-legend-list-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    gap: 8px;
-  }
-  .renderer-timeseries-legend-list-item-name {
-    width: 100%;
+  background: #F9F9F9;
+  & > div {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
   }
-  .renderer-timeseries-legend-list-item-calcs {
-    display: flex;
-    gap: 4px;
-  }
-  .renderer-timeseries-legend-list-item-calcs,.renderer-timeseries-legend-list-item-link {
-    flex-shrink: 0;
-  }
-  .renderer-timeseries-legend-list-item.disabled {
+  & > div.disabled {
     color: #24292e80
   }
 }
 .renderer-timeseries-legend-list-placement-right {
-  flex-direction: column;
-  flex-wrap: unset;
-  height: 100%;
   & > div {
-    flex-shrink: 0;
+    width: 100%;
   }
 }
 .renderer-timeseries-legend-color-symbol {
+  display: inline-block;
   height: 6px;
   width: 6px;
   border-radius: 6px;
-  flex-shrink: 0;
+  margin-right: 5px;
 }
 .renderer-timeseries-legend-toggle {
   position: absolute;
   top: 0;
   left: -1px;
-  background: var(--fc-fill-3);
+  background: #F9F9F9;
   width: 16px;
   text-align: center;
-  cursor: pointer;
-}
-.renderer-timeseries-legend-table-row {
   cursor: pointer;
 }

@@ -28,6 +28,7 @@ const TimeSeriesN = function (props: IProps) {
     if (datasourceCate === 'prometheus') {
       setseriesData(convertTimeseriesToG2Data(series));
     } else {
+      console.log(series,67878797)
       setseriesData(series);
     }
   }, [series]);

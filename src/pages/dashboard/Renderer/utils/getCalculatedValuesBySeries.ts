@@ -81,6 +81,29 @@ export const getSerieTextObj = (value: number | string | null | undefined, stand
   };
 };
 
+export const getMappedTextObj = (textValue: string, valueMappings?: IValueMapping[]) => {
+  if (typeof textValue === 'string') {
+    const matchedValueMapping = _.find(valueMappings, (item: any) => {
+      const { type, match } = item;
+      if (type === 'textValue') {
+        return textValue === match?.textValue;
+      }
+      return false;
+    });
+    if (matchedValueMapping) {
+      return {
+        // origin: textValue,
+        text: matchedValueMapping?.result?.text || textValue,
+        color: matchedValueMapping?.result?.color,
+      };
+    }
+  }
+  return {
+    // origin: textValue,
+    text: textValue,
+  };
+};
+
 const getCalculatedValuesBySeries = (series: any[], calc: string, { unit, decimals, dateFormat }, valueMappings?: IValueMapping[], thresholds?: IThresholds) => {
   const values = _.map(series, (serie) => {
     const results = {
@@ -110,7 +133,33 @@ const getCalculatedValuesBySeries = (series: any[], calc: string, { unit, decima
   return values;
 };
 
-export const getLegendValues = (series: any[], { unit, decimals, dateFormat }, hexPalette: string[], stack = false) => {
+// export const getLegendValues = (series: any[], { unit, decimals, dateFormat }, hexPalette: string[], stack = false, valueMappings: IValueMapping[] | undefined) => {
+//   const newSeries = stack ? _.reverse(_.clone(series)) : series;
+//   const values = _.map(newSeries, (serie, idx) => {
+//     const results = {
+//       max: getValueAndToNumber(_.maxBy(serie.data, (item: any) => _.toNumber(item[1]))),
+//       min: getValueAndToNumber(_.minBy(serie.data, (item: any) => _.toNumber(item[1]))),
+//       avg: _.meanBy(serie.data, (item: any) => _.toNumber(item[1])),
+//       sum: _.sumBy(serie.data, (item: any) => _.toNumber(item[1])),
+//       last: getValueAndToNumber(_.last(serie.data) as any),
+//     };
+//     return {
+//       id: serie.id,
+//       name: serie.name,
+//       metric: serie.metric,
+//       offset: serie.offset,
+//       color: hexPalette[idx % hexPalette.length],
+//       disabled: serie.visible === false ? true : undefined,
+//       max: valueFormatter({ unit, decimals, dateFormat }, results.max),
+//       min: valueFormatter({ unit, decimals, dateFormat }, results.min),
+//       avg: valueFormatter({ unit, decimals, dateFormat }, results.avg),
+//       sum: valueFormatter({ unit, decimals, dateFormat }, results.sum),
+//       last: valueFormatter({ unit, decimals, dateFormat }, results.last),
+//     };
+//   });
+//   return values;
+// };
+export const getLegendValues = (series: any[], { unit, decimals, dateFormat }, hexPalette: string[], stack = false, valueMappings?: IValueMapping[]) => {
   const newSeries = stack ? _.reverse(_.clone(series)) : series;
   const values = _.map(newSeries, (serie, idx) => {
     const results = {
@@ -122,8 +171,15 @@ export const getLegendValues = (series: any[], { unit, decimals, dateFormat }, h
     };
     return {
       id: serie.id,
-      name: serie.name,
-      metric: serie.metric,
+      name: getMappedTextObj(serie.name, valueMappings)?.text,
+      metric: _.reduce(
+        serie.metric,
+        (pre, curVal, curKey) => {
+          pre[curKey] = getMappedTextObj(curVal, valueMappings)?.text;
+          return pre;
+        },
+        {},
+      ),
       offset: serie.offset,
       color: hexPalette[idx % hexPalette.length],
       disabled: serie.visible === false ? true : undefined,

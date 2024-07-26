@@ -112,11 +112,9 @@ function index(props: IProps) {
   }
   const subProps = {
     values,
-    series: Array.isArray(series) ? series : series?.series,
+    series,
   };
-
   const RendererCptMap = {
-   
     timeseries: () => <Timeseries {...subProps} themeMode={themeMode} time={time} setRange={props.setRange} isPreview={isPreview} />,
     timeseriesN: () => <TimeSeriesN {...subProps} themeMode={themeMode} time={time} />,
     stat: () => <Stat {...subProps} bodyWrapRef={bodyWrapRef} themeMode={themeMode} />,

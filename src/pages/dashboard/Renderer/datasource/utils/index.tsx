@@ -34,10 +34,22 @@ export function completeBreakpoints(step: number | undefined, data: any[], start
   return result;
 }
 
-export const getSerieName = (metric: Object) => {
-  let name = metric['__name__'] || '';
+// export const getSerieName = (metric: Object) => {
+//   let name = metric['__name__'] || '';
+//   _.forEach(_.omit(metric, '__name__'), (value, key) => {
+//     name += ` ${key}: ${value}`;
+//   });
+//   return _.trim(name);
+// };
+
+export const getSerieName = (metric: Object, ref?: string) => {
+  let name = metric != undefined ? metric['__name__']: '' || '';
   _.forEach(_.omit(metric, '__name__'), (value, key) => {
     name += ` ${key}: ${value}`;
   });
-  return _.trim(name);
+  name = _.trim(name);
+  if (ref) {
+    name = `${ref} ${name}`;
+  }
+  return name;
 };

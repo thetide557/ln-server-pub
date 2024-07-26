@@ -30,6 +30,7 @@ import Line from './Line';
 import TimeseriesN from './TimeseriesN';
 import GaugeN from './GaugeN';
 import Topo from './Topo';
+import BarChart from './BarChart';
 
 export default function index({ type, targets, chartForm, variableConfigWithOptions }) {
   const OptionsCptMap = {
@@ -46,7 +47,8 @@ export default function index({ type, targets, chartForm, variableConfigWithOpti
     line: <Line></Line>,
     timeseriesN: <TimeseriesN></TimeseriesN>,
     gaugeN: <GaugeN></GaugeN>,
-    topo: <Topo></Topo>
+    topo: <Topo></Topo>,
+    barchart: <BarChart />,
   };
   return OptionsCptMap[type] || `无效的图表类型 ${type}`;
 }

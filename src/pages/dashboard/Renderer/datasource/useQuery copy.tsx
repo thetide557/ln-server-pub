@@ -16,11 +16,8 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
-import { Form } from 'antd';
 import { useDebounceFn } from 'ahooks';
 import { IRawTimeRange } from '@/components/TimeRangePicker';
-import { datasource as tdengineQuery } from '@/plugins/TDengine';
-import flatten from '@/utils/flatten';
 import { ITarget } from '../../types';
 import { getVaraiableSelected } from '../../VariableConfig/constant';
 import { IVariable } from '../../VariableConfig/definition';
@@ -28,7 +25,6 @@ import replaceExpressionBracket from '../utils/replaceExpressionBracket';
 import { getSerieName } from './utils';
 import prometheusQuery from './prometheus';
 import elasticsearchQuery from './elasticsearch';
-
 // @ts-ignore
 import plusDatasource from 'plus:/parcels/Dashboard/datasource';
 import apiServicequery from './apiservice';
@@ -44,17 +40,11 @@ interface IProps {
   inViewPort?: boolean;
   spanNulls?: boolean;
   scopedVars?: any;
-  inspect?: boolean;
-  type?: string;
-  custom: any;
 }
 
 export default function useQuery(props: IProps) {
   const { dashboardId, datasourceCate, time, targets, variableConfig, inViewPort, spanNulls, datasourceValue } = props;
-  // console.log(props,11111)
-  const form = Form.useFormInstance();
   const [series, setSeries] = useState<any[]>([]);
-  const [query, setQuery] = useState<any[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const cachedVariableValues = _.map(variableConfig, (item) => {
@@ -65,61 +55,24 @@ export default function useQuery(props: IProps) {
     prometheus: prometheusQuery,
     elasticsearch: elasticsearchQuery,
     api: apiServicequery,
-    tdengine: tdengineQuery,
-    ...plusDatasource,
-  };
-  const fetchQueryMap1 = {
-    tdengine: tdengineQuery,
     ...plusDatasource,
   };
   const { run: fetchData } = useDebounceFn(
-     () => {
+    () => {
       if (!datasourceCate) return;
-      // 如果在编辑状态，需要校验表单
-      // if (form && typeof form.validateFields === 'function') {
-      //   try {
-      //     await form.validateFields();
-      //   } catch (e) {
-      //     return;
-      //   }
-      // }
-      setLoading(true);
-      fetchQueryMap[datasourceCate](props)
+      setLoading(false);
+      fetchQueryMap[datasourceCate]?.(props)
         .then((res: any[]) => {
-          console.log(res,56465)
           setSeries(res);
           setError('');
         })
         .catch((e) => {
           setSeries([]);
           setError(e.message);
-          console.error(e);
         })
         .finally(() => {
           setLoading(false);
         });
-      // fetchQueryMap1[datasourceCate](props)
-      //   .then(({ series, query }: { series: any[]; query: any[] }) => {
-      //     setSeries(
-      //       _.map(series, (item) => {
-      //         return {
-      //           ...item,
-      //           metric: flatten(item.metric), // 日志数据可能会有多层嵌套，这里统一展开
-      //         };
-      //       }),
-      //     );
-      //     setQuery(query);
-      //     setError('');
-      //   })
-      //   .catch((e) => {
-      //     setSeries([]);
-      //     setQuery([]);
-      //     setError(e.message);
-      //     console.error(e);
-      //   })
-      //   .finally(() => {
-      //     setLoading(false);
-      //   });  
     },
     {
       wait: 500,
@@ -145,9 +98,7 @@ export default function useQuery(props: IProps) {
 
   useEffect(() => {
     // 目前只有 prometheus 支持 legend 替换
-  
     const _series = _.map(series, (item) => {
-      
       const target = _.find(targets, (t) => t.expr === item.expr);
       return {
         ...item,
@@ -157,5 +108,5 @@ export default function useQuery(props: IProps) {
     setSeries(_series);
   }, [JSON.stringify(_.map(targets, 'legend'))]);
 
-  return { query, series, error, loading };
+  return { series, error, loading };
 }

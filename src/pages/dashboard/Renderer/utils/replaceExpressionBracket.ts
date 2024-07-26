@@ -23,11 +23,13 @@ function extractBracketValue(str) {
 }
 
 export default function replaceExpressionBracket(titleFormat, serieMetricLabels) {
+  console.log(titleFormat,serieMetricLabels,6666)
+  const isSerieMetricLabels = serieMetricLabels || ''
   let keys = _.map(extractBracketValue(titleFormat), _.trim);
   var legendName = titleFormat;
   keys.forEach((key) => {
     const reg = new RegExp(`{{\\s?${key}\\s?}}`, 'g');
-    legendName = legendName.replace(reg, serieMetricLabels[key] ? serieMetricLabels[key] : '');
+    legendName = legendName.replace(reg, isSerieMetricLabels[key] ? isSerieMetricLabels[key] : '');
   });
   return legendName;
 }

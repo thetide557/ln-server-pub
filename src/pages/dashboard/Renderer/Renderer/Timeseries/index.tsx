@@ -14,25 +14,29 @@
  * limitations under the License.
  *
  */
-import React, { useRef, useEffect, useState, Fragment } from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import _ from 'lodash';
 import moment from 'moment';
-import { Table, Tooltip } from 'antd';
 import classNames from 'classnames';
+import querystring from 'query-string';
+import { useTranslation } from 'react-i18next';
+import { Space, Table, Tooltip } from 'antd';
+import { ColumnProps } from 'antd/lib/table';
+import { useHistory, useLocation } from 'react-router-dom';
 import { VerticalRightOutlined, VerticalLeftOutlined } from '@ant-design/icons';
 import { useSize } from 'ahooks';
 import TsGraph from '@fc-plot/ts-graph';
 import '@fc-plot/ts-graph/dist/index.css';
 import { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
+import { CommonStateContext } from '@/App';
 import { IPanel } from '../../../types';
 import { hexPalette } from '../../../config';
 import valueFormatter from '../../utils/valueFormatter';
-import { getLegendValues } from '../../utils/getCalculatedValuesBySeries';
-import './style.less';
-import { ColumnProps } from 'antd/lib/table';
-import { useTranslation } from 'react-i18next';
+import getSerieName from '../../utils/getSerieName';
+import { getLegendValues, getMappedTextObj } from '../../utils/getCalculatedValuesBySeries';
 import { getDetailUrl } from '../../utils/replaceExpressionDetail';
 import { useGlobalState } from '../../../globalState';
+import './style.less';
 
 interface ColData {
   value: number;
@@ -53,13 +57,18 @@ interface DataItem {
 
 interface IProps {
   time?: IRawTimeRange;
+  setRange?: (range: IRawTimeRange) => void;
   inDashboard?: boolean;
   chartHeight?: string;
   tableHeight?: string;
   values: IPanel;
   series: any[];
   themeMode?: 'dark';
+  hideResetBtn?: boolean;
   onClick?: (event: any, datetime: Date, value: number, points: any[]) => void;
+  onZoomWithoutDefult?: (times: Date[]) => void;
+  isPreview?: boolean;
+  colors?: string[];
 }
 
 function getStartAndEndByTargets(targets: any[]) {
@@ -79,23 +88,56 @@ function getStartAndEndByTargets(targets: any[]) {
   return { start, end };
 }
 
+function NameWithTooltip({ record, children }) {
+  const name = _.get(record, 'name');
+  const metric = _.get(record, 'metric.__name__');
+  return (
+    <Tooltip
+      placement='left'
+      title={
+        <div>
+          <div>{_.get(record, 'name')}</div>
+          {name !== metric && <div>{_.get(record, 'metric.__name__')}</div>}
+          <div>{record.offset && record.offset !== 'current' ? `offfset ${record.offset}` : ''}</div>
+          {_.map(_.omit(record.metric, '__name__'), (val, key) => {
+            return (
+              <div key={key}>
+                {key}={val}
+              </div>
+            );
+          })}
+        </div>
+      }
+      getTooltipContainer={() => document.body}
+    >
+      {children}
+    </Tooltip>
+  );
+}
+
 export default function index(props: IProps) {
   const [dashboardMeta] = useGlobalState('dashboardMeta');
+  const { darkMode } = useContext(CommonStateContext);
   const { t } = useTranslation('dashboard');
-  const { time, values, series, inDashboard = true, chartHeight = '200px', tableHeight = '200px', themeMode = '', onClick } = props;
-  const { custom, options = {}, targets } = values;
+  const { time, setRange, values, series, inDashboard = true, chartHeight = '200px', tableHeight = '200px', onClick, isPreview, colors } = props;
+  console.log(values,series,3131)
+  const themeMode = props.themeMode || (darkMode ? 'dark' : 'light');
+  const history = useHistory();
+  const location = useLocation();
+  const { custom, options = {}, targets, overrides } = values;
   const { lineWidth = 1, gradientMode = 'none', scaleDistribution } = custom;
-  const [seriesData, setSeriesData] = useState(series);
+  const [seriesData, setSeriesData] = useState<any[]>([]);
   const [activeLegend, setActiveLegend] = useState('');
   const chartEleRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<TsGraph>(null);
   const legendEleRef = useRef<HTMLDivElement>(null);
   const legendEleSize = useSize(legendEleRef);
   const displayMode = options.legend?.displayMode || 'table';
-  const placement = options.legend?.placement || 'bottom';
-  const legendColumns = options.legend?.columns && options.legend?.columns.length > 0 ? options.legend?.columns : ['max', 'min', 'avg', 'sum', 'last'];
+  const placement = displayMode === 'table' ? 'bottom' : options.legend?.placement || 'bottom';
+  const legendColumns = !_.isEmpty(options.legend?.columns) ? options.legend?.columns : displayMode === 'table' ? ['max', 'min', 'avg', 'sum', 'last'] : [];
   const detailUrl = options.legend?.detailUrl || undefined;
   const detailName = options.legend?.detailName || undefined;
+  const legendBehaviour = options.legend?.behaviour || 'showItem';
   const hasLegend = displayMode !== 'hidden';
   const [legendData, setLegendData] = useState<any[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -119,7 +161,6 @@ export default function index(props: IProps) {
   }
 
   useEffect(() => {
-    // debugger;
     if (chartEleRef.current) {
       if (chartRef.current) {
         chartRef.current.destroy();
@@ -133,7 +174,7 @@ export default function index(props: IProps) {
         chart: {
           renderTo: chartEleRef.current,
           height: chartEleRef.current.clientHeight,
-          colors: hexPalette,
+          colors: colors || hexPalette,
           marginTop: 0,
         },
         series: [],
@@ -151,7 +192,9 @@ export default function index(props: IProps) {
             decimals: options?.standardOptions?.decimals,
             dateFormat: options?.standardOptions?.dateFormat,
           },
-          hexPalette,
+          colors || hexPalette,
+          undefined,
+          options?.valueMappings,
         ),
       );
     } else {
@@ -165,7 +208,16 @@ export default function index(props: IProps) {
   }, [hasLegend]);
 
   useEffect(() => {
-    setSeriesData(series);
+    setSeriesData(
+      _.map(series, (item) => {
+        return {
+          ...item,
+          // 2024-06-28 serie.name 放到这里处理，原 datasource 里的 name 都删除掉
+          // 目前只有 mysql 源生效
+          name: item.name === undefined ? getSerieName(item.metric, { legend: item.target?.legend, ref: item.isExp ? item.refId : undefined }) : item.name,
+        };
+      }),
+    );
   }, [JSON.stringify(series)]);
 
   useEffect(() => {
@@ -180,7 +232,7 @@ export default function index(props: IProps) {
     if (chartRef.current) {
       chartRef.current.update({
         type: custom.drawStyle === 'lines' ? 'line' : 'bar',
-        series: seriesData,
+        series: _.cloneDeep(seriesData),
         line: {
           width: lineWidth,
         },
@@ -201,7 +253,32 @@ export default function index(props: IProps) {
           ...chartRef.current.options.tooltip,
           shared: options.tooltip?.mode === 'all',
           sharedSortDirection: options.tooltip?.sort !== 'none' ? options.tooltip?.sort : undefined,
-          pointValueformatter: (val) => {
+          cascade: isPreview === false ? _.includes(['sharedCrosshair', 'sharedTooltip'], dashboardMeta.graphTooltip) : undefined,
+          cascadeScope: 'cascadeScope',
+          cascadeMode: _.includes(['sharedCrosshair', 'sharedTooltip'], dashboardMeta.graphTooltip) ? dashboardMeta.graphTooltip : undefined,
+          pointNameformatter: (val, nearestPoint) => {
+            let name = val;
+            if (options?.standardOptions?.displayName) {
+              name = options?.standardOptions?.displayName;
+            }
+            const override = _.find(overrides, (item) => item.matcher.value === nearestPoint?.serieOptions?.refId);
+            if (override && override?.properties?.standardOptions?.displayName) {
+              name = override?.properties?.standardOptions?.displayName;
+            }
+            return getMappedTextObj(name, options?.valueMappings)?.text;
+          },
+          pointValueformatter: (val, nearestPoint) => {
+            const override = _.find(overrides, (item) => item.matcher.value === nearestPoint?.serieOptions?.refId);
+            if (override) {
+              return valueFormatter(
+                {
+                  unit: override?.properties?.standardOptions?.util,
+                  decimals: override?.properties?.standardOptions?.decimals,
+                  dateFormat: override?.properties?.standardOptions?.dateFormat,
+                },
+                val,
+              ).text;
+            }
             return valueFormatter(
               {
                 unit: options?.standardOptions?.util,
@@ -235,7 +312,7 @@ export default function index(props: IProps) {
               };
             },
           ),
-          backgroundColor: themeMode === 'dark' ? '#2A2D3C' : '#fff',
+          backgroundColor: themeMode === 'dark' ? '#272a38' : '#fff',
           gridLineColor: themeMode === 'dark' ? 'rgba(255,255,255,0.05)' : '#efefef',
           tickValueFormatter: (val) => {
             return valueFormatter(
@@ -248,6 +325,49 @@ export default function index(props: IProps) {
             ).text;
           },
         },
+        yAxis2: {
+          ...chartRef.current.options.yAxis,
+          visible: overrides?.[0]?.properties?.rightYAxisDisplay === 'noraml',
+          matchRefId: overrides?.[0]?.matcher?.value,
+          min: overrides?.[0]?.properties?.standardOptions?.min,
+          max: overrides?.[0]?.properties?.standardOptions?.max,
+          backgroundColor: themeMode === 'dark' ? '#2A2D3C' : '#fff',
+          tickValueFormatter: (val) => {
+            return valueFormatter(
+              {
+                unit: overrides?.[0]?.properties?.standardOptions?.util,
+                decimals: overrides?.[0]?.properties?.standardOptions?.decimals,
+                dateFormat: overrides?.[0]?.properties?.standardOptions?.dateFormat,
+              },
+              val,
+            ).text;
+          },
+        },
+        onClick: (event, datetime, value, points) => {
+          if (onClick) onClick(event, datetime, value, points);
+        },
+        hideResetBtn: props.hideResetBtn || dashboardMeta.graphZoom === 'updateTimeRange',
+        onZoomWithoutDefult: props.onZoomWithoutDefult
+          ? props.onZoomWithoutDefult
+          : dashboardMeta.graphZoom === 'updateTimeRange'
+          ? (times: Date[]) => {
+              if (setRange) {
+                setRange({
+                  start: moment(times[0]),
+                  end: moment(times[1]),
+                });
+                // 开启了缩放后更新全局时间范围时，url 中保存时间范围数据
+                history.replace({
+                  pathname: location.pathname,
+                  search: querystring.stringify({
+                    ...(querystring.parse(location.search) || {}),
+                    __from: moment(times[0]).valueOf(),
+                    __to: moment(times[1]).valueOf(),
+                  }),
+                });
+              }
+            }
+          : undefined,
       });
     }
     if (hasLegend) {
@@ -259,64 +379,55 @@ export default function index(props: IProps) {
             decimals: options?.standardOptions?.decimals,
             dateFormat: options?.standardOptions?.dateFormat,
           },
-          hexPalette,
+          colors || hexPalette,
           custom.stack === 'noraml',
+          options?.valueMappings,
         ),
       );
     } else {
       setLegendData([]);
     }
-  }, [JSON.stringify(seriesData), JSON.stringify(custom), JSON.stringify(options), themeMode]);
+  }, [JSON.stringify(seriesData), JSON.stringify(custom), JSON.stringify(options), themeMode, JSON.stringify(overrides)]);
 
   useEffect(() => {
     // TODO: 这里布局变化了，但是 fc-plot 没有自动 resize，所以这里需要手动 resize
     if (chartRef.current) {
       chartRef.current.handleResize();
     }
-  }, [placement]);
+  }, [placement, JSON.stringify(legendEleSize)]);
 
   let tableColumn: ColumnProps<DataItem>[] = [
     {
-      title: `序列 (${series.length})`,
+      title: `Series (${series.length})`,
       dataIndex: 'name',
-      width:'30%',
       ellipsis: {
         showTitle: false,
       },
-      render: (_text, record: any) => {
+      render: (text, record: any) => {
         return (
-          <Tooltip
-            placement='topLeft'
-            title={
-              <div>
-                <div>{_.get(record, 'metric.__name__')}</div>
-                <div>{record.offset && record.offset !== 'current' ? `offfset ${record.offset}` : ''}</div>
-                {_.map(_.omit(record.metric, '__name__'), (val, key) => {
-                  return (
-                    <div key={key}>
-                      {key}={val}
-                    </div>
-                  );
-                })}
-              </div>
-            }
-            getTooltipContainer={() => document.body}
-          >
-            <span className='renderer-timeseries-legend-color-symbol' style={{ backgroundColor: record.color }} />
-            {record.offset && record.offset !== 'current' ? <span style={{ paddingRight: 5 }}>offfset {record.offset}</span> : ''}
-            <span>{_text}</span>
-          </Tooltip>
+          <Space>
+            <div className='renderer-timeseries-legend-color-symbol' style={{ backgroundColor: record.color }} />
+            <div className='ant-table-cell-ellipsis'>
+              <NameWithTooltip record={record}>
+                <span>
+                  {record.offset && record.offset !== 'current' ? <span style={{ paddingRight: 5 }}>offfset {record.offset}</span> : ''}
+                  <span>{text}</span>
+                </span>
+              </NameWithTooltip>
+            </div>
+          </Space>
         );
       },
     },
   ];
-  legendColumns.forEach((column) => {
+  _.forEach(legendColumns, (column) => {
     tableColumn = [
       ...tableColumn,
       {
-        title: t(`panel.options.legend.${column}`),
+        title: t(`panel.options.legend.${column}`, {
+          lng: 'en_US', // fixed to en_US, optimize column width
+        }),
         dataIndex: column,
-        width: 100,
         sorter: (a, b) => a[column].stat - b[column].stat,
         render: (text) => {
           return text.text;
@@ -355,113 +466,124 @@ export default function index(props: IProps) {
       <div
         ref={chartEleRef}
         className='renderer-timeseries-graph'
-        style={{ height: _chartHeight, minHeight: '70%', width: placement === 'right' ? (isExpanded ? 0 : '60%') : '100%' }}
+        style={{
+          height: _chartHeight,
+          minHeight: '70%',
+          width: '100%',
+          minWidth: 0,
+        }}
       />
-      
-      {hasLegend && (
-        <div
-          className='renderer-timeseries-legend-table'
-          style={{
-            [inDashboard ? 'maxHeight' : 'maxHeight']: _tableHeight,
-            height: legendEleSize?.height! + 16,
-            width: placement === 'right' ? (isExpanded ? '100%' : '40%') : '100%',
-            overflow: 'hidden',
-            overflowY: 'auto',
-          }}
-        >
-          {displayMode === 'table' && (
-            <Fragment>
-            <div ref={legendEleRef} >
-              
-              <Table
-                rowKey='id'
-                size='small'
-                className='scroll-container-table table_list'
-                scroll={{ x: 650 }}
-                columns={tableColumn}
-                dataSource={legendData}
-                locale={{
-                  emptyText: '暂无数据',
-                }}
-                pagination={false}
-                rowClassName={(record) => {
-                  return record.disabled ? 'disabled' : '';
-                }}
-                onRow={(record) => {
-                  return {
-                    onClick: () => {
-                      setActiveLegend(activeLegend !== record.id ? record.id : '');
+      <div
+        className='renderer-timeseries-legend-table'
+        style={{
+          [inDashboard ? 'maxHeight' : 'maxHeight']: _tableHeight,
+          // height: legendEleSize?.height! + 14,
+          width: placement === 'right' ? (isExpanded ? '100%' : 'max-content') : '100%',
+          maxWidth: placement === 'right' ? (isExpanded ? '100%' : '40%') : '100%',
+          overflow: 'auto',
+          display: hasLegend ? 'block' : 'none',
+          flexShrink: displayMode === 'table' ? 1 : 0,
+          minHeight: 0,
+        }}
+      >
+        {displayMode === 'table' && (
+          <div ref={legendEleRef}>
+            <Table
+              tableLayout='auto' // 2024-01-10 对齐 grafana 效果，取消 fixed 改成 auto，开启 x 轴滚动条
+              rowKey='id'
+              size='small'
+              columns={tableColumn}
+              dataSource={legendData}
+              pagination={false}
+              rowClassName={(record) => {
+                return record.disabled ? 'renderer-timeseries-legend-table-row disabled' : 'renderer-timeseries-legend-table-row';
+              }}
+              onRow={(record) => {
+                return {
+                  onClick: () => {
+                    const newActiveLegend = activeLegend !== record.id ? record.id : '';
+                    setActiveLegend(newActiveLegend);
+                    setSeriesData(
+                      _.map(seriesData, (subItem) => {
+                        return {
+                          ...subItem,
+                          visible: newActiveLegend ? (legendBehaviour === 'hideItem' ? newActiveLegend !== subItem.id : newActiveLegend === subItem.id) : true,
+                        };
+                      }),
+                    );
+                  },
+                };
+              }}
+            />
+          </div>
+        )}
+        {displayMode === 'list' && !_.isEmpty(legendData) && (
+          <div className='renderer-timeseries-legend-container' ref={legendEleRef}>
+            <div
+              className={classNames({
+                'renderer-timeseries-legend-list': true,
+                'renderer-timeseries-legend-list-placement-right': placement === 'right',
+                'scroll-container': true,
+              })}
+            >
+              {_.map(legendData, (item) => {
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      const newActiveLegend = activeLegend !== item.id ? item.id : '';
+                      setActiveLegend(newActiveLegend);
                       setSeriesData(
                         _.map(seriesData, (subItem) => {
                           return {
                             ...subItem,
-                            visible: activeLegend === record.id ? true : record.id === subItem.id,
+                            visible: newActiveLegend ? (legendBehaviour === 'hideItem' ? newActiveLegend !== subItem.id : newActiveLegend === subItem.id) : true,
                           };
                         }),
                       );
-                    },
-                  };
-                }}
-              />
-            </div>
-            </Fragment>
-          )}
-          {displayMode === 'list' && !_.isEmpty(legendData) && (
-            <div className='renderer-timeseries-legend-container' ref={legendEleRef}>
-              <div
-                className={classNames({
-                  'renderer-timeseries-legend-list': true,
-                  'renderer-timeseries-legend-list-placement-right': placement === 'right',
-                  'scroll-container': true,
-                })}
-              >
-                {_.map(legendData, (item) => {
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => {
-                        setActiveLegend(activeLegend !== item.id ? item.id : '');
-                        setSeriesData(
-                          _.map(seriesData, (subItem) => {
-                            return {
-                              ...subItem,
-                              visible: activeLegend === item.id ? true : item.id === subItem.id,
-                            };
-                          }),
+                    }}
+                    className={classNames('renderer-timeseries-legend-list-item', {
+                      disabled: item.disabled,
+                    })}
+                  >
+                    <span className='renderer-timeseries-legend-color-symbol' style={{ backgroundColor: item.color }} />
+                    <NameWithTooltip record={item}>
+                      <span className='renderer-timeseries-legend-list-item-name'>{item.name}</span>
+                    </NameWithTooltip>
+
+                    <span className='renderer-timeseries-legend-list-item-calcs'>
+                      {_.map(legendColumns, (column) => {
+                        return (
+                          <span key={column}>
+                            {t(`panel.options.legend.${column}`)}: {item[column].text}
+                          </span>
                         );
-                      }}
-                      className={item.disabled ? 'disabled' : ''}
-                    >
-                      <span className='renderer-timeseries-legend-color-symbol' style={{ backgroundColor: item.color }} />
-                      {item.name}{' '}
-                      {detailUrl ? (
-                        <span>
-                          &nbsp;|&nbsp;
-                          <a href={detailFormatter(item)} target='_blank'>
-                            {detailName}
-                          </a>
-                        </span>
-                      ) : (
-                        ''
+                      })}
+                    </span>
+                    <span className='renderer-timeseries-legend-list-item-link'>
+                      {detailUrl && (
+                        <a href={detailFormatter(item)} target='_blank'>
+                          {detailName}
+                        </a>
                       )}
-                    </div>
-                  );
-                })}
-              </div>
-              {placement === 'right' && (
-                <div
-                  className='renderer-timeseries-legend-toggle'
-                  onClick={() => {
-                    setIsExpanded(!isExpanded);
-                  }}
-                >
-                  {isExpanded ? <VerticalLeftOutlined /> : <VerticalRightOutlined />}
-                </div>
-              )}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </div>
-      )}
+            {placement === 'right' && (
+              <div
+                className='renderer-timeseries-legend-toggle'
+                onClick={() => {
+                  setIsExpanded(!isExpanded);
+                }}
+              >
+                {isExpanded ? <VerticalLeftOutlined /> : <VerticalRightOutlined />}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
