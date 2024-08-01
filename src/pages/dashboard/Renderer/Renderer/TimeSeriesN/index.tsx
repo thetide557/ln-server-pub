@@ -23,12 +23,11 @@ const TimeSeriesN = function (props: IProps) {
   const { values, series, themeMode, time } = props;
   const { custom, options, datasourceCate } = values;
   const [seriesData, setseriesData] = useState<any[]>([]);
-
+  console.log(series,7877887)
   useEffect(() => {
-    if (datasourceCate === 'prometheus') {
+    if (datasourceCate === 'prometheus' || datasourceCate === 'tdengine') {
       setseriesData(convertTimeseriesToG2Data(series));
     } else {
-      console.log(series,67878797)
       setseriesData(series);
     }
   }, [series]);

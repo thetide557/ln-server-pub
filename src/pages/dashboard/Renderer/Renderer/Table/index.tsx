@@ -131,6 +131,7 @@ function TableCpt(props: IProps, ref: any) {
     } else if (displayMode === 'labelValuesToRows') {
       fields = _.isArray(aggrDimension) ? aggrDimension : [aggrDimension];
     }
+
     const aggrDimensions = _.isArray(aggrDimension) ? aggrDimension : [aggrDimension];
     const tableDataSource = formatToTable(data, aggrDimensions, 'refId');
     const groupNames = _.reduce(
@@ -457,12 +458,15 @@ function TableCpt(props: IProps, ref: any) {
   const realHeight = isNaN(height) ? 0 : height;
 
   const { components, resizableColumns, tableWidth, resetColumns } = useAntdResizableHeader({
-    columns: useMemo(() => {
-      if (!_.isEmpty(calculatedValues) && !_.isEmpty(tableColumns)) {
-        tableColumns = transformColumns(tableColumns, values.transformations);
-      }
-      return tableColumns;
-    }, [useDeepCompareWithRef(columns), displayMode, useDeepCompareWithRef(calculatedValues), sortObj, themeMode, aggrDimension, overrides, size, tableLayout]),
+   
+    // columns: useMemo(() => {
+     
+    //   if (!_.isEmpty(calculatedValues) && !_.isEmpty(tableColumns)) {
+    //     tableColumns = transformColumns(tableColumns, values.transformations);
+    //   }
+    //   return tableColumns;
+    // }, [useDeepCompareWithRef(columns), displayMode, useDeepCompareWithRef(calculatedValues), sortObj, themeMode, aggrDimension, overrides, size, tableLayout]),
+    columns: useMemo(() => tableColumns, [JSON.stringify(columns), displayMode, JSON.stringify(calculatedValues), sortObj, themeMode, aggrDimension, overrides, size]),
     columnsState: {
       persistenceType: 'localStorage',
       persistenceKey: `dashboard-table2.1-resizable-${values.id}`,

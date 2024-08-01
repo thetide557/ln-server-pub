@@ -43,6 +43,7 @@ export function completeBreakpoints(step: number | undefined, data: any[], start
 // };
 
 export const getSerieName = (metric: Object, ref?: string) => {
+  console.log(metric,9900)
   let name = metric != undefined ? metric['__name__']: '' || '';
   _.forEach(_.omit(metric, '__name__'), (value, key) => {
     name += ` ${key}: ${value}`;

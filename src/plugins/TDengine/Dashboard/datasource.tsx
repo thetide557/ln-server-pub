@@ -4,9 +4,10 @@ import { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 import { DatasourceCateEnum } from '@/utils/constant';
 import { getDsQuery } from '@/plugins/TDengine/services';
 import { IVariable } from '@/pages/dashboard/VariableConfig/definition';
-import replaceExpressionBracket from '@/pages/dashboard/Renderer/utils/replaceExpressionBracket';
-import { replaceExpressionVars } from '@/pages/dashboard/VariableConfig/constant';
-import { getSerieName } from '../utils';
+import  {replaceExpressionBracketTaos} from '@/pages/dashboard/Renderer/utils/replaceExpressionBracket';
+import { replaceExpressionVars, getOptionsList } from '@/pages/dashboard/VariableConfig/constant';
+import {  getSerieNameTao, completeBreakpoints } from '../utils';
+import replaceFieldWithVariable from '@/pages/dashboard/Renderer/utils/replaceFieldWithVariable';
 import { N9E_PATHNAME } from '@/utils/constant';
 interface IOptions {
   id?: string; // panelId
@@ -24,20 +25,27 @@ interface Result {
   series: any[];
   query?: any[];
 }
+const getDefaultStepByStartAndEnd = (start: number, end: number) => {
+  return Math.max(Math.floor((end - start) / 240), 1);
+};
 
 export default async function prometheusQuery(options: IOptions): Promise<Result> {
-  const { dashboardId, time, targets, variableConfig } = options;
+  const { dashboardId, time, targets, variableConfig,spanNulls, scopedVars } = options;
   if (!time.start) return Promise.resolve({ series: [] });
   const parsedRange = parseRange(time);
   let start = moment(parsedRange.start).toISOString();
   let end = moment(parsedRange.end).toISOString();
+  let start1 = moment(parsedRange.start).unix();
+  let end1 = moment(parsedRange.end).unix();
+  let _step: any = getDefaultStepByStartAndEnd(start1, end1);
   const series: any[] = [];
   let refIds: string[] = [];
+  let exprs: string[] = [];
+  console.log(targets,123455)
   const datasourceValue = variableConfig ? replaceExpressionVars(options.datasourceValue as any, variableConfig, variableConfig.length, dashboardId) : options.datasourceValue;
   if (targets && typeof datasourceValue === 'number') {
-    _.forEach(targets, (target) => {
-      refIds.push(target.refId);
-    });
+  
+   
     const queryParmas = {
       cate: DatasourceCateEnum.tdengine,
       datasource_id: datasourceValue,
@@ -48,10 +56,27 @@ export default async function prometheusQuery(options: IOptions): Promise<Result
           end = moment(parsedRange.end).toISOString();
         }
         const query: any = target.query || {};
+        const realExpr = variableConfig
+      ? replaceFieldWithVariable(
+          dashboardId,
+          query.query,
+          getOptionsList(
+            {
+              dashboardId,
+              variableConfigWithOptions: variableConfig,
+            },
+            time,
+            _step,
+          ),
+          scopedVars,
+        )
+      : target.expr;
+      refIds.push(target.refId);
+      exprs.push(target.query?.query);
         return {
           from: start,
           to: end,
-          query: query.query,
+          query: realExpr,
           keys: {
             metricKey: _.join(query.keys?.metricKey, ' '),
             labelKey: _.join(query.keys?.labelKey, ' '),
@@ -64,16 +89,32 @@ export default async function prometheusQuery(options: IOptions): Promise<Result
       let batchQueryRes: any = {};
       if (!_.isEmpty(targets) && _.some(targets, (target) => target.query?.query)) {
         batchQueryRes = await getDsQuery(queryParmas);
-        for (let i = 0; i < batchQueryRes?.length; i++) {
-          const target = _.find(targets, (t) => t.refId === refIds[i]);
-          _.forEach(batchQueryRes, (serie) => {
-            series.push({
-              id: _.uniqueId('series_'),
-              name: target?.legend ? replaceExpressionBracket(target?.legend, serie.metric) : getSerieName(serie.metric),
-              metric: serie.metric,
-              data: serie.values,
-            });
-          });
+        console.log(batchQueryRes, 123455677991)
+        for (let i = 0; i < batchQueryRes?.length; i++) {   
+
+          var item = {
+            result: batchQueryRes[i],
+            expr: exprs[i],
+            refId: refIds[i],
+          };
+          const target = _.find(targets, (t) => t.refId === refIds[i]) || _.find(targets, (t) => t.expr === item.expr);
+          // const target = _.find(targets, (t) => t.expr === item.expr);
+          // _.forEach(item.result, (serie) => {
+            // console.log(serie,123321)
+            console.log(target, 12345567799)
+            // if(target != undefined){
+              series.push({
+                id: _.uniqueId('series_'),
+                refId:  item?.refId,
+                name: target?.legend ? replaceExpressionBracketTaos(target?.legend, batchQueryRes[i].metric) : getSerieNameTao(batchQueryRes[i].metric),
+                metric: batchQueryRes[i].metric,
+                expr: item?.expr,
+                // data: batchQueryRes[i].values,
+                data: !spanNulls ? completeBreakpoints(_step, batchQueryRes[i].values, start1, end1) : batchQueryRes[i].values,
+              });
+            // });
+            // }
+            
         }
       }
       const resolveData: Result = { series };

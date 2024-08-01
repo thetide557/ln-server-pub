@@ -18,7 +18,6 @@ interface IProps {
 const GaugeN = (props: IProps) => {
   const { values, series, themeMode } = props;
   const { custom, options, datasourceCate } = values;
-
   const { calc, textMode } = custom;
   let calculatedValues = getCalculatedValuesBySeries(
     series,
@@ -31,13 +30,12 @@ const GaugeN = (props: IProps) => {
     options?.valueMappings,
     options?.thresholds,
   );
-
   // percentUnit  [0-1]
   const isPercentUnit = options.standardOptions?.util === 'percentUnit';
   const ticks = options.thresholds?.steps.map((v) => (isPercentUnit ? v.value : v.value / 100)) || [];
   const customOptions = {
     appendPadding: [0, 0, 20, 0],
-    percent: isPercentUnit ? calculatedValues[0].stat : calculatedValues[0].stat / 100,
+    percent: isPercentUnit ? calculatedValues[0]?.stat : calculatedValues[0]?.stat / 100,
     range: {
       ticks: [...ticks, 1],
       color: options.thresholds?.steps.map((v) => v.color),
@@ -59,7 +57,7 @@ const GaugeN = (props: IProps) => {
     axis: {
       label: {
         formatter(v) {
-          return calculatedValues[0].stat ? Number(v) * 100 : Number(v);
+          return calculatedValues[0]?.stat ? Number(v) * 100 : Number(v);
         },
       },
       subTickLine: {
@@ -71,9 +69,9 @@ const GaugeN = (props: IProps) => {
         offsetY: 5,
         style: {
           fontSize: '20px',
-          color: calculatedValues[0].color,
+          color: calculatedValues[0]?.color,
         },
-        formatter: () => calculatedValues[0].text,
+        formatter: () => calculatedValues[0]?.text,
       },
       content:
         textMode === 'valueAndName'
@@ -83,7 +81,7 @@ const GaugeN = (props: IProps) => {
                 fontSize: '20px',
                 // lineHeight: '44px',
               },
-              formatter: () => calculatedValues[0].name,
+              formatter: () => calculatedValues[0]?.name,
             }
           : undefined,
     },

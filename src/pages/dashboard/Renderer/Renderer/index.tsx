@@ -77,6 +77,7 @@ interface IProps {
 function index(props: IProps) {
   const { t } = useTranslation('dashboard');
   const { datasourceValue, themeMode, dashboardId, id, variableConfig, isPreview, onCloneClick, onShareClick, onEditClick, onDeleteClick, onFullScreenClick, isHome } = props;
+
   const [time, setTime] = useState(props.time);
   const [visible, setVisible] = useState(false);
   const values = _.cloneDeep(props.values);
@@ -96,6 +97,8 @@ function index(props: IProps) {
     spanNulls: values.custom?.spanNulls,
     scopedVars: values.scopedVars,
   });
+
+  console.log(series,9999)
   const name = replaceFieldWithVariable(dashboardId, values.name, variableConfig, values.scopedVars);
   const description = replaceFieldWithVariable(dashboardId, values.description, variableConfig, values.scopedVars);
   const tipsVisible = description || !_.isEmpty(values.links);
@@ -114,7 +117,7 @@ function index(props: IProps) {
     values,
     series: Array.isArray(series) ? series : series?.series,
   };
-
+console.log(series,8877)
   const RendererCptMap = {
    
     timeseries: () => <Timeseries {...subProps} themeMode={themeMode} time={time} setRange={props.setRange} isPreview={isPreview} />,

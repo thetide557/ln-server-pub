@@ -51,7 +51,7 @@ interface IProps {
 
 export default function useQuery(props: IProps) {
   const { dashboardId, datasourceCate, time, targets, variableConfig, inViewPort, spanNulls, datasourceValue } = props;
-  // console.log(props,11111)
+ 
   const form = Form.useFormInstance();
   const [series, setSeries] = useState<any[]>([]);
   const [query, setQuery] = useState<any[]>([]);
