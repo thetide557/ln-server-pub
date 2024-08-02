@@ -36,12 +36,24 @@ export default function replaceExpressionBracket(titleFormat, serieMetricLabels)
 
 export  function replaceExpressionBracketTaos(titleFormat, serieMetricLabels) {
   console.log(titleFormat,serieMetricLabels,6666)
-  const isSerieMetricLabels = serieMetricLabels || ''
-  let keys = _.map(extractBracketValue(titleFormat), _.trim);
-  var legendName = titleFormat;
-  keys.forEach((key) => {
-    const reg = new RegExp(`{{\\s?${key}\\s?}}`, 'g');
-    legendName = legendName.replace(reg, isSerieMetricLabels[key] ? isSerieMetricLabels[key] : '');
-  });
-  return legendName;
+  if(serieMetricLabels?.col){
+    const isSerieMetricLabels = serieMetricLabels.taeget || ''
+    let keys = _.map(extractBracketValue(titleFormat), _.trim);
+    var legendName = titleFormat;
+    keys.forEach((key) => {
+      const reg = new RegExp(`{{\\s?${key}\\s?}}`, 'g');
+      legendName = legendName.replace(reg, isSerieMetricLabels[key] ? isSerieMetricLabels[key] : '');
+    })
+    return legendName;
+  }else {
+    const isSerieMetricLabels = serieMetricLabels || ''
+    let keys = _.map(extractBracketValue(titleFormat), _.trim);
+    var legendName = titleFormat;
+    keys.forEach((key) => {
+      const reg = new RegExp(`{{\\s?${key}\\s?}}`, 'g');
+      legendName = legendName.replace(reg, isSerieMetricLabels[key] ? isSerieMetricLabels[key] : '');
+    })
+    return legendName;
+  }
+ 
 }

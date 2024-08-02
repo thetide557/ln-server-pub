@@ -17,13 +17,19 @@
 import _ from 'lodash';
 
 const formatToTable = (series: any[], rowBy: string[], colBy: string) => {
+  console.log(series,rowBy, colBy, 11223 )
   const rows = _.groupBy(series, (item) => {
+    console.log(item,11226)
     let groupkeys = '';
     _.forEach(rowBy, (key) => {
+      console.log(key,11227)
+      console.log(item.fields[key],11229)
       groupkeys += item.fields[key];
+      console.log(groupkeys,11228)
     });
     return groupkeys;
   });
+  console.log(rows, 11224 )
   const newSeries = _.map(rows, (val, key) => {
     const item: any = {
       id: _.uniqueId('series_'),
@@ -34,6 +40,7 @@ const formatToTable = (series: any[], rowBy: string[], colBy: string) => {
     const subGrouped = _.groupBy(val, (item) => {
       return item.fields[colBy];
     });
+    console.log(subGrouped, 11225 )
     _.forEach(subGrouped, (subVal, subKey) => {
       item[subKey] = {
         name: subVal[0].name,

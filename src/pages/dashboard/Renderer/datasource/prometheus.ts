@@ -108,6 +108,7 @@ export default async function prometheusQuery(options: IOptions) {
           const target = _.find(targets, (t) => t.expr === item.expr);
           console.log(target, 12345567799)
           _.forEach(item.result, (serie) => {
+            console.log(serie, 123455677992)
             series.push({
               id: _.uniqueId('series_'),
               refId: item.refId,

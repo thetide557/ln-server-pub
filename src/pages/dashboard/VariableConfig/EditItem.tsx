@@ -69,6 +69,10 @@ const allOptions = [
     value: 'elasticsearch',
     label: 'Elasticsearch',
   },
+  {
+    value: 'tdengine',
+    label: 'TDengine',
+  },
 ];
 
 function EditItem(props: IProps) {

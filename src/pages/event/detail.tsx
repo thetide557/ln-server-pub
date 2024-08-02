@@ -35,6 +35,7 @@ import PlusPreview from 'plus:/parcels/Event/Preview';
 // @ts-ignore
 import PlusLogsDetail from 'plus:/parcels/Event/LogsDetail';
 import PrometheusDetail from './Detail/Prometheus';
+import TdengineDetail from './Detail/TdengineDetail';
 import Host from './Detail/Host';
 import './detail.less';
 import { getStrategiesByRuleIds } from '@/services/warning';
@@ -165,8 +166,14 @@ const EventDetailPage: React.FC = () => {
     //   label: t('detail.cate'),
     //   key: 'cate',
     // },
-    ...(eventDetail?.cate === 'prometheus'
+    ...((eventDetail?.cate === 'prometheus' )
       ? PrometheusDetail({
+        eventDetail,
+        history,
+      })
+      : [false]),
+      ...(( eventDetail?.cate === 'tdengine')
+      ? TdengineDetail({
         eventDetail,
         history,
       })
