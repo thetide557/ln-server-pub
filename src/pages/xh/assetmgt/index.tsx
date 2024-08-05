@@ -503,44 +503,44 @@ export default function () {
     }
     setQueryCondition(param);
     getAssetsByCondition(param).then(({ dat }) => {
-      dat.list.forEach((entity, index) => {
-        let expands = entity.exps;
-        if (expands != null && expands.length > 0) {
-          const map = new Map();
-          expands.forEach((item, index, arr) => {
-            if (!map.has(item.config_category)) {
-              map.set(
-                item.config_category,
-                arr.filter((a) => a.config_category == item.config_category),
-              );
-            }
-          });
-          //以上分组加载数据
-          let mapValues = {};
-          map.forEach(function (value, key) {
-            const formDataMap = new Map();
-            value.forEach((item, index, arr) => {
-              if (!formDataMap.has(item.group_id)) {
-                formDataMap.set(
-                  item.group_id,
-                  arr.filter((a) => a.group_id == item.group_id),
-                );
-              }
-            });
-            let group: any = [];
-            formDataMap.forEach(function (value, i) {
-              let itemsChars = '';
-              value.forEach((item, index, arr) => {
-                itemsChars += '"' + item.name + '":"' + item.value + '",';
-              });
-              itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
-              group.push(JSON.parse(itemsChars));
-            });
-            mapValues[key] = group;
-          });
-          entity.expands = mapValues;
-        }
-      });
+      // dat.list.forEach((entity, index) => {
+      //   let expands = entity.exps;
+      //   if (expands != null && expands.length > 0) {
+      //     const map = new Map();
+      //     expands.forEach((item, index, arr) => {
+      //       if (!map.has(item.config_category)) {
+      //         map.set(
+      //           item.config_category,
+      //           arr.filter((a) => a.config_category == item.config_category),
+      //         );
+      //       }
+      //     });
+      //     //以上分组加载数据
+      //     let mapValues = {};
+      //     map.forEach(function (value, key) {
+      //       const formDataMap = new Map();
+      //       value.forEach((item, index, arr) => {
+      //         if (!formDataMap.has(item.group_id)) {
+      //           formDataMap.set(
+      //             item.group_id,
+      //             arr.filter((a) => a.group_id == item.group_id),
+      //           );
+      //         }
+      //       });
+      //       let group: any = [];
+      //       formDataMap.forEach(function (value, i) {
+      //         let itemsChars = '';
+      //         value.forEach((item, index, arr) => {
+      //           itemsChars += '"' + item.name + '":"' + item.value + '",';
+      //         });
+      //         itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
+      //         group.push(JSON.parse(itemsChars));
+      //       });
+      //       mapValues[key] = group;
+      //     });
+      //     entity.expands = mapValues;
+      //   }
+      // });
       // console.log('1111list', dat.list);
       
       setList(dat.list);
