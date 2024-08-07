@@ -23,7 +23,6 @@ function extractBracketValue(str) {
 }
 
 export default function replaceExpressionBracket(titleFormat, serieMetricLabels) {
-  console.log(titleFormat,serieMetricLabels,9911)
   const isSerieMetricLabels = serieMetricLabels || ''
   let keys = _.map(extractBracketValue(titleFormat), _.trim);
   var legendName = titleFormat;
@@ -35,7 +34,6 @@ export default function replaceExpressionBracket(titleFormat, serieMetricLabels)
 }
 
 export  function replaceExpressionBracketTaos(titleFormat, serieMetricLabels) {
-  console.log(titleFormat,serieMetricLabels,6666)
   if(serieMetricLabels?.col){
     const isSerieMetricLabels = serieMetricLabels.taeget || ''
     let keys = _.map(extractBracketValue(titleFormat), _.trim);

@@ -41,7 +41,6 @@ export default async function prometheusQuery(options: IOptions): Promise<Result
   const series: any[] = [];
   let refIds: string[] = [];
   let exprs: string[] = [];
-  console.log(targets,123455)
   const datasourceValue = variableConfig ? replaceExpressionVars(options.datasourceValue as any, variableConfig, variableConfig.length, dashboardId) : options.datasourceValue;
   if (targets && typeof datasourceValue === 'number') {
   
@@ -89,7 +88,6 @@ export default async function prometheusQuery(options: IOptions): Promise<Result
       let batchQueryRes: any = {};
       if (!_.isEmpty(targets) && _.some(targets, (target) => target.query?.query)) {
         batchQueryRes = await getDsQuery(queryParmas);
-        console.log(batchQueryRes, 123455677991)
         for (let i = 0; i < batchQueryRes?.length; i++) {   
 
           var item = {
@@ -101,11 +99,10 @@ export default async function prometheusQuery(options: IOptions): Promise<Result
           // const target = _.find(targets, (t) => t.expr === item.expr);
           // _.forEach(item.result, (serie) => {
             // console.log(serie,123321)
-            console.log(target, 12345567799)
             // if(target != undefined){
               series.push({
                 id: _.uniqueId('series_'),
-                refId:  item?.refId,
+                refId:  item?.refId ? item.refId : batchQueryRes[i].metric.col,
                 name: target?.legend ? replaceExpressionBracketTaos(target?.legend, batchQueryRes[i].metric) : getSerieNameTao(batchQueryRes[i].metric),
                 metric: batchQueryRes[i].metric,
                 expr: item?.expr,

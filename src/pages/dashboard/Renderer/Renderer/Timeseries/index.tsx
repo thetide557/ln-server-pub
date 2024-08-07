@@ -120,7 +120,6 @@ export default function index(props: IProps) {
   const { darkMode } = useContext(CommonStateContext);
   const { t } = useTranslation('dashboard');
   const { time, setRange, values, series, inDashboard = true, chartHeight = '200px', tableHeight = '200px', onClick, isPreview, colors } = props;
-  console.log(values,series,3131)
   const themeMode = props.themeMode || (darkMode ? 'dark' : 'light');
   const history = useHistory();
   const location = useLocation();

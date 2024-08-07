@@ -113,7 +113,6 @@ function TableCpt(props: IProps, ref: any) {
   }, [sortColumn, sortOrder]);
 
   useEffect(() => {
-    console.log(series,33445577)
     const data = getCalculatedValuesBySeries(
       series,
       calc,
@@ -147,7 +146,6 @@ function TableCpt(props: IProps, ref: any) {
       setDisplayedTableFields(fields);
       setTableFields(getColumnsKeys(data));
     }
-    console.log(data,33445566)
     setCalculatedValues(data);
   }, [isPreview, useDeepCompareWithRef(series), calc, useDeepCompareWithRef(options), displayMode, aggrDimension, useDeepCompareWithRef(columns)]);
 
@@ -276,7 +274,6 @@ function TableCpt(props: IProps, ref: any) {
         tableColumns,
       );
 
-      console.log(tableColumns,4444)
     }
 
     if (displayMode === 'labelsOfSeriesToRows') {
@@ -347,9 +344,7 @@ function TableCpt(props: IProps, ref: any) {
 
     if (displayMode === 'labelValuesToRows' && aggrDimension) {
       const aggrDimensions = _.isArray(aggrDimension) ? aggrDimension : [aggrDimension];
-      console.log(aggrDimensions,4444)
       tableDataSource = formatToTable(calculatedValues, aggrDimensions, 'refId');
-      console.log(tableDataSource,5555)
       const groupNames = _.reduce(
         tableDataSource,
         (pre, item) => {
@@ -357,7 +352,6 @@ function TableCpt(props: IProps, ref: any) {
         },
         [],
       );
-      console.log(groupNames,8888)
       tableColumns = _.map(aggrDimensions, (aggrDimension) => {
         return {
           title: aggrDimension,
@@ -428,7 +422,6 @@ function TableCpt(props: IProps, ref: any) {
           ...getColumnSearchProps([name, 'text']),
         });
       });
-      console.log(tableColumns,7777)
     }
 
     if (isAppendLinkColumn) {
@@ -505,7 +498,6 @@ function TableCpt(props: IProps, ref: any) {
             data.unshift(keys);
           }
           if (displayMode === 'labelValuesToRows' && aggrDimension) {
-            console.log(5555)
             const aggrDimensions = _.isArray(aggrDimension) ? aggrDimension : [aggrDimension];
             const groupNames = _.reduce(
               tableDataSource,

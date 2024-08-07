@@ -95,3 +95,24 @@ export default function index(props: { query: PromVisualQuery; datasourceValue: 
     </div>
   );
 }
+
+
+export function renderQueryTaos(query: PromVisualQuery, nested?: boolean) {
+  console.log('query1', query);
+  console.log('nested', nested);
+  
+  let queryString = `${query.metric ?? ''}${renderLabels(query.labels)}`;
+  queryString = renderOperations(queryString, query.operations);
+
+  if (!nested && hasBinaryOp(query) && Boolean(query.binaryQueries?.length)) {
+    queryString = `(${queryString})`;
+  }
+
+  queryString = renderBinaryQueries(queryString, query.binaryQueries);
+
+  if (nested && (hasBinaryOp(query) || Boolean(query.binaryQueries?.length))) {
+    queryString = `(${queryString})`;
+  }
+
+  return queryString;
+}

@@ -9,6 +9,7 @@ import React, { memo, useEffect, useMemo, useState } from 'react';
 import { getDetailUrl } from '../../utils/replaceExpressionDetail';
 import { convertTimeseriesToG2Data } from '../../utils/seriesConvert';
 import valueFormatter from '../../utils/valueFormatter';
+import getSerieName from '../../utils/getSerieName';
 import './style.less';
 
 interface IProps {
@@ -23,12 +24,11 @@ const TimeSeriesN = function (props: IProps) {
   const { values, series, themeMode, time } = props;
   const { custom, options, datasourceCate } = values;
   const [seriesData, setseriesData] = useState<any[]>([]);
-  console.log(series,7877887)
   useEffect(() => {
     if (datasourceCate === 'prometheus' || datasourceCate === 'tdengine') {
       setseriesData(convertTimeseriesToG2Data(series));
-    } else {
-      setseriesData(series);
+    }else {
+      setseriesData(series)
     }
   }, [series]);
 
@@ -94,7 +94,7 @@ const TimeSeriesN = function (props: IProps) {
       reversed: options.tooltip?.sort === 'desc',
       formatter: (datum: Datum) => {
         const val = {
-          name: datum.name,
+          name: datum.name.split('-')[0] + '-' + datum.name.split('-')[1],
           value: valueFormatter(
             {
               unit: options?.standardOptions?.util,

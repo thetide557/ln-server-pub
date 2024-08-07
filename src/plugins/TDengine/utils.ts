@@ -49,7 +49,6 @@ export const getSerieName = (metric: any) => {
 export const getSerieNameTao = (metric: any) => {
  
     const metricName = metric?.__name__ || '';
-    console.log(metricName,4444)
   const labels = _.keys(metric)
     .filter((ml) => ml !== '__name__')
     .map((label) => {

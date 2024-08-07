@@ -27,7 +27,6 @@ const getDefaultStepByStartAndEnd = (start: number, end: number) => {
 
 export default async function prometheusQuery(options: IOptions) {
   const { dashboardId, id, time, targets, variableConfig, spanNulls, scopedVars } = options;
-  console.log(time,6677)
   if (!time.start) return Promise.resolve([]);
   const parsedRange = parseRange(time);
   let start = moment(parsedRange.start).unix();
@@ -40,7 +39,6 @@ export default async function prometheusQuery(options: IOptions) {
   let refIds: string[] = [];
   let signalKey = `${id}`;
   
-  console.log(targets,123455)
   const datasourceValue = variableConfig ? replaceExpressionVars(options.datasourceValue as any, variableConfig, variableConfig.length, dashboardId) : options.datasourceValue;
   if (targets && typeof datasourceValue === 'number') {
     _.forEach(targets, (target) => {
@@ -72,7 +70,6 @@ export default async function prometheusQuery(options: IOptions) {
             scopedVars,
           )
         : target.expr;
-        console.log(realExpr,55888)
       if (realExpr) {
         if (target.instant) {
           batchInstantParams.push({
@@ -95,9 +92,7 @@ export default async function prometheusQuery(options: IOptions) {
     });
     try {
       if (!_.isEmpty(batchQueryParams)) {
-        console.log(batchQueryParams,5566)
         const res = await fetchHistoryRangeBatch({ queries: batchQueryParams, datasource_id: datasourceValue }, signalKey);
-        console.log(res, 123455677991)
         const dat = res.dat || [];
         for (let i = 0; i < dat?.length; i++) {
           var item = {
@@ -106,9 +101,7 @@ export default async function prometheusQuery(options: IOptions) {
             refId: refIds[i],
           };
           const target = _.find(targets, (t) => t.expr === item.expr);
-          console.log(target, 12345567799)
           _.forEach(item.result, (serie) => {
-            console.log(serie, 123455677992)
             series.push({
               id: _.uniqueId('series_'),
               refId: item.refId,
@@ -121,7 +114,6 @@ export default async function prometheusQuery(options: IOptions) {
         }
       }
       if (!_.isEmpty(batchInstantParams)) {
-        console.log(batchInstantParams,5577)
         const res = await fetchHistoryInstantBatch({ queries: batchInstantParams, datasource_id: datasourceValue }, signalKey);
         const dat = res.dat || [];
         for (let i = 0; i < dat?.length; i++) {

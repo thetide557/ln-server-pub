@@ -81,7 +81,6 @@ function index(props: IProps) {
   const [time, setTime] = useState(props.time);
   const [visible, setVisible] = useState(false);
   const values = _.cloneDeep(props.values);
-  console.log(values,1111)
   const ref = useRef<HTMLDivElement>(null);
   const bodyWrapRef = useRef<HTMLDivElement>(null);
   const [inViewPort] = useInViewport(ref);
@@ -98,7 +97,6 @@ function index(props: IProps) {
     scopedVars: values.scopedVars,
   });
 
-  console.log(series,9999)
   const name = replaceFieldWithVariable(dashboardId, values.name, variableConfig, values.scopedVars);
   const description = replaceFieldWithVariable(dashboardId, values.description, variableConfig, values.scopedVars);
   const tipsVisible = description || !_.isEmpty(values.links);
@@ -117,7 +115,6 @@ function index(props: IProps) {
     values,
     series: Array.isArray(series) ? series : series?.series,
   };
-console.log(series,8877)
   const RendererCptMap = {
    
     timeseries: () => <Timeseries {...subProps} themeMode={themeMode} time={time} setRange={props.setRange} isPreview={isPreview} />,

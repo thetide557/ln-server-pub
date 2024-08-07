@@ -86,7 +86,6 @@ export default function useQuery(props: IProps) {
       setLoading(true);
       fetchQueryMap[datasourceCate](props)
         .then((res: any[]) => {
-          console.log(res,56465)
           setSeries(res);
           setError('');
         })

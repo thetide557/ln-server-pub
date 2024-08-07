@@ -302,8 +302,8 @@ export default function () {
               history.push({
                 pathname: '/metric/explorer',
                 search: queryString.stringify({
-                  prom_ql: query?.metric,
-                  data_source_name: 'tdengine',
+                  prom_ql: prom_ql,
+                  data_source_name: 'prometheus',
                   data_source_id: record.datasource_id,
                   mode: 'graph',
                   start: moment().subtract(30, 'minutes').unix(),
