@@ -7,7 +7,7 @@ import _, { flowRight } from 'lodash';
 import moment from 'moment';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { getDetailUrl } from '../../utils/replaceExpressionDetail';
-import { convertTimeseriesToG2Data } from '../../utils/seriesConvert';
+import { convertTimeseriesToG2Data, convertTimeseriesToG2DataTn } from '../../utils/seriesConvert';
 import valueFormatter from '../../utils/valueFormatter';
 import getSerieName from '../../utils/getSerieName';
 import './style.less';
@@ -25,7 +25,9 @@ const TimeSeriesN = function (props: IProps) {
   const { custom, options, datasourceCate } = values;
   const [seriesData, setseriesData] = useState<any[]>([]);
   useEffect(() => {
-    if (datasourceCate === 'prometheus' || datasourceCate === 'tdengine') {
+    if (datasourceCate === 'prometheus') {
+      setseriesData(convertTimeseriesToG2DataTn(series));
+    }else if(datasourceCate === 'tdengine'){
       setseriesData(convertTimeseriesToG2Data(series));
     }else {
       setseriesData(series)
@@ -94,7 +96,7 @@ const TimeSeriesN = function (props: IProps) {
       reversed: options.tooltip?.sort === 'desc',
       formatter: (datum: Datum) => {
         const val = {
-          name: datum.name.split('-')[0] + '-' + datum.name.split('-')[1],
+          name: datum.name.split('-').length == 2 ? datum.name.split('-')[0] : datum.name.split('-')[0] + '-' + datum.name.split('-')[1],
           value: valueFormatter(
             {
               unit: options?.standardOptions?.util,

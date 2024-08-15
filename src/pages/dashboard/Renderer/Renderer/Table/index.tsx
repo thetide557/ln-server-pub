@@ -113,6 +113,7 @@ function TableCpt(props: IProps, ref: any) {
   }, [sortColumn, sortOrder]);
 
   useEffect(() => {
+    console.log(series,11999)
     const data = getCalculatedValuesBySeries(
       series,
       calc,
@@ -146,6 +147,7 @@ function TableCpt(props: IProps, ref: any) {
       setDisplayedTableFields(fields);
       setTableFields(getColumnsKeys(data));
     }
+    console.log(data,11888)
     setCalculatedValues(data);
   }, [isPreview, useDeepCompareWithRef(series), calc, useDeepCompareWithRef(options), displayMode, aggrDimension, useDeepCompareWithRef(columns)]);
 

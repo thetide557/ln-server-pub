@@ -22,11 +22,12 @@ import { IVariable } from './definition';
 interface IProps {
   expression: IVariable;
   value: string | string[];
+  dataWithoutConstants: any[];
   onChange: (val: string | string[]) => void; // 目前只为了外层更新变量 options
 }
 
 export default function DisplayItem(props: IProps) {
-  const { expression, value, onChange } = props;
+  const { expression, value, dataWithoutConstants, onChange } = props;
   const { name, label, multi, allOption, options, type, hide } = expression;
   const [selected, setSelected] = useState<string | string[]>(value);
 
@@ -37,7 +38,7 @@ export default function DisplayItem(props: IProps) {
   if (type === 'constant' || hide) return null;
 
   return (
-    <div className='tag-content-close-item'>
+    <div className='tag-content-close-item'  style={{ marginTop: dataWithoutConstants?.length > 2 ? '5px' : '0'}}>
       <Input.Group>
         <span className='ant-input-group-addon'>{label || name}</span>
         {type === 'query' || type === 'custom' ? (

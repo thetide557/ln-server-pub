@@ -7,7 +7,7 @@ import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import getCalculatedValuesBySeries from '../../utils/getCalculatedValuesBySeries';
 import { getDetailUrl } from '../../utils/replaceExpressionDetail';
-import { convertTimeseriesToG2Data } from '../../utils/seriesConvert';
+import { convertTimeseriesToG2DataTn } from '../../utils/seriesConvert';
 import valueFormatter from '../../utils/valueFormatter';
 
 import './style.less';
@@ -34,7 +34,7 @@ export default function (props: IProps) {
   const { values, series, themeMode, time } = props;
   const { custom, options } = values;
 
-  const seriesData = convertTimeseriesToG2Data(series);
+  const seriesData = convertTimeseriesToG2DataTn(series);
   const [dashboardMeta] = useGlobalState('dashboardMeta');
 
   const detailFormatter = (data: any) => {
@@ -67,6 +67,7 @@ export default function (props: IProps) {
       enterable: true,
       fields: ['name', 'value', 'metric', custom?.seriesField],
       formatter: (datum: Datum) => {
+        console.log(datum,11111)
         const val = {
           name: custom.stack === 'noraml' ? datum[custom.seriesField] : datum.name,
           value: valueFormatter(

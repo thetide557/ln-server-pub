@@ -155,13 +155,15 @@ function index(props: IProps) {
 
   return (
     <div className='tag-area'>
-      <div className={classNames('tag-content', 'tag-content-close')}>
+      <div className={classNames('tag-content', 'tag-content-close')} style={{ marginTop: dataWithoutConstant?.length > 5 ? '70px' : dataWithoutConstant?.length > 2 ? '32px' : '0'}}>
         {_.map(dataWithoutConstant, (item) => {
+         
           return (
             <DisplayItem
               key={item.name}
               expression={item}
               value={item.value}
+              dataWithoutConstants = {dataWithoutConstant}
               onChange={(val) => {
                 // 缓存变量值，更新 url 里的变量值
                 setVaraiableSelected({

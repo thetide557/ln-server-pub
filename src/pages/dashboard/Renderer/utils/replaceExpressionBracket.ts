@@ -35,7 +35,29 @@ export default function replaceExpressionBracket(titleFormat, serieMetricLabels)
 
 export  function replaceExpressionBracketTaos(titleFormat, serieMetricLabels) {
   if(serieMetricLabels?.col){
-    const isSerieMetricLabels = serieMetricLabels.taeget || ''
+    const isSerieMetricLabels = serieMetricLabels.target || ''
+    let keys = _.map(extractBracketValue(titleFormat), _.trim);
+    var legendName = titleFormat;
+    keys.forEach((key) => {
+      const reg = new RegExp(`{{\\s?${key}\\s?}}`, 'g');
+      legendName = legendName.replace(reg, isSerieMetricLabels[key] ? isSerieMetricLabels[key] : '');
+    })
+    return legendName;
+  }else {
+    const isSerieMetricLabels = serieMetricLabels || ''
+    let keys = _.map(extractBracketValue(titleFormat), _.trim);
+    var legendName = titleFormat;
+    keys.forEach((key) => {
+      const reg = new RegExp(`{{\\s?${key}\\s?}}`, 'g');
+      legendName = legendName.replace(reg, isSerieMetricLabels[key] ? isSerieMetricLabels[key] : '');
+    })
+    return legendName;
+  }
+ 
+}
+export  function replaceExpressionBracketTaoss(titleFormat, serieMetricLabels) {
+  if(serieMetricLabels?.col){
+    const isSerieMetricLabels = serieMetricLabels.target || ''
     let keys = _.map(extractBracketValue(titleFormat), _.trim);
     var legendName = titleFormat;
     keys.forEach((key) => {

@@ -4,7 +4,7 @@ import { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 import { DatasourceCateEnum } from '@/utils/constant';
 import { getDsQuery } from '@/plugins/TDengine/services';
 import { IVariable } from '@/pages/dashboard/VariableConfig/definition';
-import  {replaceExpressionBracketTaos} from '@/pages/dashboard/Renderer/utils/replaceExpressionBracket';
+import  {replaceExpressionBracketTaos, replaceExpressionBracketTaoss} from '@/pages/dashboard/Renderer/utils/replaceExpressionBracket';
 import { replaceExpressionVars, getOptionsList } from '@/pages/dashboard/VariableConfig/constant';
 import {  getSerieNameTao, completeBreakpoints } from '../utils';
 import replaceFieldWithVariable from '@/pages/dashboard/Renderer/utils/replaceFieldWithVariable';
@@ -89,17 +89,29 @@ export default async function prometheusQuery(options: IOptions): Promise<Result
       if (!_.isEmpty(targets) && _.some(targets, (target) => target.query?.query)) {
         batchQueryRes = await getDsQuery(queryParmas);
         for (let i = 0; i < batchQueryRes?.length; i++) {   
-
           var item = {
             result: batchQueryRes[i],
             expr: exprs[i],
             refId: refIds[i],
           };
+        
           const target = _.find(targets, (t) => t.refId === refIds[i]) || _.find(targets, (t) => t.expr === item.expr);
           // const target = _.find(targets, (t) => t.expr === item.expr);
           // _.forEach(item.result, (serie) => {
             // console.log(serie,123321)
             // if(target != undefined){
+            if( batchQueryRes[i].metric?.col){
+              series.push({
+                id: _.uniqueId('series_'),
+                refId:  item?.refId ? item.refId : batchQueryRes[i].metric.col,
+                name: target?.legend ? replaceExpressionBracketTaoss(target?.legend, batchQueryRes[i].metric) : getSerieNameTao(batchQueryRes[i].metric),
+                metric: batchQueryRes[i].metric,
+                expr: item?.expr,
+                // data: batchQueryRes[i].values,
+                data: !spanNulls ? completeBreakpoints(_step, batchQueryRes[i].values, start1, end1) : batchQueryRes[i].values,
+              });
+
+            }else {
               series.push({
                 id: _.uniqueId('series_'),
                 refId:  item?.refId ? item.refId : batchQueryRes[i].metric.col,
@@ -109,6 +121,10 @@ export default async function prometheusQuery(options: IOptions): Promise<Result
                 // data: batchQueryRes[i].values,
                 data: !spanNulls ? completeBreakpoints(_step, batchQueryRes[i].values, start1, end1) : batchQueryRes[i].values,
               });
+
+            }
+             
+
             // });
             // }
             

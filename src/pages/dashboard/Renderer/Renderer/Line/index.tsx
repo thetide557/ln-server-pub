@@ -2,7 +2,7 @@ import { IPanel } from '@/pages/dashboard/types';
 import { Datum } from '@ant-design/graphs';
 import { Line } from '@ant-design/plots';
 import React from 'react';
-import { convertTimeseriesToG2Data } from '../../utils/seriesConvert';
+import { convertTimeseriesToG2DataTn } from '../../utils/seriesConvert';
 import valueFormatter from '../../utils/valueFormatter';
 
 import './style.less';
@@ -17,7 +17,7 @@ export default function (props: IProps) {
   const { values, series, themeMode } = props;
   const { custom, options } = values;
 
-  const seriesData = convertTimeseriesToG2Data(series);
+  const seriesData = convertTimeseriesToG2DataTn(series);
   const customOptions = {
     xField: 'name',
     yField: 'value',
