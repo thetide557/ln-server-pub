@@ -155,6 +155,9 @@ export default function Base({ type, form, assetId, onAssetChange }) {
               <Select
                 showSearch
                 options={[{ label: '全部', value: 0 }].concat(assetOptions)}
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
                 onChange={(v) => {
                   onAssetChange({
                     includes: v !== 0 ? [v] : [],
@@ -174,6 +177,9 @@ export default function Base({ type, form, assetId, onAssetChange }) {
                 showSearch
                 mode='multiple'
                 options={assetOptions}
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
                 onChange={(v) => {
                   onAssetChange({
                     includes: [form.getFieldValue('asset_id')],

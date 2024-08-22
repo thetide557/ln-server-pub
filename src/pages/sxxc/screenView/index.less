@@ -9,57 +9,136 @@
       position: absolute;
       right: 1%;
       top: 2%;
-      z-index: 9999;
+      z-index: 99999;
       .back1 {
-        // width: 100px;
-        // position: absolute;
+        // position: relative;
+        width: 1.664vw;
+        height: 1.664vw;
+        text-align: center;
+        line-height: 1.664vw;
+        background: url('/image/screenview/card5.png') no-repeat;
+        background-size: 100% 100%;
         color: #fff;
         cursor: pointer;
-        // margin-left: 5px;
-        img {
-          width: 18px;
-          height: 18px;
+        &:hover {
+          position: relative;
+          width: 1.664vw;
+          height: 1.664vw;
+          text-align: center;
+          line-height: 1.664vw;
+          background: url('/image/screenview/card6.png') no-repeat;
+          background-size: 100% 100%;
+          color: #fff;
+          cursor: pointer;
         }
-      }
-      .screen-groups {
-        margin-right: 4px;
+        >img {
+          width: 1.56vw;
+          height: 1.56vw;
+        }
       }
       .choose_screen1 {
         // z-index: 9999;
         cursor: pointer;
-        color: #f0f0f0;
-        margin: 0 7px;
-        // font-size: 14px;
-        // .ant-select:not(.ant-select-customize-input) .ant-select-selector {
-        //   background: transparent;
-        // }
-        // .ant-select-arrow {
-        //   color: #fff;
-        // }
-        // .ant-select-clear {
-        //   background: #000;
-        //   color: #fff;
-        // }
-        // .ant-select {
-        //   color: #fff;
-        // } 
       }
     }
    
   }
   .screen-icon {
     cursor: pointer;
-    color: #f0f0f0;
-    width: 30px;
+    // width: 30px;
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    // justify-content: space-around;
     align-items: center;
+    >span {
+      font-family: Source Han Sans CN;
+      font-weight: bold;
+      font-size: 0.728vw;
+      color: #FFFFFF;
+      text-shadow: 0px 1px 0px rgba(3,22,42,0.66), 0px 1px 0px rgba(3,21,36,0.72), 0px 5px 0px rgba(50,106,164,0.39);
+      background: linear-gradient(0deg, rgba(10,177,255,0.5) 0%, rgba(255,255,255,0.5) 50.2685546875%, rgba(255,255,255,0.5) 83.7890625%, rgba(10,177,255,0.5) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      // -webkit-text-fill-color: transparent;
+    }
+  }
+  .icon1 {
+    width: 4.368vw;
+    height: 1.669vw;
+    background: url('/image/screenview/card1.png') no-repeat;
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    // padding: 0 0.364vw;
+    
+    &:hover {
+      width: 4.368vw;
+      height: 1.669vw;
+      background: url('/image/screenview/card3.png') no-repeat;
+      background-size: 100% 100%;
+      box-sizing: border-box;
+      // padding: 0 0.364vw;
+      >span {
+        font-family: Source Han Sans CN;
+        font-weight: 400;
+        font-size: 0.728vw;
+        color: #AFE0FF;
+      }
+    }
+   
+  }
+  .icon2 {
+    width: 3.64vw;
+    height: 1.664vw;
+    background: url('/image/screenview/card2.png') no-repeat;
+    background-size: 100% 100%;
+    box-sizing: border-box;
+    // padding: 0 0.364vw;
+    margin: 0 0.364vw;
+    &:hover {
+      width: 3.64vw;
+      height: 1.664vw;
+      background: url('/image/screenview/card4.png') no-repeat;
+      background-size: 100% 100%;
+      box-sizing: border-box;
+      // padding: 0 0.364vw;
+      margin: 0 0.364vw;
+      >span {
+        font-family: Source Han Sans CN;
+        font-weight: 400;
+        font-size: 0.728vw;
+        color: #AFE0FF;
+      }
+    }
   }
 }
-.ant-dropdown-menu-item-selected {
-  background-color: #fff!important;
-  color: #4D83FF;
+.screen-drop {
+  .ant-dropdown-menu-item-selected {
+    // background-color: #fff!important;
+    // color: #4D83FF;
+    background-color: #0D314E!important;
+    color: #D5D8DC!important;
+  }
+  .ant-dropdown-menu-item-active {
+    // background-color: #fff!important;
+    // color: #4D83FF;
+    background-color: #0D314E!important;
+    color: #D5D8DC!important;
+  }
+  .ant-dropdown-arrow {
+    background: #08243A;
+    &::before {
+      background: #08243A;
+    }
+  }
+  .ant-dropdown-menu {
+    background: #08243A;
+    .ant-dropdown-menu-item {
+      color: #AFE0FF;
+    }
+   
+  }
 }
+
 #logFrame {
   min-width: 100vw;
   min-height: 100vh;

@@ -61,13 +61,14 @@ export default function Title(props: IProps) {
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
-  
+
   const { viewMode, themeMode, showback } = query;
   const [selectGroup, setSelectGroup] = useState<any>(dashboard.group_id)
   const [defaultModal, setdefaultModal] = useState(false);
   const [form] = Form.useForm();
   const [options, setOptions] = useState([]);
-   
+  const [flag, setFlag] = useState<any>(true)
+
   const { profile, setProfile, busiGroups } = useContext(CommonStateContext);
   const setHomePage = () => {
     // setHome(id);
@@ -146,8 +147,15 @@ export default function Title(props: IProps) {
     // window.location.href = '/home'
   }
 
- 
-  
+  const handleEnter = () => {
+    setFlag(false)
+  }
+  const handleLeave= () => {
+    setFlag(true)
+  }
+
+
+
 
   useEffect(() => {
     // document.title = `${dashboard.name} - ${cachePageTitle}`;
@@ -190,11 +198,11 @@ export default function Title(props: IProps) {
                 }}
               />
             )} */}
-             {isPreview && !isBuiltin ? null : (
+            {isPreview && !isBuiltin ? null : (
               <RollbackOutlined
                 className='back'
                 onClick={() => {
-                 history.push('/screenView')
+                  history.push('/screenView')
                 }}
               />
             )}
@@ -320,10 +328,10 @@ export default function Title(props: IProps) {
             </Dropdown>
           </div> */}
               <div className='screen-groups'>
-                <Dropdown overlay={menu} arrow>
-                  <div className='screen-icon'>
-                    <AddPanelIcon />
-                    <DownOutlined />
+                <Dropdown overlay={menu} arrow overlayClassName='screen-drop'>
+                  <div className='screen-icon icon2'>
+                    <span>项目组</span>
+                    <DownOutlined style={{fontSize: '0.52vw', marginLeft: '0.1vw'}} />
                   </div>
                 </Dropdown>
               </div>
@@ -341,8 +349,12 @@ export default function Title(props: IProps) {
               ))}
             </Select>
           </div> */}
-              <div className='back1' onClick={goBack}>
-                <img src="/image/back.png" alt="" title='返回' />
+              <div className='back1' onClick={goBack} title='返回' onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+                <div className='back-icon'></div>
+                <img src="/image/screenview/back.png" alt="" />
+                {/* {
+                  flag ? <img src="/image/screenview/back.png" alt="" /> : <img src="/image/screenview/back1.png" alt="" />
+                } */}
               </div>
             </div>
           </Space>

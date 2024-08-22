@@ -33,6 +33,7 @@ export default function ScreenView() {
   const { busiGroups } = useContext(CommonStateContext);
   const [url, setUrl] = useState<any>('')
   const [first, setFirst] = useState<any>('')
+  const [flag, setFlag] = useState<any>(true)
   const baseUrl = '/dataroom/#/bigscreen/preview'
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
@@ -126,6 +127,13 @@ export default function ScreenView() {
   //     setUrl(screenUrl)
   //   }
   // }
+  const handleEnter = () => {
+    setFlag(false)
+  }
+  const handleLeave= () => {
+    setFlag(true)
+  }
+  
   useEffect(() => {
     getBigScreen().then(res => {
       if (res.dat.list.length > 0) {
@@ -156,18 +164,19 @@ export default function ScreenView() {
       <div className='screen1'>
         <div className='screen1-cont'>
           <div className='screen-groups'>
-            <Dropdown overlay={menu1} arrow>
-              <div className='screen-icon'>
-                <AppstoreOutlined />
-                <DownOutlined />
+            <Dropdown overlay={menu1} arrow overlayClassName='screen-drop'>
+              <div className='screen-icon icon1'>
+                {/* <AppstoreOutlined /> */}
+                <span>切换大屏</span>
+                <DownOutlined style={{fontSize: '0.52vw', marginLeft: '0.1vw'}} />
               </div>
             </Dropdown>
           </div>
           <div className='screen-groups'>
-            <Dropdown overlay={menu} arrow>
-              <div className='screen-icon'>
-                <AddPanelIcon />
-                <DownOutlined />
+            <Dropdown overlay={menu} arrow overlayClassName='screen-drop'>
+              <div className='screen-icon icon2'>
+                <span>项目组</span>
+                <DownOutlined style={{fontSize: '0.52vw', marginLeft: '0.1vw'}} />
               </div>
             </Dropdown>
           </div>
@@ -185,8 +194,12 @@ export default function ScreenView() {
               ))}
             </Select>
           </div> */}
-          <div className='back1' onClick={goBack}>
-            <img src="/image/back.png" alt="" title='返回' />
+          <div className='back1' onClick={goBack} title='返回' onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+            <div className='back-icon'></div>
+            <img src="/image/screenview/back.png" alt=""  />
+            {/* {
+              flag ? <img src="/image/screenview/back.png" alt=""  /> : <img style={{width: '18px', height: '17px'}} src="/image/screenview/back1.png" alt=""  />
+            } */}
           </div>
         </div>
         <iframe id="logFrame" src={url} sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
