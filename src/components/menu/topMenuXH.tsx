@@ -544,6 +544,7 @@ export default function () {//{ selectMenu?:any }
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
+            localStorage.removeItem('userId');
             // history.push('/login');
             window.location.href = '/login'
           });

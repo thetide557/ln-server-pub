@@ -244,6 +244,9 @@ function App() {
         // 非匿名访问，需要初始化一些公共数据
         if (!anonymous) {
           const { dat: profile } = await GetProfile();
+          // console.log('profile', profile);
+          // 存储用户id
+          localStorage.setItem('userId', profile?.id)
           const { dat: busiGroups } = await getBusiGroups();
           const { dat: permList } = await getMenuPerm()
           const datasourceList = await getDatasourceBriefList();

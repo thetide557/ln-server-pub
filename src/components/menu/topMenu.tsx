@@ -469,6 +469,7 @@ export default function () {
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
+            localStorage.removeItem('userId');
             history.push('/login');
           });
         }}

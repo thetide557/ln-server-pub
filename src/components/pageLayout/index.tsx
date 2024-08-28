@@ -60,6 +60,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
+            localStorage.removeItem('userId');
             history.push('/login');
           });
         }}
