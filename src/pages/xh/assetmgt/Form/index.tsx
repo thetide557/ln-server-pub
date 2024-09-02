@@ -292,6 +292,26 @@ export default function () {
     setAssetData({ ...assetData, ...values, ...params });
   };
 
+  // IP地址校验规则
+  const validateIP = (rule, value) => {
+    if(value){
+      const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+      if (!regex.test(value)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+      
+      const parts = value.split('.').map(Number);
+      if (parts.every(part => part === 0)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+      if (parts.every(part => part === 255)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+    }
+    return Promise.resolve();
+  };
+  
+
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
   return (
     <div className='asset_every'>
@@ -350,7 +370,7 @@ export default function () {
                   {/* <Form.Item label='IP地址' name='ip' rules={[{ required: true }]}>
                     <Input placeholder='请输入IP地址' />
                   </Form.Item> */}
-                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }]}>
+                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }, { validator: validateIP }]}>
                     {/* <Select
                       showSearch
                       options={assetOptions}
