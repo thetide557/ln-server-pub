@@ -523,10 +523,17 @@ export default function () {
   };
 
   const onSelect = (selectedKeys, info) => {
+    console.log(filterParam);
+    
     setTypeId(selectedKeys[0]);
     setCurrentAssetId(0);
-    setFilterParam("asset_ip");
-    setFilterType("input");
+    if (filterParam == 'status') {
+      setFilterType("select");
+    } else {
+      setFilterType("input");
+    }
+    // setFilterParam("asset_ip");
+    
     setSearchVal(null);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
