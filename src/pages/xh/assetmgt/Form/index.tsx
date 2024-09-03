@@ -186,7 +186,15 @@ export default function () {
           ...v,
         };
       });
-      setAssetTypes(items);
+      // 新增时，资产类型不能选择物理服务器和虚拟服务器
+      if(!id){
+        const insertItems = items.filter(item => item.value !== "物理服务器" && item.value !== "虚拟服务器");
+        setAssetTypes(insertItems);
+      }else{
+        setAssetTypes(items);
+      }
+      
+
     });
     let param = {};
     param['limit'] = -1;
@@ -355,8 +363,8 @@ export default function () {
                       options={assetTypes}
                       placeholder='请选择资产类型'
                       disabled={id != null}
-                      onChange={(val) => {
-                        setCurrentType(val);
+                      onChange={(val) => {                       
+                        setCurrentType(val);                        
                       }}
                     />
                   </Form.Item>
@@ -387,6 +395,7 @@ export default function () {
                     /> */}
                     <AutoComplete
                       allowClear={true}
+                      disabled={currentType==="物理服务器" || currentType==="虚拟服务器"}
                       options={assetOptions}
                       onChange={handleChange}
                       // onSearch={(text) => getPanelValue(text)}
