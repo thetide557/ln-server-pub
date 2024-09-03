@@ -209,7 +209,7 @@ const Resource: React.FC = () => {
 
   const onChangeType = (val) => {
     console.log(val)
-    let name = typeList.filter(item => item.id == val)[0].name
+    let name = typeList.filter(item => item.id == val)[0]?.name
     setTaskTypeName(name)
     getSubType(val)
   }

@@ -50,7 +50,7 @@ const Resource: React.FC = () => {
   const [subType, setSubType] = useState<string>();
   const [strategyList, setStrategyList] = useState([] as any);
   const [createTime, setCreateTime] = useState<string>();
-  const [resultList, setResultList] = useState(['success', 'waiting', 'running', 'timeout']);
+  const [resultList, setResultList] = useState(['success', 'waiting', 'running', 'timeout','todo','failed']);
   const [form] = Form.useForm();
   const { profile, permList, busiGroups } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
@@ -246,7 +246,7 @@ const Resource: React.FC = () => {
 
   const onChangeType = (val) => {
     console.log(val)
-    let name = typeList.filter(item => item.id == val)[0].name
+    let name = typeList.filter(item => item.id == val)[0]?.name
     setTaskType(name)
     setSubType(undefined)
     getSubType(val)

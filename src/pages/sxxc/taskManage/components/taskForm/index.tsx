@@ -110,10 +110,10 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
 
   return !loading ? (
     <Form layout='vertical' form={form} initialValues={initialValues} preserve={false}>
-      <Form.Item label={'任务名称：'} name='title' rules={[{ required: true, message: '请输入任务名称' }]}>
+      <Form.Item label={'任务名称：'} name='title' rules={[{ required: true, message: '请输入任务名称' },{max:20,message:'20字不能重复'}]}>
         <Input
           placeholder='20字不能重复'
-          max={20}
+          maxLength={20}
         />
       </Form.Item>
       {/* <Form.Item label={'业务组： '} name='groupId' rules={[{ required: true, message: '请选择业务组' }]}>
