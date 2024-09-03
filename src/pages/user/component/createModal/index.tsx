@@ -34,7 +34,6 @@ import {
 } from '@/services/manage';
 import { ModalProps, User, Team, UserType, ActionType, Contacts } from '@/store/manageInterface';
 import { useTranslation } from 'react-i18next';
-
 const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
   const { t } = useTranslation('user');
   const { visible,existUserIds, userType, onClose, action, userId, teamId, onSearch, width } = props;
@@ -57,6 +56,8 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
         values.contacts.forEach((item: Contacts) => {
           contacts[item.key] = item.value;
         });
+      contacts = JSON.stringify(contacts)
+      
       let params = { ...values, contacts, confirm: undefined };
 
       if (action === ActionType.CreateUser) {
