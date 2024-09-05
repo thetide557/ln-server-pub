@@ -208,11 +208,11 @@ const Resource: React.FC = () => {
   }
 
   const onChangeType = (val) => {
-    console.log(val)
-    let name = typeList.filter(item => item.id == val)[0]?.name
-    setTaskTypeName(name)
-    getSubType(val)
-  }
+    console.log(val) 
+      let name = typeList.filter(item => item.id == val)[0]?.name
+      setTaskTypeName(name)
+      getSubType(val)
+    }
 
   useEffect(() => {
     getTaskType()
@@ -259,7 +259,7 @@ const Resource: React.FC = () => {
             </Space>
             <Space style={{ marginRight: 16 }}>
               <Form.Item label={'任务类型'} >
-                <Select allowClear placeholder={'任务类型'} style={{ width: 200 }} onChange={onChangeType}>
+                <Select allowClear placeholder={'任务类型'} style={{ width: 200 }} onChange={onChangeType} onClear={()=>{form.setFieldsValue({ taskSubName: undefined })}}>
                   {_.map(typeList, (item) => {
                     return (
                       <Select.Option key={item.id} value={item.id}>
