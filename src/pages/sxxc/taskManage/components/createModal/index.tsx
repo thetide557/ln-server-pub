@@ -58,9 +58,13 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
       }
 
       if (task === TaskType.EditTask && taskId) {
-        editBizScript({...params,id:taskId}).then((_) => {
-          message.success('修改成功');
-          onClose(true);
+        editBizScript({...params,id:taskId}).then((res) => {
+          if (res.code == 200) {
+            message.success('修改成功');
+            onClose(true);
+          } else {
+            message.error(res.msg)
+          }
         });
       }
 
