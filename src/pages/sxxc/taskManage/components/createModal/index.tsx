@@ -45,9 +45,15 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
       console.log('新增任务',(params))
 
       if (task === TaskType.CreateTask) {
-        addBizScript(params).then((_) => {
-          message.success('新增成功');
-          onClose(true);
+        addBizScript(params).then((res) => {
+          console.log("新增结果",res.code)
+          if(res.code===200){
+            message.success('新增成功');
+            onClose(true);
+          }else{
+            message.error(res.msg)
+          }
+          
         });
       }
 
