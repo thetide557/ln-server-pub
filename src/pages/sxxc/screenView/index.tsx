@@ -118,6 +118,10 @@ export default function ScreenView() {
 
 
   const goBack = () => {
+    // 清除趋势图缓存数据
+    if (localStorage.getItem('card5Data')) {
+      localStorage.removeItem('card5Data')
+    }
     history.push('/home')
     // window.location.href = '/home'
   }
