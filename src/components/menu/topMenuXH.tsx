@@ -33,6 +33,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('资产清单'),
         },
+        {
+          key: '/serverVideoAsset',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('天翼视联资产清单'),
+        },
       ],
     },
     {
@@ -92,6 +97,12 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('通知模板'),
         },
+        {
+          key: '/serverVideoAlarm',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('天翼视联历史告警'),
+        },
+
       ],
     },
     {

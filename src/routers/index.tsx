@@ -107,6 +107,10 @@ import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import healthReport from '@/pages/sxxc/healthReport'
 import workOrder from '@/pages/sxxc/workOrder'
+
+import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
+import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";
+
 import autoInspect from '@/pages/sxxc/autoInspect'
 import topology from '@/pages/sxxc/topology'
 import TaskStrategy from '@/pages/sxxc/taskStrategy';
@@ -274,6 +278,10 @@ export default function Content() {
         <Route exact path='/autoInspect' component={autoInspect} />
         <Route exact path='/healthReport' component={healthReport} />
         <Route exact path='/workOrder' component={workOrder} />
+
+        <Route path='/serverVideoAsset' component={serverVideoAsset} exact />
+        <Route path='/serverVideoAlarm' component={serverVideoAlarm} exact />
+
         <Route exact path='/bigscreen/topology' component={topology} />
         <Route exact path='/taskManage/taskManage' component={TaskManage} />
         <Route exact path='/taskManage/taskInstance/:inspectionLogId?' component={TaskInstance} />

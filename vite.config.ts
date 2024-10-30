@@ -81,7 +81,7 @@ export default defineConfig({
       },
       '/api/n9e': {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://10.250.250.9:17000/',
+        target: 'http://10.250.250.32:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
