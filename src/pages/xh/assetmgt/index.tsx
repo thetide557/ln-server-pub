@@ -35,10 +35,11 @@ import { deleteXhAssets, getAssetstypes, getAssetsByCondition } from '@/services
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { factories } from './catalog';
+import { factories,serviceHierarchyOptions,deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
 import { settings } from 'cluster';
+import { Log } from '@/pages/explorer';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -60,6 +61,8 @@ let queryFilter = [
   { name: 'status', label: '管理状态', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'position', label: '资产位置', type: 'input' },
+  { name: 'service_level', label: '服务层级', type: 'select' },
+  { name: 'device_type', label: '设备形态', type: 'select' },
 ];
 
 export default function () {
@@ -94,7 +97,7 @@ export default function () {
   const [queryCondition, setQueryCondition] = useState<any>({});
   const groupIds = busiGroups?.map(item => item.id)
   // console.log(groupIds);
-  
+
 
   const filterOptions = {
     status: [
@@ -113,8 +116,20 @@ export default function () {
         label: factory.value,
       };
     }),
+    service_level: serviceHierarchyOptions.map((item) => {
+      return {
+        value: _.toString(item.value),
+        label: item.label,
+      };
+    }),
+    device_type: deviceFormOptions.map((item) => {
+      return {
+        value: _.toString(item.value),
+        label: item.label,
+      };
+    }),
   };
-  
+
 
   const baseColumns: any[] = [
     {
@@ -328,7 +343,7 @@ export default function () {
                   setSelectedAssets([]);
                 },
 
-                onCancel() {},
+                onCancel() { },
               });
             }}
           ></DeleteOutlined>
@@ -542,7 +557,7 @@ export default function () {
       //   }
       // });
       // console.log('1111list', dat.list);
-      
+
       setList(dat.list);
       setTotal(dat.total);
     });
@@ -584,7 +599,7 @@ export default function () {
       try {
         const value = tempFn({ temp1: values });
         return value;
-      } catch(e) {
+      } catch (e) {
         console.log('values', values)
         console.log('e', e)
       }
@@ -602,17 +617,17 @@ export default function () {
   const renderMetricsItem = (field, record, index, unit) => {
     let vaue: any = null;
     for (let item of record.metrics_list) {
-      
+
       if (item.name == field) {
         if (unit != null && unit.length > 0) {
-            vaue = item.value;
+          vaue = item.value;
         } else {
           vaue = parseFloat(item.value).toFixed(1);
         }
         break;
       }
     }
-    
+
     if (unit != null && unit.length > 0) {
       return valueFormatter(
         {
@@ -924,7 +939,7 @@ export default function () {
                                     setSelectedAssets([]);
                                   });
                                 },
-                                onCancel() {},
+                                onCancel() { },
                               });
                             }
                           } else if (key == OperateType.UpdateBusi) {
@@ -976,7 +991,7 @@ export default function () {
                 pagination={{
                   showSizeChanger: true,
                   showQuickJumper: true,
-                 
+
                   total: total,
                   onChange: onPageChange,
                   current: current,

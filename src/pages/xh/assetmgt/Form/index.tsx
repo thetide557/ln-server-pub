@@ -13,7 +13,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
-import { factories } from '../catalog';
+import { factories,serviceHierarchyOptions,deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
 import { tuple } from 'antd/lib/_util/type';
 const { Option } = Select;
@@ -444,6 +444,34 @@ export default function () {
                       }))}
                       placeholder='请选择业务组'
                     />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='服务层级' name='service_level' rules={[{ required: false }]}>
+                    <Select
+                      style={{ width: '100%' }}
+                      allowClear
+                      options={serviceHierarchyOptions.map(({ label, value }) => ({
+                        label: label,
+                        value: value,
+                      }))}
+                      placeholder='请选择服务层级'
+                    >
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='设备形态' name='device_type' rules={[{ required: false }]}>
+                    <Select
+                      style={{ width: '100%' }}
+                      allowClear
+                      options={deviceFormOptions.map(({ label, value }) => ({
+                        label: label,
+                        value: value,
+                      }))}
+                      placeholder='请选择设备形态'
+                    >
+                    </Select>
                   </Form.Item>
                 </Col>
                 <Col span={12}>
