@@ -36,7 +36,7 @@ const getMenuList = (t) => {
         {
           key: '/serverVideoAsset',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('视频类资产清单'),
+          label: t('视频类项目资产清单'),
         },
       ],
     },
@@ -100,7 +100,7 @@ const getMenuList = (t) => {
         {
           key: '/serverVideoAlarm',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('视频类历史告警'),
+          label: t('视频类项目历史告警'),
         },
 
       ],
