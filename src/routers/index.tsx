@@ -108,8 +108,8 @@ import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSha
 import healthReport from '@/pages/sxxc/healthReport'
 import workOrder from '@/pages/sxxc/workOrder'
 
-import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
-import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";
+// import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
+// import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";
 
 import autoInspect from '@/pages/sxxc/autoInspect'
 import topology from '@/pages/sxxc/topology'
@@ -279,8 +279,8 @@ export default function Content() {
         <Route exact path='/healthReport' component={healthReport} />
         <Route exact path='/workOrder' component={workOrder} />
 
-        <Route path='/serverVideoAsset' component={serverVideoAsset} exact />
-        <Route path='/serverVideoAlarm' component={serverVideoAlarm} exact />
+        {/* <Route path='/serverVideoAsset' component={serverVideoAsset} exact /> */}
+        {/* <Route path='/serverVideoAlarm' component={serverVideoAlarm} exact /> */}
 
         <Route exact path='/bigscreen/topology' component={topology} />
         <Route exact path='/taskManage/taskManage' component={TaskManage} />
