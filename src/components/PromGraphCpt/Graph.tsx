@@ -98,6 +98,9 @@ export default function Graph(props: IProps) {
 
   useEffect(() => {
     if (datasourceValue && promql) {
+      console.log("useEffect----range", range);
+      // 初始值的时候不执行查询
+      if (range.start !== "" && range.end !== "") {
       const parsedRange = parseRange(range);
       const start = moment(parsedRange.start).unix();
       const end = moment(parsedRange.end).unix();
@@ -131,6 +134,7 @@ export default function Graph(props: IProps) {
           const msg = _.get(err, 'message');
           setErrorContent(`Error executing query: ${msg}`);
         });
+      }
     }
   }, [JSON.stringify(range), step, datasourceValue, promql, refreshFlag]);
 
