@@ -47,3 +47,19 @@ export const getApiServiceOptions = function () {
         method: RequestMethod.Get
     })
 }
+
+/*
+    党政军省政府定制化首页，提取自dashboardV2接口，重新调用
+*/
+export const fetchHistoryRangeBatch = function (data) {
+    return request("/api/n9e/query-range-batch", {
+        method: RequestMethod.Post,
+        data
+    })
+}
+export const fetchHistoryInstantBatch = function (data) {
+    return request("/api/n9e/query-instant-batch", {
+        method: RequestMethod.Post,
+        data
+    })
+}

@@ -21,7 +21,8 @@ import _ from 'lodash';
 import NotFound from '@/pages/notFound';
 import Page403 from '@/pages/notFound/Page403';
 import Login from '@/pages/login';
-import Home from '@/pages/home';
+import Home from '@/pages/home/index';
+import Home1 from '@/pages/home/index_copy';
 import Overview from '@/pages/login/overview';
 import LoginCallback from '@/pages/loginCallback';
 import LoginCallbackCAS from '@/pages/loginCallback/cas';
@@ -106,7 +107,7 @@ import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import healthReport from '@/pages/sxxc/healthReport'
-import workOrder from '@/pages/sxxc/workOrder'
+import workOrder from '@/pages/sxxc/workorder'
 
 import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
 import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";
@@ -153,6 +154,7 @@ export default function Content() {
     <div className={`content ${themeClassName}`}>
       <Switch>
         <Route path='/home' component={Home} />
+        <Route path='/home1' component={Home1} />
         <Route path='/demo' component={Demo} />
         <Route path='/overview' component={Overview} />
         <Route path='/login' component={Login} exact />
