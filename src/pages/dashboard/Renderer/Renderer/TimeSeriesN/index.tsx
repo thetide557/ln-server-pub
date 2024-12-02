@@ -48,7 +48,6 @@ const TimeSeriesN = function (props: IProps) {
       timeMask = "MM-DD HH:mm"
     }
   }
-
   const customOptions = {
     ...custom,
     xField: 'time',
@@ -119,17 +118,23 @@ const TimeSeriesN = function (props: IProps) {
         },
       };
     }),
-    meta: {
-      time: {
-        type: 'timeCat',
-        mask: timeMask
-      }
-    }
+    // meta: {
+    //   time: {
+    //     type: 'timeCat',
+    //     mask: timeMask
+    //   }
+    // }
+    
   };
 
   return (
     <div className='renderer-timeseries-n-container'>
-      <Area {...customOptions} data={seriesData} renderer="canvas"></Area>
+      <Area {...customOptions} data={seriesData.map(data => (
+        {
+          ...data,
+          time: moment(new Date(Number(data.time))).format('HH:mm:ss')
+        }
+      ))} renderer="canvas"></Area>
     </div>
   );
 };
