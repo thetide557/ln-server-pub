@@ -136,9 +136,15 @@ export default function index(props: IProps) {
                             map[element.id] = element;                            
                           });
                           handleCheck(values);
+                          let replayList = new Array
                           if(values.rule_config.queries.length>0){
                             let config_cn = new Array;
                             values.rule_config.queries.forEach(element=>{
+                              replayList.push(
+                                {
+                                  prom_ql: element.reprom_ql
+                                }
+                              )
                               if(element.monitor_id!=null && map[element.monitor_id]!=null){
                                 let monitor = map[element.monitor_id];
                                 config_cn.push(monitor.monitoring_name+(element.relation?element.relation:'')+(element.value?element.value:''))
@@ -146,8 +152,14 @@ export default function index(props: IProps) {
                             })
                             values["rule_config_cn"] = config_cn.join(";")    
                           }
-                          values["rule_config_fe"] =JSON.stringify(values["rule_config"]);    
+                          values["rule_config_fe"] =JSON.stringify(values["rule_config"]);  
+                          values["rule_replay"] = {
+                            queries: replayList
+                          }  
                           const data = processFormValues(values) as any;
+                          console.log(11111, data);
+                          
+                          
                           if (type === 1) {
                             const res = EditStrategy(data, initialValues.group_id, initialValues.id);
                             handleMessage(res);
@@ -165,6 +177,18 @@ export default function index(props: IProps) {
                       }else{
                         handleCheck(values);
                         const data = processFormValues(values) as any;
+                        if (data.rule_config.queries && data.rule_config.queries.length > 0) {
+                          let replayList = new Array
+                          data.rule_config.queries.forEach(element => {
+                            replayList.push({
+                              prom_ql: element.reprom_ql
+                            })
+                          })
+                          data["rule_replay"] = {
+                            queries: replayList
+                          }  
+                        }
+                        
                         if(type==2){
                           delete data["id"];
                         }

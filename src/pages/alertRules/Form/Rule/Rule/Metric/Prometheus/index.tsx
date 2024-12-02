@@ -16,7 +16,7 @@
  */
 
 import React, { useContext } from 'react';
-import { Form, Row, Col, Card, Space } from 'antd';
+import { Form, Row, Col, Card, Space, Input } from 'antd';
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
@@ -76,6 +76,18 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                 </Row>
                 <div>
                   <Severity field={field} />
+                </div>
+                <Row style={{marginTop: '15px'}}>
+                  <Col flex='80px'>
+                    <div style={{ marginTop: 6 }}>回放PromQL</div>
+                  </Col>
+                  <Col flex='auto'>
+                    <Form.Item {...field} name={[field.name, 'reprom_ql']} validateTrigger={['onBlur']} trigger='onChange' rules={[{ required: true, message: t('请输入回放PromQL') }]}>
+                      <Input placeholder="请输入回放PromQL" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <div>
                 </div>
                 <MinusCircleOutlined className='alert-rule-trigger-remove' onClick={() => remove(field.name)} />
               </div>

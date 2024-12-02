@@ -265,8 +265,14 @@ function App() {
     getAlertEventsById(alertId).then(res => {
       // console.log(1111, res.dat);
       setCurWarn(res.dat)
+      let query = ''
+      if (res.dat.rule_replay && res.dat.rule_replay.queries && res.dat.rule_replay.queries.length > 0) {
+        query = res.dat.rule_replay.queries[0].prom_ql.replace('$asset_id', res.dat.asset_id)
+      } else {
+        query = res.dat.rule_config.queries[0].prom_ql
+      }
       const params = {
-        query: res.dat.rule_config.queries[0].prom_ql,
+        query,
         start: res.dat.trigger_time - 1800, // 30分之前
         end: res.dat.trigger_time + 1800, // 30分之后
         step: 15,

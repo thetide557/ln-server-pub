@@ -30,10 +30,10 @@ const AlarmChart = function (props: any) {
     }
 
   let list1 = _.cloneDeep(chartList)
-  // console.log(list1);
+  console.log(list1);
   let seriesData = []
   let xList = [];
-  if (list1.length > 1) {
+  if (list1.length > 0) {
     list1 = [list1[0]]
     list1[0].values.forEach((item) => {
       // console.log(data);
