@@ -18,7 +18,8 @@
 import React, { useEffect, useState, createContext, useRef, useLayoutEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 // Modal 会被注入的代码所使用，请不要删除
-import { ConfigProvider, notification, Modal, message } from 'antd';
+import { ConfigProvider, notification, Modal, message, Select } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
 import zhCN from 'antd/lib/locale/zh_CN';
 import enUS from 'antd/lib/locale/en_US';
 import 'antd/dist/antd.less';
@@ -42,6 +43,9 @@ import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import { useLocalStorage } from 'react-use';
+import { getAlertEventsById, getHistoryEventsById, getWarningChart, setAlartMutes, updataprocess } from '@/pages/sxxc/screenView/alarmApi';
+import AlarmChart from "@/pages/sxxc/screenView/alarmChart";
+
 interface IProfile {
   admin?: boolean;
   nickname: string;
@@ -186,6 +190,210 @@ function App() {
     isPlus,
   });
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [curWarn, setCurWarn] = useState({})
+  const [chartList, setChartList] = useState([])
+  const [open1, setOpen1] = useState(false)
+  const timeLensDefault = [
+    {
+      label: "1h",
+      value: 3600,
+    },
+    {
+      label: "2h",
+      value: 7200,
+    },
+    {
+      label: "3h",
+      value: 10800,
+    },
+    {
+      label: "6h",
+      value: 21600,
+    },
+    {
+      label: "12h",
+      value: 43200,
+    },
+    {
+      label: "1d",
+      value: 86400,
+    },
+    {
+      label: "2d",
+      value: 172800,
+    },
+    {
+      label: "3d",
+      value: 259200,
+    },
+    {
+      label: "5d",
+      value: 432000,
+    },
+    {
+      label: "7d",
+      value: 604800,
+    },
+    {
+      label: "14d",
+      value: 1209600,
+    },
+    {
+      label: "30d",
+      value: 2592000,
+    },
+    {
+      label: "60d",
+      value: 5184000,
+    },
+    {
+      label: "90d",
+      value: 7776000,
+    },
+    {
+      label: "99y",
+      value: 3122064000,
+    },
+  ]
+
+  // 屏蔽时长
+  let time1 = 3600
+
+  // 右下角告警
+  const handleAlarm = () => {
+    getAlertEventsById(alertId).then(res => {
+      // console.log(1111, res.dat);
+      setCurWarn(res.dat)
+      const params = {
+        query: res.dat.rule_config.queries[0].prom_ql,
+        start: res.dat.trigger_time - 1800, // 30分之前
+        end: res.dat.trigger_time + 1800, // 30分之后
+        step: 15,
+      };
+      getWarningChart(params, res.dat.datasource_id).then((res2) => {
+        setChartList(res2.data.result)
+      });
+    })
+    setIsModalOpen(true);
+  }
+
+
+  const handleClick = () => {
+    if (location.pathname != '/screenView') {
+      location.href = '/alert-cur-events/' + alertId;
+    } else {
+      handleAlarm()
+    }
+  }
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  // 处理
+  const handleDeal = () => {
+    Modal.confirm({
+      title: '提示',
+      content: '该告警是否已被处理?',
+      keyboard: false,
+      className: 'handle-warn',
+      centered: true,
+      closable: true,
+      onOk() {
+        const params = {
+          id: alertId
+        }
+        updataprocess(params).then(() => {
+          message.success(t('处理成功'))
+          handleAlarm()
+        })
+      },
+      onCancel() {
+        // console.log('Cancel');
+      },
+    });
+  }
+
+  // 屏蔽
+  const handlePb = () => {
+    setOpen1(true)
+  }
+
+  // 时间戳转换时间
+  const convertTime = (timestamp, type) => {
+    const date = new Date(parseInt(timestamp) * 1000);
+    const Year = date.getFullYear();
+    const Moth =
+      date.getMonth() + 1 < 10
+        ? "0" + (date.getMonth() + 1)
+        : date.getMonth() + 1;
+    const Day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+    const Hour =
+      date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+    const Minute =
+      date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+    const Sechond =
+      date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+    if (type == "year") {
+      return `${Year}-${Moth}-${Day} ${Hour}:${Minute}:${Sechond}`;
+    } else {
+      return `${Hour}:${Minute}`;
+    }
+  }
+
+  const handleChange = (val) => {
+    // console.log(val);
+    time1 = val
+    // console.log(time1);
+    
+  }
+
+  // 告警屏蔽
+  const saveWarnig = () => {
+    // console.log(111, curWarn);
+      const timestamp = Math.floor(new Date().getTime() / 1000);
+      let tags = [];
+      if (curWarn.tags.length > 0) {
+        curWarn.tags.forEach((item) => {
+          let arr = item.split("=");
+          tags.push({
+            func: "==",
+            key: arr[0],
+            value: arr[1],
+          });
+        });
+      }
+      const params = {
+        note: curWarn.rule_name + timestamp,
+        group_id: curWarn.group_id,
+        prod: curWarn.rule_prod,
+        cate: curWarn.cate,
+        datasource_ids: [curWarn.datasource_id],
+        severities: [curWarn.severity],
+        mute_time_type: 0,
+        btime: timestamp,
+        etime: timestamp + Number(time1),
+        periodic_mutes: [
+          {
+            enable_days_of_week: "1 2 3 4 5 6 0",
+            enable_stime: "00:00",
+            enable_etime: "00:00",
+          },
+        ],
+        cluster: curWarn.cluster,
+        tags,
+      };
+      setAlartMutes(params, curWarn.datasource_id).then((res) => {
+        setOpen1(false)
+        message.success('屏蔽成功')
+      });
+  }
+
   useLayoutEffect(() => {
     // console.log('anonymous', anonymous);
     alertWebsocket.current = new WebSocket(WebSocketURL + 232443);//获取推送过来的告警消息
@@ -196,6 +404,8 @@ function App() {
           audioRef?.current.play();
         }
         let data = JSON.parse(e.data);
+        // console.log('data2222', data);
+
         setAlertLevel(data.dat[0].severity);
         setAlertId(data.dat[0].id);
         setDialogShow('1');
@@ -351,14 +561,146 @@ function App() {
           <div className='level'>{alertLevel}</div>
           <div
             className='detail'
-            onClick={(e) => {
-              location.href = '/alert-cur-events/' + alertId;
-            }}
+            onClick={handleClick}
           >
             查看详情
           </div>
         </div>
       </div>
+
+      {/* 大屏告警弹窗 */}
+      <Modal className='warn-dialog' width={850} visible={isModalOpen} footer={null}>
+        <div className="warn-header">
+          <CloseOutlined className="el-icon-close" onClick={() => { setIsModalOpen(false) }} />
+        </div>
+        <div className='warn-cont'>
+          <div className="asset1">
+            <div className="row t-row">
+              <div className="col col1">
+                <span>告警规则名称：{curWarn.rule_name}</span>
+              </div>
+              <div className="col2">
+                {
+                  curWarn.processe == 1 ? <div>已处理</div> : <div onClick={handleDeal}>是否已处理</div>
+                }
+                <div onClick={handlePb}>屏蔽</div>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span>资产名称：{curWarn.asset_name}</span>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span>IP地址：{curWarn.asset_ip}</span>
+              </div>
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span>告警ID：{curWarn.id}</span>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <div className="serverity">
+                  <span>告警级别：</span>
+                  <div className="s-img">
+                    <img
+                      src={`/image/alarm/s${curWarn.severity}.png`}
+                      alt=""
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span
+                >触发时间：{convertTime(curWarn.trigger_time, "year")}</span>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span>触发值：{curWarn.trigger_value}</span>
+              </div>
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span
+                >告警状态：<span
+                  style={{
+                    color: curWarn.is_recovered ? '#39E9A4' : '#F26464',
+                  }}>{curWarn.is_recovered ? "已恢复" : "未恢复"}</span></span>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span>处理状态： {curWarn.processe == 1 ? '已处理' : '未处理'}</span>
+              </div>
+            </div>
+          </div>
+          <div className="chart1">
+            <AlarmChart chartList={chartList} />
+          </div>
+        </div>
+        {/* 屏蔽 */}
+        <Modal className="warn-dialog warn-dialog1" visible={open1} footer={null}>
+          <div className="header">
+            <CloseOutlined className="el-icon-close" onClick={() => { setOpen1(false) }} />
+          </div>
+          <div className='icont'>
+            <span style={{marginRight: '10px', fontSize: '18px'}}>屏蔽时长：</span>
+            <Select
+              dropdownClassName='warn-sel'
+              className='alarm-select'
+              defaultValue={3600}
+              style={{ width: 200 }}
+              onChange={handleChange}
+              options={timeLensDefault}
+            />
+          </div>
+          <div className="dialog-footer">
+            <div onClick={() => setOpen1(false)}>取 消</div>
+            <div type="primary" onClick={saveWarnig}>确 定</div>
+          </div>
+        </Modal>
+      </Modal>
+
     </div>
   );
 }

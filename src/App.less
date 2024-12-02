@@ -2,12 +2,15 @@
 .App {
   height: 100%;
 }
+
 html {
   --slider-rail: linear-gradient(to right, #45d678 0, #45d678 100%);
 }
+
 .yth_app_header {
   background: url('/image/topmenu/topbg.png') no-repeat;
   background-position: center;
+
   .ant-menu {
     margin: 0;
     padding: 0;
@@ -20,6 +23,7 @@ html {
     outline: none;
   }
 }
+
 .ant-layout-header {
   height: 64px;
   padding: 0 0px;
@@ -27,6 +31,7 @@ html {
   line-height: 64px;
   /* background: #001529; */
 }
+
 @font-face {
   font-family: Monda-Regular;
   src: url('/font/Monda-Regular.ttf');
@@ -36,46 +41,55 @@ html {
   font-family: codicon;
   src: url('/font/codicon.ttf');
 }
+
 @font-face {
   font-family: 'douyuzhuiguangti';
   src: url('/font/douyuzhuiguangti.ttf');
 }
+
 .ant-modal-close-x {
   height: 30px !important;
   line-height: 30px !important;
   margin-right: 5px;
   color: #fff;
 }
+
 .down_load_button {
   span {
     color: #2977d7;
     text-decoration: underline;
   }
 }
+
 .ant-modal-header {
   background-color: #2977d7;
   padding: 6px 20px;
+
   .ant-modal-title {
     color: #fff;
   }
 }
-.ant-upload-select-text {
-}
+
+.ant-upload-select-text {}
+
 .ant-modal-footer {
   display: flex;
   justify-content: center;
+
   button {
     // width: 64px !important;
     height: 30px !important;
     border-radius: 6px !important;
   }
 }
+
 .App {
   display: block;
   color: #767676;
   // overflow: hidden;
   background: #f9f9f9;
   font-family: @font-family;
+
   // min-width: 1180px;
   .ant-menu-inline-collapsed {
     width: 50px;
@@ -84,6 +98,7 @@ html {
   .content-box {
     height: calc(~'100vh');
     padding-top: 60px;
+
     .content {
       flex: 1;
       height: 100%;
@@ -104,17 +119,20 @@ html {
     padding: 10px 10px 0px;
     display: flex;
     justify-content: space-between;
+
     &-buttons {
       display: flex;
       justify-content: center;
       align-items: center;
     }
+
     .table-more-options {
       .ant-btn {
         margin-left: 8px;
       }
     }
   }
+
   .searchInput {
     width: 200px;
   }
@@ -129,17 +147,21 @@ html {
       line-height: 1;
     }
   }
+
   // table
   .ant-table {
     margin-top: 10px;
+
     .ant-table-tbody {
       td {
         height: 40px;
       }
+
       .ant-table-expanded-row {
         .ant-table-wrapper {
           overflow: hidden;
         }
+
         .ant-table {
           margin: 0 0 10px;
         }
@@ -157,6 +179,7 @@ html {
   width: 20px;
   height: 20px;
   margin-right: 15px;
+
   &:hover {
     color: @primary-color;
   }
@@ -166,20 +189,25 @@ html {
   color: @primary-color;
   cursor: pointer;
 }
+
 .table-operator-area {
   display: flex;
   flex-direction: row;
+
   div {
     cursor: pointer;
     margin-right: 8px;
   }
+
   &-normal {
     color: @primary-color;
   }
+
   &-warning {
     color: @colorRed2;
   }
 }
+
 // input
 input::placeholder {
   // font-size: 12px;
@@ -190,10 +218,12 @@ input::placeholder {
 .ant-select-selection-placeholder {
   font-size: 12px;
 }
+
 .ant-select {
   .overflow-586 {
     min-width: 586px !important;
   }
+
   .overflow-230 {
     min-width: 230px !important;
   }
@@ -225,6 +255,7 @@ input::placeholder {
     content: ' ';
     display: inline-block;
   }
+
   // height: 54px;
   margin: 24px 0 16px;
   font-size: 14px;
@@ -243,6 +274,7 @@ input::placeholder {
     content: ' ';
     display: inline-block;
   }
+
   display: flex;
   align-items: center;
 }
@@ -258,21 +290,27 @@ input::placeholder {
 
 .title-color {
   color: @text-color;
-  & > * {
+
+  &>* {
     color: @text-color;
   }
 }
+
 .base-text-color {
   color: @text-color;
 }
+
 .second-color {
   color: @secondColor;
-  & > * {
+
+  &>* {
     color: @secondColor;
   }
 }
+
 .danger-color {
   color: #fd736c;
+
   &:hover {
     color: #fd736c;
   }
@@ -282,6 +320,7 @@ input::placeholder {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+
   &.break {
     word-break: break-all;
     white-space: normal;
@@ -310,6 +349,7 @@ input::placeholder {
   border: 1px solid #ddd !important;
   box-shadow: 0px 1px 8px 0px rgba(0, 0, 0, 0.1) !important;
 }
+
 .ant-tabs-tab {
   color: @secondColor;
 }
@@ -326,31 +366,39 @@ input::placeholder {
 }
 
 .ant-tabs-top {
-  & > .ant-tabs-nav::before {
+  &>.ant-tabs-nav::before {
     border-bottom: 0px;
   }
 }
+
 .mt16 {
   margin-top: 16px;
 }
+
 .mb16 {
   margin-bottom: 16px;
 }
+
 .mr16 {
   margin-right: 16px;
 }
+
 .ml16 {
   margin-left: 16px;
 }
+
 .mb8 {
   margin-bottom: 8px;
 }
+
 .mt8 {
   margin-top: 8px;
 }
+
 .mr8 {
   margin-right: 8px;
 }
+
 .ml8 {
   margin-left: 8px;
 }
@@ -359,12 +407,15 @@ input::placeholder {
   &.anticon {
     color: #ee5a52;
   }
+
   color: #ee5a52;
 }
+
 .green-text {
   &.anticon {
     color: #83d35c;
   }
+
   color: #83d35c;
 }
 
@@ -374,13 +425,16 @@ input::placeholder {
     animation: shake-icon ease 1s;
   }
 }
+
 @keyframes shake-icon {
   33% {
     transform: scale(1.4) rotateZ(45deg);
   }
+
   66% {
     transform: scale(1.2) rotateZ(-45deg);
   }
+
   100% {
     transform: scale(1) rotateZ(0deg);
   }
@@ -403,21 +457,26 @@ input::placeholder {
     display: none;
   }
 }
+
 .ant-modal-confirm-btns {
   text-align: center !important;
+
   .ant-btn-default {
     border-radius: 8px;
     width: 70px;
   }
+
   .ant-btn-primary {
     background-color: #2977d7 !important;
     border-radius: 8px;
     width: 70px;
   }
 }
+
 .ant-checkbox-inner {
   top: 1px !important;
 }
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -434,6 +493,7 @@ input::placeholder {
   border: 4px solid #cecece;
   border-radius: 4px;
   display: block;
+
   .close_button {
     display: flex;
     height: 15px;
@@ -442,6 +502,7 @@ input::placeholder {
     padding-left: 2%;
     font-size: 12px;
     line-height: 15px;
+
     span {
       cursor: pointer;
       position: absolute;
@@ -454,11 +515,13 @@ input::placeholder {
       color: #fff;
     }
   }
+
   .alert_content {
     width: 100%;
     display: block;
 
     background-color: #2f84ed;
+
     .level {
       margin-left: 14%;
       width: 70%;
@@ -475,6 +538,7 @@ input::placeholder {
       background-size: 100% 100%;
       background-position: 0%;
     }
+
     .detail {
       font-size: 12px;
       font-weight: 600;
@@ -492,8 +556,305 @@ input::placeholder {
   overflow: hidden;
 }
 
-.ant-table-tbody > tr.ant-table-row:hover > td,
-.ant-table-tbody > tr > td.ant-table-cell-row-hover {
+.ant-table-tbody>tr.ant-table-row:hover>td,
+.ant-table-tbody>tr>td.ant-table-cell-row-hover {
   background-color: #f4f9ff;
 }
 
+// 告警弹窗
+.warn-dialog {
+  .ant-modal-header {
+    display: none;
+  }
+
+  .ant-modal-content {
+    width: 100%;
+    height: 503px;
+    background: url(/image/alarm/dialog.png) no-repeat;
+    background-size: 100% 100%;
+    box-shadow: none;
+    color: #DCEEFF;
+
+    .ant-modal-close {
+      display: none;
+    }
+
+    .warn-header {
+      width: 100%;
+      height: 49px;
+      line-height: 49px;
+      text-align: right;
+      background: url(/image/alarm/title1.png) no-repeat;
+      background-size: 100% 100%;
+
+      .el-icon-close {
+        cursor: pointer;
+        margin-right: 10px;
+        font-size: 22px;
+        color: #72c7f4;
+        font-weight: 700;
+      }
+    }
+
+    .warn-cont {
+      .asset1 {
+        padding: 5px 10px 0;
+        width: 100%;
+        color: #dceeff;
+        font-family: SourceHanSansSC, SourceHanSansSC;
+
+        .t-row {
+          width: 400px;
+          height: 47px;
+          background: url("/image/alarm/title2.png") no-repeat;
+          background-size: 100% 100%;
+          margin-left: -20px;
+
+          .col1 {
+            margin-top: -16px;
+            padding-left: 47px;
+          }
+
+          .col2 {
+            display: flex;
+            margin-top: -10px;
+
+            >div {
+              cursor: pointer;
+              text-align: center;
+              width: 133px;
+              height: 37px;
+              line-height: 37px;
+              margin-right: 10px;
+              background: url("/image/alarm/btn.png") no-repeat;
+              background-size: 100% 100%;
+              font-size: 14px;
+              color: #ffffff;
+            }
+          }
+        }
+
+        .row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 17px;
+          width: 100%;
+          line-height: 35px;
+
+          .dian {
+            width: 27px;
+            height: 27px;
+            vertical-align: middle;
+          }
+
+          .col {
+            flex: 1;
+            display: flex;
+            align-items: center;
+
+            .serverity {
+              display: flex;
+              align-items: center;
+
+              .s-img {
+                >img {
+                  vertical-align: middle;
+                  width: 82px;
+                  height: 22px;
+                }
+              }
+            }
+          }
+
+          // .row1 {
+          //   display: inline-block;
+          //   width: 33%;
+          // }
+        }
+      }
+
+      .chart1 {
+        width: 98%;
+        height: 170px;
+      }
+    }
+  }
+}
+
+.warn-dialog1 {
+  .ant-modal-content {
+    width: 100%;
+    height: 240px;
+    background: url(/image/alarm/dialog.png) no-repeat;
+    background-size: 100% 100%;
+    box-shadow: none;
+    color: #DCEEFF;
+
+    .ant-modal-close {
+      display: none;
+    }
+
+    .header {
+      width: 100%;
+      height: 49px;
+      line-height: 49px;
+      text-align: right;
+      background: url("/image/alarm/title1.png") no-repeat;
+      background-size: 100% 100%;
+
+      .el-icon-close {
+        cursor: pointer;
+        margin-right: 10px;
+        font-size: 20px;
+        color: #72c7f4;
+        font-weight: 700;
+      }
+    }
+
+    .icont {
+      color: #fff;
+      padding: 20px;
+
+      .alarm-select {
+        .ant-select-selector {
+          background: #172F69;
+          color: #fff;
+          border-color: #409EFF;
+          // border: 0;
+        }
+
+        .ant-select-arrow {
+          color: #fff;
+        }
+      }
+    }
+
+    .dialog-footer {
+      display: flex;
+      position: absolute;
+      bottom: 10%;
+      left: 60%;
+
+      // transform: translateX(-50%);
+      >div {
+        cursor: pointer;
+        text-align: center;
+        width: 80px;
+        height: 37px;
+        line-height: 37px;
+        margin-right: 10px;
+        background: url("/image/alarm/btn.png") no-repeat;
+        background-size: 100% 100%;
+        font-size: 14px;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.warn-sel {
+  background: #0f2b4f;
+  color: #ccc;
+
+  .ant-select-item {
+    background: #0f2b4f;
+
+    // color: #fff;
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .ant-select-item-option-selected {
+    color: #fff;
+  }
+}
+
+.handle-warn {
+  .ant-modal-content {
+    color: #fff;
+      border: 0;
+      width: 400px;
+      // height: 503px;
+      background: url("/image/alarm/dialog.png") no-repeat;
+      background-size: 100% 100%;
+      background: #132B64;
+    .ant-modal-body {
+      .ant-modal-confirm-title {
+        color: #fff;
+        font-size: 18px;
+      }
+      .ant-modal-confirm-content {
+        color: #fff;
+        font-size: 15px;
+      }
+      .anticon-exclamation-circle {
+        margin-top: 3px;
+      }
+      .ant-btn {
+        cursor: pointer;
+        text-align: center;
+        width: 80px;
+        height: 37px;
+        // line-height: 37px;
+        // margin-right: 10px;
+        background: url("/image/alarm/btn.png") no-repeat;
+        background-size: 100% 100%;
+        font-size: 14px;
+        color: #ffffff;
+        border: 0;
+      }
+      .ant-btn-primary {
+        background-color: transparent!important;
+      }
+    }
+  }
+
+  .el-message-box__header {
+    .el-message-box__title {
+      color: #fff;
+      font-size: 18px;
+    }
+
+    .el-message-box__close {
+      color: #fff;
+    }
+  }
+
+  .el-message-box__content {
+    .el-message-box__message {
+      color: #fff;
+    }
+  }
+
+  .el-message-box__btns {
+    .save1 {
+      cursor: pointer;
+      text-align: center;
+      width: 80px;
+      height: 37px;
+      // line-height: 37px;
+      // margin-right: 10px;
+      background: url("/image/alarm/btn.png") no-repeat;
+      background-size: 100% 100%;
+      font-size: 14px;
+      color: #ffffff;
+      border: 0;
+    }
+
+    .cancel1 {
+      cursor: pointer;
+      text-align: center;
+      width: 80px;
+      height: 37px;
+      // line-height: 37px;
+      // margin-right: 10px;
+      background: url("/image/alarm/btn.png") no-repeat;
+      background-size: 100% 100%;
+      font-size: 14px;
+      color: #ffffff;
+      border: 0;
+    }
+  }
+}
