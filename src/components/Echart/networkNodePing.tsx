@@ -25,7 +25,11 @@ export default function NetworkNodePing() {
             formatter: function (params) {
                 if (params.value.length > 1) {
                     return (
-                        moment(params.value[0]).format('YYYY-MM-DD HH:mm:ss') + '<br/>' + params.seriesName + '  网络断点-响应时间  ' + params.value[1]
+                        `<div style="text-align:left;">${moment(params.value[0]).format('YYYY-MM-DD HH:mm:ss')}</div>
+                        <div>
+                            <span>${params.seriesName} </span>
+                            <span> 网络端点-响应时间 </span>
+                            <span style="color:${params.color}"> ${params.value[1]}</span>`
                     );
                 }
             },

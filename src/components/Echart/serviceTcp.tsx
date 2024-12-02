@@ -11,8 +11,20 @@ export default function ServiceTcp() {
     let isMounted = true;
     let options = {
         tooltip: {
-            trigger: 'axis'
+            trigger: 'axis',
+            formatter: function (params) {
+                if (params.length >= 1) {
+                    let dom = `<div style="text-align:left;">${params[0].axisValueLabel}</div>`
+                    params.forEach(element => {
+                        dom += `<div><span style="display: inline-block;width:100px;text-algin:left;">${element.seriesName} </span><span>网络端点-响应时间</span><span style="color:${element.color}">&nbsp;&nbsp;${element.value[1]}</span></div>`
+                    })
+                    return dom;
+                }
+            },
         },
+        // tooltip: {
+        //     trigger: 'axis'
+        // },
         legend: {
             data: []
         },
@@ -46,7 +58,7 @@ export default function ServiceTcp() {
             let start = moment(parsedRange.start).unix();
             let end = moment(parsedRange.end).unix();
             fetchHistoryRangeBatch({
-                queries:[{ end: end, start: start, query: "netstat_tcp_tw", step: 15 }], datasource_id: 1
+                queries: [{ end: end, start: start, query: "netstat_tcp_tw", step: 15 }], datasource_id: 1
             }).then((res) => {
                 options.xAxis.data = res.dat[0][0].values.map(x => x[0] * 1000)
                 res.dat[0].forEach(element => {
