@@ -259,6 +259,7 @@ function App() {
 
   // 屏蔽时长
   let time1 = 3600
+  const [query1, setQuery1] = useState('')
 
   // 右下角告警
   const handleAlarm = () => {
@@ -268,8 +269,10 @@ function App() {
       let query = ''
       if (res.dat.rule_replay && res.dat.rule_replay.queries && res.dat.rule_replay.queries.length > 0) {
         query = res.dat.rule_replay.queries[0].prom_ql.replace('$asset_id', res.dat.asset_id)
+        setQuery1(query)
       } else {
         query = res.dat.rule_config.queries[0].prom_ql
+        setQuery1(query)
       }
       const params = {
         query,
@@ -677,6 +680,14 @@ function App() {
                   alt=""
                 />
                 <span>处理状态： {curWarn.processe == 1 ? '已处理' : '未处理'}</span>
+              </div>
+              <div className="col" style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <span title={query1}>回放PromQL： {query1}</span>
               </div>
             </div>
           </div>

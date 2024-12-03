@@ -67,17 +67,23 @@ const AlarmChart = function (props: any) {
       showMarkers: false,
     },
     // 可以添加更多配置选项，如legend、xAxis、yAxis等
-    yAxis: {
-      tickCount: 4,
-      tickStroke: '#ddd'
+    xAxis: {
+      // tickCount: 5,
+      gridStroke: '#eee',
     },
+    yAxis: {
+      tickCount: 5,
+      gridStroke: '#eee',
+      gridLineWidth: 0.5,
+      gridStrokeOpacity: 0.2
+    }
   };
 
 
 
   return (
     <div style={{marginTop: '5px'}}>
-      <Line {...config} style={{width: '780px', height: '170px'}} />
+      <Line {...config} style={{width: '780px', height: '150px'}} />
     </div>
   );
 };
