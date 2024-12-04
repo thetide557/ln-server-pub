@@ -613,6 +613,17 @@ input::placeholder {
           .col1 {
             margin-top: -16px;
             padding-left: 47px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            .w-title {
+              width: 70%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
           }
 
           .col2 {
@@ -671,6 +682,22 @@ input::placeholder {
           //   display: inline-block;
           //   width: 33%;
           // }
+        }
+        .last-row {
+          .last-col1 {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            .last-title {
+              width: 91%;
+              display: flex;
+              align-items: center;
+              .reproml {
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+          }
         }
       }
 

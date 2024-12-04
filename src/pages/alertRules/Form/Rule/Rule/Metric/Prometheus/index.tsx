@@ -83,7 +83,8 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                   </Col>
                   <Col flex='auto'>
                     <Form.Item {...field} name={[field.name, 'reprom_ql']} validateTrigger={['onBlur']} trigger='onChange' rules={[{ required: true, message: t('请输入回放PromQL') }]}>
-                      <Input placeholder="请输入回放PromQL" />
+                      {/* <Input placeholder="请输入回放PromQL" /> */}
+                      <PromQLInputWithBuilder readonly={disabled} datasourceValue={datasourceId} includes={includes} excludes={excludes} />
                     </Form.Item>
                   </Col>
                 </Row>

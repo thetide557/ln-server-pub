@@ -44,7 +44,7 @@ import './global.variable.less';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import { useLocalStorage } from 'react-use';
 import { getAlertEventsById, getHistoryEventsById, getWarningChart, setAlartMutes, updataprocess } from '@/pages/sxxc/screenView/alarmApi';
-import AlarmChart from "@/pages/sxxc/screenView/alarmChart";
+import AlarmChartLine from '@/pages/sxxc/screenView/alarmChartLine';
 
 interface IProfile {
   admin?: boolean;
@@ -192,7 +192,6 @@ function App() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [curWarn, setCurWarn] = useState({})
-  const [chartList, setChartList] = useState([])
   const [open1, setOpen1] = useState(false)
   const timeLensDefault = [
     {
@@ -265,7 +264,7 @@ function App() {
   const handleAlarm = () => {
     getAlertEventsById(alertId).then(res => {
       // console.log(1111, res.dat);
-      setCurWarn(res.dat)
+      setCurWarn(res.dat)  
       let query = ''
       if (res.dat.rule_replay && res.dat.rule_replay.queries && res.dat.rule_replay.queries.length > 0) {
         query = res.dat.rule_replay.queries[0].prom_ql.replace('$asset_id', res.dat.asset_id)
@@ -274,15 +273,6 @@ function App() {
         query = res.dat.rule_config.queries[0].prom_ql
         setQuery1(query)
       }
-      const params = {
-        query,
-        start: res.dat.trigger_time - 1800, // 30分之前
-        end: res.dat.trigger_time + 1800, // 30分之后
-        step: 15,
-      };
-      getWarningChart(params, res.dat.datasource_id).then((res2) => {
-        setChartList(res2.data.result)
-      });
     })
     setIsModalOpen(true);
   }
@@ -586,7 +576,8 @@ function App() {
           <div className="asset1">
             <div className="row t-row">
               <div className="col col1">
-                <span>告警规则名称：{curWarn.rule_name}</span>
+                <div>告警规则名称：</div>
+                <div className='w-title' title={curWarn.rule_name}>{curWarn.rule_name}</div>
               </div>
               <div className="col2">
                 {
@@ -669,10 +660,21 @@ function App() {
                 >告警状态：<span
                   style={{
                     color: curWarn.is_recovered ? '#39E9A4' : '#F26464',
-                  }}>{curWarn.is_recovered ? "已恢复" : "未恢复"}</span></span>
+                  }}>{!curWarn.is_recovered ? "未恢复" : "已恢复"}</span></span>
               </div>
             </div>
-            <div className="row">
+            <div className="row last-row">
+             <div className="col last-col1">
+                <img
+                  className="dian"
+                  src="/image/alarm/dian.png"
+                  alt=""
+                />
+                <div className='last-title'>
+                  <span>回放PromQL： </span>
+                  <span className='reproml' title={query1}>{query1}</span>
+                </div>
+              </div>
               <div className="col">
                 <img
                   className="dian"
@@ -681,18 +683,10 @@ function App() {
                 />
                 <span>处理状态： {curWarn.processe == 1 ? '已处理' : '未处理'}</span>
               </div>
-              <div className="col" style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                <img
-                  className="dian"
-                  src="/image/alarm/dian.png"
-                  alt=""
-                />
-                <span title={query1}>回放PromQL： {query1}</span>
-              </div>
             </div>
           </div>
           <div className="chart1">
-            <AlarmChart chartList={chartList} />
+            {curWarn.id && <AlarmChartLine curWarn={curWarn} />}
           </div>
         </div>
         {/* 屏蔽 */}
