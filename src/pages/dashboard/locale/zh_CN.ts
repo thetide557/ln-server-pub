@@ -189,6 +189,7 @@ const zh_CN = {
       min: '最小值',
       max: '最大值',
       decimals: '小数位数',
+      
     },
     overrides: {
       matcher: '查询条件名称',
@@ -302,5 +303,6 @@ const zh_CN = {
     datasource_empty: '没有数据源信息，请先配置数据源',
     invalidTimeRange: '无效的 __from 和 __to 值',
   },
+  customized: '自定义',
 };
 export default zh_CN;

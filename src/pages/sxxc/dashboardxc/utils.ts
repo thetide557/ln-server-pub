@@ -210,6 +210,8 @@ function convertOptionsGrafanaToN9E(panel: any) {
       min: config.min,
       max: config.max,
       decimals: config.decimals,
+      customized: config.customized,
+      customizedUnit: config.customizedUnit? config.customizedUnit : '',  
     },
     legend: {
       displayMode: options?.legend?.displayMode === 'hidden' ? 'hidden' : 'list',

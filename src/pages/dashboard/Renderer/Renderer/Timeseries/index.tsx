@@ -207,6 +207,8 @@ export default function index(props: IProps) {
                 unit: options?.standardOptions?.util,
                 decimals: options?.standardOptions?.decimals,
                 dateFormat: options?.standardOptions?.dateFormat,
+                customized:options?.standardOptions?.customized,
+                customizedUnit:options?.standardOptions?.customizedUnit,
               },
               val,
             ).text;
@@ -243,6 +245,8 @@ export default function index(props: IProps) {
                 unit: options?.standardOptions?.util,
                 decimals: options?.standardOptions?.decimals,
                 dateFormat: options?.standardOptions?.dateFormat,
+                customized:options?.standardOptions?.customized,
+                customizedUnit:options?.standardOptions?.customizedUnit,
               },
               val,
             ).text;

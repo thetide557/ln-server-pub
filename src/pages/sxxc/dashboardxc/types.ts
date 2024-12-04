@@ -77,6 +77,9 @@ export interface IOptions {
     max?: number;
     decimals?: number;
     dateFormat?: string;
+    // 自定义的单位
+    customized?:boolean;
+    customizedUnit?:string;
   };
   legend?: {
     // TODO: 目前不支持这么复杂的自定义

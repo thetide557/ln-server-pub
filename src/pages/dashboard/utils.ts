@@ -207,6 +207,8 @@ function convertOptionsGrafanaToN9E(panel: any) {
     thresholds: convertThresholdsGrafanaToN9E(config),
     standardOptions: {
       util: unitMap[config.unit] ? unitMap[config.unit] : 'none',
+      customized:config.customized? config.customized : false,
+      customizedUnit:config.customizedUnit? config.customizedUnit : '',
       min: config.min,
       max: config.max,
       decimals: config.decimals,

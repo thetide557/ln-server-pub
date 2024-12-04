@@ -183,6 +183,7 @@ const en_US = {
       min: 'Min',
       max: 'Max',
       decimals: 'Decimals',
+      
     },
     overrides: {
       matcher: 'Matcher',
@@ -292,5 +293,6 @@ const en_US = {
     datasource_empty: 'Please configure the data source first',
     invalidTimeRange: 'Invalid __from and __to values',
   },
+  customized: 'customized',
 };
 export default en_US;

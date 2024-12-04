@@ -30,6 +30,8 @@ export default function (props: IProps) {
               unit: options?.standardOptions?.util,
               decimals: options?.standardOptions?.decimals,
               dateFormat: options?.standardOptions?.dateFormat,
+              customized: options?.standardOptions?.customized, 
+              customizedUnit: options?.standardOptions?.customizedUnit,
             },
             val,
           ).text;
@@ -45,6 +47,8 @@ export default function (props: IProps) {
               unit: options?.standardOptions?.util,
               decimals: options?.standardOptions?.decimals,
               dateFormat: options?.standardOptions?.dateFormat,
+              customized: options?.standardOptions?.customized, 
+              customizedUnit: options?.standardOptions?.customizedUnit,
             },
             datum.value,
           ).text,

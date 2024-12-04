@@ -23,8 +23,9 @@ const getValueAndToNumber = (value: any[]) => {
 };
 
 export const getSerieTextObj = (value: number | string | null | undefined, standardOptions?: any, valueMappings?: IValueMapping[], thresholds?: IThresholds) => {
-  const { decimals, dateFormat } = standardOptions || {};
+  const { decimals, dateFormat,customized } = standardOptions || {};
   const unit = standardOptions?.unit || standardOptions?.util; // TODO: 兼容之前写错的 util
+  const customizedUnit = standardOptions?.customizedUnit || '';
   const matchedValueMapping = _.find(valueMappings, (item: any) => {
     const { type, match } = item;
     if (value === null || value === '' || value === undefined) {
@@ -73,15 +74,20 @@ export const getSerieTextObj = (value: number | string | null | undefined, stand
   );
   const valueObj = valueFormatter({ unit, decimals, dateFormat }, value);
   const newValue = matchedValueMapping?.result?.text ? matchedValueMapping?.result?.text : valueObj.value;
+  // 自定义化单位
+  const unitToUse = customized? customizedUnit : valueObj.unit;
+  const textToUse = customized? `${newValue}${customizedUnit}` : `${newValue}${valueObj.unit}`;
+  
   return {
     value: newValue,
-    unit: valueObj.unit,
+    unit: unitToUse,
+    customized: customized,
     color: matchedValueMapping?.result?.color || matchedThresholdsColor,
-    text: newValue + valueObj.unit,
+    text: textToUse,
   };
 };
 
-const getCalculatedValuesBySeries = (series: any[], calc: string, { unit, decimals, dateFormat }, valueMappings?: IValueMapping[], thresholds?: IThresholds) => {
+const getCalculatedValuesBySeries = (series: any[], calc: string, { unit,customized,customizedUnit,  decimals, dateFormat }, valueMappings?: IValueMapping[], thresholds?: IThresholds) => {
   const values = _.map(series, (serie) => {
     const results = {
       lastNotNull: () => _.get(_.last(_.filter(serie.data, (item) => item[1] !== null && !_.isNaN(_.toNumber(item[1])))), 1),
@@ -104,7 +110,7 @@ const getCalculatedValuesBySeries = (series: any[], calc: string, { unit, decima
         refId: serie.refId,
       },
       stat: _.toNumber(stat),
-      ...getSerieTextObj(stat, { unit, decimals, dateFormat }, valueMappings, thresholds),
+      ...getSerieTextObj(stat, { unit, customized,customizedUnit,decimals, dateFormat }, valueMappings, thresholds),
     };
   });
   return values;

@@ -15,7 +15,7 @@
  *
  */
 import React from 'react';
-import { Form, Select, InputNumber, Row, Col, Tooltip, Input } from 'antd';
+import { Form, Select, InputNumber, Row, Col, Tooltip, Input, Checkbox } from 'antd';
 import { InfoCircleOutlined, CaretDownOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useTranslation, Trans } from 'react-i18next';
@@ -24,20 +24,25 @@ import { Panel } from '../../Components/Collapse';
 interface IProps {
   preNamePrefix?: (string | number)[];
   namePrefix?: (string | number)[];
+  
 }
 
 const { Option, OptGroup } = Select;
 
 export default function index(props: IProps) {
   const { t } = useTranslation('dashboard');
-  const { preNamePrefix = [], namePrefix = ['options', 'standardOptions'] } = props;
+  const { preNamePrefix = [], namePrefix = ['options', 'standardOptions']} = props;
 
   return (
     <Panel header={t('panel.standardOptions.title')}>
       <>
         <Form.Item shouldUpdate>
           {({ getFieldValue }) => {
-            const unit = getFieldValue([...namePrefix, 'util']) || '';
+            {/* 单位 */ }
+            const unit = getFieldValue([...preNamePrefix,...namePrefix, 'util']) || '';
+            const customized = getFieldValue([...preNamePrefix,...namePrefix, 'customized']) || false;
+
+
             return (
               <Row gutter={10}>
                 <Col span={unit.indexOf('datetime') > -1 ? 12 : 24}>
@@ -66,7 +71,7 @@ export default function index(props: IProps) {
                     }
                     name={[...namePrefix, 'util']}
                   >
-                    <Select suffixIcon={<CaretDownOutlined />} placeholder='auto' allowClear>
+                    <Select suffixIcon={<CaretDownOutlined />} placeholder='auto' allowClear disabled={customized} >
                       <Option value='none'>none</Option>
                       <OptGroup label='Data(SI)'>
                         <Option value='bitsSI'>bits(SI)</Option>
@@ -90,7 +95,25 @@ export default function index(props: IProps) {
                       </OptGroup>
                     </Select>
                   </Form.Item>
+
                 </Col>
+                <Col span={4}>
+
+                  <Form.Item name={[...namePrefix, 'customized']} valuePropName='checked'>
+                    <Checkbox >
+                      {t('customized')}
+                    </Checkbox>
+
+                  </Form.Item>
+                </Col>
+                <Col span={20}>
+                  <Form.Item name={[...namePrefix, 'customizedUnit']}  >
+                  {customized &&
+                    <Input placeholder='请输入自定义单位' />}
+                  </Form.Item>
+                  
+                </Col>
+
                 {unit.indexOf('datetime') > -1 && (
                   <Col span={12}>
                     <Form.Item label={t('panel.standardOptions.datetime')} name={[...namePrefix, 'dateFormat']}>
@@ -102,6 +125,7 @@ export default function index(props: IProps) {
             );
           }}
         </Form.Item>
+
         <Row gutter={10}>
           <Col span={8}>
             <Form.Item label={t('panel.standardOptions.min')} name={[...namePrefix, 'min']}>

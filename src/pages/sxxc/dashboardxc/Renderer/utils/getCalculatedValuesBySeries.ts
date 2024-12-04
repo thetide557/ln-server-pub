@@ -25,6 +25,8 @@ const getValueAndToNumber = (value: any[]) => {
 export const getSerieTextObj = (value: number | string | null | undefined, standardOptions?: any, valueMappings?: IValueMapping[], thresholds?: IThresholds) => {
   const { decimals, dateFormat } = standardOptions || {};
   const unit = standardOptions?.unit || standardOptions?.util; // TODO: 兼容之前写错的 util
+  const customized = standardOptions?.customized;
+  const customizedUnit = standardOptions?.customizedUnit;
   const matchedValueMapping = _.find(valueMappings, (item: any) => {
     const { type, match } = item;
     if (value === null || value === '' || value === undefined) {
@@ -71,7 +73,7 @@ export const getSerieTextObj = (value: number | string | null | undefined, stand
       }
     },
   );
-  const valueObj = valueFormatter({ unit, decimals, dateFormat }, value);
+  const valueObj = valueFormatter({ unit, customized,customizedUnit, decimals, dateFormat }, value);
   const newValue = matchedValueMapping?.result?.text ? matchedValueMapping?.result?.text : valueObj.value;
   return {
     value: newValue,
@@ -81,7 +83,7 @@ export const getSerieTextObj = (value: number | string | null | undefined, stand
   };
 };
 
-const getCalculatedValuesBySeries = (series: any[], calc: string, { unit, decimals, dateFormat }, valueMappings?: IValueMapping[], thresholds?: IThresholds) => {
+const getCalculatedValuesBySeries = (series: any[], calc: string, { unit, customized,customizedUnit,decimals, dateFormat }, valueMappings?: IValueMapping[], thresholds?: IThresholds) => {
   const values = _.map(series, (serie) => {
     const results = {
       lastNotNull: () => _.get(_.last(_.filter(serie.data, (item) => item[1] !== null && !_.isNaN(_.toNumber(item[1])))), 1),
@@ -104,13 +106,13 @@ const getCalculatedValuesBySeries = (series: any[], calc: string, { unit, decima
         refId: serie.refId,
       },
       stat: _.toNumber(stat),
-      ...getSerieTextObj(stat, { unit, decimals, dateFormat }, valueMappings, thresholds),
+      ...getSerieTextObj(stat, { unit, customized,customizedUnit, decimals, dateFormat }, valueMappings, thresholds),
     };
   });
   return values;
 };
 
-export const getLegendValues = (series: any[], { unit, decimals, dateFormat }, hexPalette: string[], stack = false) => {
+export const getLegendValues = (series: any[], { unit, customized,customizedUnit, decimals, dateFormat }, hexPalette: string[], stack = false) => {
   const newSeries = stack ? _.reverse(_.clone(series)) : series;
   const values = _.map(newSeries, (serie, idx) => {
     const results = {
@@ -127,11 +129,11 @@ export const getLegendValues = (series: any[], { unit, decimals, dateFormat }, h
       offset: serie.offset,
       color: hexPalette[idx % hexPalette.length],
       disabled: serie.visible === false ? true : undefined,
-      max: valueFormatter({ unit, decimals, dateFormat }, results.max),
-      min: valueFormatter({ unit, decimals, dateFormat }, results.min),
-      avg: valueFormatter({ unit, decimals, dateFormat }, results.avg),
-      sum: valueFormatter({ unit, decimals, dateFormat }, results.sum),
-      last: valueFormatter({ unit, decimals, dateFormat }, results.last),
+      max: valueFormatter({ unit, customized,customizedUnit, decimals, dateFormat }, results.max),
+      min: valueFormatter({ unit, customized,customizedUnit, decimals, dateFormat }, results.min),
+      avg: valueFormatter({ unit, customized,customizedUnit, decimals, dateFormat }, results.avg),
+      sum: valueFormatter({ unit, customized,customizedUnit, decimals, dateFormat }, results.sum),
+      last: valueFormatter({ unit, customized,customizedUnit, decimals, dateFormat }, results.last),
     };
   });
   return values;

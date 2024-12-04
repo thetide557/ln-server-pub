@@ -165,6 +165,8 @@ export default function Stat(props: IProps) {
       unit: options?.standardOptions?.util,
       decimals: options?.standardOptions?.decimals,
       dateFormat: options?.standardOptions?.dateFormat,
+      customized: options?.standardOptions?.customized,
+      customizedUnit: options?.standardOptions?.customizedUnit,
     },
     options?.valueMappings,
     options?.thresholds,

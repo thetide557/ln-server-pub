@@ -22,20 +22,20 @@ import * as byteConverter from './byteConverter';
 export function formatSecondToTime(value): any {
   if (!value || Number(value) == 0) return ''
   // 最终时间结果对象
-  let day =  Number(value) / 60 / 60 / 24; // 天
-  let hour =  Number(value) / 60 / 60 % 24; // 时
-  let minute =  Number(value) / 60 % 60; // 分
-  let second =  Number(value) % 60; // 秒
-  let result = '' + parseInt(""+second)+"秒"
+  let day = Number(value) / 60 / 60 / 24; // 天
+  let hour = Number(value) / 60 / 60 % 24; // 时
+  let minute = Number(value) / 60 % 60; // 分
+  let second = Number(value) % 60; // 秒
+  let result = '' + parseInt("" + second) + "秒"
   if (minute > 0) {
-    result = '' + parseInt(""+minute) + '分' + result
+    result = '' + parseInt("" + minute) + '分' + result
   }
   if (hour > 0) {
-    result = '' + parseInt(""+hour) + '时' + result
+    result = '' + parseInt("" + hour) + '时' + result
   }
-   if (day > 0) {
-     result = '' + parseInt(""+day) + '天' + result
-   }
+  if (day > 0) {
+    result = '' + parseInt("" + day) + '天' + result
+  }
   return result;
 }
 
@@ -95,29 +95,40 @@ export function timeFormatter(val, type: 'seconds' | 'milliseconds', decimals) {
     }
   }
   let unitMap = {
-    "months":"月",
-    "years":"年",
-    "days":"天",
-    "hours":"小时",
-    "minutes":"分钟",
-    "seconds":"秒",
-    "milliseconds":"毫秒",
-    "s":"秒"
+    "months": "月",
+    "years": "年",
+    "days": "天",
+    "hours": "小时",
+    "minutes": "分钟",
+    "seconds": "秒",
+    "milliseconds": "毫秒",
+    "s": "秒"
   }
   return {
     value: _.round(newVal, decimals),
     unit,
-    text: _.round(newVal, decimals) + ' ' +(unitMap[unit]?unitMap[unit]:unit) ,
+    text: _.round(newVal, decimals) + ' ' + (unitMap[unit] ? unitMap[unit] : unit),
     stat: val,
   };
 }
 
-const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss' }, val) => {
+// interface ValueFormatterResult {
+//   value: any;
+//   unit: string;
+//   text: any;
+//   stat: any;
+//   customized: boolean;
+//   customizedUnit: string;
+// }
+
+const valueFormatter = ({ unit, customized = false, customizedUnit = '', decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss' }, val) => {
 
   if (val === null || val === '' || val === undefined) {
     return {
       value: '',
       unit: '',
+      customized: false,
+      customizedUnit: '',
       text: '',
       stat: '',
     };
@@ -125,6 +136,16 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
   if (decimals === null) decimals = 3;
   if (typeof val !== 'number') {
     val = _.toNumber(val);
+  }
+  if (customized) {
+    return {
+      value: _.round(val, decimals),
+      unit: '',
+      text: _.round(val, decimals) + customizedUnit,
+      stat: val,
+      customized: true,
+      customizedUnit: customizedUnit,
+    };
   }
   if (unit) {
     const utilValObj = utilValMap[unit];
@@ -150,6 +171,7 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         unit: '%',
         text: _.round(val, decimals) + '%',
         stat: val,
+
       };
     }
     if (unit === 'percentUnit') {
@@ -158,6 +180,7 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         unit: '%',
         text: _.round(val * 100, decimals) + '%',
         stat: val,
+
       };
     }
     if (unit === 'humantimeSeconds') {
@@ -166,6 +189,7 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         unit: '',
         text: moment.duration(val, 'seconds').humanize(),
         stat: val,
+
       };
     }
     if (unit === 'humantimeMilliseconds') {
@@ -174,16 +198,19 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         unit: '',
         text: moment.duration(val, 'milliseconds').humanize(),
         stat: val,
+
       };
     }
     if (unit === 'seconds') {
       return timeFormatter(val, unit, decimals);
     }
     if (unit === 'seconds_100ms') {
-      return timeFormatter(val/100, "seconds", decimals);
+      return timeFormatter(val / 100, "seconds", decimals);
+
     }
     if (unit === 'milliseconds') {
       return timeFormatter(val, unit, decimals);
+
     }
     if (unit === 'datetimeSeconds') {
       return {
@@ -191,6 +218,7 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         unit: '',
         text: moment.unix(val).format(dateFormat),
         stat: val,
+
       };
     }
     if (unit === 'datetimeMilliseconds') {
@@ -199,6 +227,7 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         unit: '',
         text: moment(val).format(dateFormat),
         stat: val,
+
       };
     }
     if (unit === '时间') {
@@ -207,11 +236,14 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         unit: '',
         text: formatSecondToTime(val),//moment(val).format(dateFormat),
         stat: val,
+
       };
     }
     return {
       value: _.round(val, decimals),
       unit: '',
+      customized: false,
+      customizedUnit: '',
       text: _.round(val, decimals),
       stat: val,
     };

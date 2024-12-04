@@ -73,6 +73,8 @@ export interface IOptions {
   xThresholds?: IThresholds;
   standardOptions?: {
     util?: string;
+    customized?:boolean;
+    customizedUnit?:string;
     min?: number;
     max?: number;
     decimals?: number;

@@ -112,7 +112,7 @@ export function timeFormatter(val, type: 'seconds' | 'milliseconds', decimals) {
   };
 }
 
-const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss' }, val) => {
+const valueFormatter = ({ unit, customized=false,customizedUnit,decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss' }, val) => {
 
   if (val === null || val === '' || val === undefined) {
     return {

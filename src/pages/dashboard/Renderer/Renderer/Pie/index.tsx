@@ -38,16 +38,23 @@ export default function Pie(props: IProps) {
   const { values, series, themeMode, time } = props;
   const { custom, options } = values;
   const { calc, legengPosition, max, labelWithName, labelWithValue, detailUrl, detailName, donut = false } = custom;
+
+  // const { customized, customizedUnit } = options?.standardOptions || {customized:false, customizedUnit: ''};
+
+  const customized = options?.standardOptions?.customized;
+  const customizedUnit = options?.standardOptions?.customizedUnit||"";
   const dataFormatter = (text: number) => {
     const resFormatter = valueFormatter(
       {
         unit: options?.standardOptions?.util,
+        customized: customized,
+        customizedUnit: customizedUnit,
         decimals: options?.standardOptions?.decimals,
         dateFormat: options?.standardOptions?.dateFormat,
       },
       text,
     );
-    return `${resFormatter.value}${resFormatter.unit}`;
+    return customized ? `${resFormatter.value}${customizedUnit}` : `${resFormatter.value}${resFormatter.unit}`;
   };
 
   const detailFormatter = (data: any) => {
@@ -61,6 +68,8 @@ export default function Pie(props: IProps) {
       unit: options?.standardOptions?.util,
       decimals: options?.standardOptions?.decimals,
       dateFormat: options?.standardOptions?.dateFormat,
+      customized: options?.standardOptions?.customized,
+      customizedUnit: options?.standardOptions?.customizedUnit,
     },
     options?.valueMappings,
   );
@@ -69,9 +78,9 @@ export default function Pie(props: IProps) {
   const data =
     max && sortedValues.length > max
       ? sortedValues
-          .slice(0, max)
-          .map((i) => ({ name: i.name, value: i.stat, metric: i.metric }))
-          .concat({ name: '其他', value: sortedValues.slice(max).reduce((previousValue, currentValue) => currentValue.stat + previousValue, 0), metric: {} })
+        .slice(0, max)
+        .map((i) => ({ name: i.name, value: i.stat, metric: i.metric }))
+        .concat({ name: '其他', value: sortedValues.slice(max).reduce((previousValue, currentValue) => currentValue.stat + previousValue, 0), metric: {} })
       : sortedValues.map((i) => ({ name: i.name, value: i.stat, metric: i.metric }));
   return (
     <div className='renderer-pie-container'>

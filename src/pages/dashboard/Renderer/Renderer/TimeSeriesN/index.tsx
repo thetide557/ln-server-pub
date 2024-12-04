@@ -44,7 +44,7 @@ const TimeSeriesN = function (props: IProps) {
   if (seriesData.length > 0) {
     const left = moment(seriesData[0].time)
     const right = moment(seriesData[seriesData.length - 1].time)
-    if(left.format("YYYYMMDD") != right.format("YYYYMMDD")) {
+    if (left.format("YYYYMMDD") != right.format("YYYYMMDD")) {
       timeMask = "MM-DD HH:mm"
     }
   }
@@ -82,6 +82,8 @@ const TimeSeriesN = function (props: IProps) {
               unit: options?.standardOptions?.util,
               decimals: options?.standardOptions?.decimals,
               dateFormat: options?.standardOptions?.dateFormat,
+              customized: options?.standardOptions?.customized,
+              customizedUnit: options?.standardOptions?.customizedUnit,
             },
             val,
           ).text;
@@ -99,6 +101,8 @@ const TimeSeriesN = function (props: IProps) {
               unit: options?.standardOptions?.util,
               decimals: options?.standardOptions?.decimals,
               dateFormat: options?.standardOptions?.dateFormat,
+              customized: options?.standardOptions?.customized,
+              customizedUnit: options?.standardOptions?.customizedUnit,
             },
             datum.value,
           ).text,
