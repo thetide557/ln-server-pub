@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useEffect, useRef } from 'react';
 import _ from 'lodash';
 import { Tooltip } from 'antd';

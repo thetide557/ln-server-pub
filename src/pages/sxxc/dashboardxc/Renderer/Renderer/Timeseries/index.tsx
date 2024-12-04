@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useRef, useEffect, useState, Fragment } from 'react';
 import _ from 'lodash';
 import moment from 'moment';

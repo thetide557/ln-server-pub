@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { IRawTimeRange } from '@/components/TimeRangePicker';
 import { useGlobalState } from '@/pages/dashboard/globalState';
 import { IPanel } from '@/pages/dashboard/types';

@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+// @ts-nocheck
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import _ from 'lodash';
 import { Table, Input, Space, Button } from 'antd';

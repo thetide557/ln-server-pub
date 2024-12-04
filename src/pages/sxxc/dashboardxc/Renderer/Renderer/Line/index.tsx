@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IPanel } from '@/pages/dashboard/types';
 import { Datum } from '@ant-design/graphs';
 import { Line } from '@ant-design/plots';

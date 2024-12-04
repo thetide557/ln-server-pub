@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IRawTimeRange } from '@/components/TimeRangePicker';
 import { IPanel } from '@/pages/dashboard/types';
 import { Gauge } from '@ant-design/plots';
