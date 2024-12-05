@@ -18,7 +18,7 @@
 import React, { useEffect, useState, createContext, useRef, useLayoutEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 // Modal 会被注入的代码所使用，请不要删除
-import { ConfigProvider, notification, Modal, message, Select } from 'antd';
+import { ConfigProvider, notification, Modal, message, Select, Tooltip } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import zhCN from 'antd/lib/locale/zh_CN';
 import enUS from 'antd/lib/locale/en_US';
@@ -262,6 +262,7 @@ function App() {
 
   // 右下角告警
   const handleAlarm = () => {
+    setCurWarn({})
     getAlertEventsById(alertId).then(res => {
       // console.log(1111, res.dat);
       setCurWarn(res.dat)  
@@ -325,6 +326,7 @@ function App() {
 
   // 时间戳转换时间
   const convertTime = (timestamp, type) => {
+    if (!timestamp) return ''
     const date = new Date(parseInt(timestamp) * 1000);
     const Year = date.getFullYear();
     const Moth =
@@ -577,17 +579,21 @@ function App() {
             <div className="row t-row">
               <div className="col col1">
                 <div>告警规则名称：</div>
-                <div className='w-title' title={curWarn.rule_name}>{curWarn.rule_name}</div>
+                <Tooltip placement="bottom" title={curWarn.rule_name} color='#fff' overlayInnerStyle={{color: '#000'}}>
+                  <div className='w-title'>{curWarn.rule_name}</div>
+                </Tooltip>
               </div>
-              <div className="col2">
+              {
+                curWarn.id && <div className="col2">
                 {
                   curWarn.processe == 1 ? <div>已处理</div> : <div onClick={handleDeal}>是否已处理</div>
                 }
                 <div onClick={handlePb}>屏蔽</div>
               </div>
+              }
             </div>
             <div className="row">
-              <div className="col">
+              <div className="col col-zc">
                 <img
                   className="dian"
                   src="/image/alarm/dian.png"
@@ -624,10 +630,10 @@ function App() {
                 <div className="serverity">
                   <span>告警级别：</span>
                   <div className="s-img">
-                    <img
+                    {curWarn.severity && <img
                       src={`/image/alarm/s${curWarn.severity}.png`}
                       alt=""
-                    />
+                    />}
                   </div>
                 </div>
               </div>
@@ -660,7 +666,7 @@ function App() {
                 >告警状态：<span
                   style={{
                     color: curWarn.is_recovered ? '#39E9A4' : '#F26464',
-                  }}>{!curWarn.is_recovered ? "未恢复" : "已恢复"}</span></span>
+                  }}>{curWarn.is_recovered == 1 ? "已恢复" : curWarn.is_recovered == 0 ? "未恢复" : ''}</span></span>
               </div>
             </div>
             <div className="row last-row">
@@ -672,7 +678,9 @@ function App() {
                 />
                 <div className='last-title'>
                   <span>回放PromQL： </span>
-                  <span className='reproml' title={query1}>{query1}</span>
+                  <Tooltip placement="bottom" title={query1} color='#fff' overlayInnerStyle={{color: '#000'}}>
+                    <span className='reproml'>{query1}</span>
+                  </Tooltip> 
                 </div>
               </div>
               <div className="col">
@@ -681,7 +689,7 @@ function App() {
                   src="/image/alarm/dian.png"
                   alt=""
                 />
-                <span>处理状态： {curWarn.processe == 1 ? '已处理' : '未处理'}</span>
+                <span>处理状态： {curWarn.processe == 1 ? '已处理' : curWarn.processe == 0 ? '未处理' : ''}</span>
               </div>
             </div>
           </div>
