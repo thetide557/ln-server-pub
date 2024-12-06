@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import { Space, InputNumber, Radio, Button, Popover } from 'antd';
@@ -26,6 +26,9 @@ import { completeBreakpoints } from '@/pages/dashboard/Renderer/datasource/utils
 import { CommonStateContext } from '@/App';
 import { getPromData, setTmpChartData } from './services';
 import { QueryStats } from './components/QueryStatsView';
+import { useLocation } from 'react-router-dom';
+import { queryStringOptions } from '@/pages/explorer/constants';
+import queryString from 'query-string';
 
 interface IProps {
   url: string;
@@ -96,44 +99,83 @@ export default function Graph(props: IProps) {
     },
   };
 
+
+  const { search } = useLocation();
+  const query = queryString.parse(search, queryStringOptions);
+  const isInitialRender = useRef(true);
+
   useEffect(() => {
     if (datasourceValue && promql) {
-      console.log("useEffect----range", range);
-      // 初始值的时候不执行查询
-      if (range.start !== "" && range.end !== "") {
+      // console.log("useEffect----range", range);
       const parsedRange = parseRange(range);
       const start = moment(parsedRange.start).unix();
       const end = moment(parsedRange.end).unix();
       let realStep = step;
       if (!step) realStep = Math.max(Math.floor((end - start) / 240), 1);
       const queryStart = Date.now();
-      getPromData(`${url}/${datasourceValue}/api/v1/query_range`, {
-        query: promql,
-        start: moment(parsedRange.start).unix(),
-        end: moment(parsedRange.end).unix(),
-        step: realStep,
-      })
-        .then((res) => {
-          const series = _.map(res?.result, (item) => {
-            return {
-              id: _.uniqueId('series_'),
-              name: getSerieName(item.metric),
-              metric: item.metric,
-              data: completeBreakpoints(realStep, item.values),
-            };
-          });
-          setQueryStats({
-            loadTime: Date.now() - queryStart,
-            resolution: step,
-            resultSeries: series.length,
-          });
+      // console.log("query参数",query)
+      if(query.prom_ql){
+        if (!isInitialRender.current) {
+          // console.log("执行查询",range)
+          getPromData(`${url}/${datasourceValue}/api/v1/query_range`, {
+            query: promql,
+            start: moment(parsedRange.start).unix(),
+            end: moment(parsedRange.end).unix(),
+            step: realStep,
+          })
+            .then((res) => {
+              const series = _.map(res?.result, (item) => {
+                return {
+                  id: _.uniqueId('series_'),
+                  name: getSerieName(item.metric),
+                  metric: item.metric,
+                  data: completeBreakpoints(realStep, item.values),
+                };
+              });
+              setQueryStats({
+                loadTime: Date.now() - queryStart,
+                resolution: step,
+                resultSeries: series.length,
+              });
 
-          setData(series);
+              setData(series);
+            })
+            .catch((err) => {
+              const msg = _.get(err, 'message');
+              setErrorContent(`Error executing query: ${msg}`);
+            });
+        }
+        // 初次渲染不做查询
+        isInitialRender.current = false;
+      }else{
+        // console.log("执行查询",range)
+        getPromData(`${url}/${datasourceValue}/api/v1/query_range`, {
+          query: promql,
+          start: moment(parsedRange.start).unix(),
+          end: moment(parsedRange.end).unix(),
+          step: realStep,
         })
-        .catch((err) => {
-          const msg = _.get(err, 'message');
-          setErrorContent(`Error executing query: ${msg}`);
-        });
+          .then((res) => {
+            const series = _.map(res?.result, (item) => {
+              return {
+                id: _.uniqueId('series_'),
+                name: getSerieName(item.metric),
+                metric: item.metric,
+                data: completeBreakpoints(realStep, item.values),
+              };
+            });
+            setQueryStats({
+              loadTime: Date.now() - queryStart,
+              resolution: step,
+              resultSeries: series.length,
+            });
+  
+            setData(series);
+          })
+          .catch((err) => {
+            const msg = _.get(err, 'message');
+            setErrorContent(`Error executing query: ${msg}`);
+          });
       }
     }
   }, [JSON.stringify(range), step, datasourceValue, promql, refreshFlag]);

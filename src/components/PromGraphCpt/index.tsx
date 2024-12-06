@@ -81,8 +81,8 @@ export default function index(props: IProps) {
   const [tabActiveKey, setTabActiveKey] = useState(type);
   const [timestamp, setTimestamp] = useState<number>(); // for table
   const [refreshFlag, setRefreshFlag] = useState(_.uniqueId('refreshFlag_')); // for table
-  // const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' }); // for graph
-  const [range, setRange] = useState<IRawTimeRange>({ start: '', end: '' }); // for graph
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' }); // for graph
+  // const [range, setRange] = useState<IRawTimeRange>({ start: '', end: '' }); // for graph
   const [step, setStep] = useState<number>(); // for graph
   const [metricsExplorerVisible, setMetricsExplorerVisible] = useState(false);
   const [completeEnabled, setCompleteEnabled] = useState(true);
