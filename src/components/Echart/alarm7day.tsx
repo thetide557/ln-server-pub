@@ -33,15 +33,6 @@ export default function Alarm7day(props) {
                 data: [],
                 type: 'line',
                 smooth: true,
-                // lineStyle: {
-                //     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                //         offset: 0,
-                //         color: 'red' // 渐变起始颜色
-                //     }, {
-                //         offset: 1,
-                //         color: 'blue' // 渐变结束颜色
-                //     }])
-                // }
             }
         ]
     };

@@ -46,8 +46,10 @@ export default function NetworkNodePing() {
         legend: {
             data: [],
             left: 'center',
-            top: '3%'
+            top: '1%',
+            icon: 'circle',
         },
+        color:['#FF443D','#EE752A','#FFA662','#97BB6E'],
         xAxis: [
             {
                 type: 'time',

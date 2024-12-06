@@ -13,7 +13,13 @@ export default function AssetdistributionStatus(props) {
                 type: 'shadow'
             }
         },
-        legend: {},
+        legend: {
+            top:0,
+            right:0,
+            itemWidth: 12,
+            itemHeight: 12,
+            itemGap: 20,
+        },
         grid: {
             top:'12%',
             left: '1%',
@@ -26,7 +32,7 @@ export default function AssetdistributionStatus(props) {
                 type: 'category',
                 axisLabel: {
                     rotate: 45,
-                    fontSize: 12 // 设置X轴单位文字的大小为16
+                    fontSize: 12 
                 },
                 data: []
             }
@@ -45,6 +51,9 @@ export default function AssetdistributionStatus(props) {
                 emphasis: {
                     focus: 'series'
                 },
+                itemStyle: {
+                    color: '#5082FF' 
+                },
                 data: []
             },
             {
@@ -54,6 +63,9 @@ export default function AssetdistributionStatus(props) {
                 stack: 'Ad',
                 emphasis: {
                     focus: 'series'
+                },
+                itemStyle: {
+                    color: '#EC5417' 
                 },
                 data: []
             },

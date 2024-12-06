@@ -19,12 +19,17 @@ export default function AssetMonitoring(props) {
         },
         legend: {
             autoWrap: true,
+            itemHeight: 12,
+            itemWidth: 12,
             height: '80%',
             orient: 'vertical',
-            top: "20%",
-            x: '60%',
-            bottom: '50'
+            top: "60%",
+            x: '70%',
+            bottom: '50',
+            icon: 'circle',
+            itemGap: 20
         },
+        color:['#4E83FF','#FA4241'],
         graphic: {
             elements: [
                 {

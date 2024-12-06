@@ -22,10 +22,9 @@ export default function ServiceTcp() {
                 }
             },
         },
-        // tooltip: {
-        //     trigger: 'axis'
-        // },
+        color:['#FF443D','#EE752A','#FFA662','#97BB6E'],
         legend: {
+            icon: 'circle',
             data: []
         },
         grid: {

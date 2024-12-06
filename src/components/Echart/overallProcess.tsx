@@ -26,7 +26,10 @@ export default function OverallProcess() {
             orient: 'vertical',
             top: "20%",
             x: '60%',
-            bottom: '50'
+            bottom: '50',
+            itemWidth: 12,
+            itemHeight: 12,
+            itemGap: 20
         },
         graphic: {
             elements: [
