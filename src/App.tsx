@@ -278,6 +278,23 @@ function App() {
     setIsModalOpen(true);
   }
 
+  // 小数位数判断
+  const getDecimalPlaces = (num) => {
+    // 将数字转换为字符串
+      const numStr = num.toString();
+      
+      // 查找小数点的位置
+      const decimalIndex = numStr.indexOf('.');
+      
+      // 如果小数点不存在，返回0
+      if (decimalIndex === -1) {
+          return 0;
+      }
+      
+      // 返回小数点后的字符长度
+      return numStr.substring(decimalIndex + 1).length;
+  }
+
 
   const handleClick = () => {
     if (location.pathname != '/screenView') {
@@ -654,7 +671,7 @@ function App() {
                   src="/image/alarm/dian.png"
                   alt=""
                 />
-                <span>触发值：{curWarn.trigger_value}</span>
+                <span>触发值：{getDecimalPlaces(Number(curWarn.trigger_value)) > 3 ? Number(curWarn.trigger_value).toFixed(3) : curWarn.trigger_value}</span>
               </div>
               <div className="col">
                 <img

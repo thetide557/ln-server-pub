@@ -34,11 +34,11 @@ const AlarmChartLine = function (props: any) {
   }
 
 
-  console.log(222, curWarn);
+  // console.log(222, curWarn);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    console.log(111, curWarn);
+    console.log(curWarn);
     if (curWarn.id) {
       const chartDom = chartRef.current;
       let myChart = echarts.init(chartDom);
@@ -56,10 +56,34 @@ const AlarmChartLine = function (props: any) {
       };
       getWarningChart(params, curWarn.datasource_id).then((res2) => {
         let list1 = res2.data.result || [];
+        if (list1.length > 10) {
+          list1 = list1.slice(0, 10)
+        }
         let seriesData = [];
+        // 多条数据x轴不统一
         let xList = [];
+        let xList1 = []
         list1.forEach((item) => {
-          const data = item.values.map((item2) => item2[1]);
+          xList1.push(...item.values.map((item2) => item2[0]));
+        });
+        // console.log("xlist1", xList1);
+        // 收集所有时间戳
+        let allTimestamps = [...new Set(xList1)];
+        allTimestamps = allTimestamps.sort((a, b) => a - b);
+        // console.log("allTime", allTimestamps);
+        if (list1.length > 0) {
+          // x轴
+          xList = allTimestamps.map((item) => convertTime(item, "year"));
+        }
+  
+        // 构建统一的时间戳数组
+        list1.forEach((item) => {
+          item.values = allTimestamps.map((timestamp) => {
+            let found = item.values.find((item) => item[0] === timestamp);
+            return found ? found : [timestamp, 0];
+          });
+  
+          const data = item.values.map((item2) => Number(item2[1]).toFixed(3));
           // console.log(data);
           seriesData.push({
             // name: `${item.metric.agent_ip}-${item.metric.asset_id}`,
@@ -69,9 +93,6 @@ const AlarmChartLine = function (props: any) {
             data,
           });
         });
-        if (list1.length > 0) {
-          xList = list1[0].values.map((item) => convertTime(item, "year"));
-        }
         const option = {
           grid: {
             top: '25px',

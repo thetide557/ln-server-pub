@@ -61,8 +61,8 @@ let queryFilter = [
   { name: 'status', label: '管理状态', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'position', label: '资产位置', type: 'input' },
-  { name: 'service_level', label: '服务层级', type: 'select' },
-  { name: 'device_type', label: '设备形态', type: 'select' },
+  // { name: 'service_level', label: '服务层级', type: 'select' },
+  // { name: 'device_type', label: '设备形态', type: 'select' },
 ];
 
 export default function () {
