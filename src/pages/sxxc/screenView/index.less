@@ -1,8 +1,10 @@
 .screen-view {
   position: fixed;
   top: 0;
+
   .screen1 {
     position: relative;
+
     .screen1-cont {
       display: flex;
       align-items: center;
@@ -10,6 +12,7 @@
       right: 1%;
       top: 1%;
       z-index: 99999;
+
       .back1 {
         // position: relative;
         width: 1.664vw;
@@ -20,6 +23,7 @@
         background-size: 100% 100%;
         color: #fff;
         cursor: pointer;
+
         &:hover {
           position: relative;
           width: 1.664vw;
@@ -31,18 +35,56 @@
           color: #fff;
           cursor: pointer;
         }
+
         >img {
           width: 1.56vw;
           height: 1.56vw;
         }
       }
+
       .choose_screen1 {
         // z-index: 9999;
         cursor: pointer;
       }
+
+      .screen-tab {
+        // margin-right: .2vw;
+        display: flex;
+        max-width: 22vw;
+        overflow-y: hidden;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: .2vw 0;
+        color: #bbb;
+        font-weight: 700;
+        /*滚动条样式*/
+        &::-webkit-scrollbar {
+          width: .2vw;
+          border-radius: .2vw;
+          height: .3vw;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #dddddd !important;
+          border-radius: .2vw;
+        }
+        .c-tab {
+          font-size: .85vw;
+          cursor: pointer;
+          text-align: center;
+          padding: 0 .4vw;
+          margin: 0 .25vw;
+          height: 1.669vw;
+          line-height: 1.669vw;
+          background: url('/image/screenview/card1.png') no-repeat;
+          background-size: 100% 100%;
+          box-sizing: border-box;
+         
+        }
+      }
     }
-   
+
   }
+
   .screen-icon {
     cursor: pointer;
     // width: 30px;
@@ -50,18 +92,20 @@
     justify-content: center;
     // justify-content: space-around;
     align-items: center;
+
     >span {
       font-family: Source Han Sans CN;
       font-weight: bold;
       font-size: 0.728vw;
       color: #FFFFFF;
-      text-shadow: 0px 1px 0px rgba(3,22,42,0.66), 0px 1px 0px rgba(3,21,36,0.72), 0px 5px 0px rgba(50,106,164,0.39);
-      background: linear-gradient(0deg, rgba(10,177,255,0.5) 0%, rgba(255,255,255,0.5) 50.2685546875%, rgba(255,255,255,0.5) 83.7890625%, rgba(10,177,255,0.5) 100%);
+      text-shadow: 0px 1px 0px rgba(3, 22, 42, 0.66), 0px 1px 0px rgba(3, 21, 36, 0.72), 0px 5px 0px rgba(50, 106, 164, 0.39);
+      background: linear-gradient(0deg, rgba(10, 177, 255, 0.5) 0%, rgba(255, 255, 255, 0.5) 50.2685546875%, rgba(255, 255, 255, 0.5) 83.7890625%, rgba(10, 177, 255, 0.5) 100%);
       background-clip: text;
       -webkit-background-clip: text;
       // -webkit-text-fill-color: transparent;
     }
   }
+
   .icon1 {
     width: 4.368vw;
     height: 1.669vw;
@@ -69,13 +113,14 @@
     background-size: 100% 100%;
     box-sizing: border-box;
     // padding: 0 0.364vw;
-    
+
     &:hover {
       width: 4.368vw;
       height: 1.669vw;
       background: url('/image/screenview/card3.png') no-repeat;
       background-size: 100% 100%;
       box-sizing: border-box;
+
       // padding: 0 0.364vw;
       >span {
         font-family: Source Han Sans CN;
@@ -84,8 +129,9 @@
         color: #AFE0FF;
       }
     }
-   
+
   }
+
   .icon2 {
     width: 3.64vw;
     height: 1.664vw;
@@ -94,6 +140,7 @@
     box-sizing: border-box;
     // padding: 0 0.364vw;
     margin: 0 0.364vw;
+
     &:hover {
       width: 3.64vw;
       height: 1.664vw;
@@ -102,6 +149,7 @@
       box-sizing: border-box;
       // padding: 0 0.364vw;
       margin: 0 0.364vw;
+
       >span {
         font-family: Source Han Sans CN;
         font-weight: 400;
@@ -111,31 +159,37 @@
     }
   }
 }
+
 .screen-drop {
   .ant-dropdown-menu-item-selected {
     // background-color: #fff!important;
     // color: #4D83FF;
-    background-color: #0D314E!important;
-    color: #D5D8DC!important;
+    background-color: #0D314E !important;
+    color: #D5D8DC !important;
   }
+
   .ant-dropdown-menu-item-active {
     // background-color: #fff!important;
     // color: #4D83FF;
-    background-color: #0D314E!important;
-    color: #D5D8DC!important;
+    background-color: #0D314E !important;
+    color: #D5D8DC !important;
   }
+
   .ant-dropdown-arrow {
     background: #08243A;
+
     &::before {
       background: #08243A;
     }
   }
+
   .ant-dropdown-menu {
     background: #08243A;
+
     .ant-dropdown-menu-item {
       color: #AFE0FF;
     }
-   
+
   }
 }
 

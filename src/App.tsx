@@ -264,6 +264,7 @@ function App() {
   const handleAlarm = () => {
     setCurWarn({})
     getAlertEventsById(alertId).then(res => {
+      setIsModalOpen(true);
       // console.log(1111, res.dat);
       setCurWarn(res.dat)  
       let query = ''
@@ -275,7 +276,6 @@ function App() {
         setQuery1(query)
       }
     })
-    setIsModalOpen(true);
   }
 
   // 小数位数判断
@@ -300,6 +300,9 @@ function App() {
     if (location.pathname != '/screenView') {
       location.href = '/alert-cur-events/' + alertId;
     } else {
+      setTimeout(() => {
+        setDialogShow('0')
+      }, 200);
       handleAlarm()
     }
   }

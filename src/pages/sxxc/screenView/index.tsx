@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { getBigScreen, getDashboards } from '@/services/sxxc/bigScreen';
 import { Dropdown, Menu, message, Select } from 'antd';
 import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
-import { AddPanelIcon } from './config';
 import './index.less'
 
 export default function ScreenView() {
@@ -29,20 +28,19 @@ export default function ScreenView() {
   const history = useHistory();
   const [screenList, setScreenList] = useState<any>([]);
   const [selectGroup, setSelectGroup] = useState<any>('')
-  // const [items, setItems] = useState<any>([])
   const { busiGroups } = useContext(CommonStateContext);
   const [url, setUrl] = useState<any>('')
   const [first, setFirst] = useState<any>('')
-  const [flag, setFlag] = useState<any>(true)
+  const [activeColor, setActiveColor] = useState<any>(null)
   const baseUrl = '/dataroom/#/bigscreen/preview'
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
   // console.log(busiGroups);
   const token = localStorage.getItem('access_token')
 
-  const sendToken = window.onload = function() {
-    var iframe:any = document.getElementById('logFrame');
-    iframe.onload = function() {
+  const sendToken = window.onload = function () {
+    var iframe: any = document.getElementById('logFrame');
+    iframe.onload = function () {
       iframe.contentWindow.postMessage({ token: token }, '*');
     };
   };
@@ -72,10 +70,32 @@ export default function ScreenView() {
       }
     })
   }
-
+  // 下拉切换
   const changeScreen = ({ key }) => {
     // console.log(`selected ${key}`);
     let code = screenList.find(item => item.id == key).config
+    // console.log(code);
+    if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
+      if (code.includes('?')) {
+        let code1 = code + `&token=${token}`
+        setUrl(code1)
+      } else {
+        let code1 = code + `?token=${token}`
+        setUrl(code1)
+      }
+      sendToken()
+    } else {
+      const screenUrl = `${baseUrl}?code=${code}`
+      setUrl(screenUrl)
+      // sendToken()
+    }
+  }
+  // tab切换
+  const handleClick = (item) => {
+    console.log(item);
+    setActiveColor(item.id)
+    // console.log(`selected ${key}`);
+    let code = item.config
     // console.log(code);
     if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
       if (code.includes('?')) {
@@ -125,25 +145,17 @@ export default function ScreenView() {
     history.push('/home')
     // window.location.href = '/home'
   }
-  // const handleClick = () => {
-  //   if (screenList.length > 0) {
-  //     const screenUrl = `${baseUrl}?code=${screenList[0].config}`
-  //     setUrl(screenUrl)
-  //   }
-  // }
-  const handleEnter = () => {
-    setFlag(false)
-  }
-  const handleLeave= () => {
-    setFlag(true)
-  }
-  
+
   useEffect(() => {
     getBigScreen().then(res => {
       if (res.dat.list.length > 0) {
         setScreenList(res.dat.list)
         const id = res.dat.list[0].id.toString()
+        // 切换
         setFirst(id)
+        // tab页
+        setActiveColor(res.dat.list[0].id)
+        // code值
         const code = res.dat.list[0]['config']
         // 外部链接
         if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
@@ -167,43 +179,35 @@ export default function ScreenView() {
     <div className='screen-view'>
       <div className='screen1'>
         <div className='screen1-cont'>
-          <div className='screen-groups'>
+          {/* tab标签 */}
+          <div className='screen-tab'>
+            {_.map(screenList, (item, index) => {
+              return (
+                <div className='c-tab' style={{color: activeColor == item.id ? '#fff' : '#bbb'}} key={item.id} onClick={() => handleClick(item)}>{item.title}</div>
+              )
+            })}
+          </div>
+
+          {/* 下拉切换 */}
+          {/* <div className='screen-groups'>
             <Dropdown overlay={menu1} arrow overlayClassName='screen-drop'>
               <div className='screen-icon icon1'>
-                {/* <AppstoreOutlined /> */}
                 <span>切换大屏</span>
                 <DownOutlined style={{fontSize: '0.52vw', marginLeft: '0.1vw'}} />
               </div>
             </Dropdown>
-          </div>
+          </div> */}
           <div className='screen-groups'>
             <Dropdown overlay={menu} arrow overlayClassName='screen-drop'>
               <div className='screen-icon icon2'>
                 <span>项目组</span>
-                <DownOutlined style={{fontSize: '0.52vw', marginLeft: '0.1vw'}} />
+                <DownOutlined style={{ fontSize: '0.52vw', marginLeft: '0.1vw' }} />
               </div>
             </Dropdown>
           </div>
-          {/* <div className='choose_screen1'>
-            <Select
-              placeholder='请选择项目组'
-              style={{ width: 180 }}
-              onChange={handleChange}
-              showSearch
-            >
-              {items.map((item, index) => (
-                <Select.Option value={item.id} key={index}>
-                  {item.title}
-                </Select.Option>
-              ))}
-            </Select>
-          </div> */}
-          <div className='back1' onClick={goBack} title='返回' onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+          <div className='back1' onClick={goBack} title='返回'>
             <div className='back-icon'></div>
-            <img src="/image/screenview/back.png" alt=""  />
-            {/* {
-              flag ? <img src="/image/screenview/back.png" alt=""  /> : <img style={{width: '18px', height: '17px'}} src="/image/screenview/back1.png" alt=""  />
-            } */}
+            <img src="/image/screenview/back.png" alt="" />
           </div>
         </div>
         <iframe id="logFrame" src={url} sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
