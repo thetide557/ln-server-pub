@@ -119,6 +119,8 @@ import TaskInstance from '@/pages/sxxc/taskInstance'
 import InspectionList from '@/pages/sxxc/inspectionList'
 import InspectionLog from '@/pages/sxxc/inspectionList/log'
 import InspectionReport from '@/pages/sxxc/inspectionReport'
+// 汉中平台登录页面
+import LoginHZ from '@/pages/login/indexHZ';
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -156,6 +158,8 @@ export default function Content() {
         <Route path='/demo' component={Demo} />
         <Route path='/overview' component={Overview} />
         <Route path='/login' component={Login} exact />
+        {/* 汉中平台登录页面 */}
+        <Route path='/login/:username/:password/:captchaid/:verifyvalue' component={LoginHZ}  exact/>
         <Route path='/callback' component={LoginCallback} exact />
         <Route path='/callback/cas' component={LoginCallbackCAS} exact />
         <Route path='/callback/oauth' component={LoginCallbackOAuth} exact />

@@ -446,7 +446,7 @@ export default function () {
                     />
                   </Form.Item>
                 </Col>
-                {/* <Col span={12}>
+                <Col span={12}>
                   <Form.Item label='服务层级' name='service_level' rules={[{ required: false }]}>
                     <Select
                       style={{ width: '100%' }}
@@ -473,7 +473,7 @@ export default function () {
                     >
                     </Select>
                   </Form.Item>
-                </Col> */}
+                </Col>
                 <Col span={12}>
                   <Form.Item label='备注' name='memo'>
                     <Input placeholder='填写备注' />
