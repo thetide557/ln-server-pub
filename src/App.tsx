@@ -612,7 +612,7 @@ function App() {
               </div>
               }
             </div>
-            <div className="row">
+            {curWarn.asset_id ? <div className="row">
               <div className="col col-zc">
                 <img
                   className="dian"
@@ -621,16 +621,16 @@ function App() {
                 />
                 <span>资产名称：{curWarn.asset_name}</span>
               </div>
-            </div>
+            </div> : null}
             <div className="row">
-              <div className="col">
+              {curWarn.asset_id ? <div className="col">
                 <img
                   className="dian"
                   src="/image/alarm/dian.png"
                   alt=""
                 />
                 <span>IP地址：{curWarn.asset_ip}</span>
-              </div>
+              </div> : null}
               <div className="col">
                 <img
                   className="dian"
