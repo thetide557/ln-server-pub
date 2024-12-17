@@ -15,7 +15,7 @@
  *
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Input, Button, message, Checkbox } from 'antd';
+import { Form, Input, Button, message, Checkbox,Spin } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
 import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, getRSAConfig } from '@/services/login';
@@ -23,11 +23,11 @@ import './login.less';
 // import cookie from "react-cookies";
 // @ts-ignore
 import useSsoWay from 'plus:/parcels/SSOConfigs/useSsoWay';
-
+import CryptoJS from 'crypto-js';
 import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
 import _ from 'lodash';
-import { useLocalStorage } from 'react-use';
+import { useLocalStorage, useSearchParam } from 'react-use';
 import { getBigScreen } from '@/services/sxxc/bigScreen';
 
 export interface DisplayName {
@@ -38,6 +38,38 @@ export interface DisplayName {
 
 
 export default function Login() {
+
+  /**
+ * AES 解密方法
+ * @param data
+ * @returns {string}
+ */
+  function decryptData(ciphertext, secretKey, iv) {
+    try {
+      const decryptedBytes = CryptoJS.AES.decrypt({
+        ciphertext: CryptoJS.enc.Hex.parse(ciphertext)
+      }, CryptoJS.enc.Utf8.parse(secretKey), {
+        iv: CryptoJS.enc.Utf8.parse(iv),
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+      });
+    
+      const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);
+      return decryptedData;
+    } catch (e) {
+      console.error('解密失败', e);
+      return null;
+    }
+  }
+  const secretKey = '1Nx@20244202@xN1';
+  const iv = 'Lingniu@20241211';
+  const hzToken = useSearchParam("token");
+  useEffect(()=>{  
+    if(hzToken){
+      login();
+    }
+  },[])
+
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const location = useLocation();
@@ -137,7 +169,9 @@ export default function Login() {
 
   const login = async () => {
     setLoading(true)
-    let { username, password, verifyvalue } = form.getFieldsValue();
+    let { username, password, captchaid = undefined, verifyvalue } = hzToken
+   ? JSON.parse(decryptData(hzToken, secretKey, iv))
+    : form.getFieldsValue();
      // 将用户的登录信息存储到 localStorage 中
      localStorage.setItem('username', username);
      localStorage.setItem('password', password);
@@ -147,7 +181,7 @@ export default function Login() {
     //   dat: { OpenRSA, RSAPublicKey },
     // } = rsaConf;
     // const authPassWord = OpenRSA ? RsaEncry(password, RSAPublicKey) : password;
-    authLogin(username, password, captchaidRef.current!, verifyvalue)
+    authLogin(username, password,captchaid?captchaid: captchaidRef.current!, verifyvalue)
       .then((res) => {
         const { dat, err } = res;
         const { access_token, refresh_token } = dat;
@@ -174,6 +208,22 @@ export default function Login() {
   };
 
   return (
+    <div>{hzToken? (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)', // 可选：设置背景颜色和透明度
+        zIndex: 1000, // 确保它在最上层
+      }}>
+        <Spin size="large" />
+      </div>
+      ) :(
     <div className='login-warp'>
       <div className='login-panel'>
         <div className='login-main'>
@@ -247,5 +297,8 @@ export default function Login() {
         </div>
       </div>
     </div>
+    )}
+    </div>
+    
   );
 }

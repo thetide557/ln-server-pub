@@ -159,7 +159,7 @@ export default function Content() {
         <Route path='/overview' component={Overview} />
         <Route path='/login' component={Login} exact />
         {/* 汉中平台登录页面 */}
-        <Route path='/login/:username/:password/:captchaid/:verifyvalue' component={LoginHZ}  exact/>
+        {/* <Route path='/login/:username/:password/:captchaid/:verifyvalue' component={LoginHZ}  exact/> */}
         <Route path='/callback' component={LoginCallback} exact />
         <Route path='/callback/cas' component={LoginCallbackCAS} exact />
         <Route path='/callback/oauth' component={LoginCallbackOAuth} exact />
