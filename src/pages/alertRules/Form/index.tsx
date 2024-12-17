@@ -140,11 +140,20 @@ export default function index(props: IProps) {
                           if(values.rule_config.queries.length>0){
                             let config_cn = new Array;
                             values.rule_config.queries.forEach(element=>{
-                              replayList.push(
-                                {
-                                  prom_ql: element.reprom_ql
-                                }
-                              )
+                              if (element.reprom_ql) {
+                                replayList.push(
+                                  {
+                                    prom_ql: element.reprom_ql
+                                  }
+                                )
+                              } else {
+                                element.reprom_ql = element.prom_ql
+                                replayList.push(
+                                  {
+                                    prom_ql: element.prom_ql
+                                  }
+                                )
+                              }
                               if(element.monitor_id!=null && map[element.monitor_id]!=null){
                                 let monitor = map[element.monitor_id];
                                 config_cn.push(monitor.monitoring_name+(element.relation?element.relation:'')+(element.value?element.value:''))
@@ -180,9 +189,20 @@ export default function index(props: IProps) {
                         if (data.rule_config.queries && data.rule_config.queries.length > 0) {
                           let replayList = new Array
                           data.rule_config.queries.forEach(element => {
-                            replayList.push({
-                              prom_ql: element.reprom_ql
-                            })
+                            if (element.reprom_ql) {
+                              replayList.push(
+                                {
+                                  prom_ql: element.reprom_ql
+                                }
+                              )
+                            } else {
+                              element.reprom_ql = element.prom_ql
+                              replayList.push(
+                                {
+                                  prom_ql: element.prom_ql
+                                }
+                              )
+                            }
                           })
                           data["rule_replay"] = {
                             queries: replayList
