@@ -89,6 +89,9 @@ const Resource: React.FC = () => {
     const [scope, setScope] = useState(Number)
     const [checkedServe, setCheckedServe] = useState([] as any)
     const [checkedIp, setCheckedIp] = useState([] as any)
+    const [checkedProjectName, setCheckedProjectName] = useState([] as any)
+    const [excuteStatus, setExcuteStatus] = useState<number>()
+    
     const [ipList, setIpList] = useState([] as any)
     const [serveList, setServeList] = useState([] as any)
     const [form] = Form.useForm();
@@ -218,18 +221,23 @@ const Resource: React.FC = () => {
         })
     }
 
-    const getTableData = ({ current, pageSize }): Promise<any> => {
+    const getTableData = ({ current, pageSize }): Promise<any> => {  
         const params = {
             ...form.getFieldsValue(),
             id: inspectionId,
             // type: type == 0 ? undefined : type,
             executeCycle: type == 0 ? undefined : type,
-            scope: scope == 0 ? undefined : scope,
+            // scope: scope == 0 ? undefined : scope,
             excuteDate: excuteDate,
             excuteTime: excuteTime,
-            week: week.length != 0 ? week.join(',') : undefined,
-            checkedServe: checkedServe.length != 0 ? checkedServe.join(',') : undefined,
-            checkedIp: checkedIp.length != 0 ? checkedIp.join(',') : undefined,
+            // week: week.length != 0 ? week.join(',') : undefined,
+            week: week.length != 0 ? week.join('') : undefined,
+            // checkedServe: checkedServe.length != 0 ? checkedServe.join(',') : undefined,
+            // 业务组名称
+            projectName: checkedProjectName.length != 0 ? checkedProjectName.join(',') : undefined,
+            // 执行状态
+            excuteStatus: excuteStatus,
+            // checkedIp: checkedIp.length != 0 ? checkedIp.join(',') : undefined,
             pageSize: pageSize,
             pageNum: current,
             // groupIds: groupIds?.toString(),
@@ -247,11 +255,24 @@ const Resource: React.FC = () => {
     };
     const { tableProps, run } = useAntdTable(getTableData, {
         defaultPageSize: pagination.pageSize,
-        refreshDeps: [form, type, scope, excuteTime, excuteDate, week, checkedServe, checkedIp],
+        refreshDeps: [form, type, scope, excuteTime, excuteDate, week, checkedServe, checkedIp,checkedProjectName,excuteStatus],
     });
 
     const onChangeType = (val) => {
         setType(val)
+        if(val){
+            if (val == 1) {
+                setExcuteDate()
+                setWeek([])
+            } else if (val == 2) {
+                setExcuteDate()
+            } else if (val == 3) {
+                setWeek([])
+            }
+        }else{
+            setExcuteDate()
+            setWeek([])
+        }
     };
 
     const onChangeWeek = (checkedValues: CheckboxValueType[]) => {
@@ -284,6 +305,12 @@ const Resource: React.FC = () => {
         setCheckedIp(arr)
     }
 
+    const onChangeProjectName = (value) => {
+        setCheckedProjectName(value)
+    };
+    const onChangeExcuteStatus = (val) => {
+        setExcuteStatus(val)
+    };
     const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
         console.log(dateString);
         setExcuteDate(dateString)
@@ -365,7 +392,7 @@ const Resource: React.FC = () => {
                                 )}
                             </Form.Item>
                         </Space>
-                        <Form.Item label={'执行范围：'} name='scope'>
+                        {/* <Form.Item label={'执行范围：'} name='scope'>
                             <Select allowClear placeholder={'执行范围'} style={{ width: 200 }} onChange={onChangeScope}>
                                 {_.map(scopeList, (item) => {
                                     return (
@@ -382,6 +409,29 @@ const Resource: React.FC = () => {
                             {scope == 3 && (
                                 <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.remote_addr, value: item.id } })} onChange={onChangeIp} />
                             )}
+                        </Form.Item> */}
+                        <Form.Item label={'业务组：'}>
+                            <Select mode="multiple" allowClear placeholder={'请选择业务组'} style={{ width: 200 }} onChange={onChangeProjectName}>
+                                {_.map(serveList, (item) => {
+                                    return (
+                                        <Select.Option key={item.id} value={item.name}>
+                                            {item.name}
+                                        </Select.Option>
+                                    );
+                                })}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item label={'执行状态：'}>
+                            <Select allowClear placeholder={'执行状态'} style={{ width: 200 }} onChange={onChangeExcuteStatus}  >
+                                {_.map(statusList, (item) => {
+                                    return (
+                                        <Select.Option key={item.id} value={item.id}>
+                                            {item.value}
+                                        </Select.Option>
+                                    );
+                                })}
+                            </Select>
+
                         </Form.Item>
                         <Space>
                             <Form.Item label={'执行时间：'}>
@@ -396,7 +446,7 @@ const Resource: React.FC = () => {
 
                     <Table
                         size='small'
-                        rowKey='inspectionLogId'
+                        rowKey='id'
                         columns={taskColumns}
                         {...tableProps}
                         pagination={{
