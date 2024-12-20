@@ -232,7 +232,7 @@ const Resource: React.FC = () => {
             pageNum: current,
             // groupIds: groupIds?.toString()
         };
-
+        console.log("params",params)
         return getInspectionLogList({
             ...params,
         }).then((res) => {
@@ -249,6 +249,19 @@ const Resource: React.FC = () => {
 
     const onChangeType = (val) => {
         setType(val)
+        if(val){
+            if (val == 1) {
+                setExcuteDate()
+                setWeek([])
+            } else if (val == 2) {
+                setExcuteDate()
+            } else if (val == 3) {
+                setWeek([])
+            }
+        }else{
+            setExcuteDate()
+            setWeek([])
+        }
     };
 
     const onChangeWeek = (checkedValues: CheckboxValueType[]) => {
@@ -260,13 +273,18 @@ const Resource: React.FC = () => {
     }
     const onChangeScope = (val) => {
         setScope(val);
-        if (val == 1) {
+        if(val){
+            if (val == 1) {
+                setCheckedServe([])
+                setCheckedIp([])
+            } else if (val == 2) {
+                setCheckedIp([])
+            } else if (val == 3) {
+                setCheckedServe([])
+            }
+        }else{
             setCheckedServe([])
             setCheckedIp([])
-        } else if (val == 2) {
-            setCheckedIp([])
-        } else if (val == 3) {
-            setCheckedServe([])
         }
     };
     const onChangeServe = (checkedValues: CheckboxValueType[]) => {
