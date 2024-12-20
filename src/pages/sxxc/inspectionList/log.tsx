@@ -38,6 +38,7 @@ import { getMonObjectList } from '@/services/targets';
 import Report from './report'
 import './index.less';
 // import './locale';
+import { getAssets1 } from '@/services/assets';
 
 const { confirm } = Modal;
 
@@ -232,7 +233,7 @@ const Resource: React.FC = () => {
             pageNum: current,
             // groupIds: groupIds?.toString()
         };
-        console.log("params",params)
+        // console.log("params",params)
         return getInspectionLogList({
             ...params,
         }).then((res) => {
@@ -292,11 +293,11 @@ const Resource: React.FC = () => {
         setCheckedServe(checkedValues)
     }
     const onChangeIp = (checkedValues: CheckboxValueType[]) => {
-        let arr = checkedValues.map(item => {
-            return ipList.filter(res => item == res.id)[0].remote_addr
-        })
-        console.log('checked = ', checkedValues);
-        setCheckedIp(arr)
+        // let arr = checkedValues.map(item => {
+        //     return ipList.filter(res => item == res.id)[0].remote_addr
+        // })
+        // console.log('checked = ', checkedValues);
+        setCheckedIp(checkedValues)
     }
 
     const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
@@ -315,8 +316,18 @@ const Resource: React.FC = () => {
             limit: 5000,
             p: 1,
         };
-        getMonObjectList(query).then(res => {
-            let list = res.dat.list
+        // getMonObjectList(query).then(res => {
+        //     let list = res.dat.list
+        //     setIpList(list)
+        // })
+        // 执行范围：指定IP  IP列表
+        getAssets1(query).then(res => {
+            let list = res.dat?.filter(item => {
+                if (item.type == '物理服务器' || item.type == '虚拟服务器') {
+                    return true
+                }
+            })
+            // console.log('list', list);
             setIpList(list)
         })
     }
@@ -395,7 +406,8 @@ const Resource: React.FC = () => {
                                 <Checkbox.Group style={{ marginLeft: '65px' }} options={serveList.map(item => { return { label: item.name, value: item.id } })} onChange={onChangeServe} />
                             )}
                             {scope == 3 && (
-                                <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.remote_addr, value: item.id } })} onChange={onChangeIp} />
+                                // <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.remote_addr, value: item.id } })} onChange={onChangeIp} />
+                                <Checkbox.Group style={{ marginLeft: '65px' }} options={ipList.map(item => { return { label: item.ip, value: item.ip } })} onChange={onChangeIp} />
                             )}
                         </Form.Item>
                         <Space>
