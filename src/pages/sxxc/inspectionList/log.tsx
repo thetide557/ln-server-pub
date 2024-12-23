@@ -321,11 +321,15 @@ const Resource: React.FC = () => {
         //     setIpList(list)
         // })
         // 执行范围：指定IP  IP列表
+        // 资产状态为在线：过滤status: 1
         getAssets1(query).then(res => {
             let list = res.dat?.filter(item => {
-                if (item.type == '物理服务器' || item.type == '虚拟服务器') {
-                    return true
+                if(item.status == 1){
+                    if (item.type == '物理服务器' || item.type == '虚拟服务器') {
+                        return true
+                    }
                 }
+                
             })
             // console.log('list', list);
             setIpList(list)
