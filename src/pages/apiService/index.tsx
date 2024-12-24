@@ -4,10 +4,10 @@
 
 import { Button, Input, message, Modal, Space, Table } from 'antd';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
-
+import { CommonStateContext } from '@/App';
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
 import { listApiService, deleteApiService } from '@/services/api_service';
@@ -30,6 +30,7 @@ const ApiService = () => {
   const [items, setItems] = useState([]);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [searchVal, setSearchVal] = useState('');
+  const { profile, permList } = useContext(CommonStateContext);
   const history = useHistory();
 
   useEffect(() => {
@@ -54,16 +55,18 @@ const ApiService = () => {
               </div> */}
             </Space>
             <Space>
-              <div>
-                <Button
-                  type='primary'
-                  onClick={() => {
-                    history.push(`api-service/add`);
-                  }}
-                >
-                  新建
-                </Button>
-              </div>
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/add")) && <div>
+                  <Button
+                    type='primary'
+                    onClick={() => {
+                      history.push(`api-service/add`);
+                    }}
+                  >
+                    新建
+                  </Button>
+                </div>
+              }
             </Space>
           </div>
           <Table
@@ -88,30 +91,37 @@ const ApiService = () => {
                 fixed: 'right',
                 render: (value: string, record: any) => (
                   <Space>
-                    <SearchOutlined
-                      onClick={() => {
-                        history.push(`api-service/${record.id}`);
-                      }}
-                    ></SearchOutlined>
-                    <EditOutlined
-                      onClick={() => {
-                        history.push(`api-service/${record.id}/edit`);
-                      }}
-                    />
-                    <DeleteOutlined
-                      onClick={() => {
-                        Modal.confirm({
-                          title: '是否确认删除?',
-                          onOk: () => {
-                            deleteApiService(record.id).then(() => {
-                              message.success('删除成功');
-                              setRefreshKey(_.uniqueId());
-                            });
-                          },
-                          onCancel() {},
-                        });
-                      }}
-                    />
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/detail")) && <SearchOutlined
+                        onClick={() => {
+                          history.push(`api-service/${record.id}`);
+                        }}
+                      ></SearchOutlined>
+                    }
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/put")) && <EditOutlined
+                        onClick={() => {
+                          history.push(`api-service/${record.id}/edit`);
+                        }}
+                      />
+                    }
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/del")) && <DeleteOutlined
+                        onClick={() => {
+                          Modal.confirm({
+                            title: '是否确认删除?',
+                            onOk: () => {
+                              deleteApiService(record.id).then(() => {
+                                message.success('删除成功');
+                                setRefreshKey(_.uniqueId());
+                              });
+                            },
+                            onCancel() { },
+                          });
+                        }}
+                      />
+                    }
+
                   </Space>
                 ),
               },

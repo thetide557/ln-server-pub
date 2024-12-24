@@ -50,7 +50,7 @@ const index = (_props: any) => {
   const [query, setQuery] = useState('');
   const [mine, setMine] = useState(true);
   const [days, setDays] = useState(7);
-  const { curBusiId, setCurBusiId } = useContext(CommonStateContext);
+  const { profile, permList, curBusiId, setCurBusiId } = useContext(CommonStateContext);
   const { tableProps } = useAntdTable((options) => getTableData(options, curBusiId, query, mine, days), { refreshDeps: [curBusiId, query, mine, days] });
   const columns: ColumnProps<DataItem>[] = [
     {
@@ -144,14 +144,16 @@ const index = (_props: any) => {
                 </Checkbox>
               </Col>
               <Col span={8} style={{ textAlign: 'right' }}>
-                <Button
-                  type='primary'
-                  onClick={() => {
-                    history.push('/job-tasks/add');
-                  }}
-                >
-                  {t('task.temporary.create')}
-                </Button>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/job-tasks/add")) && <Button
+                   type='primary'
+                   onClick={() => {
+                     history.push('/job-tasks/add');
+                   }}
+                 >
+                   {t('task.temporary.create')}
+                 </Button>
+                }
               </Col>
             </Row>
             <Table

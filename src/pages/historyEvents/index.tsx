@@ -60,7 +60,7 @@ export const setDefaultHours = (hours: number) => {
 
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
   const [filterType, setFilterType] = useLocalStorage<any>('history_filter_types', 'input');
   const [searchVal, setSearchVal] = useLocalStorage<any>('history_filter_value', null);
@@ -215,39 +215,48 @@ const Event: React.FC = () => {
       render: (record: any) => {
         return (
           <Space size={'small'} className='table-operate-column'>
-            <FileSearchOutlined
-              title='详情'
-              onClick={() => {
-                history.push(`/alert-his-events/${record.id}?from=history`);
-              }}
-            />
-            <DownloadOutlined
-              className='down_icon'
-              title='导出'
-              onClick={() => {
-                let ids = new Array();
-                ids.push(record.id);
-                setRowKeys(_.cloneDeep(ids));
-                setModalOpen(true);
-              }}
-            />
-            <DeleteOutlined
-              title='删除'
-              onClick={() => {
-                Modal.confirm({
-                  title: '确认要强制删除历史告警信息？',
-                  onOk: () => {
-                    let ids = new Array<number>();
-                    ids.push(record.id);
-                    deleteHistoryEvents(ids).then((res) => {
-                      message.success('删除成功');
-                      setRefreshFlag(_.uniqueId('refresh_'));
-                    });
-                  },
-                  onCancel() {},
-                });
-              }}
-            />
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/detail")) && <FileSearchOutlined
+                title='详情'
+                onClick={() => {
+                  history.push(`/alert-his-events/${record.id}?from=history`);
+                }}
+              />
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/export")) && <DownloadOutlined
+                className='down_icon'
+                title='导出'
+                onClick={() => {
+                  let ids = new Array();
+                  ids.push(record.id);
+                  setRowKeys(_.cloneDeep(ids));
+                  setModalOpen(true);
+                }}
+              />
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/del")) && <DeleteOutlined
+                title='删除'
+                onClick={() => {
+                  Modal.confirm({
+                    title: '确认要强制删除历史告警信息？',
+                    onOk: () => {
+                      let ids = new Array<number>();
+                      ids.push(record.id);
+                      deleteHistoryEvents(ids).then((res) => {
+                        message.success('删除成功');
+                        setRefreshFlag(_.uniqueId('refresh_'));
+                      });
+                    },
+                    onCancel() { },
+                  });
+                }}
+              />
+            }
+
+
+
           </Space>
         );
       },
@@ -379,7 +388,7 @@ const Event: React.FC = () => {
                         onOk: async () => {
                           setModalOpen(true);
                         },
-                        onCancel() {},
+                        onCancel() { },
                       });
                     } else {
                       setModalOpen(true);
@@ -399,7 +408,7 @@ const Event: React.FC = () => {
                             setSelectRowKeys([]);
                           });
                         },
-                        onCancel() {},
+                        onCancel() { },
                       });
                     }
                   }

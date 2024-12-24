@@ -46,7 +46,7 @@ const index = (_props: any) => {
   const { t, i18n } = useTranslation('common');
   const searchRef = useRef<any>(null);
   const [query, setQuery] = useState('');
-  const { curBusiId, setCurBusiId } = useContext(CommonStateContext);
+  const { profile, permList, curBusiId, setCurBusiId } = useContext(CommonStateContext);
   const busiId = curBusiId;
   const [selectedIds, setSelectedIds] = useState([] as any[]);
   const { tableProps, refresh } = useAntdTable<any, any>((options) => getTableData(options, busiId, query), { refreshDeps: [busiId, query] });
@@ -144,20 +144,34 @@ const index = (_props: any) => {
       render: (_text, record) => {
         return (
           <span>
-            <Link to={{ pathname: `/job-tpls/add/task`, search: `tpl=${record.id}` }}>{t('task.create')}</Link>
-            <Divider type='vertical' />
-            <Link to={{ pathname: `/job-tpls/${record.id}/modify` }}>{t('common:btn.modify')}</Link>
-            <Divider type='vertical' />
-            <Link to={{ pathname: `/job-tpls/${record.id}/clone` }}>{t('common:btn.clone')}</Link>
-            <Divider type='vertical' />
-            <Popconfirm
-              title={<div style={{ width: 100 }}>{t('common:confirm.delete')}</div>}
-              onConfirm={() => {
-                handleDelBtnClick(record.id);
-              }}
-            >
-              <a style={{ color: 'red' }}>{t('common:btn.delete')}</a>
-            </Popconfirm>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/job-task/add")) && <>
+                <Link to={{ pathname: `/job-tpls/add/task`, search: `tpl=${record.id}` }}>{t('task.create')}</Link>
+                <Divider type='vertical' />
+              </>
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/job-task/put")) && <>
+                <Link to={{ pathname: `/job-tpls/${record.id}/modify` }}>{t('common:btn.modify')}</Link>
+                <Divider type='vertical' />
+              </>
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/job-task/copy")) && <>
+                <Link to={{ pathname: `/job-tpls/${record.id}/clone` }}>{t('common:btn.clone')}</Link>
+                <Divider type='vertical' />
+              </>
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/job-task/del")) && <Popconfirm
+                title={<div style={{ width: 100 }}>{t('common:confirm.delete')}</div>}
+                onConfirm={() => {
+                  handleDelBtnClick(record.id);
+                }}
+              >
+                <a style={{ color: 'red' }}>{t('common:btn.delete')}</a>
+              </Popconfirm>
+            }
           </span>
         );
       },
@@ -194,11 +208,13 @@ const index = (_props: any) => {
                 />
               </Col>
               <Col span={10} className='textAlignRight'>
-                <Link to={{ pathname: `/job-tpls/add` }}>
-                  <Button style={{ marginRight: 10 }} type='primary'>
-                    {t('tpl.create')}
-                  </Button>
-                </Link>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/job-tpls/add")) && <Link to={{ pathname: `/job-tpls/add` }}>
+                    <Button style={{ marginRight: 10 }} type='primary'>
+                      {t('tpl.create')}
+                    </Button>
+                  </Link>
+                }
                 <Dropdown
                   overlay={
                     <Menu>

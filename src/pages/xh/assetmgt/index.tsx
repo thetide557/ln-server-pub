@@ -35,7 +35,7 @@ import { deleteXhAssets, getAssetstypes, getAssetsByCondition } from '@/services
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { factories,serviceHierarchyOptions,deviceFormOptions } from './catalog';
+import { factories, serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
 import { settings } from 'cluster';
@@ -85,7 +85,7 @@ export default function () {
 
   const [total, setTotal] = useState<number>(0);
 
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
 
   const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
@@ -305,48 +305,63 @@ export default function () {
       fixed: 'right',
       render: (text: string, record: assetsType) => (
         <Space>
-          <VideoCameraOutlined
-            title='设置监控'
-            onClick={(e) => {
-              localStorage.setItem('left_monitor_type', '0');
-              history.push('/xh/monitor?mode=view&assetId=' + record.id);
-            }}
-          />
-          <FileSearchOutlined
-            title='资产详情'
-            onClick={(e) => {
-              showModal('view', record);
-            }}
-          />
-          <FundOutlined
-            title='监控图表'
-            onClick={(e) => {
-              history.push(`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`);
-            }}
-          />
-          <EditOutlined
-            title='编辑'
-            onClick={(e) => {
-              showModal('update', record);
-            }}
-          />
-          <DeleteOutlined
-            title='删除'
-            className='table-operator-area-warning'
-            onClick={async () => {
-              Modal.confirm({
-                title: t('common:confirm.delete'),
-                onOk: async () => {
-                  await deleteXhAssets({ ids: [record.id.toString()] });
-                  message.success(t('common:success.delete'));
-                  setRefreshKey(_.uniqueId('refreshKey_'));
-                  setSelectedAssets([]);
-                },
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/monitor")) && <VideoCameraOutlined
+              title='设置监控'
+              onClick={(e) => {
+                localStorage.setItem('left_monitor_type', '0');
+                history.push('/xh/monitor?mode=view&assetId=' + record.id);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/detail")) && <FileSearchOutlined
+              title='资产详情'
+              onClick={(e) => {
+                showModal('view', record);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/monitor")) && <FundOutlined
+              title='监控图表'
+              onClick={(e) => {
+                history.push(`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/put")) && <EditOutlined
+              title='编辑'
+              onClick={(e) => {
+                showModal('update', record);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/del")) && <DeleteOutlined
+              title='删除'
+              className='table-operator-area-warning'
+              onClick={async () => {
+                Modal.confirm({
+                  title: t('common:confirm.delete'),
+                  onOk: async () => {
+                    await deleteXhAssets({ ids: [record.id.toString()] });
+                    message.success(t('common:success.delete'));
+                    setRefreshKey(_.uniqueId('refreshKey_'));
+                    setSelectedAssets([]);
+                  },
 
-                onCancel() { },
-              });
-            }}
-          ></DeleteOutlined>
+                  onCancel() { },
+                });
+              }}
+            ></DeleteOutlined>
+          }
+
+
+
+
+
         </Space>
       ),
     },
@@ -900,16 +915,18 @@ export default function () {
             </Space>
             <div className='tool_right'>
               <Space>
-                <div>
-                  <Button
-                    onClick={() => {
-                      showModal('add', null);
-                    }}
-                    type='primary'
-                  >
-                    {t('新增')}
-                  </Button>
-                </div>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/add")) && <div>
+                    <Button
+                      onClick={() => {
+                        showModal('add', null);
+                      }}
+                      type='primary'
+                    >
+                      {t('新增')}
+                    </Button>
+                  </div>
+                }
                 <div>
                   <Popover placement='bottom' content={popupContent} trigger='click' className='filter_columns'>
                     <Button icon={<UnorderedListOutlined />}>显示列</Button>

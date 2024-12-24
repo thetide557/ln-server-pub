@@ -48,9 +48,9 @@ const Shield: React.FC = () => {
   const { search } = useLocation();
   const { id } = queryString.parse(search);
   const commonState = useContext(CommonStateContext);
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
-  const bgid = id ? Number(id) : commonState.curBusiId>0?commonState.curBusiId:1;
+  const bgid = id ? Number(id) : commonState.curBusiId > 0 ? commonState.curBusiId : 1;
   const { datasourceList, groupedDatasourceList } = commonState;
   const [query, setQuery] = useState<string>('');
   const [currentShieldDataAll, setCurrentShieldDataAll] = useState<Array<shieldItem>>([]);
@@ -115,10 +115,10 @@ const Shield: React.FC = () => {
           <>
             {text
               ? text.map((tag, index) => {
-                  return tag ? (
-                    <div key={index} style={{ lineHeight: '16px' }}>{`${tag.key} ${tag.func} ${tag.func === 'in' ? tag.value.split(' ').join(', ') : tag.value}`}</div>
-                  ) : null;
-                })
+                return tag ? (
+                  <div key={index} style={{ lineHeight: '16px' }}>{`${tag.key} ${tag.func} ${tag.func === 'in' ? tag.value.split(' ').join(', ') : tag.value}`}</div>
+                ) : null;
+              })
               : ''}
           </>
         );
@@ -223,41 +223,45 @@ const Shield: React.FC = () => {
         return (
           <>
             <div className='table-operator-area'>
-              <div
-                className='table-operator-area-normal'
-                style={{
-                  cursor: 'pointer',
-                  display: 'inline-block',
-                }}
-                onClick={() => {
-                  history.push(`/alert-mutes/edit/${record.id}?mode=clone`, {
-                    ...record,
-                    datasource_ids: record.datasource_ids || undefined,
-                  });
-                }}
-              >
-                {t('common:btn.clone')}
-              </div>
-              <div
-                className='table-operator-area-warning'
-                style={{
-                  cursor: 'pointer',
-                  display: 'inline-block',
-                }}
-                onClick={() => {
-                  confirm({
-                    title: t('common:confirm.delete'),
-                    icon: <ExclamationCircleOutlined />,
-                    onOk: () => {
-                      dismiss(record.id);
-                    },
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/alert-mutes/copy")) && <div
+                  className='table-operator-area-normal'
+                  style={{
+                    cursor: 'pointer',
+                    display: 'inline-block',
+                  }}
+                  onClick={() => {
+                    history.push(`/alert-mutes/edit/${record.id}?mode=clone`, {
+                      ...record,
+                      datasource_ids: record.datasource_ids || undefined,
+                    });
+                  }}
+                >
+                  {t('common:btn.clone')}
+                </div>
+              }
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/alert-mutes/del")) && <div
+                  className='table-operator-area-warning'
+                  style={{
+                    cursor: 'pointer',
+                    display: 'inline-block',
+                  }}
+                  onClick={() => {
+                    confirm({
+                      title: t('common:confirm.delete'),
+                      icon: <ExclamationCircleOutlined />,
+                      onOk: () => {
+                        dismiss(record.id);
+                      },
 
-                    onCancel() {},
-                  });
-                }}
-              >
-                {t('common:btn.delete')}
-              </div>
+                      onCancel() { },
+                    });
+                  }}
+                >
+                  {t('common:btn.delete')}
+                </div>
+              }
             </div>
           </>
         );
@@ -314,7 +318,7 @@ const Shield: React.FC = () => {
 
   const getList = async () => {
     if (bgid) {
-      const params:any = {
+      const params: any = {
         gid: groupIds?.toString()
       }
       setLoading(true);
@@ -385,15 +389,17 @@ const Shield: React.FC = () => {
                 <Input onPressEnter={onSearchQuery} prefix={<SearchOutlined />} placeholder={t('search_placeholder')} />
               </Space>
               <div className='header-right'>
-                <Button
-                  type='primary'
-                  className='add'
-                  onClick={() => {
-                    history.push('/alert-mutes/add');
-                  }}
-                >
-                  {t('common:btn.add')}
-                </Button>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/alert-mutes/add")) && <Button
+                    type='primary'
+                    className='add'
+                    onClick={() => {
+                      history.push('/alert-mutes/add');
+                    }}
+                  >
+                    {t('common:btn.add')}
+                  </Button>
+                }
               </div>
             </div>
             <Table

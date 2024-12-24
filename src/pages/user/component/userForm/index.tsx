@@ -209,11 +209,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       </Row>
       <Row>
         <Col span={12} key={"item-" + 7}>
-          <Form.Item label={t('account:profile.phone')} name='phone' rules={[
-            {
-              required: true,
-            }
-          ]}>
+          <Form.Item label={t('account:profile.phone')} name='phone'>
             <Input />
           </Form.Item>
         </Col>

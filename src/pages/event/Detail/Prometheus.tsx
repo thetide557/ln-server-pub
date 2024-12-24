@@ -63,13 +63,13 @@ export default function PrometheusDetail(props: IProps) {
       label: '回放PromQL',
       key: 'rule_replay',
       render(rulePlay) {
-        console.log(222, rulePlay);
+        // console.log(222, rulePlay);
         
         let queries = _.get(rulePlay, 'queries', []);
         queries.forEach(item => {
-          item.prom_ql = item.prom_ql.replace('$asset_id', eventDetail.asset_id)
+          item.prom_ql = item.prom_ql.replace(/\$asset_id/g, eventDetail.asset_id)
         })
-        console.log(555, queries);
+        // console.log(555, queries);
         
         return (
           <div style={{ width: '100%' }}>

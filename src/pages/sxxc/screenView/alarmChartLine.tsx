@@ -44,7 +44,7 @@ const AlarmChartLine = function (props: any) {
       let myChart = echarts.init(chartDom);
       let query = ''
       if (curWarn.rule_replay && curWarn.rule_replay.queries && curWarn.rule_replay.queries.length > 0) {
-        query = curWarn.rule_replay.queries[0].prom_ql.replace('$asset_id', curWarn.asset_id)
+        query = curWarn.rule_replay.queries[0].prom_ql.replace(/\$asset_id/g, curWarn.asset_id)
       } else {
         query = curWarn.rule_config.queries[0].prom_ql
       }

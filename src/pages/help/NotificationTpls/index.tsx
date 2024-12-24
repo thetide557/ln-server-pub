@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { List, Input, Space, Button, Modal, message } from 'antd';
@@ -9,6 +9,7 @@ import { NotifyTplsType } from './types';
 import HTML from './Editor/HTML';
 import Markdown from './Editor/Markdown';
 import FormModal from './FormModal';
+import { CommonStateContext } from '@/App';
 import './index.less';
 import { putNotifyTplContent } from './services';
 import './locale';
@@ -18,8 +19,10 @@ export default function index() {
   const [search, setSearch] = useState<string>('');
   const [data, setData] = useState<NotifyTplsType[]>([]);
   const [active, setActive] = useState<NotifyTplsType>();
+  const commonState = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   console.log('active', active);
-  
+
   const fetchData = () => {
     getNotifyTpls().then((res) => {
       setData(res);
@@ -42,16 +45,18 @@ export default function index() {
           <div className='left-tree-area'>
             <div className='sub-title'>
               {t('list')}
-              <Button
-                size='small'
-                type='link'
-                onClick={() => {
-                  FormModal({ mode: 'post', onOk: () => fetchData() });
-                }}
-              >
-                {t('common:btn.add')}
-              </Button>
-            </div> 
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/help/notification-tpls/add")) && <Button
+                  size='small'
+                  type='link'
+                  onClick={() => {
+                    FormModal({ mode: 'post', onOk: () => fetchData() });
+                  }}
+                >
+                  {t('common:btn.add')}
+                </Button>
+              }
+            </div>
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
                 prefix={<SearchOutlined />}
@@ -60,8 +65,8 @@ export default function index() {
                   setSearch(e.target.value);
                 }}
               />
-            </div> 
-           <List
+            </div>
+            <List
               style={{
                 marginBottom: '12px',
                 flex: 1,
@@ -76,9 +81,9 @@ export default function index() {
                   {item.name}
                 </List.Item>
               )}
-            /> 
+            />
 
-            </div>
+          </div>
           <div className='resource-table-content'>
             <div className='team-info'>
               <Space
@@ -87,13 +92,15 @@ export default function index() {
                 }}
               >
                 <span>{active?.name}</span>
-                <EditOutlined
-                  onClick={() => {
-                    if (active) {
-                      FormModal({ mode: 'update', data: active, onOk: () => fetchData() });
-                    }
-                  }}
-                />
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/help/notification-tpls/put")) && <EditOutlined
+                    onClick={() => {
+                      if (active) {
+                        FormModal({ mode: 'update', data: active, onOk: () => fetchData() });
+                      }
+                    }}
+                  />
+                }
                 {!active?.built_in && (
                   <DeleteOutlined
                     onClick={() => {
@@ -107,7 +114,7 @@ export default function index() {
                             });
                           }
                         },
-                        onCancel: () => {},
+                        onCancel: () => { },
                       });
                     }}
                   />
@@ -149,19 +156,21 @@ export default function index() {
                 )
               )}
             </div>
-            <Button style={{right:'0px', position: 'fixed', bottom: '0', margin: '16px'}}
-              type='primary'
-              onClick={() => {
-                if (active) {
-                  putNotifyTplContent(active).then(() => {
-                    message.success(t('common:success.save'));
-                    fetchData();
-                  });
-                }
-              }}
-            >
-              {t('common:btn.save')}
-            </Button>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/help/notification-tpls/save")) && <Button style={{ right: '0px', position: 'fixed', bottom: '0', margin: '16px' }}
+                type='primary'
+                onClick={() => {
+                  if (active) {
+                    putNotifyTplContent(active).then(() => {
+                      message.success(t('common:success.save'));
+                      fetchData();
+                    });
+                  }
+                }}
+              >
+                {t('common:btn.save')}
+              </Button>
+            }
           </div>
         </div>
       </div>
