@@ -1,14 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { Form, Button, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView } from '@codemirror/view';
 import PageLayout from '@/components/pageLayout';
+import { CommonStateContext } from '@/App';
 import { getNotifyConfig, putNotifyConfig } from '../services';
 
 export default function index() {
   const [form] = Form.useForm();
   const { t } = useTranslation('notificationSettings');
+  const { profile, permList } = useContext(CommonStateContext);
 
   useEffect(() => {
     getNotifyConfig('ibex_server').then((res) => {
@@ -22,7 +24,7 @@ export default function index() {
   return (
     <PageLayout title={t('ibex.title')}>
       <div>
-      {/* <div style={{ position: 'relative' }}> */}
+        {/* <div style={{ position: 'relative' }}> */}
         <div
           style={{
             padding: 10,
@@ -52,20 +54,22 @@ export default function index() {
               />
             </Form.Item>
             {/* <div style={{ position: 'absolute', bottom: 0, right: 0, margin: '16px' }}> */}
-            <div>
-              <Button
-                type='primary'
-                onClick={() => {
-                  form.validateFields().then((values) => {
-                    putNotifyConfig(values).then(() => {
-                      message.success(t('common:success.save'));
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/ibex-settings/save")) && <div>
+                <Button
+                  type='primary'
+                  onClick={() => {
+                    form.validateFields().then((values) => {
+                      putNotifyConfig(values).then(() => {
+                        message.success(t('common:success.save'));
+                      });
                     });
-                  });
-                }}
-              >
-                {t('common:btn.save')}
-              </Button>
-            </div>
+                  }}
+                >
+                  {t('common:btn.save')}
+                </Button>
+              </div>
+            }
           </Form>
         </div>
       </div>

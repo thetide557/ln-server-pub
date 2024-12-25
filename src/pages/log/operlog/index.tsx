@@ -20,6 +20,7 @@ const { RangePicker } = DatePicker;
 export default function () {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const [query, setQuery] = useState({})
   const [searchVal, setSearchVal] = useState<any>('');
@@ -108,12 +109,13 @@ export default function () {
       align: 'center',
       render: (val, record: any) => {
         return (
-          <a  onClick={() => {                   
-               let ids = new Array();
-                ids.push(record.id);
-                setRowKeys(_.cloneDeep(ids));
-                setModalOpen(true);
-            }} target='_blank'>
+          (profile.roles?.includes("Admin") || permList.includes("/log/operlog/export")) &&
+          <a onClick={() => {
+            let ids = new Array();
+            ids.push(record.id);
+            setRowKeys(_.cloneDeep(ids));
+            setModalOpen(true);
+          }} target='_blank'>
             导出
           </a>
         );
@@ -209,7 +211,7 @@ export default function () {
     setRefreshFlag(_.uniqueId('refresh_'));
   };
 
-  const handleModal = (action: string,rowKeys:any[]) => {
+  const handleModal = (action: string, rowKeys: any[]) => {
     if (action == "open") {
       let params: any = {};
       if (rowKeys != null && rowKeys.length > 0) {
@@ -217,12 +219,12 @@ export default function () {
       }
       if (searchVal != null && searchVal.length > 0) {
         //console.log("searchVal",searchVal)
-         params["query"] = searchVal;
+        params["query"] = searchVal;
         //console.log("query",searchVal)
       }
       //console.log("FFFFFFFFFF",filterName)
       if (filterName != null && filterName.length > 0) {
-         params["filterType"] = filterName;
+        params["filterType"] = filterName;
         //console.log("FFFFFFFFFF",filterName)
       }
       params["ftype"] = ftype;
@@ -326,7 +328,7 @@ export default function () {
                 onOk={onOk}
               />
             </Col>
-            
+
             {/* <Col span={11} >
                     <Select
                       style={{ width: '125px',marginLeft:'10px' }}
@@ -336,22 +338,24 @@ export default function () {
                       options={statusOptions}
                     />
                     </Col>   */}
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/log/operlog/exportAll")) && <Button className='btn' type="primary" style={{ right: '0', position: 'absolute', marginRight: '16px' }} onClick={() => {
+                if (selectRowKeys.length <= 0) {
+                  Modal.confirm({
+                    title: "确认导出所有日志信息吗",
+                    onOk: async () => {
+                      setModalOpen(true);
+                    },
+                    onCancel() { },
+                  });
+                } else {
+                  setRowKeys(selectRowKeys);
+                  setModalOpen(true);
+                }
+              }}>批量导出
+              </Button>
+            }
 
-            <Button className='btn' type="primary" style={{ right: '0', position: 'absolute', marginRight: '16px' }} onClick={() => { 
-              if (selectRowKeys.length <= 0) {
-                Modal.confirm({
-                  title: "确认导出所有日志信息吗",
-                  onOk: async () => {
-                    setModalOpen(true);
-                  },
-                  onCancel() { },
-                });
-              } else {
-                setRowKeys(selectRowKeys);
-                setModalOpen(true);
-              }
-            }}>批量导出
-            </Button>
 
           </Row>
         </div>

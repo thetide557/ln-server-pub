@@ -269,7 +269,7 @@ function App() {
       setCurWarn(res.dat)  
       let query = ''
       if (res.dat.rule_replay && res.dat.rule_replay.queries && res.dat.rule_replay.queries.length > 0) {
-        query = res.dat.rule_replay.queries[0].prom_ql.replace('$asset_id', res.dat.asset_id)
+        query = res.dat.rule_replay.queries[0].prom_ql.replace(/\$asset_id/g, res.dat.asset_id)
         setQuery1(query)
       } else {
         query = res.dat.rule_config.queries[0].prom_ql

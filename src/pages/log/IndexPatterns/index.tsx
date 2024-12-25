@@ -30,7 +30,7 @@ export { default as Fields } from './Fields';
 
 export default function Servers() {
   const { t } = useTranslation('es-index-patterns');
-  const { profile, groupedDatasourceList, datasourceList } = useContext(CommonStateContext);
+  const { profile, permList, groupedDatasourceList, datasourceList } = useContext(CommonStateContext);
   const [data, setData] = useState<IndexPattern[]>([]);
   const [loading, setLoading] = useState(false);
   const fetchData = () => {
@@ -44,6 +44,8 @@ export default function Servers() {
   };
 
   useEffect(() => {
+    console.log(1111, profile);
+
     fetchData();
   }, []);
 
@@ -54,20 +56,22 @@ export default function Servers() {
           {profile.admin ? (
             <div>
               <div style={{ textAlign: 'right' }}>
-                <Button
-                  type='primary'
-                  onClick={() => {
-                    Add({
-                      indexPatterns: data,
-                      datasourceList: groupedDatasourceList.elasticsearch,
-                      onOk: () => {
-                        fetchData();
-                      },
-                    });
-                  }}
-                >
-                  {t('create_btn')}
-                </Button>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/log/index-patterns/add")) && <Button
+                    type='primary'
+                    onClick={() => {
+                      Add({
+                        indexPatterns: data,
+                        datasourceList: groupedDatasourceList.elasticsearch,
+                        onOk: () => {
+                          fetchData();
+                        },
+                      });
+                    }}
+                  >
+                    {t('create_btn')}
+                  </Button>
+                }
               </div>
               <Table
                 size='small'
@@ -104,7 +108,7 @@ export default function Servers() {
                     width: 80,
                     render: (record) => {
                       return (
-                        <Popconfirm
+                        (profile.roles?.includes("Admin") || permList.includes("/log/index-patterns/del")) && <Popconfirm
                           title={t('common:confirm.delete')}
                           onConfirm={() => {
                             deleteESIndexPattern(record.id).then(() => {
@@ -115,6 +119,7 @@ export default function Servers() {
                         >
                           <Button type='link'>{t('common:btn.delete')}</Button>
                         </Popconfirm>
+
                       );
                     },
                   },

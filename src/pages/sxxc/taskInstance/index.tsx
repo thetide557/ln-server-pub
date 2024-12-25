@@ -104,7 +104,7 @@ const Resource: React.FC = () => {
       render: (text: string, record) => (
         <>
           {
-            (profile.roles?.includes('Admin') || permList.includes('/taskManage/run')) && <a
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/taskInstanceRun')) && <a
               onClick={() => {
                 confirm({
                   title: '是否重新执行',
@@ -150,7 +150,7 @@ const Resource: React.FC = () => {
             </a>
           }
           {
-            (profile.roles?.includes('Admin') || permList.includes('/taskType/list')) && <Button className='oper-name' type='link' onClick={() => getLog(record)}>
+            (profile.roles?.includes('Admin') || permList.includes('/taskManage/taskInstanceLog')) && <Button className='oper-name' type='link' onClick={() => getLog(record)}>
               日志
             </Button>
           }

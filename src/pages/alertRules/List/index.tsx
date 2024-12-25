@@ -58,7 +58,7 @@ interface Filter {
 
 export default function List(props: ListProps) {
   const { bgid, assetid, from } = props;
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
   const { t } = useTranslation('alertRules');
   const history = useHistory();
@@ -208,80 +208,90 @@ export default function List(props: ListProps) {
       render: (val, record: any) => {
         return (
           <Space>
-            <PoweroffOutlined
-              title={record['disabled'] === AlertRuleStatus.Enable ? '已启动' : '未启动'}
-              style={{ color: record['disabled'] === AlertRuleStatus.Enable ? 'green' : 'gray' }}
-              onClick={(e) => {
-                const { id, disabled } = record;
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/status")) && <PoweroffOutlined
+                title={record['disabled'] === AlertRuleStatus.Enable ? '已启动' : '未启动'}
+                style={{ color: record['disabled'] === AlertRuleStatus.Enable ? 'green' : 'gray' }}
+                onClick={(e) => {
+                  const { id, disabled } = record;
 
-                Modal.confirm({
-                  title: `确认要修改状态为：${record['disabled'] === AlertRuleStatus.Enable ? '关闭' : '启动'}`,
-                  onOk: () => {
-                    bgid &&
-                      updateAlertRules(
-                        {
-                          ids: [id],
-                          fields: {
-                            disabled: !disabled ? 1 : 0,
+                  Modal.confirm({
+                    title: `确认要修改状态为：${record['disabled'] === AlertRuleStatus.Enable ? '关闭' : '启动'}`,
+                    onOk: () => {
+                      bgid &&
+                        updateAlertRules(
+                          {
+                            ids: [id],
+                            fields: {
+                              disabled: !disabled ? 1 : 0,
+                            },
                           },
-                        },
-                        bgid,
-                      ).then(() => {
-                        getAlertRules(params);
-                      });
-                  },
-                  onCancel() {},
-                });
-              }}
-              rev={undefined}
-            />
-            <Link
-              title='克隆'
-              className='table-operator-area-normal'
-              to={{
-                pathname: `/alert-rules/edit/${record.id}?mode=clone`,
-              }}
-              target='_self'
-            >
-              <CopyTwoTone rev={undefined} />
-            </Link>
-            <FileSearchOutlined
-              title='查看'
-              onClick={() => {
-                history.push(`alert-rules/edit/${record.id}?mode=view`);
-              }}
-              rev={undefined}
-            />
-            <EditOutlined
-              title='编辑'
-              onClick={() => {
-                history.push(`alert-rules/edit/${record.id}`);
-              }}
-              rev={undefined}
-            />
-            <div
-              title='删除'
-              className='table-operator-area-warning'
-              onClick={() => {
-                Modal.confirm({
-                  title: '确认要删除',
-                  okText: '确认',
-                  cancelText: '取消',
-                  onOk: () => {
-                    bgid &&
-                      deleteStrategy([record.id], bgid).then(() => {
-                        message.success('删除成功');
-                        getAlertRules(params);
-                        setSelectRowKeys([]);
-                      });
-                  },
+                          bgid,
+                        ).then(() => {
+                          getAlertRules(params);
+                        });
+                    },
+                    onCancel() { },
+                  });
+                }}
+                rev={undefined}
+              />
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/copy")) && <Link
+                title='克隆'
+                className='table-operator-area-normal'
+                to={{
+                  pathname: `/alert-rules/edit/${record.id}?mode=clone`,
+                }}
+                target='_self'
+              >
+                <CopyTwoTone rev={undefined} />
+              </Link>
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/detail")) && <FileSearchOutlined
+                title='查看'
+                onClick={() => {
+                  history.push(`alert-rules/edit/${record.id}?mode=view`);
+                }}
+                rev={undefined}
+              />
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/put")) && <EditOutlined
+                title='编辑'
+                onClick={() => {
+                  history.push(`alert-rules/edit/${record.id}`);
+                }}
+                rev={undefined}
+              />
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/del")) && <div
+                title='删除'
+                className='table-operator-area-warning'
+                onClick={() => {
+                  Modal.confirm({
+                    title: '确认要删除',
+                    okText: '确认',
+                    cancelText: '取消',
+                    onOk: () => {
+                      bgid &&
+                        deleteStrategy([record.id], bgid).then(() => {
+                          message.success('删除成功');
+                          getAlertRules(params);
+                          setSelectRowKeys([]);
+                        });
+                    },
 
-                  onCancel() {},
-                });
-              }}
-            >
-              <DeleteOutlined rev={undefined} />
-            </div>
+                    onCancel() { },
+                  });
+                }}
+              >
+                <DeleteOutlined rev={undefined} />
+              </div>
+            }
             {record.prod === 'anomaly' && (
               <div>
                 <Link to={{ pathname: `/alert-rules/brain/${record.id}` }}>{t('brain_result_btn')}</Link>
@@ -301,19 +311,19 @@ export default function List(props: ListProps) {
     },
   });
 
- 
+
   const getAlertRules = async (params) => {
     if (!bgid) {
       return;
     }
     params["id"] = bgid;
-    await getStrategyGroupSubList(params).then(({dat})=>{
+    await getStrategyGroupSubList(params).then(({ dat }) => {
       setLoading(false);
       setTotal(dat.total)
       let lists = dat.list;
-      setListTableData(lists);      
-      console.log("是否-数据----",lists);
-      
+      setListTableData(lists);
+      console.log("是否-数据----", lists);
+
     })
   };
   useEffect(() => {
@@ -426,10 +436,10 @@ export default function List(props: ListProps) {
                 value={searchVal}
                 allowClear
                 options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
-                onChange={(val) =>{
+                onChange={(val) => {
                   setCurrent(1);
                   setSearchVal(val)
-                } }
+                }}
                 placeholder={'选择要查询的条件'}
               />
             )}
@@ -437,22 +447,24 @@ export default function List(props: ListProps) {
         </Col>
         <Col>
           <Space>
-            <Button
-              type='primary'
-              onClick={() => {
-                window.localStorage.removeItem('select_monitor_asset_ip');
-                let path_params = assetid != null && assetid > 0 ? '?action=add&assetid=' + assetid : '';
-                history.push({
-                  pathname: `/alert-rules/add/${bgid > 0 ? bgid : 1}${path_params}`,
-                  state: {
-                    asset_id: assetid,
-                  },
-                });
-              }}
-              className='strategy-table-search-right-create'
-            >
-              添加
-            </Button>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/add")) && <Button
+                type='primary'
+                onClick={() => {
+                  window.localStorage.removeItem('select_monitor_asset_ip');
+                  let path_params = assetid != null && assetid > 0 ? '?action=add&assetid=' + assetid : '';
+                  history.push({
+                    pathname: `/alert-rules/add/${bgid > 0 ? bgid : 1}${path_params}`,
+                    state: {
+                      asset_id: assetid,
+                    },
+                  });
+                }}
+                className='strategy-table-search-right-create'
+              >
+                添加
+              </Button>
+            }
             <MoreOperations
               bgid={bgid}
               selectRowKeys={selectRowKeys}
@@ -467,36 +479,36 @@ export default function List(props: ListProps) {
       </Row>
       <div className='renderer-table-container' >
         <div className='renderer-table-container-box' >
-        <Table
-          size='small'
-          rowKey='id'
-          pagination={{
-            showSizeChanger: true,
-            showQuickJumper: true,
-            total: total,
-            current: current,
-            pageSize: pageSize,
-            onChange: onPageChange,
-            showTotal: (total) => `总共 ${total} 条`,
-            pageSizeOptions: [10, 20, 50, 100],
-          }}
-          loading={loading}
-          bordered
-          dataSource={listTableData}
-          className='ruler-table_columns'
-          rowSelection={{
-            selectedRowKeys: selectedRows.map((item) => item.id),
-            onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-              setSelectRowKeys(selectedRowKeys);
-              setSelectedRows(selectedRows);
-            },
-          }}
-          scroll={{ x: tableWidth }}
-          components={components}
-          columns={resizableColumns}
-        />
+          <Table
+            size='small'
+            rowKey='id'
+            pagination={{
+              showSizeChanger: true,
+              showQuickJumper: true,
+              total: total,
+              current: current,
+              pageSize: pageSize,
+              onChange: onPageChange,
+              showTotal: (total) => `总共 ${total} 条`,
+              pageSizeOptions: [10, 20, 50, 100],
+            }}
+            loading={loading}
+            bordered
+            dataSource={listTableData}
+            className='ruler-table_columns'
+            rowSelection={{
+              selectedRowKeys: selectedRows.map((item) => item.id),
+              onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+                setSelectRowKeys(selectedRowKeys);
+                setSelectedRows(selectedRows);
+              },
+            }}
+            scroll={{ x: tableWidth }}
+            components={components}
+            columns={resizableColumns}
+          />
+        </div>
       </div>
-    </div>
     </div>
   );
 }

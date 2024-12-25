@@ -1,20 +1,15 @@
-// page list 接口管理
-// date : 2023-10-21 09:09
-// desc : 接口管理
-
 import { Button, Input, message, Modal, Space, Table } from 'antd';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
-
+import { CommonStateContext } from '@/App';
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
 import { deleteScreenById, getBigScreen } from '@/services/sxxc/bigScreen';
 import Add from './Add';
 import Edit from './Edit';
 import Detail from './Detail';
-
 import './index.less';
 
 export type ApiServiceType = {
@@ -31,6 +26,7 @@ const ApiService = () => {
   const [items, setItems] = useState([]);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [searchVal, setSearchVal] = useState('');
+  const { profile, permList } = useContext(CommonStateContext);
   const history = useHistory();
 
   useEffect(() => {
@@ -56,16 +52,19 @@ const ApiService = () => {
               </div> */}
             </Space>
             <Space>
-              <div>
-                <Button
-                  type='primary'
-                  onClick={() => {
-                    history.push(`address/add`);
-                  }}
-                >
-                  新建
-                </Button>
-              </div>
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/add")) && <div>
+                  <Button
+                    type='primary'
+                    onClick={() => {
+                      history.push(`address/add`);
+                    }}
+                  >
+                    新建
+                  </Button>
+                </div>
+              }
+
             </Space>
           </div>
           <Table
@@ -94,30 +93,37 @@ const ApiService = () => {
                 fixed: 'right',
                 render: (value: string, record: any) => (
                   <Space>
-                    <SearchOutlined
-                      onClick={() => {
-                        history.push(`address/${record.id}`);
-                      }}
-                    ></SearchOutlined>
-                    <EditOutlined
-                      onClick={() => {
-                        history.push(`address/${record.id}/edit`);
-                      }}
-                    />
-                    <DeleteOutlined
-                      onClick={() => {
-                        Modal.confirm({
-                          title: '是否确认删除?',
-                          onOk: () => {
-                            deleteScreenById(record.id).then(res => {
-                              message.success('删除成功');
-                              setRefreshKey(_.uniqueId());
-                            });
-                          },
-                          onCancel() {},
-                        });
-                      }}
-                    />
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/detail")) && <SearchOutlined
+                        onClick={() => {
+                          history.push(`address/${record.id}`);
+                        }}
+                      ></SearchOutlined>
+                    }
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/put")) && <EditOutlined
+                        onClick={() => {
+                          history.push(`address/${record.id}/edit`);
+                        }}
+                      />
+                    }
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/del")) && <DeleteOutlined
+                        onClick={() => {
+                          Modal.confirm({
+                            title: '是否确认删除?',
+                            onOk: () => {
+                              deleteScreenById(record.id).then(res => {
+                                message.success('删除成功');
+                                setRefreshKey(_.uniqueId());
+                              });
+                            },
+                            onCancel() { },
+                          });
+                        }}
+                      />
+                    }
+
                   </Space>
                 ),
               },

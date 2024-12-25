@@ -17,7 +17,7 @@ export default function () {
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
   const [form] = Form.useForm();
-  const { profile, setProfile } = useContext(CommonStateContext);
+  const { permList, profile, setProfile } = useContext(CommonStateContext);
   const [refArr, setRefArr] = useState<any>({});
   // const logOptions = [
   //   { label: 'DEBUG', value: 1 },
@@ -73,7 +73,7 @@ export default function () {
 
   const submitForm = async (values) => {
     console.log('submitForm', values);
-    values["http_port"]=parseInt(values["http_port"]);
+    values["http_port"] = parseInt(values["http_port"]);
 
 
 
@@ -165,9 +165,11 @@ export default function () {
               </Col>
             </Row>
             <Form.Item wrapperCol={{ offset: 10, span: 16 }} className='submit_button'>
-              <Button style={{width:"70px"}} type="primary" htmlType="submit">
-                保存
-              </Button>
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/system/parameters/save")) && <Button style={{ width: "70px" }} type="primary" htmlType="submit">
+                  保存
+                </Button>
+              }
             </Form.Item>
 
 

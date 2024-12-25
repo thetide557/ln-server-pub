@@ -30,7 +30,7 @@ export interface IKeyValue {
 const TableSource = (props: IPropsType) => {
   const { t } = useTranslation('datasourceManage');
   const { nameClick, pluginList } = props;
-  const { setDatasourceList } = useContext(CommonStateContext);
+  const { profile, permList, setDatasourceList } = useContext(CommonStateContext);
   const [tableData, setTableData] = useState<any>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -117,22 +117,23 @@ const TableSource = (props: IPropsType) => {
       render: (record) => {
         return (
           <Space>
-            <Popconfirm
-              placement='topLeft'
-              title={record.status === 'enabled' ? t('confirm.disable') : t('confirm.enable')}
-              onConfirm={() => {
-                updateDataSourceStatus({
-                  id: record.id,
-                  status: record.status === 'enabled' ? 'disabled' : 'enabled',
-                }).then(() => {
-                  message.success(record.status === 'enabled' ? t('success.disable') : t('success.enable'));
-                  setRefresh((oldVal) => !oldVal);
-                });
-              }}
-            >
-              <a>{record.status === 'enabled' ? t('disable') : t('enable')}</a>
-            </Popconfirm>
-
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/help/source/disabled")) && <Popconfirm
+                placement='topLeft'
+                title={record.status === 'enabled' ? t('confirm.disable') : t('confirm.enable')}
+                onConfirm={() => {
+                  updateDataSourceStatus({
+                    id: record.id,
+                    status: record.status === 'enabled' ? 'disabled' : 'enabled',
+                  }).then(() => {
+                    message.success(record.status === 'enabled' ? t('success.disable') : t('success.enable'));
+                    setRefresh((oldVal) => !oldVal);
+                  });
+                }}
+              >
+                <a>{record.status === 'enabled' ? t('disable') : t('enable')}</a>
+              </Popconfirm>
+            }
             {record.status === 'disabled' && (
               <Button
                 type='link'

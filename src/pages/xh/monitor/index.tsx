@@ -71,8 +71,8 @@ export default function () {
   const [optionColumns, setOptionColumns] = useState<any[]>([]);
 
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
-  const [current, setCurrent] = useLocalStorage<any>('monitors_list_current',1);
-  const [pageSize, setPageSize] = useLocalStorage<any>('monitors_list_page',10);
+  const [current, setCurrent] = useLocalStorage<any>('monitors_list_current', 1);
+  const [pageSize, setPageSize] = useLocalStorage<any>('monitors_list_page', 10);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [defaultValues, setDefaultValues] = useState<string[]>();
@@ -90,15 +90,15 @@ export default function () {
   const [collapse, setCollapse] = useState(localStorage.getItem('left_monitor_list') === '1');
   const [width, setWidth] = useLocalStorage<any>('left_monitor_width', 200);
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
-  const [typeId, setTypeId] = useLocalStorage<any>('monitors_type_id',0);
-  const [filterParam, setFilterParam] =useLocalStorage<any>('monitors_filter_param','asset_ip');
-  const [searchVal, setSearchVal] = useLocalStorage<any>('monitors_filter_value',null);
-  const [filterType, setFilterType] = useLocalStorage<any>('monitors_filter_type',"input");
+  const [typeId, setTypeId] = useLocalStorage<any>('monitors_type_id', 0);
+  const [filterParam, setFilterParam] = useLocalStorage<any>('monitors_filter_param', 'asset_ip');
+  const [searchVal, setSearchVal] = useLocalStorage<any>('monitors_filter_value', null);
+  const [filterType, setFilterType] = useLocalStorage<any>('monitors_filter_type', "input");
   const history = useHistory();
   const [unitOptions, setUnitOptions] = useState<any>(unitTypes);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
 
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
 
   const onSelectNone = () => {
@@ -235,104 +235,120 @@ export default function () {
       fixed: 'right',
       render: (val, record: any) => (
         <Space>
-          <PoweroffOutlined
-            title={record.status == 1 ? '正常' : '失效'}
-            style={{ color: record.status === 1 ? 'green' : 'gray' }}
-            onClick={(e) => {
-              let key = new Array();
-              key.push(record.id);
-              if (record.status == 0) {
-                Modal.confirm({
-                  title: '确认要启用当前选择监控？',
-                  onOk: async () => {
-                    updateMonitorStatus(1, key, 1).then((res) => {
-                      message.success('修改成功');
-                      setRefreshFlag(_.uniqueId('refreshFlag_'));
-                    });
-                  },
-                  onCancel() {},
-                });
-              } else {
-                Modal.confirm({
-                  title: '确认要关闭当前选择监控？',
-                  okText:'确定',
-                  cancelText:'取消',
-                  onOk: async () => {
-                    updateMonitorStatus(0, key, 1).then((res) => {
-                      message.success('修改成功');
-                      setRefreshFlag(_.uniqueId('refreshFlag_'));
-                    });
-                  },
-                  onCancel() {},
-                });
-              }
-            }}
-          />
-
-          <FileProtectOutlined
-            title='查看资产告警规则'
-            onClick={() => {
-              showModal('rules', record.asset_id, 'view');
-            }}
-          />
-
-          <FileSearchOutlined
-            title='查看监控配置'
-            onClick={() => {
-              showModal('asset', record.id, 'view');
-            }}
-          />
-          <FundOutlined
-            title='监控指标信息'
-            onClick={() => {
-              const query: PromVisualQuery = {
-                metric: record.monitoring_sql,
-                labels: [
-                  {
-                    label: 'asset_id',
-                    value: record.asset_id,
-                    op: '=',
-                  },
-                ],
-                operations: [],
-              };
-              const prom_ql = renderQuery(query);
-              history.push({
-                pathname: '/metric/explorer',
-                search: queryString.stringify({
-                  prom_ql: prom_ql,
-                  data_source_name: 'prometheus',
-                  data_source_id: record.datasource_id,
-                  mode: 'graph',
-                  start: moment().subtract(30, 'minutes').unix(),
-                  end: moment().add(30, 'minutes').unix(),
-                }),
-              });
-            }}
-          />
-          <EditOutlined
-            title='编辑监控信息'
-            onClick={() => {
-              showModal('asset', record.id, 'edit');
-            }}
-          />
-          <DeleteOutlined
-            title='删除监控信息'
-            onClick={() => {
-              Modal.confirm({
-                title: t('common:confirm.delete'),
-                okText:'确定',
-                cancelText:'取消',
-                onOk: async () => {
-                  deleteXhMonitor(record.id).then((res) => {
-                    message.success('删除成功');
-                    setRefreshFlag(_.uniqueId('refreshFlag_'));
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/status")) && <PoweroffOutlined
+              title={record.status == 1 ? '正常' : '失效'}
+              style={{ color: record.status === 1 ? 'green' : 'gray' }}
+              onClick={(e) => {
+                let key = new Array();
+                key.push(record.id);
+                if (record.status == 0) {
+                  Modal.confirm({
+                    title: '确认要启用当前选择监控？',
+                    onOk: async () => {
+                      updateMonitorStatus(1, key, 1).then((res) => {
+                        message.success('修改成功');
+                        setRefreshFlag(_.uniqueId('refreshFlag_'));
+                      });
+                    },
+                    onCancel() { },
                   });
-                },
-                onCancel() {},
-              });
-            }}
-          />
+                } else {
+                  Modal.confirm({
+                    title: '确认要关闭当前选择监控？',
+                    okText: '确定',
+                    cancelText: '取消',
+                    onOk: async () => {
+                      updateMonitorStatus(0, key, 1).then((res) => {
+                        message.success('修改成功');
+                        setRefreshFlag(_.uniqueId('refreshFlag_'));
+                      });
+                    },
+                    onCancel() { },
+                  });
+                }
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/rules")) && <FileProtectOutlined
+              title='查看资产告警规则'
+              onClick={() => {
+                showModal('rules', record.asset_id, 'view');
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/detail")) && <FileSearchOutlined
+              title='查看监控配置'
+              onClick={() => {
+                showModal('asset', record.id, 'view');
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/explorer")) && <FundOutlined
+              title='监控指标信息'
+              onClick={() => {
+                const query: PromVisualQuery = {
+                  metric: record.monitoring_sql,
+                  labels: [
+                    {
+                      label: 'asset_id',
+                      value: record.asset_id,
+                      op: '=',
+                    },
+                  ],
+                  operations: [],
+                };
+                const prom_ql = renderQuery(query);
+                history.push({
+                  pathname: '/metric/explorer',
+                  search: queryString.stringify({
+                    prom_ql: prom_ql,
+                    data_source_name: 'prometheus',
+                    data_source_id: record.datasource_id,
+                    mode: 'graph',
+                    start: moment().subtract(30, 'minutes').unix(),
+                    end: moment().add(30, 'minutes').unix(),
+                  }),
+                });
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/put")) && <EditOutlined
+              title='编辑监控信息'
+              onClick={() => {
+                showModal('asset', record.id, 'edit');
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/del")) && <DeleteOutlined
+              title='删除监控信息'
+              onClick={() => {
+                Modal.confirm({
+                  title: t('common:confirm.delete'),
+                  okText: '确定',
+                  cancelText: '取消',
+                  onOk: async () => {
+                    deleteXhMonitor(record.id).then((res) => {
+                      message.success('删除成功');
+                      setRefreshFlag(_.uniqueId('refreshFlag_'));
+                    });
+                  },
+                  onCancel() { },
+                });
+              }}
+            />
+          }
+
+
+
+
+
+
         </Space>
       ),
     },
@@ -434,18 +450,18 @@ export default function () {
 
     if (currentAssetId > 0) {
       param['assetId'] = currentAssetId;
-    }else{
+    } else {
       if (searchVal != null && searchVal.length > 0) {
         param['query'] = searchVal;
       }
       if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
         param['filter'] = filterParam;
       }
-      if (currentAssetId<=0 && typeId != null && typeId + '' != '0') {
+      if (currentAssetId <= 0 && typeId != null && typeId + '' != '0') {
         param['assetType'] = typeId;
       }
     }
-    
+
 
     getMonitorInfoList(param).then(({ dat }) => {
       dat.list.forEach((entity) => {
@@ -524,7 +540,7 @@ export default function () {
 
   const onSelect = (selectedKeys, info) => {
     console.log(filterParam);
-    
+
     setTypeId(selectedKeys[0]);
     setCurrentAssetId(0);
     if (filterParam == 'status') {
@@ -533,7 +549,7 @@ export default function () {
       setFilterType("input");
     }
     // setFilterParam("asset_ip");
-    
+
     setSearchVal(null);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
@@ -598,14 +614,14 @@ export default function () {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
               />
-              
+
               <div className='table-handle-search'>
                 <Select
                   placeholder="选择过滤器"
-                  style={{ width: 120,marginRight:'10px' }}
-                  defaultValue={filterParam}                  
+                  style={{ width: 120, marginRight: '10px' }}
+                  defaultValue={filterParam}
                   onChange={(value) => {
-                    queryFilter.forEach((item:any) => {
+                    queryFilter.forEach((item: any) => {
                       if (item.name == value) {
                         setFilterType(item.type);
                       }
@@ -618,9 +634,9 @@ export default function () {
                 >
                   {queryFilter.map((item, index) => {
                     return (
-                    <Select.Option value={item.name} key={index}>
-                      {item.label}
-                    </Select.Option>)
+                      <Select.Option value={item.name} key={index}>
+                        {item.label}
+                      </Select.Option>)
                   })}
                 </Select>
                 {filterType == 'input' && (
@@ -660,20 +676,22 @@ export default function () {
                   />
                 )}
               </div>
-              </Space>
+            </Space>
             <div className='tool_right'>
-              <div>
-                <Button
-                  className='tool_rightbtn'
-                  onClick={() => {
-                    showModal('asset', currentAssetId, 'add');
-                  }}
-                  type='primary'
-                >
-                  {t('新增')}
-                </Button>
-                &nbsp; &nbsp; &nbsp;
-              </div>
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/add")) && <div>
+                  <Button
+                    className='tool_rightbtn'
+                    onClick={() => {
+                      showModal('asset', currentAssetId, 'add');
+                    }}
+                    type='primary'
+                  >
+                    {t('新增')}
+                  </Button>
+                  &nbsp; &nbsp; &nbsp;
+                </div>
+              }
               <div>
                 <Popover placement='bottom' content={pupupContent} trigger='click' className='filter_columns'>
                   <Button className='show_columns' icon={<UnorderedListOutlined />}>
@@ -699,15 +717,15 @@ export default function () {
                           if (key == 'delete') {
                             Modal.confirm({
                               title: '确认要强制删除当前选中的监控信息？',
-                              okText:'确定',
-                              cancelText:'取消',
+                              okText: '确定',
+                              cancelText: '取消',
                               onOk: async () => {
                                 deleteXhBatchMonitor({ ids: selectedAssets.toString().split(',') }).then((res) => {
                                   message.success('删除成功');
                                   setRefreshFlag(_.uniqueId('refreshFlag_'));
                                 });
                               },
-                              onCancel() {},
+                              onCancel() { },
                             });
                           } else if (key == 'turnOnMonitoring') {
                             Modal.confirm({
@@ -720,13 +738,13 @@ export default function () {
                                   onSelectNone();
                                 });
                               },
-                              onCancel() {},
+                              onCancel() { },
                             });
                           } else if (key == 'disableMonitoring') {
                             Modal.confirm({
                               title: '确认要禁止当前选择监控？',
-                              okText:'确定',
-                              cancelText:'取消',
+                              okText: '确定',
+                              cancelText: '取消',
                               onOk: async () => {
                                 updateMonitorStatus(0, selectedAssets, 1).then((res) => {
                                   message.success('修改成功');
@@ -735,7 +753,7 @@ export default function () {
                                   onSelectNone();
                                 });
                               },
-                              onCancel() {},
+                              onCancel() { },
                             });
                           } else {
                             setOperateType(key as OperateType);
@@ -757,7 +775,7 @@ export default function () {
                 </Dropdown>
               </div>
             </div>
-            
+
           </div>
           <div className='renderer-table-container'>
             <div className='monitor-list renderer-table-container-box'>

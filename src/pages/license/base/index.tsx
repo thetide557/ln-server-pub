@@ -32,6 +32,7 @@ interface DataType {
 export default function () {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const [treeData, setTreeData] = useState<any[]>();
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const history = useHistory();
@@ -93,7 +94,7 @@ export default function () {
       setInitData({ ...initData })
     });
   };
-  const loadClientName=()=>{
+  const loadClientName = () => {
     getParametersList().then((res) => {
       setCustomerName(res.dat.client)
     });
@@ -188,12 +189,12 @@ export default function () {
   }
   const submitClientForm = (values) => {
     console.log(values);
-    saveCustomerName(values).then((res)=>{
+    saveCustomerName(values).then((res) => {
       setModalShow(false);
       loadClientName();
       message.success("客户名称设置成功");
     });
-    
+
 
   }
   const onSearchQuery = (e) => {
@@ -242,35 +243,41 @@ export default function () {
         <Row className='event-table-search'>
           <div className='event-table-search-left' style={{ marginLeft: '10px' }}>
             客户名称：{customerName || "一体化综合运维管理平台"}
-            <EditOutlined
-              style={{
-                marginLeft: '8px',
-                fontSize: '14px',
-              }}
-              onClick={() => {
-                clientForm.setFieldsValue({name:customerName})
-                setModalShow(true)
-              }}
-            ></EditOutlined>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/license/base/setName")) && <EditOutlined
+                style={{
+                  marginLeft: '8px',
+                  fontSize: '14px',
+                }}
+                onClick={() => {
+                  clientForm.setFieldsValue({ name: customerName })
+                  setModalShow(true)
+                }}
+              ></EditOutlined>
+            }
+
           </div>
           <div className='event-table-search-right'>
             <div className='user-manage-operate'>
-              <Button type='primary' className='license_batch_import_btn' onClick={() => {
-                if (selectRowKeys.length <= 0) {
-                  Modal.confirm({
-                    title: "确认导出所有许可信息吗",
-                    onOk: async () => {
-                      handleModal("open", null);
-                    },
-                    onCancel() { },
-                  });
-                } else {
-                  handleModal("open", selectRowKeys);
-                }
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/license/base/exportAll")) && <Button type='primary' className='license_batch_import_btn' onClick={() => {
+                  if (selectRowKeys.length <= 0) {
+                    Modal.confirm({
+                      title: "确认导出所有许可信息吗",
+                      onOk: async () => {
+                        handleModal("open", null);
+                      },
+                      onCancel() { },
+                    });
+                  } else {
+                    handleModal("open", selectRowKeys);
+                  }
 
-              }} >
-                批量导出
-              </Button>
+                }} >
+                  批量导出
+                </Button>
+              }
+
             </div>
           </div>
         </Row>
@@ -361,23 +368,26 @@ export default function () {
               align: 'center',
               render: (text: string, record: assetsType) => (
                 <div className='table-operator-area'>
-                  <Button size='small' style={{ backgroundColor: "#57B894" }} className='oper-name' type='link' icon={<SyncOutlined />}
-                    onClick={() => {
-                      localStorage.setItem("license_select_detail", JSON.stringify(record))
-                      history.push(`/license/base/${record.id}`);
-                    }}
-                  >
-                    更新证书
-                  </Button>
-                  <Button size='small' style={{ backgroundColor: "#4095E5" }} className='oper-name' type='link' icon={<DeliveredProcedureOutlined />}
-                    onClick={() => {
-                      let ids = new Array();
-                      ids.push(record.id);
-                      handleModal("open", ids);
-                    }}>
-                    导出
-                  </Button>
-
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/license/base/update")) && <Button size='small' style={{ backgroundColor: "#57B894" }} className='oper-name' type='link' icon={<SyncOutlined />}
+                      onClick={() => {
+                        localStorage.setItem("license_select_detail", JSON.stringify(record))
+                        history.push(`/license/base/${record.id}`);
+                      }}
+                    >
+                      更新证书
+                    </Button>
+                  }
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/license/base/export")) && <Button size='small' style={{ backgroundColor: "#4095E5" }} className='oper-name' type='link' icon={<DeliveredProcedureOutlined />}
+                      onClick={() => {
+                        let ids = new Array();
+                        ids.push(record.id);
+                        handleModal("open", ids);
+                      }}>
+                      导出
+                    </Button>
+                  }
                 </div>
               ),
             },
@@ -474,13 +484,15 @@ export default function () {
             <Form.Item wrapperCol={{ offset: 12, span: 16 }} className='submit_button'>
               <Space >
                 {( // 当不处于编辑状态时，显示编辑按钮
-                  <Button onClick={handleEdit}>
+                  (profile.roles?.includes("Admin") || permList.includes("/license/base/put")) && <Button onClick={handleEdit}>
                     编辑
                   </Button>
                 )}
-                <Button type="primary" htmlType="submit" disabled={!editing}>
-                  保存
-                </Button>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/license/base/save")) && <Button type="primary" htmlType="submit" disabled={!editing}>
+                    保存
+                  </Button>
+                }
               </Space>
             </Form.Item>
           </Form>}
@@ -498,7 +510,7 @@ export default function () {
             style: { display: 'none' },
           }}
           okText={"提交"}
-          
+
           onCancel={() => {
             setModalShow(false);
           }}
