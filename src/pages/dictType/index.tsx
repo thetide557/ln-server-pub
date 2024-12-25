@@ -1,17 +1,18 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Button, message, Modal, Table } from 'antd';
 import { PlusOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { getDictTypeList, getDictDataListByType, removeDictType, updateDictData,addDictType, updateDictType, exportDictType } from '@/services/system/dict';
+import { getDictTypeList, getDictDataListByType, removeDictType, updateDictData, addDictType, updateDictType, exportDictType } from '@/services/system/dict';
 import UpdateForm from './edit';
 import ItemForm from './item';
-
+import { CommonStateContext } from '@/App';
 import DictTag from '@/components/DictTag';
 import { ColumnType } from 'antd/lib/table';
 import PageLayout from '@/components/pageLayout';
 import usePagination from '@/components/usePagination';
 
 export default function () {
+  const { profile, permList } = useContext(CommonStateContext);
   /**
    * 添加节点
    *
@@ -92,24 +93,24 @@ export default function () {
     if (!selectedRows) return true;
     try {
       var index = 0;
-      selectedRows.map((row) =>{
+      selectedRows.map((row) => {
         index++;
-        removeDictType(""+row.id).then(res=>{
-          if(index===selectedRows.length){
+        removeDictType("" + row.id).then(res => {
+          if (index === selectedRows.length) {
             getTypeList()
-            message.success('删除成功');  
+            message.success('删除成功');
             hide();
           }
-        });    
-      }); 
-      setSelectedRows([]) 
-      
+        });
+      });
+      setSelectedRows([])
+
     } catch (error) {
       hide();
       message.error('删除失败，请重试');
       return false;
     }
-      
+
   };
 
   const handleRemoveOne = async (selectedRow: API.System.DictType) => {
@@ -150,7 +151,7 @@ export default function () {
       return false;
     }
   };
- 
+
 
   const columns: ColumnType<API.System.DictType>[] = [
     {
@@ -171,59 +172,68 @@ export default function () {
       title: "操作",
       dataIndex: 'option',
       width: '220px',
-      render: (_, record) => [
-        <Button
-          type="link"
-          size="small"
-          key={record.id+"edit"}
-          //   hidden={!access.hasPerms('system:dictType:edit')}
-          onClick={() => {
-            setModalVisible(true);
-            setCurrentRow(record);
-          }}
-        >
-          编辑
-        </Button>,
-          <Button
-          type="link"
-          size="small"
-          key="edit"
-          //   hidden={!access.hasPerms('system:dictType:edit')}
-          onClick={() => {
-               
-               getDictDataListByType(record.type_code).then((res) => {
+      render: (_, record) => (
+        <>
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/types/dictype/put")) && <Button
+              type="link"
+              size="small"
+              key={record.id + "edit"}
+              //   hidden={!access.hasPerms('system:dictType:edit')}
+              onClick={() => {
+                setModalVisible(true);
+                setCurrentRow(record);
+              }}
+            >
+              编辑
+            </Button>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/types/dictype/setData")) && <Button
+              type="link"
+              size="small"
+              key="edit"
+              //   hidden={!access.hasPerms('system:dictType:edit')}
+              onClick={() => {
+
+                getDictDataListByType(record.type_code).then((res) => {
                   setDictCode(record.type_code);
                   setSelectedItem(res.dat);
                   setItemVisible(true);
-              }) 
-          }}
-        >
-          设置数据项
-        </Button>,
-        <Button
-          type="link"
-          size="small"
-          danger
-          key="batchRemove"
-          //   hidden={!access.hasPerms('system:dictType:remove')}
-          onClick={async () => {
-            Modal.confirm({
-              title: '删除',
-              content: '确定删除该项吗？',
-              okText: '确认',
-              cancelText: '取消',
-              onOk: async () => {
-                const success = await removeDictType(""+record.id);
-                if (success) {
-                  getTypeList();
-                }
-              },
-            });
-          }}
-        >
-          删除
-        </Button>,
-      ],
+                })
+              }}
+            >
+              设置数据项
+            </Button>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/types/dictype/del")) && <Button
+              type="link"
+              size="small"
+              danger
+              key="batchRemove"
+              //   hidden={!access.hasPerms('system:dictType:remove')}
+              onClick={async () => {
+                Modal.confirm({
+                  title: '删除',
+                  content: '确定删除该项吗？',
+                  okText: '确认',
+                  cancelText: '取消',
+                  onOk: async () => {
+                    const success = await removeDictType("" + record.id);
+                    if (success) {
+                      getTypeList();
+                    }
+                  }
+                })
+              }}
+            >
+              删除
+            </Button>
+          }
+
+        </>
+      )
     },
   ];
 
@@ -242,7 +252,7 @@ export default function () {
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
 
   useEffect(() => {
-    
+
     getTypeList();
 
   }, []);
@@ -253,46 +263,50 @@ export default function () {
     });
   }
 
-  
+
 
   return (
     <PageLayout>
       <div>
-        <Button
-          type="primary"
-          key="add"
-          //   hidden={!access.hasPerms('system:dictType:add')}
-          onClick={async () => {
-            setCurrentRow(undefined);
-            setModalVisible(true);
-          }}
-          style={{ color: '#fff', backgroundColor: '#0A4B9D' }}
-        >
-          <PlusOutlined />新建
-        </Button>
-        <Button
-          type="primary"
-          key="remove"
-          style={{ color: '#fff', backgroundColor: '#0A4B9D' }}
-          hidden={selectedRows?.length === 0 }
-          onClick={async () => {
-            Modal.confirm({
-              title: '是否确认删除所选数据项?',
-              icon: <ExclamationCircleOutlined />,
-              content: '请谨慎操作',
-              async onOk() {
-                const success = await handleRemove(selectedRows);
-                if (success) {
+        {
+          (profile.roles?.includes("Admin") || permList.includes("/types/dictype/add")) && <Button
+            type="primary"
+            key="add"
+            //   hidden={!access.hasPerms('system:dictType:add')}
+            onClick={async () => {
+              setCurrentRow(undefined);
+              setModalVisible(true);
+            }}
+            style={{ color: '#fff', backgroundColor: '#0A4B9D' }}
+          >
+            <PlusOutlined />新建
+          </Button>
+        }
+        {
+          (profile.roles?.includes("Admin") || permList.includes("/types/dictype/del")) && <Button
+            type="primary"
+            key="remove"
+            style={{ color: '#fff', backgroundColor: '#0A4B9D', marginLeft: '10px' }}
+            hidden={selectedRows?.length === 0}
+            onClick={async () => {
+              Modal.confirm({
+                title: '是否确认删除所选数据项?',
+                icon: <ExclamationCircleOutlined />,
+                content: '请谨慎操作',
+                async onOk() {
+                  const success = await handleRemove(selectedRows);
+                  if (success) {
                     setSelectedRows([]);
-                }
-              },
-              onCancel() { },
-            });
-          }}
-        >
-          <DeleteOutlined />
-          删除
-        </Button>
+                  }
+                },
+                onCancel() { },
+              });
+            }}
+          >
+            <DeleteOutlined />
+            删除
+          </Button>
+        }
         <Table
           tableLayout='fixed'
           size='small'
@@ -333,17 +347,17 @@ export default function () {
           onSubmit={async (values) => {
             // debugger
             let success = false;
-             var items = new Array
-             values.users.forEach(element => {
-              var param ={
-                  "dict_key": element.dict_key,
-                  "type_code":dictCode,
-                  "dict_value": element.dict_value,
-                  "remark": element.remark
+            var items = new Array
+            values.users.forEach(element => {
+              var param = {
+                "dict_key": element.dict_key,
+                "type_code": dictCode,
+                "dict_value": element.dict_value,
+                "remark": element.remark
               };
               items.push(param);
-             });
-              success = await updateDictData(dictCode,items);          
+            });
+            success = await updateDictData(dictCode, items);
             if (success) {
               setItemVisible(false);
               setSelectedItem([]);

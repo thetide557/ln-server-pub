@@ -323,7 +323,7 @@ export default function () {
             />
           }
           {
-            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/monitor")) && <FundOutlined
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/chart")) && <FundOutlined
               title='监控图表'
               onClick={(e) => {
                 history.push(`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`);

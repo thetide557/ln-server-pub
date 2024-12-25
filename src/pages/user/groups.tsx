@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import moment from 'moment';
 import PageLayout from '@/components/pageLayout';
 import { Button, Table, Input, message, List, Row, Col, Modal, Space } from 'antd';
@@ -24,6 +24,7 @@ import { getTeamInfoList, getTeamInfo, deleteTeam, deleteMember } from '@/servic
 import { User, Team, UserType, ActionType, TeamInfo } from '@/store/manageInterface';
 import { ColumnsType } from 'antd/lib/table';
 import { useTranslation } from 'react-i18next';
+import { CommonStateContext } from '@/App';
 import './index.less';
 import './locale';
 
@@ -38,7 +39,7 @@ const Resource: React.FC = () => {
   const [memberId, setMemberId] = useState<string>('');
   const [memberList, setMemberList] = useState<User[]>([]);
   const [existUsers, setExistUsers] = useState<any[]>([]);
-  
+  const { profile, permList } = useContext(CommonStateContext);
   const [allMemberList, setAllMemberList] = useState<User[]>([]);
   const [teamInfo, setTeamInfo] = useState<Team>();
   const [teamList, setTeamList] = useState<Team[]>([]);
@@ -76,6 +77,7 @@ const Resource: React.FC = () => {
       title: t('common:table.operations'),
       width: '100px',
       render: (text: string, record) => (
+        (profile.roles?.includes("Admin") || permList.includes("/user-groups/delUser")) &&
         <DeleteOutlined
           style={{
             color: '#4095E5',
@@ -162,7 +164,7 @@ const Resource: React.FC = () => {
   };
 
   const handleClick = (type: ActionType, id?: string, memberId?: string) => {
-    console.log(type,id )
+    console.log(type, id)
     if (id) {
       setTeamId(id);
     } else {
@@ -209,17 +211,19 @@ const Resource: React.FC = () => {
           <div className='left-tree-area'>
             <div className='sub-title'>
               {t('team.list')}
-              <PlusSquareOutlined style={{
-                height: '30px',
-                lineHeight: '35px',
-                color: '#4095E5',
-              }}
-                type='link'
-                onClick={() => {
-                  handleClick(ActionType.CreateTeam);
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/user-groups/add")) && <PlusSquareOutlined style={{
+                  height: '30px',
+                  lineHeight: '35px',
+                  color: '#4095E5',
                 }}
-              >
-              </PlusSquareOutlined>
+                  type='link'
+                  onClick={() => {
+                    handleClick(ActionType.CreateTeam);
+                  }}
+                >
+                </PlusSquareOutlined>
+              }
             </div>
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
@@ -268,31 +272,35 @@ const Resource: React.FC = () => {
                   }}
                 >
                   {teamInfo && teamInfo.name}
-                  <EditOutlined
-                    style={{
-                      marginLeft: '8px',
-                      fontSize: '14px',
-                    }}
-                    onClick={() => handleClick(ActionType.EditTeam, teamId)}
-                  ></EditOutlined>
-                  <DeleteOutlined
-                    style={{
-                      marginLeft: '8px',
-                      fontSize: '14px',
-                    }}
-                    onClick={() => {
-                      confirm({
-                        title: t('common:confirm.delete'),
-                        onOk: () => {
-                          deleteTeam(teamId).then((_) => {
-                            message.success(t('common:success.delete'));
-                            handleClose(true);
-                          });
-                        },
-                        onCancel: () => { },
-                      });
-                    }}
-                  />
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/user-groups/put")) && <EditOutlined
+                      style={{
+                        marginLeft: '8px',
+                        fontSize: '14px',
+                      }}
+                      onClick={() => handleClick(ActionType.EditTeam, teamId)}
+                    ></EditOutlined>
+                  }
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/user-groups/del")) && <DeleteOutlined
+                      style={{
+                        marginLeft: '8px',
+                        fontSize: '14px',
+                      }}
+                      onClick={() => {
+                        confirm({
+                          title: t('common:confirm.delete'),
+                          onOk: () => {
+                            deleteTeam(teamId).then((_) => {
+                              message.success(t('common:success.delete'));
+                              handleClose(true);
+                            });
+                          },
+                          onCancel: () => { },
+                        });
+                      }}
+                    />
+                  }
                 </Col>
                 <Col
                   style={{
@@ -319,7 +327,7 @@ const Resource: React.FC = () => {
                     suffix={<SearchOutlined />}
                     value={searchMemberValue}
                     className={'searchInput'}
-                    onChange={(e) =>{
+                    onChange={(e) => {
                       setSearchMemberValue(e.target.value);
                       handleSearch('member', e.target.value)
                     }}
@@ -327,31 +335,33 @@ const Resource: React.FC = () => {
                     onPressEnter={(e) => handleSearch('member', searchMemberValue)}
                   />
                 </Col>
-                <Button
-                  type='primary'
-                  onClick={() => {
-                    let userIds = Array.from(new Set(memberList.map((obj) => obj.id)));
-                    setExistUsers(userIds);
-                    handleClick(ActionType.AddUser, teamId);
-                  }}
-                >
-                  {'添加成员'}
-                </Button>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/user-groups/addUser")) && <Button
+                    type='primary'
+                    onClick={() => {
+                      let userIds = Array.from(new Set(memberList.map((obj) => obj.id)));
+                      setExistUsers(userIds);
+                      handleClick(ActionType.AddUser, teamId);
+                    }}
+                  >
+                    {'添加成员'}
+                  </Button>
+                }
               </Row>
 
               <Table size='small'
                 rowKey='id'
                 columns={teamMemberColumns}
-                dataSource={memberList} 
+                dataSource={memberList}
                 pagination={{
                   showSizeChanger: true,
                   showQuickJumper: true,
                   showTotal: (total) => `总共 ${total} 条`,
-                  pageSizeOptions: [5,10, 20, 50, 100],
+                  pageSizeOptions: [5, 10, 20, 50, 100],
                 }}
-                loading={memberLoading} 
-                // rowSelection={rowSelection}
-                />
+                loading={memberLoading}
+              // rowSelection={rowSelection}
+              />
             </div>
           ) : (
             <div className='blank-busi-holder'>
@@ -375,7 +385,7 @@ const Resource: React.FC = () => {
             // setSearchValue(val);
             // handleSearch('team', val);
           }}
-          existUserIds ={existUsers}
+          existUserIds={existUsers}
           userId={undefined}
           teamId={teamId}
           memberId={memberId}

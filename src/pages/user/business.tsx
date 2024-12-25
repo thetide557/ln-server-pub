@@ -37,7 +37,7 @@ const { confirm } = Modal;
 export const PAGE_SIZE = 200;
 
 const Resource: React.FC = () => {
-  const { setBusiGroups, setCurBusiId } = useContext(CommonStateContext);
+  const { profile, permList, setBusiGroups, setCurBusiId } = useContext(CommonStateContext);
   const { t } = useTranslation('user');
   const urlQuery = useQuery();
   const id = urlQuery.get('id');
@@ -70,52 +70,53 @@ const Resource: React.FC = () => {
       ellipsis: true,
       render: (text: string, record) => record['user_group'].note || '-',
     },
-    
+
     {
       title: t('common:table.operations'),
       width: '100px',
       render: (text: string, record) => (
         <>
-          <EditOutlined 
-                    style={{
-                      color: '#4095E5',
-                      marginLeft: '8px',
-                      fontSize: '16px',
-                    }} 
-                    title="编辑所属业务组名称"
-                    onClick={() => handleClick(ActionType.EditBusiness)}
-                  ></EditOutlined>
-          <DeleteOutlined 
-                    style={{
-                      color: '#4095E5',
-                      marginLeft: '8px',
-                      fontSize: '16px',
-                    }}
-                    title="删除团队"
-                    onClick={() => {
-                      if (memberList.length <= 1) return message.warning('业务组中至少保留一个团队');
-        
-                      let params = [
-                        {
-                          user_group_id: record['user_group'].id,
-                          busi_group_id: teamId,
-                        },
-                      ];
-                      confirm({
-                        title: t('common:confirm.delete'),
-                        onOk: () => {
-                          deleteBusinessTeamMember(teamId, params).then((_) => {
-                            message.success(t('common:success.delete'));
-                            handleClose('deleteMember');
-                          });
-                        },
-                        onCancel: () => {},
-                      });
-                    }}
-                  />
-        
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/busi-groups/put")) && <EditOutlined
+              style={{
+                color: '#4095E5',
+                marginLeft: '8px',
+                fontSize: '16px',
+              }}
+              title="编辑所属业务组名称"
+              onClick={() => handleClick(ActionType.EditBusiness)}
+            ></EditOutlined>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/busi-groups/delGroup")) && <DeleteOutlined
+              style={{
+                color: '#4095E5',
+                marginLeft: '8px',
+                fontSize: '16px',
+              }}
+              title="删除团队"
+              onClick={() => {
+                if (memberList.length <= 1) return message.warning('业务组中至少保留一个团队');
+                let params = [
+                  {
+                    user_group_id: record['user_group'].id,
+                    busi_group_id: teamId,
+                  },
+                ];
+                confirm({
+                  title: t('common:confirm.delete'),
+                  onOk: () => {
+                    deleteBusinessTeamMember(teamId, params).then((_) => {
+                      message.success(t('common:success.delete'));
+                      handleClose('deleteMember');
+                    });
+                  },
+                  onCancel: () => { },
+                });
+              }}
+            />
+          }
         </>
-        
       ),
     },
   ];
@@ -188,16 +189,18 @@ const Resource: React.FC = () => {
           <div className='left-tree-area'>
             <div className='sub-title'>
               {t('business.list')}
-              <PlusSquareOutlined  style={{
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/busi-groups/add")) && <PlusSquareOutlined style={{
                   height: '30px',
-                  lineHeight:'35px',
+                  lineHeight: '35px',
                   color: '#4095E5',
                 }}
-                //size='small'
-                type='link'
-                onClick={() => {
-                  handleClick(ActionType.CreateBusiness);
-                }}/>
+                  //size='small'
+                  type='link'
+                  onClick={() => {
+                    handleClick(ActionType.CreateBusiness);
+                  }} />
+              }
             </div>
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
@@ -296,31 +299,35 @@ const Resource: React.FC = () => {
                   }}
                 >
                   {teamInfo && teamInfo.name}
-                  <EditOutlined
-                    style={{
-                      marginLeft: '8px',
-                      fontSize: '14px',
-                    }}
-                    onClick={() => handleClick(ActionType.EditBusiness)}
-                  ></EditOutlined>
-                  <DeleteOutlined
-                    style={{
-                      marginLeft: '8px',
-                      fontSize: '14px',
-                    }}
-                    onClick={() => {
-                      confirm({
-                        title: t('common:confirm.delete'),
-                        onOk: () => {
-                          deleteBusinessTeam(teamId).then((_) => {
-                            message.success(t('common:success.delete'));
-                            handleClose('delete');
-                          });
-                        },
-                        onCancel: () => {},
-                      });
-                    }}
-                  />
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/busi-groups/put")) && <EditOutlined
+                      style={{
+                        marginLeft: '8px',
+                        fontSize: '14px',
+                      }}
+                      onClick={() => handleClick(ActionType.EditBusiness)}
+                    ></EditOutlined>
+                  }
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/busi-groups/del")) && <DeleteOutlined
+                      style={{
+                        marginLeft: '8px',
+                        fontSize: '14px',
+                      }}
+                      onClick={() => {
+                        confirm({
+                          title: t('common:confirm.delete'),
+                          onOk: () => {
+                            deleteBusinessTeam(teamId).then((_) => {
+                              message.success(t('common:success.delete'));
+                              handleClose('delete');
+                            });
+                          },
+                          onCancel: () => { },
+                        });
+                      }}
+                    />
+                  }
                 </Col>
                 <Col
                   style={{
@@ -354,15 +361,17 @@ const Resource: React.FC = () => {
                 </Col>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <Col>
-                  <Button
-                    type='primary'
-                    style={{ marginLeft:'10px',marginRight:'20px'}}
-                    onClick={() => {
-                      handleClick(ActionType.AddBusinessMember);
-                    }}
-                  >
-                    {t('business.add_team')}
-                  </Button>
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/busi-groups/addGroup")) && <Button
+                      type='primary'
+                      style={{ marginLeft: '10px', marginRight: '20px' }}
+                      onClick={() => {
+                        handleClick(ActionType.AddBusinessMember);
+                      }}
+                    >
+                      {t('business.add_team')}
+                    </Button>
+                  }
                   {/* <Select defaultValue={"批量操作"}
                   style={{ width: '125px',marginLeft:'3px'}}
                   onChange={handleChange}
@@ -371,7 +380,7 @@ const Resource: React.FC = () => {
                   ]}
                   ></Select> */}
                 </Col>
-                               
+
               </Row>
 
               <Table

@@ -59,7 +59,7 @@ const Resource: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   const [status, setStatus] = useState<number>();
   const [role, setRole] = useState<string>();
-  const { profile } = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'users' });
   const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
   const [groupMap, setGroupMap] = useState({});
@@ -131,10 +131,10 @@ const Resource: React.FC = () => {
       setTreeData(treeData.slice());
 
       dat.forEach((item, index) => {
-        groupMap[item.id] = item.name;  
-        setGroupMap({...groupMap})      
+        groupMap[item.id] = item.name;
+        setGroupMap({ ...groupMap })
       });
-      
+
       let arr = ["0"];
       dat.map((item, index) => {
         arr.push(item.id);
@@ -192,7 +192,7 @@ const Resource: React.FC = () => {
       dataIndex: 'group_name',
       render: (val, record) => {
         let names = new Array();
-        for(var i=0;i<val.length;i++){
+        for (var i = 0; i < val.length; i++) {
           names.push(groupMap[val[i]]);
         }
         return names ? names.join(",") : ''//renderDataMap["organ_"+val];
@@ -234,55 +234,65 @@ const Resource: React.FC = () => {
       align: 'center',
       render: (text: string, record) => (
         <>
-          <PoweroffOutlined className='oper-name'
-            title={record.status === 1 ? ('已启用') : ('已禁用')}
-            style={{ color: record.status === 1 ? ('green') : ('gray') }}
-            onClick={e => {
-              if ("" + record.id == "1") {
-                message.error("默认超管账号，禁止在此操作！");
-              } else {
-                Modal.confirm({
-                  title: "确认要" + (record.status === 1 ? '禁用' : '启用') + "所选用户使用？",
-                  onOk: async () => {
-                    updateProperty("status", (record.status === 1 ? 0 : 1), [record.id]).then((res) => {
-                      message.success('修改成功');
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/status")) && <PoweroffOutlined className='oper-name'
+              title={record.status === 1 ? ('已启用') : ('已禁用')}
+              style={{ color: record.status === 1 ? ('green') : ('gray') }}
+              onClick={e => {
+                if ("" + record.id == "1") {
+                  message.error("默认超管账号，禁止在此操作！");
+                } else {
+                  Modal.confirm({
+                    title: "确认要" + (record.status === 1 ? '禁用' : '启用') + "所选用户使用？",
+                    onOk: async () => {
+                      updateProperty("status", (record.status === 1 ? 0 : 1), [record.id]).then((res) => {
+                        message.success('修改成功');
+                        setRefreshFlag(_.uniqueId('refreshFlag_'));
+                      });
+                    },
+                    onCancel() { },
+                  });
+                }
+
+              }} />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/put")) && <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
+            </EditOutlined>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/resetPassword")) && <UndoOutlined title='重置密码' className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
+              {t('account:password.reset')}
+            </UndoOutlined>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/del")) && <a className='oper-name'
+              onClick={() => {
+                if ("" + record.id == "1") {
+                  message.error("默认超管账号，禁止在此操作！");
+                  return
+                }
+                confirm({
+                  title: t('common:confirm.delete'),
+                  okText: '确定',
+                  cancelText: "取消",
+                  onOk: () => {
+                    deleteUser(record.id).then((_) => {
+                      message.success(t('common:success.delete'));
+                      handleClose(true);
                       setRefreshFlag(_.uniqueId('refreshFlag_'));
                     });
                   },
-                  onCancel() { },
+                  onCancel: () => { },
                 });
-              }
+              }}
+            >
+              <DeleteOutlined className='table-operator-area-warning' title='删除' />
+            </a>
+          }
 
-            }} />
-          <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
 
-          </EditOutlined>
-          <UndoOutlined title='重置密码' className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
-            {t('account:password.reset')}
-          </UndoOutlined>
-          <a className='oper-name'
-            onClick={() => {
-              if ("" + record.id == "1") {
-                message.error("默认超管账号，禁止在此操作！");
-                return
-              }
-              confirm({
-                title: t('common:confirm.delete'),
-                okText:'确定',
-                cancelText: "取消",
-                onOk: () => {
-                  deleteUser(record.id).then((_) => {
-                    message.success(t('common:success.delete'));
-                    handleClose(true);
-                    setRefreshFlag(_.uniqueId('refreshFlag_'));
-                  });
-                },
-                onCancel: () => { },
-              });
-            }}
-          >
-            <DeleteOutlined className='table-operator-area-warning' title='删除' />
-          </a>
+
         </>
       ),
     },
@@ -441,7 +451,7 @@ const Resource: React.FC = () => {
       console.log("status", status)
     }
 
-    return getUserInfoList(params).then((res) => {      
+    return getUserInfoList(params).then((res) => {
       return {
         total: res.dat.total,
         list: res.dat.list,
@@ -450,7 +460,7 @@ const Resource: React.FC = () => {
   };
   const { tableProps } = useAntdTable(getTableData, {
     defaultPageSize: pagination.pageSize,
-    refreshDeps: [query, refreshFlag,groupMap],
+    refreshDeps: [query, refreshFlag, groupMap],
   });
 
   const onSelectNone = () => {
@@ -483,12 +493,14 @@ const Resource: React.FC = () => {
         <div style={{ width: '245px', display: 'list-item' }}>
           <div className='sub-title'>
             团队列表
-            <PlusSquareOutlined
-              className='user_add_group_button'
-              onClick={() => {
-                handleClick(ActionType.CreateTeam, 0, "team");
-              }}
-            />
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/users/addGroup")) && <PlusSquareOutlined
+                className='user_add_group_button'
+                onClick={() => {
+                  handleClick(ActionType.CreateTeam, 0, "team");
+                }}
+              />
+            }
           </div>
           <Tree
             onSelect={(keys, e) => {
@@ -529,34 +541,38 @@ const Resource: React.FC = () => {
                   }}
                 >
                   {teamInfo && teamInfo.name}
-                  <EditOutlined
-                    style={{
-                      marginLeft: '8px',
-                      fontSize: '14px',
-                    }}
-                    onClick={() => handleClick(ActionType.EditTeam, teamId, "team")}
-                  ></EditOutlined>
-                  <DeleteOutlined
-                    style={{
-                      marginLeft: '8px',
-                      fontSize: '14px',
-                    }}
-                    onClick={() => {
-                      confirm({
-                        title: t('common:confirm.delete'),
-                        onOk: () => {
-                          deleteTeam("" + teamId).then((_) => {
-                            message.success(t('common:success.delete'));
-                            // handleClose(true);
-                            loadingTree();
-                            setTeamId(0)
-                            setTeamInfo(undefined)
-                          });
-                        },
-                        onCancel: () => { },
-                      });
-                    }}
-                  />
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/user-groups/put")) && <EditOutlined
+                      style={{
+                        marginLeft: '8px',
+                        fontSize: '14px',
+                      }}
+                      onClick={() => handleClick(ActionType.EditTeam, teamId, "team")}
+                    ></EditOutlined>
+                  }
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/user-groups/del")) && <DeleteOutlined
+                      style={{
+                        marginLeft: '8px',
+                        fontSize: '14px',
+                      }}
+                      onClick={() => {
+                        confirm({
+                          title: t('common:confirm.delete'),
+                          onOk: () => {
+                            deleteTeam("" + teamId).then((_) => {
+                              message.success(t('common:success.delete'));
+                              // handleClose(true);
+                              loadingTree();
+                              setTeamId(0)
+                              setTeamInfo(undefined)
+                            });
+                          },
+                          onCancel: () => { },
+                        });
+                      }}
+                    />
+                  }
                 </Col>
                 <Col
                   style={{
@@ -581,54 +597,56 @@ const Resource: React.FC = () => {
             )}
             <div className='layer_2'>
               <Space>
-              <div className='event-table-search-left'>
+                <div className='event-table-search-left'>
 
-                <Select
-                  placeholder="选择过滤器"
-                  style={{ width: 300 }}
-                  allowClear
-                  onChange={(value) => {
-                    queryFilter.forEach((item) => {
-                      if (item.name == value) {
-                        setFilterType(item.type);
-                        setFilterName(item.name);
+                  <Select
+                    placeholder="选择过滤器"
+                    style={{ width: 300 }}
+                    allowClear
+                    onChange={(value) => {
+                      queryFilter.forEach((item) => {
+                        if (item.name == value) {
+                          setFilterType(item.type);
+                          setFilterName(item.name);
 
-                      }
-                    })
-                    setFilterParam(value);
-                    setSearchVal(null)
-                  }}>
-                  {queryFilter.map((item, index) => (
-                    <option value={item.name} key={index}>{item.label}</option>
-                  ))
-                  }
-                </Select>
-              </div>
+                        }
+                      })
+                      setFilterParam(value);
+                      setSearchVal(null)
+                    }}>
+                    {queryFilter.map((item, index) => (
+                      <option value={item.name} key={index}>{item.label}</option>
+                    ))
+                    }
+                  </Select>
+                </div>
 
-              {filterType == "input" && (
-                <Input
-                  className={'searchInput'}
-                  value={searchVal}
-                  allowClear
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  suffix={<SearchOutlined />}
-                  placeholder={'输入模糊检索关键字'}
-                />
-              )}
-              {filterType == "select" && (
-                <Select
-                  className={'searchInput'}
-                  value={searchVal}
-                  allowClear
-                  options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
-                  onChange={(val) => setSearchVal(val)}
-                  placeholder={'选择要查询的条件'}
-                />
-              )}
+                {filterType == "input" && (
+                  <Input
+                    className={'searchInput'}
+                    value={searchVal}
+                    allowClear
+                    onChange={(e) => setSearchVal(e.target.value)}
+                    suffix={<SearchOutlined />}
+                    placeholder={'输入模糊检索关键字'}
+                  />
+                )}
+                {filterType == "select" && (
+                  <Select
+                    className={'searchInput'}
+                    value={searchVal}
+                    allowClear
+                    options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
+                    onChange={(val) => setSearchVal(val)}
+                    placeholder={'选择要查询的条件'}
+                  />
+                )}
               </Space>
               <div className='event-table-search-right'>
-                <Button className='btn' type="primary" onClick={() => { handleOperateClick("add") }}>新增
-                </Button>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/users/add")) && <Button className='btn' type="primary" onClick={() => { handleOperateClick("add") }}>新增
+                  </Button>
+                }
                 {profile.roles?.includes('Admin') && (
                   <div className='user-manage-operate-list'>
                     <Dropdown

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Row, Col, Button } from 'antd';
 import { Link } from 'react-router-dom';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
+import { CommonStateContext } from '@/App';
 import './index.less';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 export default function SourceCard(props: Props) {
   const { t } = useTranslation('datasourceManage');
   const { sourceMap, urlPrefix = 'settings' } = props;
+  const { profile, permList } = useContext(CommonStateContext);
+
   return (
     <Row className='settings-datasource' gutter={[16, 16]}>
       {_.map(sourceMap, (item) => {
@@ -27,9 +30,11 @@ export default function SourceCard(props: Props) {
                   </div>
                 </div>
                 <div>
-                  <Button size='small' type='primary' ghost style={{ borderRadius: 4 }}>
-                    {t('type_btn_add')}
-                  </Button>
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/help/source/add")) && <Button size='small' type='primary' ghost style={{ borderRadius: 4 }}>
+                      {t('type_btn_add')}
+                    </Button>
+                  }
                 </div>
               </div>
             </Link>

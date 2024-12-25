@@ -30,6 +30,7 @@ interface DataType {
 export default function () {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const [treeData, setTreeData] = useState<any[]>();
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const history = useHistory();
@@ -43,17 +44,17 @@ export default function () {
   const { Option } = Select;
   const [refreshing, setRefreshing] = useState(false);
 
-  
+
   const handleRefresh = () => {
     setRefreshing(true);
     // 添加数据刷新逻辑
-  
+
     setTimeout(() => {
       // 添加数据刷新逻辑...
       setRefreshing(false);
     }, 500); // 模拟延迟
   };
-   
+
 
   const loadingTree = () => {
     getOrganizationTree({}).then(({ dat }) => {
@@ -148,7 +149,7 @@ export default function () {
       <div className='assets-list' style={{ height: '30px', lineHeight: '39px' }}>
         <Row className='event-table-search'>
           <div className='event-table-search-left' style={{ marginLeft: '10px' }}>
-           
+
             <Input
               placeholder="资产名称、资产类型、IP地址"
               style={{ width: "360px", marginRight: "20px" }}
@@ -166,9 +167,11 @@ export default function () {
 
 
           <div className='user-manage-operate' style={{ textAlign: 'right' }}>
-            <Button type='primary' onClick={handleRefresh} icon={<SyncOutlined spin={refreshing} />} style={{ position:'absolute',right:0, marginLeft: 'auto' }}>
-            同步License
-            </Button>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/license/device/run")) && <Button type='primary' onClick={handleRefresh} icon={<SyncOutlined spin={refreshing} />} style={{ position: 'absolute', right: 0, marginLeft: 'auto' }}>
+                同步License
+              </Button>
+            }
           </div>
         </Row>
 

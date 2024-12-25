@@ -4,7 +4,7 @@ import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { GroupOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
-import { CommonStateContext,initTheme } from '@/App';
+import { CommonStateContext, initTheme } from '@/App';
 import './style.less';
 import _, { now, random, uniqueId } from 'lodash';
 import type { UploadChangeParam } from 'antd/es/upload';
@@ -26,8 +26,9 @@ export default function () {
   const { t } = useTranslation('assets');
   let imageURL = "/api/n9e/"
   const commonState = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
-  const [previewOpen, setPreviewOpen] = useState(false);  
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [theme, setTheme] = useLocalStorage("platform_theme", initTheme);
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
@@ -56,41 +57,41 @@ export default function () {
   const [titleLogoImageUrl, setTitleLogoImageUrl] = useState<string | undefined>();
 
 
-  const resetLogoSet=() =>{
-      let values ={
-        "login_title":initTheme.title,
-        "logo_top":initTheme.logo,
-        "logo_title":initTheme.icon,        
-      }
-      saveLog(values).then(res => {
-        // message.success('表单成功提交');
-        getLogInfo().then(({ dat }) => {
-          setTheme({
-            title: dat.login_title,
-            icon: dat.logo_title,
-            logo: dat.logo_top,
-          });
-          form.setFieldsValue(dat)
-          if (dat.logo_top != null && dat.logo_top.length > 0) {
-            setTitleLogoImageUrl(dat.logo_title);
-          }
-          if (dat.logo_title != null && dat.logo_title.length > 0) {
-            setTopLogoImageUrl(dat.logo_top);
-          }
-          confirm({
-            title: '系统提醒',
-            content: '设置信息已提交，确定立即生效？',
-            onOk() {
-              window.location.reload();
-            },
-            onCancel() {
-              console.log('Cancel')
-            },
-          })
+  const resetLogoSet = () => {
+    let values = {
+      "login_title": initTheme.title,
+      "logo_top": initTheme.logo,
+      "logo_title": initTheme.icon,
+    }
+    saveLog(values).then(res => {
+      // message.success('表单成功提交');
+      getLogInfo().then(({ dat }) => {
+        setTheme({
+          title: dat.login_title,
+          icon: dat.logo_title,
+          logo: dat.logo_top,
+        });
+        form.setFieldsValue(dat)
+        if (dat.logo_top != null && dat.logo_top.length > 0) {
+          setTitleLogoImageUrl(dat.logo_title);
+        }
+        if (dat.logo_title != null && dat.logo_title.length > 0) {
+          setTopLogoImageUrl(dat.logo_top);
+        }
+        confirm({
+          title: '系统提醒',
+          content: '设置信息已提交，确定立即生效？',
+          onOk() {
+            window.location.reload();
+          },
+          onCancel() {
+            console.log('Cancel')
+          },
         })
+      })
 
-  })
-}
+    })
+  }
 
   const onFinish = async (values: any) => {
     try {
@@ -151,15 +152,15 @@ export default function () {
       getBase64(file as RcFile, (url) => {
         setLoading(false);
         if (logoName === "logo_top") {
-          setTopLogoImageUrl(imageURL+ info.file.response.dat + "?" + Math.random());
+          setTopLogoImageUrl(imageURL + info.file.response.dat + "?" + Math.random());
           form.setFieldsValue({
-            logo_top: imageURL+info.file.response.dat,
+            logo_top: imageURL + info.file.response.dat,
           });
         }
         if (logoName === "logo_title") {
-          setTitleLogoImageUrl(imageURL+ info.file.response.dat + "?" + Math.random());
+          setTitleLogoImageUrl(imageURL + info.file.response.dat + "?" + Math.random());
           form.setFieldsValue({
-            logo_title: imageURL+info.file.response.dat,
+            logo_title: imageURL + info.file.response.dat,
           });
         }
       });
@@ -268,13 +269,16 @@ export default function () {
 
           <Form.Item wrapperCol={{ offset: 12, span: 16 }} className='submit_button'>
             <Space >
-
-              <Button type="primary" htmlType="submit">
-                保存
-              </Button>
-              <Button onClick={resetLogoSet} >
-                还原
-              </Button>
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/system/logo/save")) && <Button type="primary" htmlType="submit">
+                  保存
+                </Button>
+              }
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/system/logo/reset")) && <Button onClick={resetLogoSet} >
+                  还原
+                </Button>
+              }
             </Space>
           </Form.Item>
         </Form>

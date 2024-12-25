@@ -25,6 +25,7 @@ import { useLocalStorage } from 'react-use';
 export default function () {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const [refreshFlag, setRefreshFlag] = useState<string>("");
   const [query, setQuery] = useState({})
   const [filterType, setFilterType] = useState<string>("");
@@ -38,7 +39,7 @@ export default function () {
   const [collapse, setCollapse] = useState(localStorage.getItem('left_log_list') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
   const [modifySelectLog, setModifySelectLog] = useState<boolean>(true);
-  const [selectLog, setSelectLog] =   useLocalStorage<any>('left_logs_type', '0'); 
+  const [selectLog, setSelectLog] = useLocalStorage<any>('left_logs_type', '0');
   const [current, setCurrent] = useLocalStorage("log_current", 1);
   // const [pageSize, setPageSize] = useLocalStorage("log_current_page",10);
   // 列处理
@@ -82,20 +83,21 @@ export default function () {
       title: '文件大小',
       dataIndex: 'size',
     },
-   
+
     {
       title: '操作',
       width: '180px',
       align: 'center',
       render: (val, record: any) => {
         return (
-          <Button onClick={() => {
+          (profile.roles?.includes("Admin") || permList.includes("/log/syslog/export")) && <Button onClick={() => {
             let ids = new Array();
             ids.push(record.name);
-            handleModal("open", ids,record.log_type);
+            handleModal("open", ids, record.log_type);
           }}>
             导出
           </Button>
+
         );
       }
     },
@@ -134,7 +136,7 @@ export default function () {
     });
     setRefreshFlag(_.uniqueId('refresh_'));
   };
-  const handleModal = (action: string, rowKeys: any[] | null,selectLog) => {
+  const handleModal = (action: string, rowKeys: any[] | null, selectLog) => {
     if (action == "open") {
       let url = "/api/n9e/xh/sys-log/export-xls";
       let exportTitle = "系统";
@@ -142,7 +144,7 @@ export default function () {
       if (selectLog != null && selectLog != '0') {
         params['list'] = selectLog;
       }
-      exportTempletZip(url, params,(rowKeys != null && rowKeys.length > 0) ? { names: rowKeys } : null).then((res) => {
+      exportTempletZip(url, params, (rowKeys != null && rowKeys.length > 0) ? { names: rowKeys } : null).then((res) => {
         let blob = new Blob([res], {
           // 下载的文件类型(此处可更改：具体取值参考以下链接地址)
           type: 'application/zip',
@@ -187,9 +189,9 @@ export default function () {
     }).then((res) => {
       return {
         total: res.dat.total,
-        list: res.dat.list.map((v,index) => {
-           v["log_type"]= selectLog;
-           return v
+        list: res.dat.list.map((v, index) => {
+          v["log_type"] = selectLog;
+          return v
         }),
       };
     });
@@ -388,25 +390,23 @@ export default function () {
                   />
                 </Col>
 
-
-                <Button className='btn' type="primary" style={{ right: '0', position: 'absolute', marginRight: '16px' }}
-                  onClick={() => {
-                    if (selectRowKeys.length <= 0) {
-                      Modal.confirm({
-                        title: "确认导出所有日志信息吗",
-                        onOk: async () => {
-                          handleModal("open", null,selectLog);
-                        },
-                        onCancel() { },
-                      });
-                    } else {
-                      handleModal("open", selectRowKeys,selectLog);
-                    }
-
-
-                  }}>批量导出
-                </Button>
-
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/log/syslog/exportAll")) && <Button className='btn' type="primary" style={{ right: '0', position: 'absolute', marginRight: '16px' }}
+                    onClick={() => {
+                      if (selectRowKeys.length <= 0) {
+                        Modal.confirm({
+                          title: "确认导出所有日志信息吗",
+                          onOk: async () => {
+                            handleModal("open", null, selectLog);
+                          },
+                          onCancel() { },
+                        });
+                      } else {
+                        handleModal("open", selectRowKeys, selectLog);
+                      }
+                    }}>批量导出
+                  </Button>
+                }
               </Row>
             </Form>
           </div>

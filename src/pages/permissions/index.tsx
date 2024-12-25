@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { Button, List, Input, Modal, Space } from 'antd';
@@ -6,6 +6,7 @@ import { SafetyCertificateOutlined, SearchOutlined, EditOutlined, DeleteOutlined
 import PageLayout from '@/components/pageLayout';
 import { RoleType, OperationType } from './types';
 import { getRoles, deleteRoles, getOperations } from './services';
+import { CommonStateContext } from '@/App';
 import RoleFormModal from './RoleFormModal';
 import Operations from './Operations';
 import './locale';
@@ -18,6 +19,7 @@ export default function index() {
   const [activeRole, setActiveRole] = useState<RoleType>();
   const [roleSearchValue, setRoleSearchValue] = useState<string>('');
   const [operations, setOperations] = useState<OperationType[]>([]);
+  const { profile, permList } = useContext(CommonStateContext);
 
   const fetchRoles = () => {
     getRoles().then((res) => {
@@ -42,23 +44,25 @@ export default function index() {
           <div className='left-tree-area'>
             <div className='sub-title'>
               {t('roles')}
-              <Button
-                style={{
-                  height: '30px',
-                }}
-                size='small'
-                type='link'
-                onClick={() => {
-                  RoleFormModal({
-                    action: 'post',
-                    onOk: () => {
-                      fetchRoles();
-                    },
-                  });
-                }}
-              >
-                {t('role_add')}
-              </Button>
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/permissions/add")) && <Button
+                  style={{
+                    height: '30px',
+                  }}
+                  size='small'
+                  type='link'
+                  onClick={() => {
+                    RoleFormModal({
+                      action: 'post',
+                      onOk: () => {
+                        fetchRoles();
+                      },
+                    });
+                  }}
+                >
+                  {t('role_add')}
+                </Button>
+              }
             </div>
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
@@ -100,36 +104,41 @@ export default function index() {
                 <span>{activeRole?.name}</span>
                 {activeRole?.name !== 'Admin' && (
                   <>
-                    <EditOutlined
-                      onClick={() => {
-                        RoleFormModal({
-                          action: 'put',
-                          initialValues: activeRole,
-                          onOk: (values) => {
-                            fetchRoles();
-                            setActiveRole(values);
-                          },
-                        });
-                      }}
-                    />
-                    <DeleteOutlined
-                      disabled={activeRole?.name === 'Admin'}
-                      onClick={() => {
-                        confirm({
-                          title: t('common:confirm.delete'),
-                          okText: '确认',
-                          cancelText: '取消',
-                          onOk() {
-                            if (activeRole?.id) {
-                              deleteRoles(activeRole?.id).then(() => {
-                                fetchRoles();
-                                setActiveRole(roleList[0]);
-                              });
-                            }
-                          },
-                        });
-                      }}
-                    />
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/permissions/put")) && <EditOutlined
+                        onClick={() => {
+                          RoleFormModal({
+                            action: 'put',
+                            initialValues: activeRole,
+                            onOk: (values) => {
+                              fetchRoles();
+                              setActiveRole(values);
+                            },
+                          });
+                        }}
+                      />
+                    }
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/permissions/del")) && <DeleteOutlined
+                        disabled={activeRole?.name === 'Admin'}
+                        onClick={() => {
+                          confirm({
+                            title: t('common:confirm.delete'),
+                            okText: '确认',
+                            cancelText: '取消',
+                            onOk() {
+                              if (activeRole?.id) {
+                                deleteRoles(activeRole?.id).then(() => {
+                                  fetchRoles();
+                                  setActiveRole(roleList[0]);
+                                });
+                              }
+                            },
+                          });
+                        }}
+                      />
+                    }
+
                   </>
                 )}
               </Space>
@@ -137,7 +146,7 @@ export default function index() {
                 {t('common:table.note')}：{activeRole?.note || '-'}
               </div>
             </div>
-            <Operations data={operations} roleId={activeRole?.id} disabled={activeRole?.name === 'Admin'} />
+            <Operations data={operations} roleId={activeRole?.id} disabled={activeRole?.name === 'Admin'} profile={profile} permList={permList} />
           </div>
         </div>
       </div>
