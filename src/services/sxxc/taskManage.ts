@@ -75,3 +75,11 @@ export function getStrategyList(params) {
         params,
     });
 }
+
+// 执行任务弹窗资产列表
+export function getBizScriptAssets(params) {
+    return request(`/sxxcTask/biz/script/assets`, {
+        method: RequestMethod.Get,
+        params,
+    });
+}

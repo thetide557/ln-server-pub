@@ -122,8 +122,11 @@ const Resource: React.FC = () => {
                           strategyName: record.strategyName,
                           taskTypeName: record.taskType,
                           taskSubName: record.taskSubType,
-                          projectName: record.projectName
+                          projectName: record.projectName,
+                          projectNames:[record.projectName] ,
+                          
                         }
+                        // 执行任务run接口增加 projectNames参数，项目名称数组
                         runTask(params).then((res1) => {
                           if (res1.code == 200) {
                             message.success('执行成功');

@@ -48,6 +48,8 @@ export interface Serve {
   id: string;
   ident: string;
   remote_addr: string;
+  ip:string;
+  groupId:number
 }
 
 export interface Team {

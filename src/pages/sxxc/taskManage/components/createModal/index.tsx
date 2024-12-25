@@ -72,9 +72,11 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
     if (isRunForm){
       if (task === TaskType.RunTask && taskId) {
         let value = taskRef.current.serveList;
+        let projectNameArr = taskRef.current.projectNameList;
         let params = taskRef.current.initialValues;
         console.log('IP列表',(value),params)
-        runTask({...params,hosts:value}).then((res) => {
+        // 执行任务run接口增加 projectNames参数，勾选的项目名称数组
+        runTask({...params,hosts:value,projectNames:projectNameArr}).then((res) => {
           console.log((res))
           if(res.code == 200){
             message.success('执行成功');

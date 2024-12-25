@@ -16,7 +16,7 @@
  */
 import React, { useEffect, useState, useImperativeHandle, ReactNode, useContext } from 'react';
 import { Table, Form, Input, Select, Space, Switch, Button } from 'antd';
-import { getBizScriptList, addBizScript, removeBizScript, editBizScript, getBizScriptInfo, runTask, getTaskLog, getTaskLogList, getTaskTypeList, getStrategyList } from '@/services/sxxc/taskManage'
+import { getBizScriptList, addBizScript, removeBizScript, editBizScript, getBizScriptInfo, runTask, getTaskLog, getTaskLogList, getTaskTypeList, getStrategyList,getBizScriptAssets } from '@/services/sxxc/taskManage'
 import { TaskAndPasswordFormProps, Contacts, ContactsItem, Task,Serve } from '@/store/sxxc/taskInterface';
 import { MinusCircleOutlined, PlusCircleOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/lib/table';
@@ -39,11 +39,13 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   const [loading, setLoading] = useState<boolean>(true);
   const [busiGroups,setBusiGroups ] = useState([] as any);
   const [serveList,setServeList] = useState([] as any);
+  const [projectNameList,setProjectNameList] = useState([] as any);
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
 
   useImperativeHandle(ref, () => ({
     serveList: serveList,
-    initialValues:initialValues
+    initialValues:initialValues,
+    projectNameList:projectNameList
   }));
 
   const taskColumn: ColumnsType<Serve> = [
@@ -54,18 +56,35 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
           <Switch onChange={(val)=>{
             console.log(record.ident)
             if(val){
-              serveList.push(record.ident)
+              // serveList.push(record.ident)
+              serveList.push(record.ip)
               setServeList(serveList)
-              console.log(serveList)
+              const projectName = busiGroups.find((item) => item.id === record.groupId)?.name;
+              projectNameList.push(projectName)
+              setProjectNameList(projectNameList)
             }else{
+              // for(let i = 0;i<serveList.length;i++){
+              //   if(serveList[i] == record.ident){
+              //     serveList.splice(i,1)
+              //     return
+              //   }
+              // }
+              // console.log(serveList)
+              // setServeList(serveList)
               for(let i = 0;i<serveList.length;i++){
-                if(serveList[i] == record.ident){
+                if(serveList[i] == record.ip){
                   serveList.splice(i,1)
                   return
                 }
               }
-              console.log(serveList)
               setServeList(serveList)
+              for(let i = 0;i<projectNameList.length;i++){
+                if(projectNameList[i] == record.groupId){
+                  projectNameList.splice(i,1)
+                  return
+                }
+              }
+              setProjectNameList(projectNameList)
             }
           }}
           ></Switch>
@@ -76,13 +95,33 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
       title: '序号',
       render:(text,record,index)=>`${index+1}`,
     },
+    // {
+    //   title: '项目名',
+    //   dataIndex: 'ident',
+    // },
+    // {
+    //   title: 'IP',
+    //   dataIndex: 'remote_addr',
+    // },
+
     {
       title: '项目名',
-      dataIndex: 'ident',
+      dataIndex: 'groupId',
+      render(value, record, index) {
+        if (value > 0) {
+          let groupName = '';
+          busiGroups.forEach((group) => {
+            if (group.id === value) {
+              groupName = group.name;
+            }
+          });
+          return groupName;
+        }
+      },
     },
     {
       title: 'IP',
-      dataIndex: 'remote_addr',
+      dataIndex: 'ip',
     }
   ];
   
@@ -112,18 +151,36 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   };
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const getTableData = ({ current, pageSize }): Promise<any> => {
+    // const params = {
+    //   ...form.getFieldsValue(),
+    //   limit: pageSize,
+    //   p: current,
+    // };
+
+    // return getMonObjectList({
+    //   ...params,
+    // }).then((res) => {
+    //   return {
+    //     total: res.dat.total,
+    //     list: res.dat.list,
+    //   };
+    // });
     const params = {
       ...form.getFieldsValue(),
-      limit: pageSize,
-      p: current,
+      pageSize: pageSize,
+      pageNum: current,
     };
 
-    return getMonObjectList({
+    return getBizScriptAssets({
       ...params,
     }).then((res) => {
       return {
-        total: res.dat.total,
-        list: res.dat.list,
+        total: res.total,
+        list: res.rows.filter(item => {
+          if(item.status == 1){
+                  return true
+          }
+      }),
       };
     });
   };
@@ -135,7 +192,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   return !loading ? (
     <div>
       <Form layout='inline' form={form} initialValues={initialValues} preserve={false} style={{marginBottom: '10px'}}>
-        <Form.Item label={'项目名称：'} name='bgid'>
+      {/* <Form.Item label={'项目名称：'} name='bgid'>
           <Select allowClear placeholder={'项目名称'} style={{ width: 200 }} onClick={()=>run({current:1, pageSize:pagination.pageSize})}>
             {_.map(busiGroups, (item) => {
               return (
@@ -150,6 +207,25 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
           <Input 
             placeholder='单行输入'
             max={15}
+          />
+        </Form.Item> */}
+
+        <Form.Item label={'项目名称：'} name='groupId'>
+          <Select allowClear placeholder={'项目名称'} style={{ width: 200 }} onChange={()=>run({current:1, pageSize:pagination.pageSize})}>
+            {_.map(busiGroups, (item) => {
+              return (
+                <Select.Option key={item.name} value={item.id}>
+                  {item.name}
+                </Select.Option>
+              );
+            })}
+          </Select>
+        </Form.Item>
+        <Form.Item label={'IP地址：'} name='ip'>
+          <Input 
+            placeholder='单行输入'
+            max={15}
+            allowClear
           />
         </Form.Item>
         <Form.Item>
