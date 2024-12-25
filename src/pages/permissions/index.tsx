@@ -146,7 +146,7 @@ export default function index() {
                 {t('common:table.note')}：{activeRole?.note || '-'}
               </div>
             </div>
-            <Operations data={operations} roleId={activeRole?.id} disabled={activeRole?.name === 'Admin'} profile={profile} permList={permList} />
+            <Operations data={operations} roleId={activeRole?.id} disabled={activeRole?.name === 'Admin'} />
           </div>
         </div>
       </div>
