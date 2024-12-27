@@ -72,7 +72,7 @@ let listQueryFilter = [
   { name: 'severity', label: '告警级别', type: 'select' },
   { name: 'rule_name', label: '告警规则名称', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
-  { name: 'alert_rule', label: '告警规则', type: 'input' },
+  // { name: 'alert_rule', label: '告警规则', type: 'input' },
   { name: 'group_id', label: '业务组', type: 'select' },
 ]
 
@@ -83,6 +83,7 @@ const Event: React.FC = () => {
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
 
   const [searchVal, setSearchVal] = useLocalStorage<any>('current_filter_type', null);
+  const [chooseVal,setChooseVal] = useState<any>('');
   const [filterParam, setFilterParam] = useLocalStorage<any>('current_filter_param', "severity");
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
@@ -180,19 +181,23 @@ const Event: React.FC = () => {
               setFilterType(null);
             }       
             localStorage.setItem('current_alert_display', "card");
-
+            setChooseVal('severity')
+            
           }} />
           <Button icon={<UnorderedListOutlined />} onClick={() => {
             setView('list')
             localStorage.setItem('current_alert_display', "list")
+            setChooseVal('')
           }} />
 
          
             <Select
               placeholder="选择过滤器"
               style={{ width: 120 }}
+              value={chooseVal}
               defaultValue={filterParam}
               onChange={(value) => {
+                setChooseVal(value)
                 if (value == undefined) {
                   setFilterParam(null);
                   setSearchVal(null);

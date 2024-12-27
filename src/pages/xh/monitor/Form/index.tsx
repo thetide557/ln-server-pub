@@ -48,7 +48,9 @@ const [operateScript, setOperateScript] = useState<any>({
 
 
   useEffect(() => {
-
+    form.setFieldsValue({
+      asset_id: undefined, // 替换为你的字段名
+    });
     let map = new Map;
     let scripList = new Array();
     Object.keys(cn_name).map(key=>{
@@ -127,7 +129,7 @@ const [operateScript, setOperateScript] = useState<any>({
           });
         }
         if(id != null && id.length > 0 && id != 'null' && action=="add" ){
-            form.setFieldsValue({asset_id:parseInt(""+id)});
+            // form.setFieldsValue({asset_id:parseInt(""+id)});
         }
       });
 
