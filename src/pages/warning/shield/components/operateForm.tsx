@@ -74,6 +74,13 @@ const OperateForm: React.FC<Props> = ({ detail = {}, type }: any) => {
   const timeChange = () => {
     const btime = form.getFieldValue('btime');
     const etime = form.getFieldValue('etime');
+    console.log("duration",moment.duration(etime - btime))
+    const durationTime = moment.duration(etime - btime)
+    if(durationTime._milliseconds < 0){
+      form.setFieldsValue({'btime':''})
+      form.setFieldsValue({'etime':''})
+      return 
+    }
     if (!!etime && !!btime) {
       const y = Math.round(moment.duration(etime - btime).asYears());
       const d = Math.floor(moment.duration(etime - btime).asDays());
@@ -140,7 +147,9 @@ const OperateForm: React.FC<Props> = ({ detail = {}, type }: any) => {
       }),
     });
   };
-
+  form.setFieldsValue({
+    group_id: undefined, // 替换为你的字段名
+  });
   const content = (
     <Form
       form={form}
@@ -197,6 +206,7 @@ const OperateForm: React.FC<Props> = ({ detail = {}, type }: any) => {
         <Form.Item label={"----"+t('common:business_group')} name='group_id'>
           <Select
             disabled={type == 1}
+            defaultValue=''
             options={_.map(busiGroups, (item) => {
               return {
                 label: item.name,
@@ -205,15 +215,16 @@ const OperateForm: React.FC<Props> = ({ detail = {}, type }: any) => {
             })}
           />
         </Form.Item>
-        <ProdSelect
+        {/* <ProdSelect
           label={t('prod')}
-          onChange={(e) => {
-            form.setFieldsValue({
-              ...getDefaultValuesByProd(e.target.value),
-              datasource_ids: [],
-            });
-          }}
-        />
+          // disabled='true'
+          // onChange={(e) => {
+          //   form.setFieldsValue({
+          //     ...getDefaultValuesByProd(e.target.value),
+          //     datasource_ids: [],
+          //   });
+          // }}
+        /> */}
         <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.prod !== curValues.prod} noStyle>
           {({ getFieldValue }) => {
             const prod = getFieldValue('prod');
@@ -224,6 +235,7 @@ const OperateForm: React.FC<Props> = ({ detail = {}, type }: any) => {
                     <Form.Item label={t('common:datasource.type')} name='cate' initialValue='prometheus'>
                       <DatasourceCateSelect
                         scene='alert'
+                        disabled="true"
                         filterCates={(cates) => {
                           return _.filter(cates, (item) => _.includes(item.type, prod) && !!item.alertRule);
                         }}
