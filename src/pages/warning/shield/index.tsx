@@ -193,7 +193,7 @@ const Shield: React.FC = () => {
       dataIndex: 'disabled',
       width: 40,
       render: (disabled, record) => (
-        <Switch
+        (profile.roles?.includes("Admin") || permList.includes("/alert-mutes/status")) && <Switch
           checked={disabled === strategyStatus.Enable}
           size='small'
           onChange={() => {

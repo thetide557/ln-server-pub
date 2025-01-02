@@ -374,57 +374,60 @@ const Event: React.FC = () => {
             onOk={onOk}
           />
         </Space>
-        <div>
-          <Dropdown
-            trigger={['click']}
-            overlay={
-              <Menu
-                style={{ width: '100px' }}
-                onClick={({ key }) => {
-                  if (key == 'export') {
-                    if (selectRowKeys.length <= 0) {
-                      Modal.confirm({
-                        title: '确认导出所有告警信息吗',
-                        onOk: async () => {
-                          setModalOpen(true);
-                        },
-                        onCancel() { },
-                      });
-                    } else {
-                      setModalOpen(true);
-                      setRowKeys(selectRowKeys);
+        {
+          (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/ops")) && <div>
+            <Dropdown
+              trigger={['click']}
+              overlay={
+                <Menu
+                  style={{ width: '100px' }}
+                  onClick={({ key }) => {
+                    if (key == 'export') {
+                      if (selectRowKeys.length <= 0) {
+                        Modal.confirm({
+                          title: '确认导出所有告警信息吗',
+                          onOk: async () => {
+                            setModalOpen(true);
+                          },
+                          onCancel() { },
+                        });
+                      } else {
+                        setModalOpen(true);
+                        setRowKeys(selectRowKeys);
+                      }
+                    } else if (key == 'delete') {
+                      if (selectRowKeys.length <= 0) {
+                        message.warning('请选择要批量删除的记录');
+                        return;
+                      } else {
+                        Modal.confirm({
+                          title: '确认要删除吗',
+                          onOk: async () => {
+                            deleteHistoryEvents(selectRowKeys).then((res) => {
+                              message.success('删除成功');
+                              setRefreshFlag(_.uniqueId('refresh_'));
+                              setSelectRowKeys([]);
+                            });
+                          },
+                          onCancel() { },
+                        });
+                      }
                     }
-                  } else if (key == 'delete') {
-                    if (selectRowKeys.length <= 0) {
-                      message.warning('请选择要批量删除的记录');
-                      return;
-                    } else {
-                      Modal.confirm({
-                        title: '确认要删除吗',
-                        onOk: async () => {
-                          deleteHistoryEvents(selectRowKeys).then((res) => {
-                            message.success('删除成功');
-                            setRefreshFlag(_.uniqueId('refresh_'));
-                            setSelectRowKeys([]);
-                          });
-                        },
-                        onCancel() { },
-                      });
-                    }
-                  }
-                }}
-                items={[
-                  { key: 'export', label: '导出' },
-                  { key: 'delete', label: '批量删除' },
-                ]}
-              ></Menu>
-            }
-          >
-            <Button>
-              {t('common:btn.batch_operations')} <DownOutlined />
-            </Button>
-          </Dropdown>
-        </div>
+                  }}
+                  items={[
+                    { key: 'export', label: '导出' },
+                    { key: 'delete', label: '批量删除' },
+                  ]}
+                ></Menu>
+              }
+            >
+              <Button>
+                {t('common:btn.batch_operations')} <DownOutlined />
+              </Button>
+            </Dropdown>
+          </div>
+        }
+
       </div>
     );
   }

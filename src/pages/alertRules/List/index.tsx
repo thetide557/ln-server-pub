@@ -465,15 +465,17 @@ export default function List(props: ListProps) {
                 添加
               </Button>
             }
-            <MoreOperations
-              bgid={bgid}
-              selectRowKeys={selectRowKeys}
-              selectedRows={selectedRows}
-              refreshRules={(e) => {
-                setCurrent(1);
-                setRefreshLeft(_.uniqueId('refresh_left'));
-              }}
-            />
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/ops")) && <MoreOperations
+                bgid={bgid}
+                selectRowKeys={selectRowKeys}
+                selectedRows={selectedRows}
+                refreshRules={(e) => {
+                  setCurrent(1);
+                  setRefreshLeft(_.uniqueId('refresh_left'));
+                }}
+              />
+            }
           </Space>
         </Col>
       </Row>

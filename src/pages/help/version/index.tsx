@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Icon, { InboxOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
@@ -22,6 +22,7 @@ import SystemInfoSvg from '../../../../public/image/system-info.svg';
 import pkgJson from '../../../../package.json';
 import './locale';
 import { Divider, message, Upload, UploadProps } from 'antd';
+import { CommonStateContext } from '@/App';
 
 const { Dragger } = Upload;
 
@@ -50,7 +51,7 @@ const props: UploadProps = {
 export default function version() {
   const { t } = useTranslation('version');
   const [backendVersion, setBackendVersion] = useState('');
-
+  const { profile, permList } = useContext(CommonStateContext);
   useEffect(() => {
     fetch('/api/n9e/version')
       .then((res) => {
@@ -79,14 +80,16 @@ export default function version() {
           </li>
         </ul>
         <Divider></Divider>
-        <div style={{ height: 150, overflow: 'visible' }}>
-          <Dragger {...props}>
-            <p className='ant-upload-drag-icon'>
-              <InboxOutlined />
-            </p>
-            <p className='ant-upload-text'>点击或拖放系统升级包到这个区域上传</p>
-          </Dragger>
-        </div>
+        {
+          (profile.roles?.includes("Admin") || permList.includes("/help/version/update")) && <div style={{ height: 150, overflow: 'visible' }}>
+            <Dragger {...props}>
+              <p className='ant-upload-drag-icon'>
+                <InboxOutlined />
+              </p>
+              <p className='ant-upload-text'>点击或拖放系统升级包到这个区域上传</p>
+            </Dragger>
+          </div>
+        }
       </div>
     </PageLayout>
   );

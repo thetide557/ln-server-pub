@@ -43,6 +43,8 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [assetIp, setAssetIp] = useState<string>('');
   const [showExcludes, setShowExcludes] = useState(true);
+  const { asset_id } = form.getFieldsValue();
+  
 
   useEffect(() => {
     let param = {};
@@ -79,7 +81,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   }, []);
 
   function buildPromqlWithAsset(assets) {
-    console.log('form.getFieldsValue()', form.getFieldsValue());
+    // console.log('form.getFieldsValue()', form.getFieldsValue());
     const { rule_config, asset_id, excludes } = form.getFieldsValue();
 
     const labels: PromVisualQueryLabelFilter[] = [];
@@ -172,7 +174,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
           <Col span={8}>
             <Form.Item label={t('排除资产')} name='excludes' initialValue={[]}>
               <Select
-                disabled={!showExcludes}
+                disabled={!showExcludes || asset_id > 0}
                 allowClear
                 showSearch
                 mode='multiple'

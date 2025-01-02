@@ -927,66 +927,72 @@ export default function () {
                     </Button>
                   </div>
                 }
-                <div>
-                  <Popover placement='bottom' content={popupContent} trigger='click' className='filter_columns'>
-                    <Button icon={<UnorderedListOutlined />}>显示列</Button>
-                  </Popover>
-                </div>
-                <div>
-                  <Dropdown
-                    trigger={['click']}
-                    overlay={
-                      <Menu
-                        style={{ width: '100px' }}
-                        onClick={({ key }) => {
-                          if (key == OperateType.AssetBatchExport) {
-                            setOperateType(key as OperateType);
-                          } else if (key == OperateType.Delete) {
-                            if (selectedAssets.length <= 0) {
-                              message.warning('请选择要批量操作的设备');
-                              return;
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/col")) && <div>
+                    <Popover placement='bottom' content={popupContent} trigger='click' className='filter_columns'>
+                      <Button icon={<UnorderedListOutlined />}>显示列</Button>
+                    </Popover>
+                  </div>
+                }
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/ops")) && <div>
+                    <Dropdown
+                      trigger={['click']}
+                      overlay={
+                        <Menu
+                          style={{ width: '100px' }}
+                          onClick={({ key }) => {
+                            if (key == OperateType.AssetBatchExport) {
+                              setOperateType(key as OperateType);
+                            } else if (key == OperateType.Delete) {
+                              if (selectedAssets.length <= 0) {
+                                message.warning('请选择要批量操作的设备');
+                                return;
+                              } else {
+                                Modal.confirm({
+                                  title: '确认要删除吗',
+                                  onOk: async () => {
+                                    let rows = selectedAssets?.map((item) => '' + item);
+                                    deleteXhAssets({ ids: rows }).then((res) => {
+                                      message.success('删除成功！');
+                                      setRefreshKey(_.uniqueId('refreshKey_'));
+                                      setSelectedAssets([]);
+                                    });
+                                  },
+                                  onCancel() { },
+                                });
+                              }
+                            } else if (key == OperateType.UpdateBusi) {
+                              if (selectedAssets.length <= 0) {
+                                message.warning('请选择要批量转移的资产');
+                                return;
+                              }
+                              setOperateType(key as OperateType);
                             } else {
-                              Modal.confirm({
-                                title: '确认要删除吗',
-                                onOk: async () => {
-                                  let rows = selectedAssets?.map((item) => '' + item);
-                                  deleteXhAssets({ ids: rows }).then((res) => {
-                                    message.success('删除成功！');
-                                    setRefreshKey(_.uniqueId('refreshKey_'));
-                                    setSelectedAssets([]);
-                                  });
-                                },
-                                onCancel() { },
-                              });
+                              setOperateType(key as OperateType);
                             }
-                          } else if (key == OperateType.UpdateBusi) {
-                            if (selectedAssets.length <= 0) {
-                              message.warning('请选择要批量转移的资产');
-                              return;
-                            }
-                            setOperateType(key as OperateType);
-                          } else {
-                            setOperateType(key as OperateType);
-                          }
-                        }}
-                        items={[
-                          { key: OperateType.AssetBatchImport, label: '导入设备' },
-                          { key: OperateType.AssetBatchExport, label: '导出设备' },
-                          // { key: OperateType.BindTag, label: '绑定标签' },
-                          // { key: OperateType.UnbindTag, label: '解绑标签' },
-                          { key: OperateType.UpdateBusi, label: '批量转移' },
-                          // { key: OperateType.RemoveBusi, label: '移出业务组' },
-                          // { key: OperateType.UpdateNote, label: '修改备注' },
-                          { key: OperateType.Delete, label: '批量删除' },
-                        ]}
-                      ></Menu>
-                    }
-                  >
-                    <Button>
-                      {t('common:btn.batch_operations')} <DownOutlined />
-                    </Button>
-                  </Dropdown>
-                </div>
+                          }}
+                          items={[
+                            { key: OperateType.AssetBatchImport, label: '导入设备' },
+                            { key: OperateType.AssetBatchExport, label: '导出设备' },
+                            // { key: OperateType.BindTag, label: '绑定标签' },
+                            // { key: OperateType.UnbindTag, label: '解绑标签' },
+                            { key: OperateType.UpdateBusi, label: '批量转移' },
+                            // { key: OperateType.RemoveBusi, label: '移出业务组' },
+                            // { key: OperateType.UpdateNote, label: '修改备注' },
+                            { key: OperateType.Delete, label: '批量删除' },
+                          ]}
+                        ></Menu>
+                      }
+                    >
+                      <Button>
+                        {t('common:btn.batch_operations')} <DownOutlined />
+                      </Button>
+                    </Dropdown>
+                  </div>
+                }
+
+
               </Space>
             </div>
           </div>
