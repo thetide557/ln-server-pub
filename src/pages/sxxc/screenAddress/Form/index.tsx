@@ -51,7 +51,15 @@ const navTemplateOption: any = [
 ]
 export default function ({ title, disabled, initialValues, onFinish }: IProps) {
   const [form] = Form.useForm();
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    nav_template:'',
+    nav_name:'',
+    font_size:'',
+    font_color:'',
+    bg_color:'',
+    bg_width:'',
+    bg_height:''
+  });
   const history = useHistory();
   const [bigScreenType, setBigScreenType] = useState();
   const [businessGroupOption, setBusinessGroupOption] = useState<Option[]>([]);
