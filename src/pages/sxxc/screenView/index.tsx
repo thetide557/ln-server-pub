@@ -35,7 +35,6 @@ export default function ScreenView() {
   const baseUrl = '/dataroom/#/bigscreen/preview'
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
-  // console.log(busiGroups);
   const token = localStorage.getItem('access_token')
 
   const sendToken = window.onload = function () {
@@ -92,7 +91,6 @@ export default function ScreenView() {
   }
   // tab切换
   const handleClick = (item) => {
-    console.log(item);
     setActiveColor(item.id)
     // console.log(`selected ${key}`);
     let code = item.config
@@ -113,13 +111,24 @@ export default function ScreenView() {
     }
   }
 
+  const MyStyle = (styleString) => {
+    // 将样式字符串转换为样式对象
+    const styleObject = styleString.split(';').reduce((style, declaration) => {
+      const [key, value] = declaration.split(':').map(part => part.trim());
+      if (key && value) {
+        style[key] = value;
+      }
+      return style;
+    }, {});
+    return styleObject;
+  };
   const menu = (
     <Menu
       onClick={goBoard}
       selectedKeys={[selectGroup]}
     >
-      {_.map(busiGroups, (item) => {
-        return <Menu.Item key={item.id}>{item.name}</Menu.Item>;
+      {_.map(screenList.filter(x => x.type == 2), (item) => {
+        return <Menu.Item key={item.id}>{item.title}</Menu.Item>;
       })}
     </Menu>
   );
@@ -181,9 +190,11 @@ export default function ScreenView() {
         <div className='screen1-cont'>
           {/* tab标签 */}
           <div className='screen-tab'>
-            {_.map(screenList, (item, index) => {
+            {_.map(screenList.filter(x => x.type == 1), (item, index) => {
               return (
-                <div className='c-tab' style={{color: activeColor == item.id ? '#fff' : '#bbb'}} key={item.id} onClick={() => handleClick(item)}>{item.title}</div>
+                <div className={['c-tab', activeColor == item.id ? 'active' : null].join(" ")} style={{  width: item.bg_width, height: item.bg_height, background: item.bg_color, ...MyStyle(item.nav_template) }} key={item.id} onClick={() => handleClick(item)}>
+                  <span className='title' style={{fontSize: item.font_size, color: item.font_color,...MyStyle(item.nav_template)}}>{item.nav_name}</span> 
+                </div>
               )
             })}
           </div>

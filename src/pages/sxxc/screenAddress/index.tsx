@@ -73,7 +73,11 @@ const ApiService = () => {
             rowKey='id'
             columns={[
               { title: '大屏标题', dataIndex: 'title' },
-              { title: '大屏类型', dataIndex: 'screenName' },
+              {
+                title: '大屏类型', dataIndex: 'type', render: (value) => {
+                  return value == 1 ? '一级大屏' : value == 2 ? '二级大屏' : '';
+                },
+              },
               { title: '配置', dataIndex: 'config' },
               { title: '更新人', dataIndex: 'updated_by' },
               {

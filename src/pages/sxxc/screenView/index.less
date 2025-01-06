@@ -56,17 +56,20 @@
         white-space: nowrap;
         padding: .2vw 0;
         color: #bbb;
-        font-weight: 700;
+        // font-weight: 700;
+
         /*滚动条样式*/
         &::-webkit-scrollbar {
           width: .2vw;
           border-radius: .2vw;
           height: .3vw;
         }
+
         &::-webkit-scrollbar-thumb {
           background: #dddddd !important;
           border-radius: .2vw;
         }
+
         .c-tab {
           font-size: .85vw;
           cursor: pointer;
@@ -75,10 +78,28 @@
           margin: 0 .25vw;
           height: 1.669vw;
           line-height: 1.669vw;
-          background: url('/image/screenview/card1.png') no-repeat;
-          background-size: 100% 100%;
-          box-sizing: border-box;
-         
+          // background: url('/image/screenview/card1.png') no-repeat;
+          // background-size: 100% 100%;
+          // box-sizing: border-box;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          -webkit-transform: skew(-33deg);
+          -moz-transform: skew(-33deg);
+          -o-transform: skew(-33deg);
+          border-width: 1px;
+          border-style: solid;
+
+          .title {
+            font-family: 'youshebiaotihei';
+            -webkit-transform: skew(33deg);
+            -moz-transform: skew(33deg);
+            -o-transform: skew(33deg);
+          }
+        }
+
+        .active {
+          color: #fff !important;
         }
       }
     }

@@ -7,6 +7,7 @@ import Gradient from '@/components/ColorPicker/gradient';
 import Color from '@/components/ColorPicker/color';
 import { getBusiGroups } from '@/services/common';
 import { Background } from '@antv/x6/lib/registry';
+import { getBigScreen } from '@/services/sxxc/bigScreen';
 interface IProps {
   title?: string;
   disabled?: boolean;
@@ -14,6 +15,7 @@ interface IProps {
   onFinish?: (value) => void;
 }
 interface Option {
+  id: string;
   label: string;
   value: string;
 }
@@ -24,53 +26,57 @@ const panelBaseProps: any = {
 const bigScreenTypeOption: any = [
   {
     label: '一级大屏',
-    value: '1',
+    value: 1,
   },
   {
     label: '二级大屏',
-    value: '2',
+    value: 2,
   },
 ]
 const navTemplateOption: any = [
   {
     label: '模板一',
-    value: '1',
+    value: 'borderColor: #048787;',
   },
   {
     label: '模板二',
-    value: '2',
+    value: 'borderColor: #83A7D6;fontWeight: bolder;',
   },
   {
     label: '模板三',
-    value: '3',
+    value: 'borderColor: #00E4EB;',
   },
   {
     label: '模板四',
-    value: '4',
+    value: 'borderColor: #01B8E6;',
   },
 ]
 export default function ({ title, disabled, initialValues, onFinish }: IProps) {
   const [form] = Form.useForm();
   const [formData, setFormData] = useState({
-    nav_template:'',
-    nav_name:'',
-    font_size:'',
-    font_color:'',
-    bg_color:'',
-    bg_width:'',
-    bg_height:''
+    nav_template: '',
+    nav_name: '',
+    font_size: '',
+    font_color: '',
+    bg_color: '',
+    bg_width: '',
+    bg_height: ''
   });
   const history = useHistory();
   const [bigScreenType, setBigScreenType] = useState();
+  const [bigScreenOption, setBigScreenOption] = useState<Option[]>([]);
   const [businessGroupOption, setBusinessGroupOption] = useState<Option[]>([]);
   const layout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
   const hiddenLayout = { span: 0 };
 
   useEffect(() => {
     form.setFieldsValue(initialValues);
+    setBigScreenType(form.getFieldValue('type'))
+    setFormData(initialValues)
   }, [initialValues]);
   useEffect(() => {
     getBusiGroupsData()
+    getBigScreenData()
   }, []);
 
   // 获取业务组otions
@@ -78,6 +84,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
     getBusiGroups().then(res => {
       const options = res.dat.map(x => {
         return {
+          id:x.id,
           label: x.name,
           value: x.id
         }
@@ -85,7 +92,25 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
       setBusinessGroupOption(options)
     });
   }
-
+  // 获取大屏列表
+  const getBigScreenData = () => {
+    getBigScreen().then(res => {
+      setBigScreenOption(res.dat.list.filter(x => x.type == 1))
+    })
+  }
+  // 当导航模板很多时，各模板特定的样式皆可配置到模板中绑定到元素中
+  const MyStyle = (styleString) => {
+    if (styleString) {
+      const styleObject = styleString.split(';').reduce((style, declaration) => {
+        const [key, value] = declaration.split(':').map(part => part.trim());
+        if (key && value) {
+          style[key] = value;
+        }
+        return style;
+      }, {});
+      return styleObject;
+    }
+  };
   const onFormChange = (changedValues, allValues) => {
     setFormData(allValues);
   }
@@ -171,8 +196,21 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                   <Col span={12}>
                     <Form.Item name='copy_from' label='配置复制'>
                       <Select
-                        options={businessGroupOption}
+                        options={bigScreenOption}
+                        fieldNames={{ label: 'nav_name', value: 'id' }}
                         placeholder='请选择复制大屏'
+                        onChange={(val) => {
+                          let currentData: any = bigScreenOption.filter(x => x.id == val)[0];
+                          form.setFieldsValue({
+                            nav_template: currentData.nav_template,
+                            font_size: currentData.font_size,
+                            font_color: currentData.font_color,
+                            bg_color: currentData.bg_color,
+                            bg_width: currentData.bg_width,
+                            bg_height: currentData.bg_height,
+                          });
+                          setFormData(currentData)
+                        }}
                       />
                     </Form.Item>
                   </Col>
@@ -181,6 +219,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                   <Col span={12}>
                     <Form.Item name='nav_template' label='导航模板' rules={[{ required: true }]}>
                       <Select
+                        key={'label'}
                         options={navTemplateOption}
                         placeholder='请选择导航模板'
                       />
@@ -227,10 +266,10 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                   <Col span={24}>
                     <Form.Item>
                       <Card title="导航预览" {...panelBaseProps} className='views'>
-                        <div className={[formData.nav_template ? `style${formData.nav_template}` : null, 'diamond'].join(" ")} style={{ background: formData.bg_color, width: formData.bg_width, height: formData.bg_height }}>
+                        <div className="diamond" style={{ background: formData.bg_color, width: formData.bg_width, height: formData.bg_height, ...MyStyle(formData.nav_template) }}>
                           {
                             formData.nav_name && (
-                              <div className='title' style={{ fontSize: formData.font_size, color: formData.font_color }}>{formData.nav_name}</div>
+                              <div className='title' style={{ fontSize: formData.font_size, color: formData.font_color,...MyStyle(formData.nav_template) }}>{formData.nav_name}</div>
                             )
                           }
                         </div>
@@ -250,7 +289,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
               >
                 取消
               </Button>
-              <Button type='primary' style={{backgroundColor:'#76D183',border: 'none'}} htmlType='submit'>
+              <Button type='primary' style={{ backgroundColor: '#76D183', border: 'none' }} htmlType='submit'>
                 确定
               </Button>
             </Space>
