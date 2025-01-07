@@ -122,7 +122,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
       >
         <Tabs.TabPane tab={'基本信息'} key='base_set' className='tab_header'></Tabs.TabPane>
       </Tabs>
-      <Form layout='horizontal' {...layout} initialValues={{ font_size: 13, font_color: '#ffffff', bg_width: 212, bg_height: 42, bg_color: '#FFFFFF' }} disabled={disabled} form={form} onFinish={onFinish} onValuesChange={onFormChange} className='forms'>
+      <Form layout='horizontal' {...layout} initialValues={{ font_size: 13, font_color: '#000000', bg_width: 212, bg_height: 42, bg_color: '#ffffff' }} disabled={disabled} form={form} onFinish={onFinish} onValuesChange={onFormChange} className='forms'>
         <Card {...panelBaseProps} className='card_base'>
           <Form.Item name='id' wrapperCol={hiddenLayout}>
             <InputNumber hidden></InputNumber>
