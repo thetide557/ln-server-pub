@@ -6,7 +6,6 @@ import './form.less';
 import Gradient from '@/components/ColorPicker/gradient';
 import Color from '@/components/ColorPicker/color';
 import { getBusiGroups } from '@/services/common';
-import { Background } from '@antv/x6/lib/registry';
 import { getBigScreen } from '@/services/sxxc/bigScreen';
 interface IProps {
   title?: string;
@@ -55,12 +54,11 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
   const [form] = Form.useForm();
   const [formData, setFormData] = useState({
     nav_template: '',
-    nav_name: '',
     font_size: '',
     font_color: '',
     bg_color: '',
     bg_width: '',
-    bg_height: ''
+    bg_height: '',
   });
   const history = useHistory();
   const [bigScreenType, setBigScreenType] = useState();
@@ -84,7 +82,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
     getBusiGroups().then(res => {
       const options = res.dat.map(x => {
         return {
-          id:x.id,
+          id: x.id,
           label: x.name,
           value: x.id
         }
@@ -124,7 +122,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
       >
         <Tabs.TabPane tab={'基本信息'} key='base_set' className='tab_header'></Tabs.TabPane>
       </Tabs>
-      <Form layout='horizontal' {...layout} disabled={disabled} form={form} onFinish={onFinish} onValuesChange={onFormChange} className='forms'>
+      <Form layout='horizontal' {...layout} initialValues={{ font_size: 13, font_color: '#ffffff', bg_width: 212, bg_height: 42, bg_color: '#FFFFFF' }} disabled={disabled} form={form} onFinish={onFinish} onValuesChange={onFormChange} className='forms'>
         <Card {...panelBaseProps} className='card_base'>
           <Form.Item name='id' wrapperCol={hiddenLayout}>
             <InputNumber hidden></InputNumber>
@@ -201,15 +199,16 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                         placeholder='请选择复制大屏'
                         onChange={(val) => {
                           let currentData: any = bigScreenOption.filter(x => x.id == val)[0];
-                          form.setFieldsValue({
+                          let formData = {
                             nav_template: currentData.nav_template,
                             font_size: currentData.font_size,
                             font_color: currentData.font_color,
                             bg_color: currentData.bg_color,
                             bg_width: currentData.bg_width,
                             bg_height: currentData.bg_height,
-                          });
-                          setFormData(currentData)
+                          }
+                          form.setFieldsValue(formData);
+                          setFormData(formData)
                         }}
                       />
                     </Form.Item>
@@ -268,8 +267,8 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                       <Card title="导航预览" {...panelBaseProps} className='views'>
                         <div className="diamond" style={{ background: formData.bg_color, width: formData.bg_width, height: formData.bg_height, ...MyStyle(formData.nav_template) }}>
                           {
-                            formData.nav_name && (
-                              <div className='title' style={{ fontSize: formData.font_size, color: formData.font_color,...MyStyle(formData.nav_template) }}>{formData.nav_name}</div>
+                            form.getFieldValue('nav_name') && (
+                              <div className='title' style={{ fontSize: formData.font_size, color: formData.font_color, ...MyStyle(formData.nav_template) }}>{form.getFieldValue('nav_name')}</div>
                             )
                           }
                         </div>
