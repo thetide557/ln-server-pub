@@ -186,7 +186,7 @@ export default function ScreenView() {
     })
     // 获取二级导航
     getNav2().then(res => {
-      if(res.dat.length){
+      if (res.dat.length) {
         setNav2(res.dat)
       }
     })
@@ -199,8 +199,8 @@ export default function ScreenView() {
           <div className='screen-tab'>
             {_.map(screenList.filter(x => x.type == 1), (item, index) => {
               return (
-                <div className={['c-tab', activeColor == item.id ? 'active' : null].join(" ")} style={{ width: item.bg_width, height: item.bg_height, background: item.bg_color, ...MyStyle(item.nav_template) }} key={item.id} onClick={() => handleClick(item)}>
-                  <span className='title' style={{ fontSize: item.font_size, color: item.font_color, ...MyStyle(item.nav_template) }}>{item.nav_name}</span>
+                <div className={['c-tab', activeColor == item.id ? 'active' : null].join(" ")} style={{ width: item.bg_width / 18 + 'vw', height: item.bg_height / 18 + 'vw', background: item.bg_color, ...MyStyle(item.nav_template) }} key={item.id} onClick={() => handleClick(item)}>
+                  <span className='title' style={{ fontSize: item.font_size / 18 + 'vw', color: item.font_color, ...MyStyle(item.nav_template) }}>{item.nav_name}</span>
                 </div>
               )
             })}
