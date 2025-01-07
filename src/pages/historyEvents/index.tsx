@@ -375,7 +375,7 @@ const Event: React.FC = () => {
           />
         </Space>
         {
-          (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/ops")) && <div>
+          <div>
             <Dropdown
               trigger={['click']}
               overlay={
@@ -415,8 +415,8 @@ const Event: React.FC = () => {
                     }
                   }}
                   items={[
-                    { key: 'export', label: '导出' },
-                    { key: 'delete', label: '批量删除' },
+                    (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/exportAll")) && { key: 'export', label: '导出' },
+                    (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/delAll")) && { key: 'delete', label: '批量删除' },
                   ]}
                 ></Menu>
               }

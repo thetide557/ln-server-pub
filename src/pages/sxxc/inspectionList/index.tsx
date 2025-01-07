@@ -98,7 +98,7 @@ const Resource: React.FC = () => {
             // render: (text, record, index) => statusList.filter(item => item.id == text)[0].value,
             render: (text, record, index) => (
                 <>
-                    <Switch checkedChildren="有效" unCheckedChildren="无效" checked={text == 0} onChange={() => changeStatus(record)} />
+                    <Switch disabled={(profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionStatus')) ? false : true} checkedChildren="有效" unCheckedChildren="无效" checked={text == 0} onChange={() => changeStatus(record)} />
                 </>
             )
         },
@@ -211,7 +211,7 @@ const Resource: React.FC = () => {
             ...form.getFieldsValue(),
             pageSize: pageSize,
             pageNum: current,
-            // groupIds: groupIds?.toString()
+            groupIds: localStorage.getItem('groupIds')
         };
 
         return getInspectionList({
