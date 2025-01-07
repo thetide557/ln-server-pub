@@ -40,7 +40,7 @@ const navTemplateOption: any = [
   },
   {
     label: '模板二',
-    value: 'borderColor: #83A7D6;fontWeight: bolder;',
+    value: 'borderColor: #83A7D6;',
   },
   {
     label: '模板三',
