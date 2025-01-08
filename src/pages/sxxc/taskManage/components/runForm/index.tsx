@@ -176,11 +176,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
     }).then((res) => {
       return {
         total: res.total,
-        list: res.rows.filter(item => {
-          if(item.status == 1){
-                  return true
-          }
-      }),
+        list: res.rows,
       };
     });
   };
