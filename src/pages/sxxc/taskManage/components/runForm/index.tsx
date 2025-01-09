@@ -169,6 +169,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
       ...form.getFieldsValue(),
       pageSize: pageSize,
       pageNum: current,
+      groupIds: localStorage.getItem('groupIds')
     };
 
     return getBizScriptAssets({
