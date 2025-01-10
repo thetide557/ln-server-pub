@@ -45,11 +45,12 @@ export default function index(props: IProps) {
 
             return (
               <Row gutter={10}>
-                <Col span={unit.indexOf('datetime') > -1 ? 12 : 24}>
+                <Col span={24}>
                   <Form.Item
                     label={
                       <div>
-                        {t('panel.standardOptions.unit')}{' '}
+                        {/* {t('panel.standardOptions.unit')}{' '} */}
+                        {'数据单位'}{' '}
                         <Tooltip
                           overlayInnerStyle={{
                             width: 500,
