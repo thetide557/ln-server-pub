@@ -37,6 +37,9 @@ export default function Edit() {
       getWarningStrategy(alertRuleId).then((res) => {
         // res.dat.rule_config =JSON.parse(res.dat["rule_config_fe"]);
         // console.log('res.dat', res.dat)
+        if(!res.dat.excludes){
+          delete res.dat.excludes
+        }
         setValues(res.dat || {});
         if(res.dat && res.dat.asset_id){
           window.localStorage.setItem('select_monitor_asset_id',res.dat.asset_id);

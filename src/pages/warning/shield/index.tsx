@@ -386,7 +386,7 @@ const Shield: React.FC = () => {
                     setDatasourceIds(val);
                   }}
                 />
-                <Input onPressEnter={onSearchQuery} prefix={<SearchOutlined />} placeholder={t('search_placeholder')} />
+                <Input allowClear onPressEnter={onSearchQuery} prefix={<SearchOutlined />} placeholder={t('search_placeholder')} />
               </Space>
               <div className='header-right'>
                 {
