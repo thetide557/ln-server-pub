@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { CommonStateContext } from '@/App';
 import { useHistory } from 'react-router-dom';
 import _ from 'lodash';
-import { getBigScreen, getDashboards } from '@/services/sxxc/bigScreen';
+import { getBigScreen, getDashboards, getNav2 } from '@/services/sxxc/bigScreen';
 import { Dropdown, Menu, message, Select } from 'antd';
 import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import './index.less'
@@ -29,13 +29,13 @@ export default function ScreenView() {
   const [screenList, setScreenList] = useState<any>([]);
   const [selectGroup, setSelectGroup] = useState<any>('')
   const { busiGroups } = useContext(CommonStateContext);
+  const [nav2, setNav2] = useState<any>([]);
   const [url, setUrl] = useState<any>('')
   const [first, setFirst] = useState<any>('')
   const [activeColor, setActiveColor] = useState<any>(null)
   const baseUrl = '/dataroom/#/bigscreen/preview'
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
-  // console.log(busiGroups);
   const token = localStorage.getItem('access_token')
 
   const sendToken = window.onload = function () {
@@ -92,7 +92,6 @@ export default function ScreenView() {
   }
   // tab切换
   const handleClick = (item) => {
-    console.log(item);
     setActiveColor(item.id)
     // console.log(`selected ${key}`);
     let code = item.config
@@ -113,12 +112,23 @@ export default function ScreenView() {
     }
   }
 
+  const MyStyle = (styleString) => {
+    // 将样式字符串转换为样式对象
+    const styleObject = styleString.split(';').reduce((style, declaration) => {
+      const [key, value] = declaration.split(':').map(part => part.trim());
+      if (key && value) {
+        style[key] = value;
+      }
+      return style;
+    }, {});
+    return styleObject;
+  };
   const menu = (
     <Menu
       onClick={goBoard}
       selectedKeys={[selectGroup]}
     >
-      {_.map(busiGroups, (item) => {
+      {_.map(nav2, (item) => {
         return <Menu.Item key={item.id}>{item.name}</Menu.Item>;
       })}
     </Menu>
@@ -174,6 +184,12 @@ export default function ScreenView() {
         }
       }
     })
+    // 获取二级导航
+    getNav2().then(res => {
+      if (res.dat.length) {
+        setNav2(res.dat)
+      }
+    })
   }, []);
   return (
     <div className='screen-view'>
@@ -181,9 +197,11 @@ export default function ScreenView() {
         <div className='screen1-cont'>
           {/* tab标签 */}
           <div className='screen-tab'>
-            {_.map(screenList, (item, index) => {
+            {_.map(screenList.filter(x => x.type == 1), (item, index) => {
               return (
-                <div className='c-tab' style={{color: activeColor == item.id ? '#fff' : '#bbb'}} key={item.id} onClick={() => handleClick(item)}>{item.title}</div>
+                <div className={['c-tab', activeColor == item.id ? 'active' : null].join(" ")} style={{ width: item.bg_width / 18 + 'vw', height: item.bg_height / 18 + 'vw', background: item.bg_color, ...MyStyle(item.nav_template) }} key={item.id} onClick={() => handleClick(item)}>
+                  <span className='title' style={{ fontSize: item.font_size / 18 + 'vw', color: item.font_color, ...MyStyle(item.nav_template) }}>{item.nav_name}</span>
+                </div>
               )
             })}
           </div>

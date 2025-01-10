@@ -215,36 +215,38 @@ const index = (_props: any) => {
                     </Button>
                   </Link>
                 }
-                <Dropdown
-                  overlay={
-                    <Menu>
-                      <Menu.Item>
-                        <Button
-                          type='link'
-                          disabled={selectedIds.length === 0}
-                          onClick={() => {
-                            handleBatchBindTags();
-                          }}
-                        >
-                          {t('tpl.tag.bind')}
-                        </Button>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <Button
-                          type='link'
-                          disabled={selectedIds.length === 0}
-                          onClick={() => {
-                            handleBatchUnBindTags();
-                          }}
-                        >
-                          {t('tpl.tag.unbind')}
-                        </Button>
-                      </Menu.Item>
-                    </Menu>
-                  }
-                >
-                  <Button icon={<DownOutlined />}>{t('btn.batch_operations')}</Button>
-                </Dropdown>
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/job-task/ops")) && <Dropdown
+                    overlay={
+                      <Menu>
+                        <Menu.Item>
+                          <Button
+                            type='link'
+                            disabled={selectedIds.length === 0}
+                            onClick={() => {
+                              handleBatchBindTags();
+                            }}
+                          >
+                            {t('tpl.tag.bind')}
+                          </Button>
+                        </Menu.Item>
+                        <Menu.Item>
+                          <Button
+                            type='link'
+                            disabled={selectedIds.length === 0}
+                            onClick={() => {
+                              handleBatchUnBindTags();
+                            }}
+                          >
+                            {t('tpl.tag.unbind')}
+                          </Button>
+                        </Menu.Item>
+                      </Menu>
+                    }
+                  >
+                    <Button icon={<DownOutlined />}>{t('btn.batch_operations')}</Button>
+                  </Dropdown>
+                }
               </Col>
             </Row>
             <Table

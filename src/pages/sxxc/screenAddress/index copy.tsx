@@ -1,15 +1,20 @@
+// page list 接口管理
+// date : 2023-10-21 09:09
+// desc : 接口管理
+
 import { Button, Input, message, Modal, Space, Table } from 'antd';
 import _ from 'lodash';
-import React, { useEffect, useState, useContext } from 'react';
-import { DeleteOutlined, EditOutlined, FileSearchOutlined, SearchOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
-import { CommonStateContext } from '@/App';
+
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
 import { deleteScreenById, getBigScreen } from '@/services/sxxc/bigScreen';
 import Add from './Add';
 import Edit from './Edit';
 import Detail from './Detail';
+
 import './index.less';
 
 export type ApiServiceType = {
@@ -26,10 +31,10 @@ const ApiService = () => {
   const [items, setItems] = useState([]);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [searchVal, setSearchVal] = useState('');
-  const { profile, permList } = useContext(CommonStateContext);
   const history = useHistory();
 
   useEffect(() => {
+    // console.log(location);
     getBigScreen().then(res => {
       setItems(res.dat.list)
     })
@@ -51,20 +56,16 @@ const ApiService = () => {
               </div> */}
             </Space>
             <Space>
-              {
-                (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/add")) && <div>
-                  <Button
-                    style={{ backgroundColor: '#76D183', border: 'none' }}
-                    type='primary'
-                    onClick={() => {
-                      history.push(`address/add`);
-                    }}
-                  >
-                    新建
-                  </Button>
-                </div>
-              }
-
+              <div>
+                <Button
+                  type='primary'
+                  onClick={() => {
+                    history.push(`address/add`);
+                  }}
+                >
+                  新建
+                </Button>
+              </div>
             </Space>
           </div>
           <Table
@@ -72,49 +73,39 @@ const ApiService = () => {
             dataSource={items}
             rowKey='id'
             columns={[
-              { title: '大屏标题', dataIndex: 'title' },
-              {
-                title: '大屏类型', dataIndex: 'type', render: (value) => {
-                  return value == 1 ? '一级大屏' : value == 2 ? '二级大屏' : '';
-                },
-              },
+              { title: '标题', dataIndex: 'title' },
+              // { title: '大屏名称', dataIndex: 'screenName' },
               { title: '配置', dataIndex: 'config' },
-              { title: '更新人', dataIndex: 'updated_by' },
+              { title: '简介', dataIndex: 'desc' },
+              { title: '创建人', dataIndex: 'created_by' },
+              // { title: '数据源', dataIndex: 'datasource_id' },
+              // { title: 'URL', dataIndex: 'url' },
               {
-                title: '更新时间',
-                dataIndex: 'updated_at',
+                title: '创建时间',
+                dataIndex: 'created_at',
                 render: (value) => {
                   return new Date(value * 1000).toLocaleString();
                 },
               },
               {
                 title: '操作',
-                width: '220px',
+                width: '120px',
                 align: 'center',
                 fixed: 'right',
                 render: (value: string, record: any) => (
                   <Space>
-                    {
-                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/detail")) &&
-                      <div className='items' onClick={(e) => {
+                    <SearchOutlined
+                      onClick={() => {
                         history.push(`address/${record.id}`);
-                      }}>
-                        <FileSearchOutlined />
-                        <span className='text'>查看</span>
-                      </div>
-                    }
-                    {
-                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/put")) &&
-                      <div className='items' onClick={(e) => {
+                      }}
+                    ></SearchOutlined>
+                    <EditOutlined
+                      onClick={() => {
                         history.push(`address/${record.id}/edit`);
-                      }}>
-                        <EditOutlined />
-                        <span className='text'>编辑</span>
-                      </div>
-                    }
-                    {
-                      (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/del")) &&
-                      <div className='items' onClick={async () => {
+                      }}
+                    />
+                    <DeleteOutlined
+                      onClick={() => {
                         Modal.confirm({
                           title: '是否确认删除?',
                           onOk: () => {
@@ -123,13 +114,10 @@ const ApiService = () => {
                               setRefreshKey(_.uniqueId());
                             });
                           },
-                          onCancel() { },
+                          onCancel() {},
                         });
-                      }}>
-                        <DeleteOutlined />
-                        <span className='text'>删除</span>
-                      </div>
-                    }
+                      }}
+                    />
                   </Space>
                 ),
               },

@@ -2,7 +2,7 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import { message, notification } from 'antd';
-
+import _ from 'lodash';
 // // 查询分组对应大屏
 // export const getListGroupScreen = function () {
 //     return request(`/dataroomxc/bigScreenServer/bigScreen/design/listGroupScreen`, {
@@ -133,4 +133,19 @@ export const deleteScreenById = function (id: number | string) {
         method: RequestMethod.Delete,
     })
 }
-
+// 大屏二级导航
+export function getNav2(query = '', limit: number = 5000) {
+    return request(`/api/n9e/bigscreen/busi-groups`, {
+      method: RequestMethod.Get,
+      params: Object.assign(
+        {
+          limit,
+        },
+        query ? { query } : {},
+      ),
+    }).then((res) => {
+      return {
+        dat: _.sortBy(res.dat, 'name'),
+      };
+    });
+  }

@@ -70,7 +70,7 @@ export default function Title(props: IProps) {
   const [form] = Form.useForm();
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false)
-  const { profile, setProfile } = useContext(CommonStateContext);
+  const { permList, profile, setProfile } = useContext(CommonStateContext);
   const setHomePage = () => {
     // setHome(id);
     updateSelfBoard({
@@ -255,7 +255,7 @@ export default function Title(props: IProps) {
           </Space>
         </div>
       }
-      {isHome && (
+      {isHome && (profile.roles?.includes("Admin") || permList.includes("/home/setBoards")) && (
         <div className='dashboard-detail-header-right'>
           <Button
             loading={loading}

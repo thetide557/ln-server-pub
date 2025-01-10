@@ -17,7 +17,7 @@
 /**
  * 类似 prometheus graph 的组件
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import { Input, Tabs, Button, Alert, Checkbox } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
@@ -30,6 +30,7 @@ import Table from './Table';
 import Graph from './Graph';
 import QueryStatsView, { QueryStats } from './components/QueryStatsView';
 import MetricsExplorer from './components/MetricsExplorer';
+import { CommonStateContext } from '@/App';
 import './locale';
 import './style.less';
 
@@ -87,6 +88,7 @@ export default function index(props: IProps) {
   const [metricsExplorerVisible, setMetricsExplorerVisible] = useState(false);
   const [completeEnabled, setCompleteEnabled] = useState(true);
   const promQLInputRef = useRef<any>(null);
+  const { profile, permList } = useContext(CommonStateContext);
 
   useEffect(() => {
     if (typeof defaultTime === 'number') {
@@ -170,18 +172,21 @@ export default function index(props: IProps) {
               background: 'none',
             }}
           >
-            <Button
-              onClick={() => {
-                PromQueryBuilderModal({
-                  range,
-                  datasourceValue,
-                  value,
-                  onChange: setValue,
-                });
-              }}
-            >
-              {t('builder_btn')}
-            </Button>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/metric/explorer/newMode")) && <Button
+                onClick={() => {
+                  PromQueryBuilderModal({
+                    range,
+                    datasourceValue,
+                    value,
+                    onChange: setValue,
+                  });
+                }}
+              >
+                {t('builder_btn')}
+              </Button>
+            }
+
           </span>
           <span
             className='ant-input-group-addon'
@@ -191,16 +196,19 @@ export default function index(props: IProps) {
               background: 'none',
             }}
           >
-            <Button
-              type='primary'
-              onClick={() => {
-                setRefreshFlag(_.uniqueId('refreshFlag_'));
-                setPromql(value);
-                executeQuery && executeQuery(value);
-              }}
-            >
-              {t('query_btn')}
-            </Button>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/metric/explorer/query")) && <Button
+                type='primary'
+                onClick={() => {
+                  setRefreshFlag(_.uniqueId('refreshFlag_'));
+                  setPromql(value);
+                  executeQuery && executeQuery(value);
+                }}
+              >
+                {t('query_btn')}
+              </Button>
+            }
+
           </span>
         </Input.Group>
       </div>

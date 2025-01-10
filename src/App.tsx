@@ -479,6 +479,13 @@ function App() {
           // 存储用户id
           localStorage.setItem('userId', profile?.id)
           const { dat: busiGroups } = await getBusiGroups();
+          let groupIds = ''
+          if (busiGroups.length > 0) {
+            groupIds = busiGroups.map(item => item.id).toString()
+          }
+          localStorage.setItem('groupIds', groupIds)
+          
+          
           const { dat: permList } = await getMenuPerm()
           const datasourceList = await getDatasourceBriefList();
           const { licenseRulesRemaining, licenseExpireDays, feats } = await getLicense(t);

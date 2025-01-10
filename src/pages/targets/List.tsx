@@ -63,7 +63,7 @@ export default function List(props: IProps) {
   const { t } = useTranslation('targets');
   const { curBusiId, selectedIdents, setSelectedIdents, selectedRowKeys, setSelectedRowKeys, refreshFlag, setRefreshFlag, setOperateType } = props;
   const isAddTagToQueryInput = useRef(false);
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const [searchVal, setSearchVal] = useState('');
   const [tableQueryContent, setTableQueryContent] = useState<string>('');
   const [columnsConfigs, setColumnsConfigs] = useState<{ name: string; visible: boolean }[]>(getDefaultColumnsConfigs());
@@ -503,40 +503,44 @@ export default function List(props: IProps) {
           />
         </Space>
         <Space>
-          <Button
-            onClick={() => {
-              OrganizeColumns({
-                value: columnsConfigs,
-                onChange: (val) => {
-                  setColumnsConfigs(val);
-                  setDefaultColumnsConfigs(val);
-                },
-              });
-            }}
-          >
-            {t('organize_columns.title')}
-          </Button>
-          <Dropdown
-            trigger={['click']}
-            overlay={
-              <Menu
-                onClick={({ key }) => {
-                  setOperateType(key as OperateType);
-                }}
-              >
-                <Menu.Item key={OperateType.BindTag}>{t('bind_tag.title')}</Menu.Item>
-                <Menu.Item key={OperateType.UnbindTag}>{t('unbind_tag.title')}</Menu.Item>
-                <Menu.Item key={OperateType.UpdateBusi}>{t('update_busi.title')}</Menu.Item>
-                <Menu.Item key={OperateType.RemoveBusi}>{t('remove_busi.title')}</Menu.Item>
-                <Menu.Item key={OperateType.UpdateNote}>{t('update_note.title')}</Menu.Item>
-                <Menu.Item key={OperateType.Delete}>{t('batch_delete.title')}</Menu.Item>
-              </Menu>
-            }
-          >
-            <Button>
-              {t('common:btn.batch_operations')} <DownOutlined />
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/targets/col")) && <Button
+              onClick={() => {
+                OrganizeColumns({
+                  value: columnsConfigs,
+                  onChange: (val) => {
+                    setColumnsConfigs(val);
+                    setDefaultColumnsConfigs(val);
+                  },
+                });
+              }}
+            >
+              {t('organize_columns.title')}
             </Button>
-          </Dropdown>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/targets/ops")) && <Dropdown
+              trigger={['click']}
+              overlay={
+                <Menu
+                  onClick={({ key }) => {
+                    setOperateType(key as OperateType);
+                  }}
+                >
+                  <Menu.Item key={OperateType.BindTag}>{t('bind_tag.title')}</Menu.Item>
+                  <Menu.Item key={OperateType.UnbindTag}>{t('unbind_tag.title')}</Menu.Item>
+                  <Menu.Item key={OperateType.UpdateBusi}>{t('update_busi.title')}</Menu.Item>
+                  <Menu.Item key={OperateType.RemoveBusi}>{t('remove_busi.title')}</Menu.Item>
+                  <Menu.Item key={OperateType.UpdateNote}>{t('update_note.title')}</Menu.Item>
+                  <Menu.Item key={OperateType.Delete}>{t('batch_delete.title')}</Menu.Item>
+                </Menu>
+              }
+            >
+              <Button>
+                {t('common:btn.batch_operations')} <DownOutlined />
+              </Button>
+            </Dropdown>
+          }
         </Space>
       </div>
       <Table

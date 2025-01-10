@@ -439,8 +439,11 @@ const Resource: React.FC = () => {
                             </Form.Item>
                         </Space>
                         <Space>
-                            <Button style={{ marginLeft: '16px' }} onClick={handleSubmit}
-                            >查询</Button>
+                            {
+                                (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionQuery')) && <Button style={{ marginLeft: '16px' }} onClick={handleSubmit}
+                                >查询</Button>
+                            }
+                           
                         </Space>
                     </Form>
 

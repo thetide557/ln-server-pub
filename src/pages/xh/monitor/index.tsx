@@ -692,88 +692,94 @@ export default function () {
                   &nbsp; &nbsp; &nbsp;
                 </div>
               }
-              <div>
-                <Popover placement='bottom' content={pupupContent} trigger='click' className='filter_columns'>
-                  <Button className='show_columns' icon={<UnorderedListOutlined />}>
-                    显示列
-                  </Button>
-                  &nbsp; &nbsp; &nbsp;
-                </Popover>
-              </div>
-              <div>
-                <Dropdown
-                  trigger={['click']}
-                  overlay={
-                    <Menu
-                      style={{ width: '100px' }}
-                      onClick={({ key }) => {
-                        if ('assetBatchImport' == key) {
-                          history.push('/xh/monitor/muti/add');
-                        } else {
-                          if (selectedAssets.length <= 0) {
-                            message.error('未选中监控信息');
-                            return;
-                          }
-                          if (key == 'delete') {
-                            Modal.confirm({
-                              title: '确认要强制删除当前选中的监控信息？',
-                              okText: '确定',
-                              cancelText: '取消',
-                              onOk: async () => {
-                                deleteXhBatchMonitor({ ids: selectedAssets.toString().split(',') }).then((res) => {
-                                  message.success('删除成功');
-                                  setRefreshFlag(_.uniqueId('refreshFlag_'));
-                                });
-                              },
-                              onCancel() { },
-                            });
-                          } else if (key == 'turnOnMonitoring') {
-                            Modal.confirm({
-                              title: '确认要启用当前选择监控？',
-                              onOk: async () => {
-                                updateMonitorStatus(1, selectedAssets, 1).then((res) => {
-                                  message.success('修改成功');
-                                  setOperateType(OperateType.None);
-                                  setRefreshFlag(_.uniqueId('refreshFlag_'));
-                                  onSelectNone();
-                                });
-                              },
-                              onCancel() { },
-                            });
-                          } else if (key == 'disableMonitoring') {
-                            Modal.confirm({
-                              title: '确认要禁止当前选择监控？',
-                              okText: '确定',
-                              cancelText: '取消',
-                              onOk: async () => {
-                                updateMonitorStatus(0, selectedAssets, 1).then((res) => {
-                                  message.success('修改成功');
-                                  setOperateType(OperateType.None);
-                                  setRefreshFlag(_.uniqueId('refreshFlag_'));
-                                  onSelectNone();
-                                });
-                              },
-                              onCancel() { },
-                            });
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/col")) && <div>
+                  <Popover placement='bottom' content={pupupContent} trigger='click' className='filter_columns'>
+                    <Button className='show_columns' icon={<UnorderedListOutlined />}>
+                      显示列
+                    </Button>
+                    &nbsp; &nbsp; &nbsp;
+                  </Popover>
+                </div>
+              }
+              {
+                (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/ops")) && <div>
+                  <Dropdown
+                    trigger={['click']}
+                    overlay={
+                      <Menu
+                        style={{ width: '100px' }}
+                        onClick={({ key }) => {
+                          if ('assetBatchImport' == key) {
+                            history.push('/xh/monitor/muti/add');
                           } else {
-                            setOperateType(key as OperateType);
+                            if (selectedAssets.length <= 0) {
+                              message.error('未选中监控信息');
+                              return;
+                            }
+                            if (key == 'delete') {
+                              Modal.confirm({
+                                title: '确认要强制删除当前选中的监控信息？',
+                                okText: '确定',
+                                cancelText: '取消',
+                                onOk: async () => {
+                                  deleteXhBatchMonitor({ ids: selectedAssets.toString().split(',') }).then((res) => {
+                                    message.success('删除成功');
+                                    setRefreshFlag(_.uniqueId('refreshFlag_'));
+                                  });
+                                },
+                                onCancel() { },
+                              });
+                            } else if (key == 'turnOnMonitoring') {
+                              Modal.confirm({
+                                title: '确认要启用当前选择监控？',
+                                onOk: async () => {
+                                  updateMonitorStatus(1, selectedAssets, 1).then((res) => {
+                                    message.success('修改成功');
+                                    setOperateType(OperateType.None);
+                                    setRefreshFlag(_.uniqueId('refreshFlag_'));
+                                    onSelectNone();
+                                  });
+                                },
+                                onCancel() { },
+                              });
+                            } else if (key == 'disableMonitoring') {
+                              Modal.confirm({
+                                title: '确认要禁止当前选择监控？',
+                                okText: '确定',
+                                cancelText: '取消',
+                                onOk: async () => {
+                                  updateMonitorStatus(0, selectedAssets, 1).then((res) => {
+                                    message.success('修改成功');
+                                    setOperateType(OperateType.None);
+                                    setRefreshFlag(_.uniqueId('refreshFlag_'));
+                                    onSelectNone();
+                                  });
+                                },
+                                onCancel() { },
+                              });
+                            } else {
+                              setOperateType(key as OperateType);
+                            }
                           }
-                        }
-                      }}
-                      items={[
-                        { key: OperateType.TurnOnMonitoring, label: '启用监控' },
-                        { key: OperateType.DisableMonitoring, label: '禁止监控' },
-                        // { key: OperateType.AssetBatchImport, label: '批量添加' },
-                        { key: OperateType.Delete, label: '批量删除' },
-                      ]}
-                    ></Menu>
-                  }
-                >
-                  <Button>
-                    {t('common:btn.batch_operations')} <DownOutlined />
-                  </Button>
-                </Dropdown>
-              </div>
+                        }}
+                        items={[
+                          { key: OperateType.TurnOnMonitoring, label: '启用监控' },
+                          { key: OperateType.DisableMonitoring, label: '禁止监控' },
+                          // { key: OperateType.AssetBatchImport, label: '批量添加' },
+                          { key: OperateType.Delete, label: '批量删除' },
+                        ]}
+                      ></Menu>
+                    }
+                  >
+                    <Button>
+                      {t('common:btn.batch_operations')} <DownOutlined />
+                    </Button>
+                  </Dropdown>
+                </div>
+              }
+
+
             </div>
 
           </div>
