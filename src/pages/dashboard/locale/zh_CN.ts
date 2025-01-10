@@ -303,6 +303,6 @@ const zh_CN = {
     datasource_empty: '没有数据源信息，请先配置数据源',
     invalidTimeRange: '无效的 __from 和 __to 值',
   },
-  customized: '自定义',
+  customized: '数据单位',
 };
 export default zh_CN;
