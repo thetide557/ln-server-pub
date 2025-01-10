@@ -40,7 +40,7 @@ let queryFilter = [
   { name: 'nickname', label: '显示名', type: 'input' },
   { name: 'email', label: '邮箱', type: 'input' },
   { name: 'phone', label: '手机号', type: 'input' },
-  { name: 'statu', label: '状态', type: 'select' },
+  { name: 'status', label: '状态', type: 'select' },
   { name: 'role', label: '角色', type: 'select' },
 ]
 
@@ -148,7 +148,7 @@ const Resource: React.FC = () => {
 
 
   useEffect(() => {
-    filterOptions["statu"] = [{ value: '0', label: '禁用' }, { value: '1', label: '启用' }]
+    filterOptions["status"] = [{ value: '0', label: '禁用' }, { value: '1', label: '启用' }]
     setFilterOptions({ ...filterOptions })
     getRoles().then((res) => {
       let items = res.map(role => {
