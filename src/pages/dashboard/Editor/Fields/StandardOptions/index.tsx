@@ -49,8 +49,7 @@ export default function index(props: IProps) {
                   <Form.Item
                     label={
                       <div>
-                        {/* {t('panel.standardOptions.unit')}{' '} */}
-                        {'数据单位'}{' '}
+                        {t('panel.standardOptions.unit')}{' '}
                         <Tooltip
                           overlayInnerStyle={{
                             width: 500,
@@ -110,7 +109,7 @@ export default function index(props: IProps) {
                 <Col span={20}>
                   <Form.Item name={[...namePrefix, 'customizedUnit']}  >
                   {customized &&
-                    <Input placeholder='请输入自定义单位' />}
+                    <Input placeholder='请输入数据单位' />}
                   </Form.Item>
                   
                 </Col>
