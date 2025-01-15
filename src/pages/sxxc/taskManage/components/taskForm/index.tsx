@@ -160,7 +160,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
           })}
         </Select>
       </Form.Item>
-      <Form.Item label={'需要分析：'}>
+      {/* <Form.Item label={'需要分析：'}>
         <Switch checked={strategy} onChange={onChange}></Switch>
       </Form.Item>
       {strategy && (
@@ -177,7 +177,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
             </Select>
           </Form.Item>
         </>
-      )}
+      )} */}
       <Form.Item label={'备注：'} name='remark'>
         <TextArea showCount rows={4} placeholder="100字" maxLength={100} />
       </Form.Item>

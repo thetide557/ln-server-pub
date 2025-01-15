@@ -517,16 +517,17 @@ export default function () {
   const titleRender = (node) => {
     return (
       <div style={{ position: 'relative', width: '100%' }}>
-        <span>
-          {node.name}
-          {node.id > 0 && (
+        <span style={{display: 'flex', justifyContent: 'space-between'}}>
+        <span>{node.name}</span>
+        <span>{node?.number}</span>
+          {/* {node.id > 0 && (
             <Fragment>
               <span style={{ marginLeft: '5px' }} className='tree_node_count'>
                 {' '}
                 ({node.count})
               </span>
             </Fragment>
-          )}
+          )} */}
         </span>
       </div>
     );

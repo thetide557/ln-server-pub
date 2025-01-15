@@ -72,10 +72,10 @@ const Resource: React.FC = () => {
       title: '任务子类',
       dataIndex: 'taskSubType',
     },
-    {
-      title: '策略名称',
-      dataIndex: 'strategyName',
-    },
+    // {
+    //   title: '策略名称',
+    //   dataIndex: 'strategyName',
+    // },
     {
       title: '巡检计划',
       dataIndex: 'inspectionLogName',
@@ -200,7 +200,7 @@ const Resource: React.FC = () => {
       inspectionLogId: inspectionLogId ? inspectionLogId : undefined,
       pageSize: pageSize,
       pageNum: current,
-      // groupIds: groupIds?.toString()
+      groupIds: groupIds?.toString()
     };
 
     return getTaskLogList({
@@ -296,7 +296,7 @@ const Resource: React.FC = () => {
                 />
               </Form.Item>
             </Space>
-            <Space style={{ marginRight: 16 }}>
+            {/* <Space style={{ marginRight: 16 }}>
               <Form.Item label={'策略名称：'} name='strategyName'>
                 <Select allowClear placeholder={'任务子类'} style={{ width: 200 }}>
                   {_.map(strategyList, (item) => {
@@ -308,7 +308,7 @@ const Resource: React.FC = () => {
                   })}
                 </Select>
               </Form.Item>
-            </Space>
+            </Space> */}
             <Space style={{ marginRight: 16 }}>
               <Form.Item label={'任务类型'}>
                 <Select allowClear placeholder={'任务类型'} style={{ width: 200 }} value={taskType} onChange={onChangeType} onClear={clearType}>

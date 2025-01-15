@@ -25,7 +25,7 @@ import { ColumnsType } from 'antd/lib/table';
 import { useTranslation } from 'react-i18next';
 import { useAntdTable } from 'ahooks';
 import PageLayout from '@/components/pageLayout';
-import { getInspectionList, addInspection, editInspectionStatus, editInspection, removeInspection } from '@/services/sxxc/inspection'
+import { getInspectionList, addInspection, editInspectionStatus, editInspection, removeInspection, getInspectionDetailByGroup } from '@/services/sxxc/inspection'
 import { InspectionType, Inspection } from '@/store/sxxc/inspection';
 import { CommonStateContext } from '@/App';
 import usePagination from '@/components/usePagination';
@@ -123,7 +123,7 @@ const Resource: React.FC = () => {
                             报告
                         </Button>
                     }
-                     {
+                    {
                         (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionLog')) && <Button className='oper-name' type='link' onClick={() => goLog(record)}>
                             日志
                         </Button>
@@ -164,12 +164,18 @@ const Resource: React.FC = () => {
     const handleClick = (type: InspectionType, id?: string) => {
         if (id) {
             setInspectionId(id);
+            const params = {
+                groupIds: localStorage.getItem('groupIds')
+            }
+            getInspectionDetailByGroup(id, params).then((res) => {
+                if (res.code != 200) return message.error(res.msg)
+                setVisible(true)
+            });
         } else {
             setInspectionId('');
+            setVisible(true);
         }
-
         setInspection(type);
-        setVisible(true);
     }
 
     const changeStatus = (val) => {

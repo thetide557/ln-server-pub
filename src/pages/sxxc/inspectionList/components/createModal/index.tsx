@@ -68,7 +68,8 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
                 params.excuteDate = moment(params.excuteDate).format('YYYY-MM-DD');
             }
             if (params.scope == 1) {
-                delete params.scopeContext
+                // delete params.scopeContext
+                params.scopeContext = localStorage.getItem('groupIds')
                 delete params.hosts
             } else if (params.scope == 2) {
                 delete params.hosts

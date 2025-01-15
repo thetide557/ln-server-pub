@@ -23,14 +23,14 @@ import React, { ReactNode, useEffect, useImperativeHandle, useState, useContext 
 import { useTranslation } from 'react-i18next';
 import { getBusiGroups } from '@/services/common';
 import { getMonObjectList } from '@/services/targets';
-import { getAssets1 } from '@/services/assets';
+import { getAssets1, getAssetsByCondition } from '@/services/assets';
 import { Task, TaskType } from '@/store/sxxc/taskInterface';
 import { ColumnsType } from 'antd/lib/table';
 import usePagination from '@/components/usePagination';
 import { useAntdTable } from 'ahooks';
 import moment from 'moment';
 import { getBizScriptList, getTaskTypeList } from '@/services/sxxc/taskManage'
-import { getInspectionList, getInspectionDetail } from '@/services/sxxc/inspection'
+import { getInspectionList, getInspectionDetail, getInspectionDetailByGroup } from '@/services/sxxc/inspection'
 // import { Link, Switch } from 'react-router-dom';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
@@ -103,10 +103,10 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
             title: '任务子类',
             dataIndex: 'taskSubName',
         },
-        {
-            title: '策略名称',
-            dataIndex: 'strategyName',
-        },
+        // {
+        //     title: '策略名称',
+        //     dataIndex: 'strategyName',
+        // },
         {
             title: '时间',
             dataIndex: 'createTime',
@@ -124,14 +124,14 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     }));
 
     useEffect(() => {
-        getBusiGroup()
-        getTaskType()
-        run({ current: 1, pageSize: pagination.pageSize });
         if (inspectionId) {
             getInspectionInfo(inspectionId);
         } else {
             setLoading(false);
         }
+        getBusiGroup()
+        getTaskType()
+        run({ current: 1, pageSize: pagination.pageSize });
     }, []);
     const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
     const getTableData = ({ current, pageSize }): Promise<any> => {
@@ -163,18 +163,31 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
             setServeList(res.dat || []);
         });
         const query = {
-            query: '',
-            bgid: '-1',
+            // query: '',
+            // bgid: '-1',
+            page: 1,
             limit: 5000,
-            p: 1,
+            groupIds: localStorage.getItem('groupIds')
         };
         // getMonObjectList(query).then(res => {
         //     let list = res.dat.list
         //     setIpList(list)
         // })
         // 资产状态为在线：过滤status: 1
-        getAssets1(query).then(res => {
-            let list = res.dat?.filter(item => {
+        // getAssets1(query).then(res => {
+        //     let list = res.dat?.filter(item => {
+        //         if(item.status == 1){
+        //             if (item.type == '物理服务器' || item.type == '虚拟服务器') {
+        //                 return true
+        //             }
+        //         }
+        //     })
+        //     console.log('list', list);
+
+        //     setIpList(list)
+        // })
+        getAssetsByCondition(query).then(res => {
+            let list = res.dat?.list?.filter(item => {
                 if(item.status == 1){
                     if (item.type == '物理服务器' || item.type == '虚拟服务器') {
                         return true
@@ -185,6 +198,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
 
             setIpList(list)
         })
+        
     }
 
     const getTaskType = () => {
@@ -231,8 +245,10 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     }
 
     const getInspectionInfo = (id: string) => {
-        getInspectionDetail(id).then((res) => {
-            console.log(res.data)
+        const params = {
+            groupIds: localStorage.getItem('groupIds')
+        }
+        getInspectionDetailByGroup(id, params).then((res) => {
             setType(res.data.executeCycle)
             setScope(res.data.scope)
             res.data.excuteTime = dayjs(res.data.excuteTime, timeFormat)

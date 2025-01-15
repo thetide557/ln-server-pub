@@ -14,6 +14,13 @@ export function getInspectionDetail(id) {
         method: RequestMethod.Get,
     });
 }
+// 获取巡检任务详情
+export function getInspectionDetailByGroup(id, params) {
+    return request(`/sxxcTask/biz/task/inspection/detail/${id}`, {
+        method: RequestMethod.Get,
+        params
+    });
+}
 // 新增巡检
 export function addInspection (data: any) {
     return request(`/sxxcTask/biz/task/inspection/add`, {

@@ -142,11 +142,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('任务管理'),
         },
-        {
-          key: '/taskManage/strategy',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('任务策略'),
-        },
+        // {
+        //   key: '/taskManage/strategy',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('任务策略'),
+        // },
         {
           key: '/taskManage/taskInstance',
           icon: <IconFont type='icon-Menu_Infrastructure' />,

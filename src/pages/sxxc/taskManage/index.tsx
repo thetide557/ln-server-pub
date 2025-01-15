@@ -94,10 +94,10 @@ const Resource: React.FC = () => {
       title: "任务子类",
       dataIndex: "taskSubName",
     },
-    {
-      title: "策略名称",
-      dataIndex: "strategyName",
-    },
+    // {
+    //   title: "策略名称",
+    //   dataIndex: "strategyName",
+    // },
     {
       title: "时间",
       dataIndex: "createTime",
@@ -277,7 +277,7 @@ const Resource: React.FC = () => {
                 />
               </Form.Item>
             </Space>
-            <Space style={{ marginRight: 16 }}>
+            {/* <Space style={{ marginRight: 16 }}>
               <Form.Item
                 label={"策略名称"}
                 name="strategyName"
@@ -297,7 +297,7 @@ const Resource: React.FC = () => {
                   }}
                 />
               </Form.Item>
-            </Space>
+            </Space> */}
             <Space style={{ marginRight: 16 }}>
               <Form.Item label={"任务类型"}>
                 <Select
