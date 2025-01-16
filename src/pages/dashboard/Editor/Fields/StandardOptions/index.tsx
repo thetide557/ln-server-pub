@@ -45,7 +45,7 @@ export default function index(props: IProps) {
 
             return (
               <Row gutter={10}>
-                <Col span={unit.indexOf('datetime') > -1 ? 12 : 24}>
+                <Col span={24}>
                   <Form.Item
                     label={
                       <div>
@@ -109,7 +109,7 @@ export default function index(props: IProps) {
                 <Col span={20}>
                   <Form.Item name={[...namePrefix, 'customizedUnit']}  >
                   {customized &&
-                    <Input placeholder='请输入自定义单位' />}
+                    <Input placeholder='请输入数据单位' />}
                   </Form.Item>
                   
                 </Col>

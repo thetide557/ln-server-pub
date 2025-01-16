@@ -240,7 +240,7 @@ const Resource: React.FC = () => {
             // checkedIp: checkedIp.length != 0 ? checkedIp.join(',') : undefined,
             pageSize: pageSize,
             pageNum: current,
-            // groupIds: groupIds?.toString(),
+            groupIds: groupIds?.toString(),
             name: name
         };
 
@@ -321,16 +321,16 @@ const Resource: React.FC = () => {
             console.log('--->busi', res)
             setServeList(res.dat || []);
         });
-        const query = {
-            query: '',
-            bgid: '-1',
-            limit: 5000,
-            p: 1,
-        };
-        getMonObjectList(query).then(res => {
-            let list = res.dat.list
-            setIpList(list)
-        })
+        // const query = {
+        //     query: '',
+        //     bgid: '-1',
+        //     limit: 5000,
+        //     p: 1,
+        // };
+        // getMonObjectList(query).then(res => {
+        //     let list = res.dat.list
+        //     setIpList(list)
+        // })
     }
 
     useEffect(() => {

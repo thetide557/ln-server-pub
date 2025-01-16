@@ -28,6 +28,7 @@ import './style.less';
 import _ from 'lodash';
 import { Resizable } from 're-resizable';
 import Accordion from './Accordion';
+import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
 import { deleteXhAssets, getAssetstypes, getAssetsByCondition } from '@/services/assets';
@@ -38,8 +39,6 @@ import { OperationModal } from './OperationModal';
 import { factories, serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
-import { settings } from 'cluster';
-import { Log } from '@/pages/explorer';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -97,6 +96,8 @@ export default function () {
   const [queryCondition, setQueryCondition] = useState<any>({});
   const groupIds = busiGroups?.map(item => item.id)
   // console.log(groupIds);
+
+  const [open, setOpen] = useState<boolean>(false)
 
 
   const filterOptions = {
@@ -478,9 +479,9 @@ export default function () {
     setSelectColumns(showColumns.concat(fixColumns));
   }
 
-  useEffect(() => {
-    //来源数据字典
-    getAssetstypes().then((res) => {
+  const getAssetTree = () => {
+     //来源数据字典
+     getAssetstypes().then((res) => {
       let arr = ['0'];
       const items = res.dat.map((v) => {
         return {
@@ -505,6 +506,10 @@ export default function () {
       loadingGroupColumns(items);
       setTreeData(_.cloneDeep(treeData));
     });
+  }
+
+  useEffect(() => {
+   getAssetTree()
   }, []);
 
   useEffect(() => {
@@ -787,6 +792,10 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
 
+  const refreshTree = () => {
+    getAssetTree()
+  }
+
   return (
     <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
       <div style={{ display: 'inline-flex' }} className='asset_list_view'>
@@ -818,7 +827,10 @@ export default function () {
               {!collapse ? <LeftOutlined /> : <RightOutlined />}
             </div>
             <div className='left_tree' style={{ display: 'inline-block' }}>
-              <div className='asset_organize_cls'>组织树列表</div>
+              <div className='asset_organize_cls'>
+                <span>组织树列表</span>
+                {/* <span className='add_group' onClick={() => {setOpen(true)}}>新增分组</span> */}
+              </div>
               <Accordion
                 isAutoInitialized={true}
                 treeData={treeData}
@@ -1037,6 +1049,8 @@ export default function () {
             </div>
           </div>
         </div>
+        {/* 分组弹窗 */}
+        {open && <AccordionModal title='新增分组' open={open} setOpen={setOpen} refreshTree={refreshTree} treeData={treeData} />}
       </div>
     </PageLayout>
   );
