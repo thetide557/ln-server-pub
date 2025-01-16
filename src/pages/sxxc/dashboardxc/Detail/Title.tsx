@@ -32,7 +32,7 @@ import { GetAssetType } from '@/services/metric';
 import { getDashboardTemplate, putDashboardTemplte, setDashboardAssetType } from '@/services/dashboardV2';
 import { updateSelfBoard } from '@/services/account';
 import { CommonStateContext } from '@/App';
-import { getBigScreen, getDashboards } from '@/services/sxxc/bigScreen';
+import { getBigScreen, getDashboards,getNav2 } from '@/services/sxxc/bigScreen';
 import { useTimeout, useTimeoutFn } from 'react-use';
 import './titleStyle.less'
 
@@ -68,6 +68,7 @@ export default function Title(props: IProps) {
   const [form] = Form.useForm();
   const [options, setOptions] = useState([]);
   const [flag, setFlag] = useState<any>(true)
+  const [nav2, setNav2] = useState<any>([]);
 
   const { profile, setProfile, busiGroups } = useContext(CommonStateContext);
   const setHomePage = () => {
@@ -130,14 +131,24 @@ export default function Title(props: IProps) {
     })
   }
 
+  // const menu = (
+  //   <Menu
+  //     selectable
+  //     onClick={goBoard}
+  //     defaultSelectedKeys={[selectGroup]}
+  //   >
+  //     {_.map(busiGroups, (item) => {
+  //       return <Menu.Item key={item.id}>{item.name}</Menu.Item>;
+  //     })}
+  //   </Menu>
+  // );
   const menu = (
     <Menu
-      selectable
       onClick={goBoard}
-      defaultSelectedKeys={[selectGroup]}
+      selectedKeys={[selectGroup]}
     >
-      {_.map(busiGroups, (item) => {
-        return <Menu.Item key={item.id}>{item.name}</Menu.Item>;
+      {_.map(nav2, (item) => {
+        return <Menu.Item key={item.id}>{item.title}</Menu.Item>;
       })}
     </Menu>
   );
@@ -182,6 +193,13 @@ export default function Title(props: IProps) {
         }),
       );
     });
+    // 获取二级导航
+    getNav2().then(res => {
+      if (res.dat.length) {
+        setNav2(res.dat)
+      }
+    })
+    
   }, []);
 
   return (
@@ -211,7 +229,8 @@ export default function Title(props: IProps) {
         )}
 
         <div className='title' style={{ width: '205px' }}>
-          {dashboard.name}
+          {/* {dashboard.name} */}
+          {nav2.filter(item => item.id == dashboard.group_id)[0]?.title}
         </div>
       </div>
       {
