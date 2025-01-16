@@ -122,8 +122,9 @@ const Resource: React.FC = () => {
                           strategyName: record.strategyName,
                           taskTypeName: record.taskType,
                           taskSubName: record.taskSubType,
-                          projectName: record.projectName,
-                          projectNames:[record.projectName] ,
+                          // projectName: record.projectName,
+                          projectNames:[record.projectName],
+                          projectCodes: [record.projectCode]
                           
                         }
                         // 执行任务run接口增加 projectNames参数，项目名称数组

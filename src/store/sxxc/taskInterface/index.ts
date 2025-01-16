@@ -49,7 +49,8 @@ export interface Serve {
   ident: string;
   remote_addr: string;
   ip:string;
-  groupId:number
+  groupId:number,
+  groupName: string
 }
 
 export interface Team {
