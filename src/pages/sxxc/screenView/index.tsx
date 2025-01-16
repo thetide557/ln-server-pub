@@ -129,7 +129,7 @@ export default function ScreenView() {
       selectedKeys={[selectGroup]}
     >
       {_.map(nav2, (item) => {
-        return <Menu.Item key={item.id}>{item.name}</Menu.Item>;
+        return <Menu.Item key={item.id}>{item.title}</Menu.Item>;
       })}
     </Menu>
   );
