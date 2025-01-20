@@ -53,11 +53,17 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
     })
   }
 
-  const onChangeType = (val) => {
+  const getTaskSubType = (val) => {
     getTaskTypeList({ parentId: val }).then((res) => {
       console.log('任务子类', res)
       setSubTypeList(res.rows)
     })
+  }
+
+  const onChangeType = (val) => {
+    // 当切换任务类型时，清空任务子类的值
+    form.setFieldsValue({ taskTypeId: undefined })
+    getTaskSubType(val)
   }
 
   const getStrategy = () => {
@@ -99,7 +105,8 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
         Object.assign({}, res.data),
       );
       getTaskType()
-      onChangeType(res.data.taskParentId)
+      // onChangeType(res.data.taskParentId)
+      getTaskSubType(res.data.taskParentId)
       getStrategy()
       if (res.data.strategyId) {
         setStrategy(() => true)
