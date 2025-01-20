@@ -94,6 +94,7 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
+  const treeQuery ={}
   const groupIds = busiGroups?.map(item => item.id)
   // console.log(groupIds);
 
@@ -480,6 +481,7 @@ export default function () {
   }
 
   const getAssetTree = () => {
+    console.log('treeQuery', treeQuery);
      //来源数据字典
      getAssetstypes().then((res) => {
       let arr = ['0'];
@@ -508,13 +510,17 @@ export default function () {
     });
   }
 
-  useEffect(() => {
-   getAssetTree()
-  }, []);
+  // useEffect(() => {
+  //  getAssetTree()
+  // }, []);
 
   useEffect(() => {
     getTableData();
   }, [searchVal, typeId, refreshKey]);
+
+  useEffect(() => {
+    getAssetTree()
+  }, [searchVal]);
 
   useInterval(() => {
     setRefreshKey(_.uniqueId('refreshKey_'));
@@ -529,12 +535,14 @@ export default function () {
 
     if (searchVal != null && searchVal.length > 0) {
       param['query'] = searchVal;
+      treeQuery['query'] = searchVal
     }
     if (typeId != null && typeId != '0' && modifyType) {
       param['type'] = typeId;
     }
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
+      treeQuery['filter'] = filterParam
     }
     setQueryCondition(param);
     getAssetsByCondition(param).then(({ dat }) => {

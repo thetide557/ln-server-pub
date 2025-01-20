@@ -40,12 +40,14 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   const [busiGroups,setBusiGroups ] = useState([] as any);
   const [serveList,setServeList] = useState([] as any);
   const [projectNameList,setProjectNameList] = useState([] as any);
+  const [projectCodes,setProjectCodes] = useState([] as any);
   const pagination = usePagination({ PAGESIZE_KEY: 'tasks' });
 
   useImperativeHandle(ref, () => ({
     serveList: serveList,
     initialValues:initialValues,
-    projectNameList:projectNameList
+    projectNameList:projectNameList,
+    projectCodes: projectCodes
   }));
 
   const taskColumn: ColumnsType<Serve> = [
@@ -54,15 +56,22 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
       render: (text: string, record) => (
         <>
           <Switch onChange={(val)=>{
-            console.log(record.ident)
+            console.log(record);
+            
+            // console.log(record.ident)
             if(val){
               // serveList.push(record.ident)
               serveList.push(record.ip)
               setServeList(serveList)
-              const projectName = busiGroups.find((item) => item.id === record.groupId)?.name;
-              projectNameList.push(projectName)
+
+              projectNameList.push(record.groupName)
               setProjectNameList(projectNameList)
+
+              projectCodes.push(record.groupId)
+              setProjectCodes(projectCodes)
             }else{
+              // console.log(111, record);
+              
               // for(let i = 0;i<serveList.length;i++){
               //   if(serveList[i] == record.ident){
               //     serveList.splice(i,1)
@@ -74,14 +83,26 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
               for(let i = 0;i<serveList.length;i++){
                 if(serveList[i] == record.ip){
                   serveList.splice(i,1)
-                  return
+                  break
                 }
               }
               setServeList(serveList)
+              
+              for(let i = 0;i<projectCodes.length;i++){
+                if(projectCodes[i] == record.groupId){
+                  projectCodes.splice(i,1)
+                  break
+                }
+              }
+              // console.log('gg', projectCodes);
+            
+              setProjectCodes(projectCodes)
+
+
               for(let i = 0;i<projectNameList.length;i++){
-                if(projectNameList[i] == record.groupId){
+                if(projectNameList[i] == record.groupName){
                   projectNameList.splice(i,1)
-                  return
+                  break
                 }
               }
               setProjectNameList(projectNameList)

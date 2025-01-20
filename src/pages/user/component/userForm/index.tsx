@@ -209,12 +209,20 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       </Row>
       <Row>
         <Col span={12} key={"item-" + 7}>
-          <Form.Item label={t('account:profile.phone')} name='phone'>
+          <Form.Item label={t('account:profile.phone')} name='phone' rules={[
+              {
+                required: true,
+              },
+            ]}>
             <Input />
           </Form.Item>
         </Col>
         <Col span={12} key={"item-" + 8}>
-          <Form.Item label={'所属团队'} name='group_name'>
+          <Form.Item label={'所属团队'} name='group_name' rules={[
+              {
+                required: true,
+              },
+            ]}>
             <Select mode='multiple' options={treeData}>
 
             </Select>
