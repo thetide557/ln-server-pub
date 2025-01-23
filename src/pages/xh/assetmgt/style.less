@@ -95,6 +95,64 @@
         border-radius: 6px;
         background: rgba(0, 0, 0, 0.1);
     }
+
+    .tree-list {
+        // margin-left: 5px;
+        .tree-row {
+            // margin-top: 10px;
+            color: #262626;
+            padding-top: 18px;
+            &:first-child {
+                padding-top: 10px;
+            }
+            .tree-group {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                padding: 0px 5px;
+                .g-name {
+                    width: 90%;
+                    padding: 4px 2px 4px 2px;
+                    margin: 0 4px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    &:hover {
+                        background-color: #eee;
+                    }
+                }
+                .more {
+                    display: inline-block;
+                    width: 15px;
+                    height: 15px;
+                    line-height: 15px;
+                    text-align: center;
+                    margin-top: -4px;
+                    color: #2B7EE5;
+                }
+            }
+            .tree-content {
+                margin-left: 24px;
+                .tree-asset {
+                    cursor: pointer;
+                    margin-top: 18px;
+                    display: flex;
+                    align-items: center;
+                    .asset-name {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 4px 2px 4px 2px;
+                        margin-left: 4px;
+                        width: 100%;
+                        &:hover {
+                            background-color: #eee;
+                        }
+                    }
+                   
+                }
+            }
+        }
+    }
 }
 
 .table-view {

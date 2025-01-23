@@ -27,7 +27,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import { getAssetstypes, getAssetsByCondition, getAssetDirectoryTree, getXhAsset } from '@/services/assets';
+import { getAssetstypes, getAssetsByCondition, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor } from '@/services/assets';
 import { getMonitorInfoList, deleteXhMonitor, deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
@@ -100,6 +100,7 @@ export default function () {
 
   const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
+  let treeQuery ={}
 
   const onSelectNone = () => {
     setSelectedAssets([]);
@@ -373,12 +374,8 @@ export default function () {
     setSelectColum(showColumns.concat(fixColumns));
   }
 
-  useEffect(() => {
-    setSecondAddButton(false);
-    setOptionColumns(baseColumns.concat(choooseColumns));
-    let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map((obj) => obj.title)));
-    setDefaultValues(modelIds);
-    getAssetstypes().then((res) => {
+  const getAssetTree = () => {
+    getMonitorAssetstypes(treeQuery).then((res) => {
       filterOptions['asset_type'] = res.dat.map((v) => {
         return {
           value: v.name,
@@ -417,6 +414,13 @@ export default function () {
       setExpandedKeys(arr);
       setTreeData(_.cloneDeep(treeData));
     });
+  }
+
+  useEffect(() => {
+    setSecondAddButton(false);
+    setOptionColumns(baseColumns.concat(choooseColumns));
+    let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map((obj) => obj.title)));
+    setDefaultValues(modelIds);
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
     getAssetsByCondition({ limit: -1 }).then(({ dat }) => {
       dat.list.forEach((v) => {
@@ -441,6 +445,10 @@ export default function () {
     getTableData(assetInfo, unitOptions);
   }, [searchVal, refreshFlag, typeId, refreshKey]);
 
+  useEffect(() => {
+      getAssetTree()
+  }, [searchVal]);
+
   const getTableData = (assets, units) => {
     const param = {
       page: current,
@@ -453,9 +461,11 @@ export default function () {
     } else {
       if (searchVal != null && searchVal.length > 0) {
         param['query'] = searchVal;
+        treeQuery['query'] = searchVal
       }
       if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
         param['filter'] = filterParam;
+        treeQuery['filter'] = filterParam;
       }
       if (currentAssetId <= 0 && typeId != null && typeId + '' != '0') {
         param['assetType'] = typeId;
@@ -544,6 +554,7 @@ export default function () {
 
     setTypeId(selectedKeys[0]);
     setCurrentAssetId(0);
+    setCurrent(1)
     if (filterParam == 'status') {
       setFilterType("select");
     } else {

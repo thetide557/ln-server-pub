@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
+import { PlusSquareOutlined, MinusSquareOutlined, FileOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';
@@ -31,7 +32,7 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { deleteXhAssets, getAssetstypes, getAssetsByCondition } from '@/services/assets';
+import { deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
@@ -94,12 +95,19 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
-  const treeQuery ={}
+  const [title, setTitle] = useState<any>('');
   const groupIds = busiGroups?.map(item => item.id)
   // console.log(groupIds);
 
+  // 资产分组
+  let treeQuery = {}
+  const [treeList, setTreeList] = useState<any>([])
   const [open, setOpen] = useState<boolean>(false)
-
+  const [isShow, setIsShow] = useState<any>(-1)
+  const [activeColor, setActiveColor] = useState<any>(-1)
+  const [parId, setParId] = useState<any>(null)
+  const [tissueId, setTissueId] = useState<any>(-1)
+  const [curGroup, setCurGroup] = useState<any>({})
 
   const filterOptions = {
     status: [
@@ -481,9 +489,28 @@ export default function () {
   }
 
   const getAssetTree = () => {
-    console.log('treeQuery', treeQuery);
-     //来源数据字典
-     getAssetstypes().then((res) => {
+    // console.log('treeQuery', treeQuery);
+    treeQuery['status'] = 0
+    getAssetstypesNew(treeQuery).then(res => {
+      const { dat } = res
+      dat.forEach(item => {
+        item['type_list'] = item['type_list'].map((v) => {
+          return {
+            id: v.name,
+            name: v.name,
+            ...v,
+            parentId: item.id
+          };
+        });
+      })
+      // console.log('dat', dat);
+      setTreeList(dat)
+    })
+  }
+
+  useEffect(() => {
+    //来源数据字典
+    getAssetstypesByParams(treeQuery).then((res) => {
       let arr = ['0'];
       const items = res.dat.map((v) => {
         return {
@@ -508,15 +535,11 @@ export default function () {
       loadingGroupColumns(items);
       setTreeData(_.cloneDeep(treeData));
     });
-  }
-
-  // useEffect(() => {
-  //  getAssetTree()
-  // }, []);
+  }, []);
 
   useEffect(() => {
     getTableData();
-  }, [searchVal, typeId, refreshKey]);
+  }, [searchVal, typeId, refreshKey, tissueId]);
 
   useEffect(() => {
     getAssetTree()
@@ -537,14 +560,18 @@ export default function () {
       param['query'] = searchVal;
       treeQuery['query'] = searchVal
     }
-    if (typeId != null && typeId != '0' && modifyType) {
+    if (typeId != null && typeId != '0' && modifyType && (tissueId == null || tissueId == undefined)) {
       param['type'] = typeId;
+    }
+    if (tissueId != null) {
+      param['tissue_tree_id'] = tissueId;
     }
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
       treeQuery['filter'] = filterParam
     }
     setQueryCondition(param);
+
     getAssetsByCondition(param).then(({ dat }) => {
       // dat.list.forEach((entity, index) => {
       //   let expands = entity.exps;
@@ -804,6 +831,23 @@ export default function () {
     getAssetTree()
   }
 
+  const handleClickTree = (item, par) => {
+    if (par) {
+      setParId(par.id)
+      setTypeId(item.id);
+      setTissueId(undefined)
+    } else {
+      setTissueId(item.id)
+      setTypeId(undefined)
+    }
+    // console.log(item);
+    setActiveColor(item.id)
+    //资产类型操作
+    setCurrent(1);
+    localStorage.setItem('left_asset_type', item.id);
+    setRefreshKey(_.uniqueId('refreshKey_'));
+  }
+
   return (
     <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
       <div style={{ display: 'inline-flex' }} className='asset_list_view'>
@@ -837,9 +881,84 @@ export default function () {
             <div className='left_tree' style={{ display: 'inline-block' }}>
               <div className='asset_organize_cls'>
                 <span>组织树列表</span>
-                {/* <span className='add_group' onClick={() => {setOpen(true)}}>新增分组</span> */}
+                <span className='add_group' onClick={() => { setOpen(true); setCurGroup({}); setTitle('新增分组') }}>新增分组</span>
               </div>
-              <Accordion
+              <div className='tree-list'>
+                {
+                  _.map(treeList, (item) => {
+                    return (
+                      <div key={item.name} className='tree-row'>
+                        <div className='tree-group'>
+                          <span>{isShow == item.id ? <MinusSquareOutlined style={{ fontSize: 13 }} onClick={() => { setIsShow(null) }} /> : <PlusSquareOutlined style={{ fontSize: 13 }} onClick={() => {
+                            setIsShow(item.id)
+                          }} />}</span>
+                          <span className='g-name' onClick={() => handleClickTree(item, null)} style={{ backgroundColor: item.id == activeColor ? '#92b7d1' : '' }}>{item.name}</span>
+                          {
+                            item.id != -1 && <Dropdown
+                              // trigger={['click']}
+                              overlay={
+                                <Menu
+                                  style={{ width: '100px' }}
+                                  onClick={({ key }) => {
+                                    // console.log(key);
+                                    if (key === 'edit') {
+                                      setTitle('编辑分组');
+                                      setCurGroup(item);
+                                      setOpen(true);
+                                    } else {
+                                      Modal.confirm({
+                                        title: '是否确认删除该分组？',
+                                        onOk: async () => {
+                                          delAssetstypesNew({ ids: item.id }).then((res) => {
+                                            message.success('删除成功');
+                                            // 删除自己则返回默认
+                                            if (item.id == tissueId) {
+                                              setTissueId(-1)
+                                              setActiveColor(-1)
+                                            }
+                                            setRefreshKey(_.uniqueId('refreshKey_'));
+                                            // setSelectedAssets([]);
+                                            getAssetTree()
+                                          });
+                                        },
+                                        onCancel() { },
+                                      });
+                                    }
+
+                                  }}
+                                  items={[
+                                    { key: 'edit', label: '编辑', icon: <EditOutlined />, },
+                                    { key: 'del', label: '删除', icon: <DeleteOutlined /> },
+                                  ]}
+                                ></Menu>
+                              }
+                            >
+                              <span className='more'>...</span>
+                            </Dropdown>
+                          }
+                        </div>
+                        {
+                          (isShow == item.id) && <div className='tree-content'>
+                            {_.map(item.type_list, item1 => {
+                              return (
+                                <div key={item1.id} className='tree-asset'>
+                                  <FileOutlined style={{ fontSize: 13 }} />
+                                  <div style={{ backgroundColor: (item1.id == activeColor && parId == item.id) ? '#92b7d1' : '' }} className='asset-name' onClick={() => handleClickTree(item1, item)}>
+                                    <span>{item1.name}</span>
+                                    <span>{item1.number}</span>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        }
+                      </div>
+                    )
+                  })
+                }
+              </div>
+              {/* 分组树 */}
+              {/* <Accordion
                 isAutoInitialized={true}
                 treeData={treeData}
                 addButton={false}
@@ -856,7 +975,7 @@ export default function () {
                     setRefreshKey(_.uniqueId('refreshKey_'));
                   }
                 }}
-              />
+              /> */}
             </div>
           </div>
         </Resizable>
@@ -1058,7 +1177,7 @@ export default function () {
           </div>
         </div>
         {/* 分组弹窗 */}
-        {open && <AccordionModal title='新增分组' open={open} setOpen={setOpen} refreshTree={refreshTree} treeData={treeData} />}
+        {open && <AccordionModal title={title} open={open} curGroup={curGroup} closeOpen={() => setOpen(false)} refreshTree={refreshTree} treeData={treeData} />}
       </div>
     </PageLayout>
   );

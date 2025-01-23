@@ -2,53 +2,83 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Form, Input, Modal, Select, message } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { CommonStateContext } from '@/App';
+import { addAssetstypesNew, editAssetstypesNew } from '@/services/assets';
 import _ from 'lodash';
 import './index.less';
 
 const AccordionModal = (props: any) => {
   const { busiGroups } = useContext(CommonStateContext);
   const [form] = Form.useForm();
-  const { title, open, setOpen, refreshTree, treeData, groupId } = props
-  console.log(treeData);
+  const { title, open, closeOpen, refreshTree, treeData, curGroup } = props
+  // console.log(treeData);
   const optionList = treeData[0]?.children || []
   const [checkList, setCheckList] = useState<any>([])
+
+  useEffect(() => {
+    console.log(curGroup);
+    if (curGroup.name) {
+      const typsList = curGroup.type_list.map(item => item.name)
+      // 修改
+      const obj = {
+        id: curGroup.id,
+        name: curGroup.name,
+        types: typsList
+      }
+      setCheckList(typsList)
+      form.setFieldsValue(obj)
+    }
+  }, [])
 
   const handleOk = () => {
     // let data = form.getFieldsValue();
     // console.log(data);
     form.validateFields().then((data) => {
-      console.log(data);
-      // setOpen(false);
-      // refreshTree()
+      let params = { ...data, status: 0 };
+      params.types = params.types.toString()
+      // console.log(curGroup);
+      if (curGroup.name) {
+        editAssetstypesNew({ ...params, id: curGroup.id }).then(res => {
+          message.success('修改成功')
+          refreshTree()
+          closeOpen()
+        })
+      } else {
+        addAssetstypesNew(params).then(res => {
+          message.success('新增成功')
+          refreshTree()
+          closeOpen()
+        })
+
+      }
     }).catch(err => {
       console.log(err);
     })
   };
 
   const handleCancel = () => {
-    setOpen(false);
+    closeOpen();
   };
 
   const handleChange = (value: any, option: any) => {
-    console.log(value);
-    console.log(option);
+    // console.log(value);
+    // console.log(option);
     setCheckList(value)
   }
 
   const reset = () => {
     // 重置下拉框
     form.setFieldsValue({
-      groups: []
+      types: []
     })
     setCheckList([])
   }
 
   const remove = (item) => {
-    console.log(item);
+    // console.log(item);
     const data = checkList.filter(param => param != item)
-    console.log(data);
+    // console.log(data);
     form.setFieldsValue({
-      groups: data
+      types: data
     })
     setCheckList(data)
   }
@@ -66,7 +96,7 @@ const AccordionModal = (props: any) => {
         <Form.Item name="name" label="分组名称" rules={[{ required: true }]}>
           <Input placeholder="请输入分组名称" maxLength={20} />
         </Form.Item>
-        <Form.Item name="groups" label="分组设备" rules={[{ required: true, message: '请选择分组内的设备类型' }]}>
+        <Form.Item name="types" label="分组设备" rules={[{ required: true, message: '请选择分组内的设备类型' }]}>
           <Select
             mode="multiple"
             placeholder="请选择分组内的设备类型"
@@ -74,9 +104,9 @@ const AccordionModal = (props: any) => {
             allowClear
           >
             {
-              _.map(optionList, item => {
+              _.map(optionList, (item) => {
                 return (
-                  <Select.Option value={item.name} key={item.id}>
+                  <Select.Option value={item.name} key={item.name}>
                     {item.name}
                   </Select.Option>
                 )
@@ -98,7 +128,7 @@ const AccordionModal = (props: any) => {
             <div className='check-content'>
               {_.map(checkList, (item) => {
                 return (
-                  <div className='check-card'>
+                  <div className='check-card' key={item}>
                     <div className='card-icon' onClick={() => { remove(item) }}></div>
                     <div>{item}</div>
                   </div>
