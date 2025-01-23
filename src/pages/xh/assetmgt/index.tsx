@@ -827,11 +827,14 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
 
-  const refreshTree = () => {
-    getAssetTree()
+  const handleClose = (value: any) => {
+    if (value == 'sure') {
+      getAssetTree()
+    }
+    setOpen(false)
   }
 
-  const handleClickTree = (item, par) => {
+  const handleClickTree = (item: any, par: any) => {
     if (par) {
       setParId(par.id)
       setTypeId(item.id);
@@ -1177,7 +1180,7 @@ export default function () {
           </div>
         </div>
         {/* 分组弹窗 */}
-        {open && <AccordionModal title={title} open={open} curGroup={curGroup} closeOpen={() => setOpen(false)} refreshTree={refreshTree} treeData={treeData} />}
+        {open && <AccordionModal title={title} open={open} curGroup={curGroup} closeOpen={handleClose} treeData={treeData} />}
       </div>
     </PageLayout>
   );

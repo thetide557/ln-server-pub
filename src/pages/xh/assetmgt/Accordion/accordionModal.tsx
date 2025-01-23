@@ -9,7 +9,7 @@ import './index.less';
 const AccordionModal = (props: any) => {
   const { busiGroups } = useContext(CommonStateContext);
   const [form] = Form.useForm();
-  const { title, open, closeOpen, refreshTree, treeData, curGroup } = props
+  const { title, open, closeOpen, treeData, curGroup } = props
   // console.log(treeData);
   const optionList = treeData[0]?.children || []
   const [checkList, setCheckList] = useState<any>([])
@@ -39,14 +39,14 @@ const AccordionModal = (props: any) => {
       if (curGroup.name) {
         editAssetstypesNew({ ...params, id: curGroup.id }).then(res => {
           message.success('修改成功')
-          refreshTree()
-          closeOpen()
+          // refreshTree()
+          closeOpen('sure')
         })
       } else {
         addAssetstypesNew(params).then(res => {
           message.success('新增成功')
-          refreshTree()
-          closeOpen()
+          // refreshTree()
+          closeOpen('sure')
         })
 
       }
@@ -56,7 +56,7 @@ const AccordionModal = (props: any) => {
   };
 
   const handleCancel = () => {
-    closeOpen();
+    closeOpen('cancel');
   };
 
   const handleChange = (value: any, option: any) => {
