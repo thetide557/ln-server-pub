@@ -562,7 +562,7 @@ export default function () {
     }
     // setFilterParam("asset_ip");
 
-    setSearchVal(null);
+    // setSearchVal(null);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
