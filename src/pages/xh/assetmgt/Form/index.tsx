@@ -1,12 +1,12 @@
 // @ts-nocheck
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-
-import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs } from 'antd';
+import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs, DatePicker, Modal, InputNumber, Timeline, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
+import moment from 'moment';
 import { CommonStateContext } from '@/App';
-import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion } from '@/services/assets';
+import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory } from '@/services/assets';
 import { MinusCircleOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -16,7 +16,11 @@ import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import { factories } from '../catalog';
 import { AutoComplete } from 'antd';
 import { tuple } from 'antd/lib/_util/type';
+import { timestamp, timestampToCST } from '@/utils/day';
+import { nextTick } from 'process';
 const { Option } = Select;
+const { TextArea } = Input;
+
 export default function () {
   const { t } = useTranslation('assets');
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
@@ -25,14 +29,10 @@ export default function () {
   const [tabIndex, setTabIndex] = useState<string>('base_set');
   const [editType, setEditType] = useState<string>('insert');
   const history = useHistory();
-
   const [hasSave, setHasSave] = useState<boolean>(true);
-
   const { search } = useLocation();
   const { mode, id } = queryString.parse(search);
-
   const [properties, setProperties] = useState({});
-
   const [params, setParams] = useState<{ label: string; name: string; required?: boolean; type: string; options?: [] }[]>([]);
   const [form] = Form.useForm();
   const [assetData, setAssetData] = useState<any>({}); // 集中保存提交的数据
@@ -40,12 +40,60 @@ export default function () {
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   // const [assetOptions1, setAssetOptions1] = useState<any[]>([]);
-
+  const [maintenanceRecordModalOpen, setMaintenanceRecordModalOpen] = useState(false);
+  const [maintenanceHistoryModalOpen, setMaintenanceHistoryModalOpen] = useState(false);
+  const [maintenanceHistory, setMaintenanceHistory] = useState<any[]>([]);
+  const [maintenanceRecordForm] = Form.useForm();
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
   };
-
+  const alertSstatusOption = [
+    {
+      label: '到期前一天',
+      value: 0
+    },
+    {
+      label: '到期前三天',
+      value: 1
+    },
+    {
+      label: '到期前一周',
+      value: 2
+    },
+    {
+      label: '到期前两周',
+      value: 3
+    },
+  ]
+  const maintenanceStatusOption = [
+    {
+      label: '维保中',
+      value: 0
+    },
+    {
+      label: '已正常',
+      value: 1
+    },
+    {
+      label: '待维保',
+      value: 2
+    }
+  ]
+  const maintenanceTypeOption = [
+    {
+      label: '例行检查',
+      value: 0
+    },
+    {
+      label: '故障修复',
+      value: 1
+    },
+    {
+      label: '到期维护',
+      value: 2
+    }
+  ]
   // 根据选择资产类型生成表单
   useEffect(() => {
     const assetType: any = assetTypes.find((v) => v.name === currentType);
@@ -92,6 +140,11 @@ export default function () {
           });
         }
       }
+      // 增加维保信息tab
+      items.push({
+        name: 'maintenance',
+        label: '维保信息',
+      })
       setProperties(properties);
       setFormItems(items);
     }
@@ -142,6 +195,8 @@ export default function () {
         const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
+        console.log(dat);
+
         form.setFieldsValue(dat);
         setCurrentType(dat.type);
       });
@@ -172,7 +227,7 @@ export default function () {
   //     setAssetOptions(assetOptions1)
   //   }
   // }
-  
+
 
   useEffect(() => {
     getAssetstypes().then((res) => {
@@ -199,7 +254,7 @@ export default function () {
           type: v.type
         });
       });
-      let options1= options.sort((a, b) => localeCompare(a.label, b.label));
+      let options1 = options.sort((a, b) => localeCompare(a.label, b.label));
       options = options1.filter(item => {
         if (item.type.includes('服务器') || item.type.includes('虚拟')) {
           return true
@@ -225,7 +280,6 @@ export default function () {
   }, [id]);
 
   const TabOperteClick = (tabIndex: string) => {
-
     setTabIndex(tabIndex);
     if (tabIndex != 'base_set' && id == null) {
       setHasSave(false);
@@ -263,7 +317,7 @@ export default function () {
           });
         await addXHAssetExpansion(subItem, id, v.name);
       });
-      message.success('操作成功');
+      saveMaintenanceInfo();
       history.goBack();
       // loadAssetInfo(id);
     }
@@ -288,8 +342,71 @@ export default function () {
     const params = { ident: values.ip }
     setAssetData({ ...assetData, ...values, ...params });
   };
-
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
+
+  // 获取维保信息详情
+  const getMaintenanceInfo = () => {
+    getMaintenanceInfoById(_.toNumber(id)).then((res) => {
+      let dats = {
+        ...res.dat,
+        last_maintenace_date: res.dat.last_maintenace_date == 0 ? '' : moment(res.dat.last_maintenace_date * 1000),
+        purchase_data: moment(res.dat.purchase_data * 1000),
+        next_maintenace_date: moment(res.dat.next_maintenace_date * 1000),
+        last_maintenace_date: moment(res.dat.last_maintenace_date * 1000),
+        warranty_date: moment(res.dat.warranty_date * 1000),
+      }
+      form.setFieldsValue(dats);
+    })
+  }
+  //保存维保信息
+  const saveMaintenanceInfo = () => {
+    editMaintenanceInfo({
+      asset_id: _.toNumber(id),
+      asset_model: assetData.asset_model,
+      purchase_data: timestamp(assetData.purchase_data),
+      asset_position: assetData.asset_position,
+      warranty_date: timestamp(assetData.warranty_date),
+      last_maintenace_date: assetData.last_maintenace_date,
+      next_maintenace_date: timestamp(assetData.next_maintenace_date),
+      maintainers: assetData.maintainers,
+      maintainers_mail: assetData.maintainers_mail,
+      alert_status: assetData.alert_status,
+      maintenance_status: assetData.maintenance_status,
+    }).then((res) => {
+      message.success('操作成功');
+    });
+  }
+  // show 维保记录弹框
+  const showMaintenanceRecord = () => {
+    setMaintenanceRecordModalOpen(true);
+  }
+  const mrhandleOk = () => {
+    let formData = maintenanceRecordForm.getFieldsValue();
+    addMaintenanceHistory({
+      ...formData,
+      asset_id: _.toNumber(id),
+      maintenance_date: timestamp(formData.maintenance_date)
+    }).then((res) => {
+      message.success('操作成功');
+      setMaintenanceRecordModalOpen(false);
+    });
+  };
+  // show 维保历史弹框
+  const showmaintenanceHistory = () => {
+    getMaintenanceHistoryData()
+    setMaintenanceHistoryModalOpen(true);
+  }
+  const getMaintenanceHistoryData = (maintenanceDate = -1) => {
+    getMaintenanceHistory({ id: _.toNumber(id), maintenanceDate: maintenanceDate }).then((res) => {
+      setMaintenanceHistory(res.dat);
+    });
+  }
+  const maintenanceDateChange = (date, dateString) => {
+    getMaintenanceHistoryData(!date ? -1 : timestamp(date))
+  }
+  const mhhandleOk = () => {
+    setMaintenanceHistoryModalOpen(false);
+  };
   return (
     <div className='asset_every'>
       <div className='assetmgt_header_select'>
@@ -299,6 +416,10 @@ export default function () {
           type='card'
           size='small'
           onTabClick={(key) => {
+            console.log(key);
+            if (key == 'maintenance') {
+              getMaintenanceInfo()
+            }
             TabOperteClick(key);
           }}
         >
@@ -444,7 +565,7 @@ export default function () {
             )}
           </div>
         )}
-        {tabIndex != 'base_set' && (
+        {tabIndex != 'base_set' && tabIndex != 'maintenance' && (
           <div className='card-wrapper'>
             {formItems.map((groupItem, index) => {
               if (tabIndex == groupItem.name) {
@@ -540,6 +661,86 @@ export default function () {
             })}
           </div>
         )}
+        {/* 维保信息 */}
+        {tabIndex == 'maintenance' && (
+          <div className='card-wrapper' >
+            <Card {...panelBaseProps} className='card_base' style={{ padding: '1rem 0' }}>
+              <Row>
+                <Col span={4} offset={22}>
+                  <span className='hsBtn' onClick={showmaintenanceHistory}>维保历史</span>
+                </Col>
+              </Row>
+              <Row gutter={10}>
+                <Col span={12}>
+                  <Form.Item label='资产型号' name='asset_model'>
+                    <Input placeholder='请输入资产型号' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='购置日期' name='purchase_data' >
+                    <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} placeholder='请选择购置日期' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='所在位置' name='asset_position' rules={[{ required: true }]}>
+                    <Input placeholder='请输入所在位置' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='保修期至' name='warranty_date' rules={[{ required: false }]}>
+                    <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} placeholder='请选择保修期至' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='上次维保日期' name='last_maintenace_date"'>
+                    <DatePicker format='YYYY-MM-DD' disabled style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='下次维保日期' name='next_maintenace_date' rules={[{ required: true }]}>
+                    <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} placeholder='请选择下次维保日期' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='维保人员' name='maintainers' rules={[{ required: true }]}>
+                    <Input placeholder='请输入维保人员' />
+                  </Form.Item>
+                </Col>
+
+                <Col span={12}>
+                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true }]}>
+                    <Input placeholder='请输入维保人员邮箱' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='维保提醒' name='alert_status' rules={[{ required: true }]}>
+                    <Select
+                      style={{ width: '100%' }}
+                      options={alertSstatusOption}
+                      placeholder='请选择维保提醒'
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
+                    <Select
+                      style={{ width: '100%' }}
+                      options={maintenanceStatusOption}
+                      placeholder='请选择维保状态'
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={12} offset={3}>
+                  <Button type="primary" onClick={showMaintenanceRecord}>新增维保记录</Button>
+                </Col>
+              </Row>
+
+            </Card>
+
+          </div>
+        )}
         {mode == 'edit' && (
           <div className='button-wrapper'>
             <Form.Item>
@@ -570,6 +771,142 @@ export default function () {
           </Button>
         </div>
       )}
+      {/* 新增维保记录弹框 */}
+      <Modal title="新增维保记录" width='50%' visible={maintenanceRecordModalOpen} onOk={mrhandleOk} onCancel={() => { setMaintenanceRecordModalOpen(false) }}>
+        <Form
+          name="basic"
+          form={maintenanceRecordForm}
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+        >
+          <Row gutter={10}>
+            <Col span={12}>
+              <Form.Item
+                label="维保类型"
+                name="maintenance_type"
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <Select
+                  style={{ width: '100%' }}
+                  options={maintenanceTypeOption}
+                  placeholder='请选择维保类型'
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="维保日期"
+                name="maintenance_date"
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} placeholder='请选择维保日期' />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={10}>
+            <Col span={12}>
+              <Form.Item
+                label="维保人"
+                name="maintainers"
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <Input placeholder='请输入维保人' />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={10}>
+            <Col span={12}>
+              <Form.Item
+                label="维保费用(元)"
+                name="expenses"
+              >
+                <InputNumber placeholder='请输入维保费用' style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="维保服务商"
+                name="maintenance_provider"
+              >
+                <Input placeholder='请输入维保服务商' />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24}>
+              <Form.Item
+                label="维保内容"
+                name="content"
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+                labelCol={{
+                  span: 4,
+                }}
+                wrapperCol={{
+                  span: 20,
+                }}
+              >
+                <TextArea autoSize={{ minRows: 3, maxRows: 10 }} placeholder='请输入维保内容' style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Modal>
+
+      {/* 维保历史弹框 */}
+      <Modal title="维保历史" width='50%' footer={null} visible={maintenanceHistoryModalOpen} onOk={mhhandleOk} onCancel={() => { setMaintenanceHistoryModalOpen(false) }}>
+        <div style={{ marginBottom: '1rem' }}>
+          <span>维保日期&nbsp;&nbsp;</span>
+          <DatePicker allowClear style={{ width: '30%' }} onChange={maintenanceDateChange} placeholder='请选择维保日期' />
+        </div>
+        <Timeline style={{ maxHeight: '500px', overflowY: 'auto', padding: '.5rem 0' }}>
+          {
+            maintenanceHistory.length && (
+              maintenanceHistory.map((x, index) => {
+                return (
+                  <Timeline.Item color="green" key={index}>
+                    <div className='one'>
+                      <span>{timestampToCST(x.maintenance_date)} </span>
+                      <Tag color="blue">{maintenanceTypeOption.filter(item => item.value == x.maintenance_type)[0]?.label}</Tag>
+                      {
+                        x.expenses.toString() && (
+                          <Tag color="orange">{x.expenses.toString()}</Tag>
+                        )
+                      }
+                      {
+                        x.maintenance_provider && (
+                          <Tag color="green">{x.maintenance_provider}</Tag>
+                        )
+                      }
+                    </div>
+                    <div style={{ margin: '.3rem 0' }}>维保人：{x.maintainers}</div>
+                    <div style={{ padding: '.3rem 0', background: '#F2F8FF' }}>维保内容：{x.content}</div>
+                  </Timeline.Item>
+                )
+              })
+            )
+          }
+        </Timeline>
+      </Modal>
     </div>
   );
 }

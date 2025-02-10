@@ -60,6 +60,7 @@ let queryFilter = [
   { name: 'status', label: '管理状态', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'position', label: '资产位置', type: 'input' },
+  { name: 'maintenanceStatus', label: '维保状态', type: 'select' },
 ];
 
 export default function () {
@@ -95,7 +96,20 @@ export default function () {
   const groupIds = busiGroups?.map(item => item.id)
   // console.log(groupIds);
   
-
+  const maintenanceStatusOption = [
+    {
+      label: '维保中',
+      value: 0
+    },
+    {
+      label: '已正常',
+      value: 1
+    },
+    {
+      label: '待维保',
+      value: 2
+    }
+  ]
   const filterOptions = {
     status: [
       { value: '1', label: '正常' },
@@ -111,6 +125,12 @@ export default function () {
       return {
         value: _.toString(factory.value),
         label: factory.value,
+      };
+    }),
+    maintenanceStatus:maintenanceStatusOption.map((factory) => {
+      return {
+        value: _.toString(factory.value),
+        label: factory.label,
       };
     }),
   };
@@ -261,6 +281,36 @@ export default function () {
           label = (
             <Tag icon={<SyncOutlined spin />} color='processing'>
               待检测
+            </Tag>
+          );
+        }
+        return label;
+      },
+    },
+    {
+      title: '维保状态',
+      dataIndex: 'maintenance_status',
+      align: 'center',
+      width: 120,
+      ellipsis: true,
+      render(value, record, index) {
+        let label;
+        if (value == 0) {
+          label = (
+            <Tag icon={<CloseCircleOutlined />} color='processing'>
+              维保中
+            </Tag>
+          );
+        } else if (value == 1) {
+          label = (
+            <Tag icon={<CheckCircleOutlined />} color='success'>
+              已正常
+            </Tag>
+          );
+        } else if (value == 2) {
+          label = (
+            <Tag icon={<SyncOutlined spin />} color='warning'>
+              待维保
             </Tag>
           );
         }
