@@ -34,6 +34,7 @@ import locale from 'antd/es/date-picker/locale/zh_CN';
 import './locale';
 import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
 import { useLocalStorage } from 'react-use';
+import TimeRangePicker, { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 
 const { RangePicker } = DatePicker;
 export const getDefaultHours = () => {
@@ -91,6 +92,8 @@ const Event: React.FC = () => {
     query: '',
     type: null,
   });
+
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   useEffect(() => {
     filterOptions['group_id'] = busiGroups.map((group) => {
@@ -365,14 +368,15 @@ const Event: React.FC = () => {
               placeholder={'选择要查询的条件'}
             />
           )}
-          <RangePicker
+          <TimeRangePicker value={range} onChange={setRange} dateFormat='YYYY-MM-DD HH:mm:ss' />
+          {/* <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format='YYYY-MM-DD HH:mm'
             locale={locale}
             onChange={onChange}
             defaultValue={[startTime ? moment(startTime) : null, endTime ? moment(endTime) : null]}
             onOk={onOk}
-          />
+          /> */}
         </Space>
         {
           <div>
@@ -439,6 +443,9 @@ const Event: React.FC = () => {
     if (end > 0) {
       filterObj['end'] = end;
     }
+    const parsedRange = parseRange(range);
+    filterObj["start"] = moment(parsedRange.start).unix();
+    filterObj["end"] = moment(parsedRange.end).unix();
 
     return getEvents({
       page: current,
@@ -470,7 +477,7 @@ const Event: React.FC = () => {
   };
 
   const { tableProps } = useAntdTable(fetchData, {
-    refreshDeps: [refreshFlag, JSON.stringify(filterObj)],
+    refreshDeps: [refreshFlag, JSON.stringify(filterObj), JSON.stringify(range)],
     defaultPageSize: 30,
     debounceWait: 500,
   });

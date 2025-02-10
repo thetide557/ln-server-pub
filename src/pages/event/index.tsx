@@ -38,6 +38,7 @@ import { exportTemplet } from '../historyEvents/services';
 import BatchAckBtn from 'plus:/parcels/Event/Acknowledge/BatchAckBtn';
 import moment from 'moment';
 import { useLocalStorage } from 'react-use';
+import TimeRangePicker, { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 
 const { confirm } = Modal;
 export const SeverityColor = ['red', 'orange', 'yellow', 'green'];
@@ -83,7 +84,7 @@ const Event: React.FC = () => {
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
 
   const [searchVal, setSearchVal] = useLocalStorage<any>('current_filter_type', null);
-  const [chooseVal,setChooseVal] = useState<any>('');
+  const [chooseVal,setChooseVal] = useState<any>('severity');
   const [filterParam, setFilterParam] = useLocalStorage<any>('current_filter_param', "severity");
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
@@ -108,6 +109,7 @@ const Event: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [filterType, setFilterType] = useLocalStorage<any>('current_filter_types', "select");
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   const onChange = (
     value: DatePickerProps['value'] | RangePickerProps['value'],
@@ -156,17 +158,24 @@ const Event: React.FC = () => {
       }
     })
     setFilterOptions({ ...filterOptions })
-    if (startTime != null && endTime != null) {
-      filter["start"] = moment(startTime).unix()
-      filter["end"] = moment(endTime).unix()
-      setFilter({ ...filter });
-    }
+    const parsedRange = parseRange(range);
+    filter["start"] = moment(parsedRange.start).unix();
+    filter["end"] = moment(parsedRange.end).unix();
+    setFilter({ ...filter });
+    // if (startTime != null && endTime != null) {
+    //   filter["start"] = moment(startTime).unix()
+    //   filter["end"] = moment(endTime).unix()
+    //   setFilter({ ...filter });
+    // }
   }, [])
 
   useEffect(() => {
+    const parsedRange = parseRange(range);
+    filter["start"] = moment(parsedRange.start).unix();
+    filter["end"] = moment(parsedRange.end).unix();
+    setFilter({ ...filter });
 
-
-  }, [filterType])
+  }, [JSON.stringify(range)])
 
   function renderLeftHeader(type:string) {
     
@@ -259,7 +268,8 @@ const Event: React.FC = () => {
               placeholder={'选择要筛选的条件'}
             />
           )}
-          <RangePicker
+          <TimeRangePicker value={range} onChange={setRange} dateFormat='YYYY-MM-DD HH:mm:ss' />
+          {/* <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
             onChange={onChange}
@@ -267,7 +277,7 @@ const Event: React.FC = () => {
             value={[startTime ? moment(startTime, DateFormat) : null, endTime ? moment(endTime, DateFormat) : null]}
             locale={locale}
             onOk={onOk}
-          />
+          /> */}
         </Space>
         <Col
           flex='200px'
