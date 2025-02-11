@@ -43,6 +43,7 @@ export default function () {
   const [maintenanceRecordModalOpen, setMaintenanceRecordModalOpen] = useState(false);
   const [maintenanceHistoryModalOpen, setMaintenanceHistoryModalOpen] = useState(false);
   const [maintenanceHistory, setMaintenanceHistory] = useState<any[]>([]);
+  const [maintenanceStatusNum, setMaintenanceStatusNum] = useState();
   const [maintenanceRecordForm] = Form.useForm();
   const panelBaseProps: any = {
     size: 'small',
@@ -347,15 +348,19 @@ export default function () {
   // 获取维保信息详情
   const getMaintenanceInfo = () => {
     getMaintenanceInfoById(_.toNumber(id)).then((res) => {
-      let dats = {
-        ...res.dat,
-        last_maintenace_date: res.dat.last_maintenace_date == 0 ? '' : moment(res.dat.last_maintenace_date * 1000),
-        purchase_data: moment(res.dat.purchase_data * 1000),
-        next_maintenace_date: moment(res.dat.next_maintenace_date * 1000),
-        last_maintenace_date: moment(res.dat.last_maintenace_date * 1000),
-        warranty_date: moment(res.dat.warranty_date * 1000),
+      if (res.dat) {
+        let dats = {
+          ...res.dat,
+          last_maintenace_date: moment(res.dat.last_maintenace_date * 1000),
+          purchase_data: moment(res.dat.purchase_data * 1000),
+          next_maintenace_date: moment(res.dat.next_maintenace_date * 1000),
+          warranty_date: moment(res.dat.warranty_date * 1000),
+        }
+        if (mode == 'edit') {
+          setMaintenanceStatusNum(res.dat.maintenance_status)
+        }
+        form.setFieldsValue(dats);
       }
-      form.setFieldsValue(dats);
     })
   }
   //保存维保信息
@@ -366,7 +371,7 @@ export default function () {
       purchase_data: timestamp(assetData.purchase_data),
       asset_position: assetData.asset_position,
       warranty_date: timestamp(assetData.warranty_date),
-      last_maintenace_date: assetData.last_maintenace_date,
+      last_maintenace_date: timestamp(assetData.last_maintenace_date),
       next_maintenace_date: timestamp(assetData.next_maintenace_date),
       maintainers: assetData.maintainers,
       maintainers_mail: assetData.maintainers_mail,
@@ -692,7 +697,7 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='上次维保日期' name='last_maintenace_date"'>
+                  <Form.Item label='上次维保日期' name='last_maintenace_date'>
                     <DatePicker format='YYYY-MM-DD' disabled style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
@@ -724,8 +729,18 @@ export default function () {
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                     <Select
+                      disabled={maintenanceStatusNum == 2}
                       style={{ width: '100%' }}
-                      options={maintenanceStatusOption}
+                      options={maintenanceStatusNum == 2 ? [
+                        {
+                          label: '维保中',
+                          value: 0
+                        },
+                        {
+                          label: '待维保',
+                          value: 2
+                        }
+                      ] : maintenanceStatusOption}
                       placeholder='请选择维保状态'
                     />
                   </Form.Item>
@@ -736,9 +751,7 @@ export default function () {
                   <Button type="primary" onClick={showMaintenanceRecord}>新增维保记录</Button>
                 </Col>
               </Row>
-
             </Card>
-
           </div>
         )}
         {mode == 'edit' && (

@@ -297,7 +297,7 @@ export default function () {
         let label;
         if (value == 0) {
           label = (
-            <Tag icon={<CloseCircleOutlined />} color='processing'>
+            <Tag icon={< SyncOutlined/>} color='processing'>
               维保中
             </Tag>
           );
@@ -309,7 +309,7 @@ export default function () {
           );
         } else if (value == 2) {
           label = (
-            <Tag icon={<SyncOutlined spin />} color='warning'>
+            <Tag icon={<CloseCircleOutlined  spin />} color='warning'>
               待维保
             </Tag>
           );
