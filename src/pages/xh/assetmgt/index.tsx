@@ -22,6 +22,7 @@ import {
   SyncOutlined,
   UnorderedListOutlined,
   VideoCameraOutlined,
+  StopOutlined
 } from '@ant-design/icons';
 import './locale';
 import './style.less';
@@ -297,7 +298,7 @@ export default function () {
         let label;
         if (value == 0) {
           label = (
-            <Tag icon={< SyncOutlined/>} color='processing'>
+            <Tag icon={< SyncOutlined spin/>} color='processing'>
               维保中
             </Tag>
           );
@@ -309,8 +310,14 @@ export default function () {
           );
         } else if (value == 2) {
           label = (
-            <Tag icon={<CloseCircleOutlined  spin />} color='warning'>
+            <Tag icon={<CloseCircleOutlined   />} color='warning'>
               待维保
+            </Tag>
+          );
+        }else if (value == -1) {
+          label = (
+            <Tag icon={<StopOutlined />} color='processing'>
+              暂无
             </Tag>
           );
         }
@@ -553,7 +560,7 @@ export default function () {
     }
     setQueryCondition(param);
     getAssetsByCondition(param).then(({ dat }) => {
-      dat.list.forEach((entity, index) => {
+      dat.list?.forEach((entity, index) => {
         let expands = entity.exps;
         if (expands != null && expands.length > 0) {
           const map = new Map();
@@ -593,7 +600,7 @@ export default function () {
       });
       // console.log('1111list', dat.list);
       
-      setList(dat.list);
+      setList(dat.list || []);
       setTotal(dat.total);
     });
   };

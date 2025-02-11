@@ -245,7 +245,7 @@ export default function () {
     param['limit'] = -1;
     getAssetsByCondition(param).then((res) => {
       let options = new Array();
-      res.dat.list.map((v) => {
+      res.dat?.list.map((v) => {
         assetList[v.id] = v;
         options.push({
           key: v.id,
@@ -729,7 +729,7 @@ export default function () {
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                     <Select
-                      disabled={maintenanceStatusNum == 2}
+                      disabled={maintenanceStatusNum&&maintenanceStatusNum != 2}
                       style={{ width: '100%' }}
                       options={maintenanceStatusNum == 2 ? [
                         {
