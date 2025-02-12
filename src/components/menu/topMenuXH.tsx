@@ -556,6 +556,9 @@ export default function () {//{ selectMenu?:any }
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');
+            localStorage.removeItem('left_tissueId');
+            localStorage.removeItem('left_parId');
+            localStorage.removeItem('left_asset_type');
             // history.push('/login');
             window.location.href = '/login'
           });

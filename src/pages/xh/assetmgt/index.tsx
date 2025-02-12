@@ -103,12 +103,12 @@ export default function () {
   let treeQuery = {}
   const [treeList, setTreeList] = useState<any>([])
   const [open, setOpen] = useState<boolean>(false)
-  const [isShow, setIsShow] = useState<any>(-1)
-  const [activeColor, setActiveColor] = useState<any>(-1)
-  const [parId, setParId] = useState<any>(null)
-  const [tissueId, setTissueId] = useState<any>(-1)
   const [curGroup, setCurGroup] = useState<any>({})
-
+  const [isShow, setIsShow] = useLocalStorage('left_tissueId', Number(-1))
+  // const [activeColor, setActiveColor] = useLocalStorage('left_asset_type', Number(-1))
+  const [parId, setParId] = useLocalStorage('left_parId')
+  const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1))
+  
   const filterOptions = {
     status: [
       { value: '1', label: '正常' },
@@ -489,6 +489,10 @@ export default function () {
   }
 
   const getAssetTree = () => {
+    // console.log('ac', activeColor);
+    console.log('parId', parId);
+    console.log('left_asset_type', localStorage.getItem('left_asset_type'));
+    
     // console.log('treeQuery', treeQuery);
     treeQuery['status'] = 0
     getAssetstypesNew(treeQuery).then(res => {
@@ -550,6 +554,7 @@ export default function () {
   }, 1000 * 30);
 
   const getTableData = () => {
+    const parentId = localStorage.getItem('left_parId')
     const param = {
       page: current,
       limit: pageSize,
@@ -560,10 +565,10 @@ export default function () {
       param['query'] = searchVal;
       treeQuery['query'] = searchVal
     }
-    if (typeId != null && typeId != '0' && modifyType && (tissueId == null || tissueId == undefined)) {
+    if (typeId != null && typeId != '0' && modifyType && parentId) {
       param['type'] = typeId;
     }
-    if (tissueId != null) {
+    if (tissueId != null && !parentId) {
       param['tissue_tree_id'] = tissueId;
     }
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
@@ -842,9 +847,11 @@ export default function () {
     } else {
       setTissueId(item.id)
       setTypeId(undefined)
+      localStorage.removeItem('left_parId')
+      setParId(undefined)
     }
     // console.log(item);
-    setActiveColor(item.id)
+    // setActiveColor(item.id)
     //资产类型操作
     setCurrent(1);
     localStorage.setItem('left_asset_type', item.id);
@@ -892,10 +899,10 @@ export default function () {
                     return (
                       <div key={item.name} className='tree-row'>
                         <div className='tree-group'>
-                          <span>{isShow == item.id ? <MinusSquareOutlined style={{ fontSize: 13 }} onClick={() => { setIsShow(null) }} /> : <PlusSquareOutlined style={{ fontSize: 13 }} onClick={() => {
+                          <span>{isShow == item.id ? <MinusSquareOutlined style={{ fontSize: 13 }} onClick={() => { setIsShow(null as any) }} /> : <PlusSquareOutlined style={{ fontSize: 13 }} onClick={() => {
                             setIsShow(item.id)
                           }} />}</span>
-                          <span className='g-name' onClick={() => handleClickTree(item, null)} style={{ backgroundColor: item.id == activeColor ? '#92b7d1' : '' }}>{item.name}</span>
+                          <span className='g-name' onClick={() => handleClickTree(item, null)} style={{ backgroundColor: (item.id == localStorage.getItem('left_asset_type') && !localStorage.getItem('left_parId')) ? '#92b7d1' : '' }}>{item.name}</span>
                           {
                             item.id != -1 && <Dropdown
                               // trigger={['click']}
@@ -916,12 +923,15 @@ export default function () {
                                             message.success('删除成功');
                                             // 删除自己则返回默认
                                             if (item.id == tissueId) {
+                                              localStorage.setItem('left_tissueId', '-1')
+                                              localStorage.setItem('left_asset_type', '-1')
+                                              localStorage.removeItem('left_parId')
                                               setTissueId(-1)
-                                              setActiveColor(-1)
+                                              // setActiveColor(-1)
                                             }
+                                            getAssetTree()
                                             setRefreshKey(_.uniqueId('refreshKey_'));
                                             // setSelectedAssets([]);
-                                            getAssetTree()
                                           });
                                         },
                                         onCancel() { },
@@ -946,7 +956,7 @@ export default function () {
                               return (
                                 <div key={item1.id} className='tree-asset'>
                                   <FileOutlined style={{ fontSize: 13 }} />
-                                  <div style={{ backgroundColor: (item1.id == activeColor && parId == item.id) ? '#92b7d1' : '' }} className='asset-name' onClick={() => handleClickTree(item1, item)}>
+                                  <div style={{ backgroundColor: (item1.id == localStorage.getItem('left_asset_type') && parId == item.id) ? '#92b7d1' : '' }} className='asset-name' onClick={() => handleClickTree(item1, item)}>
                                     <span>{item1.name}</span>
                                     <span>{item1.number}</span>
                                   </div>
