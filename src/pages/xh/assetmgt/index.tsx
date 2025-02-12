@@ -23,6 +23,7 @@ import {
   SyncOutlined,
   UnorderedListOutlined,
   VideoCameraOutlined,
+  StopOutlined
 } from '@ant-design/icons';
 import './locale';
 import './style.less';
@@ -61,6 +62,7 @@ let queryFilter = [
   { name: 'status', label: '管理状态', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'position', label: '资产位置', type: 'input' },
+  { name: 'maintenanceStatus', label: '维保状态', type: 'select' },
   // { name: 'service_level', label: '服务层级', type: 'select' },
   // { name: 'device_type', label: '设备形态', type: 'select' },
 ];
@@ -109,6 +111,20 @@ export default function () {
   const [parId, setParId] = useLocalStorage('left_parId')
   const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1))
   
+  const maintenanceStatusOption = [
+    {
+      label: '维保中',
+      value: 0
+    },
+    {
+      label: '已正常',
+      value: 1
+    },
+    {
+      label: '待维保',
+      value: 2
+    }
+  ]
   const filterOptions = {
     status: [
       { value: '1', label: '正常' },
@@ -124,6 +140,12 @@ export default function () {
       return {
         value: _.toString(factory.value),
         label: factory.value,
+      };
+    }),
+    maintenanceStatus:maintenanceStatusOption.map((factory) => {
+      return {
+        value: _.toString(factory.value),
+        label: factory.label,
       };
     }),
     service_level: serviceHierarchyOptions.map((item) => {
@@ -147,7 +169,7 @@ export default function () {
       dataIndex: 'name',
       Ced: 'left',
       ellipsis: true,
-      width: 120,
+      // width: 120,
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
@@ -168,7 +190,7 @@ export default function () {
       title: '资产类型',
       dataIndex: 'type',
       Ced: 'left',
-      width: 120,
+      // width: 120,
       align: 'center',
       ellipsis: true,
       sorter: (a, b) => {
@@ -179,7 +201,7 @@ export default function () {
       title: 'IP地址',
       dataIndex: 'ip',
       align: 'center',
-      width: 120,
+      // width: 120,
       ellipsis: true,
       render(value, record, index) {
         return (
@@ -201,7 +223,7 @@ export default function () {
       title: '厂商',
       dataIndex: 'manufacturers',
       align: 'center',
-      width: 120,
+      // width: 120,
       ellipsis: true,
     },
     {
@@ -209,7 +231,7 @@ export default function () {
       dataIndex: 'position',
       align: 'center',
       ellipsis: true,
-      width: 120,
+      // width: 120,
       sorter: (a, b) => {
         return a.position.localeCompare(b.position);
       },
@@ -219,7 +241,7 @@ export default function () {
       dataIndex: 'group_id',
       align: 'center',
       ellipsis: true,
-      width: 120,
+      // width: 120,
       render(value, record, index) {
         if (value > 0) {
           let groupName = '';
@@ -236,7 +258,7 @@ export default function () {
       title: '管理状态',
       dataIndex: 'status',
       align: 'center',
-      width: 120,
+      // width: 120,
       ellipsis: true,
       sorter: (a, b) => {
         return a.status - b.status;
@@ -263,7 +285,7 @@ export default function () {
       title: '运行状态',
       dataIndex: 'health',
       align: 'center',
-      width: 120,
+      // width: 120,
       ellipsis: true,
       sorter: (a, b) => {
         return a.health - b.health;
@@ -293,11 +315,47 @@ export default function () {
       },
     },
     {
+      title: '维保状态',
+      dataIndex: 'maintenance_status',
+      align: 'center',
+      // width: 120,
+      ellipsis: true,
+      render(value, record, index) {
+        let label;
+        if (value == 0) {
+          label = (
+            <Tag icon={< SyncOutlined spin/>} color='processing'>
+              维保中
+            </Tag>
+          );
+        } else if (value == 1) {
+          label = (
+            <Tag icon={<CheckCircleOutlined />} color='success'>
+              已正常
+            </Tag>
+          );
+        } else if (value == 2) {
+          label = (
+            <Tag icon={<CloseCircleOutlined   />} color='warning'>
+              待维保
+            </Tag>
+          );
+        }else if (value == -1) {
+          label = (
+            <Tag icon={<StopOutlined />} color='processing'>
+              暂无
+            </Tag>
+          );
+        }
+        return label;
+      },
+    },
+    {
       title: '录入时间',
       dataIndex: 'create_at',
       align: 'center',
       ellipsis: true,
-      width: 130,
+      // width: 130,
       render(text, record, index) {
         return moment.unix(text).format('YYYY-MM-DD HH:mm:ss');
       },
@@ -618,7 +676,7 @@ export default function () {
       // });
       // console.log('1111list', dat.list);
 
-      setList(dat.list);
+      setList(dat.list || []);
       setTotal(dat.total);
     });
   };
