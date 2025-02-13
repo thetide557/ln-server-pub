@@ -322,3 +322,33 @@ export const delAssetstypesNew = function (params: any) {
     params
   });
 };
+
+// 查询资产清单维保信息
+export const getMaintenanceInfoById = function (id) {
+  return request('/api/n9e/asset-maintenance-info/' + id, {
+    method: RequestMethod.Get,
+  });
+};
+
+// 更新资产清单维保信息
+export const editMaintenanceInfo = function (data) {
+  return request('/api/n9e/asset-maintenance-info', {
+    method: RequestMethod.Put,
+    data,
+  });
+};
+
+// 新增维保信息
+export const addMaintenanceHistory = function (data) {
+  return request('/api/n9e/asset-maintenance-history', {
+    method: RequestMethod.Post,
+    data,
+  });
+};
+
+// 查询维保历史
+export const getMaintenanceHistory = function ({id, maintenanceDate}) {
+  return request('/api/n9e/asset-maintenance-history?assetId=' + id + '&maintenance_date=' + maintenanceDate, {
+    method: RequestMethod.Get,
+  });
+};
