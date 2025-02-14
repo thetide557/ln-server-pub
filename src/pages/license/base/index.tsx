@@ -335,6 +335,7 @@ export default function () {
               dataIndex: 'start',
               ellipsis: true,
               align: 'center',
+              width: 300,
               render(value, record, index) {
                 const sdate = moment.unix(record.start_time);
                 const edate = moment.unix(record.end_time);
@@ -348,6 +349,7 @@ export default function () {
               title: '许可节点数',
               dataIndex: 'permission_node',
               ellipsis: true,
+              width: 110,
               align: 'center',
               render(value, record, index) {
                 return value;
@@ -357,6 +359,7 @@ export default function () {
               title: '已用许可节点',
               dataIndex: 'used_node',
               ellipsis: true,
+              width: 110,
               align: 'center',
               render(value, record, index) {
                 return value;
