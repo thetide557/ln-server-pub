@@ -13,7 +13,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
-import { factories,serviceHierarchyOptions,deviceFormOptions } from '../catalog';
+import { factories, serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
 import { tuple } from 'antd/lib/_util/type';
 import { timestamp, timestampToCST } from '@/utils/day';
@@ -48,6 +48,7 @@ export default function () {
   const [maintenanceHistory, setMaintenanceHistory] = useState<any[]>([]);
   const [maintenanceStatusNum, setMaintenanceStatusNum] = useState();
   const [maintenanceRecordForm] = Form.useForm();
+  const [maintainersVal, setMaintainersVal] = useState('');
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
@@ -158,47 +159,47 @@ export default function () {
     if (!!id) {
       setEditType('edit');
       getXhAsset(_.toString(id)).then(({ dat }) => {
-        // let expands = dat.exps;
-        // if (expands != null && expands.length > 0) {
-        //   const map = new Map();
-        //   expands.forEach((item, index, arr) => {
-        //     if (!map.has(item.config_category)) {
-        //       map.set(
-        //         item.config_category,
-        //         arr.filter((a) => a.config_category == item.config_category),
-        //       );
-        //     }
-        //   });
-        //   //以上分组加载数据
-        //   let mapValues = {};
-        //   map.forEach(function (value, key) {
-        //     const formDataMap = new Map();
-        //     value.forEach((item, index, arr) => {
-        //       if (!formDataMap.has(item.group_id)) {
-        //         formDataMap.set(
-        //           item.group_id,
-        //           arr.filter((a) => a.group_id == item.group_id),
-        //         );
-        //       }
-        //     });
-        //     let group: any = [];
-        //     formDataMap.forEach(function (value, i) {
-        //       let itemsChars = '';
-        //       value.forEach((item, index, arr) => {
-        //         itemsChars += '"' + item.name + '":"' + item.value + '",';
-        //       });
-        //       itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
-        //       group.push(JSON.parse(itemsChars));
-        //     });
-        //     mapValues[key] = group;
-        //     dat[key] = group;
-        //     console.log('111111111', mapValues);
-            
-        //   });
-        //   delete dat.exps;
-        // }
+        let expands = dat.exps;
+        if (expands != null && expands.length > 0) {
+          const map = new Map();
+          expands.forEach((item, index, arr) => {
+            if (!map.has(item.config_category)) {
+              map.set(
+                item.config_category,
+                arr.filter((a) => a.config_category == item.config_category),
+              );
+            }
+          });
+          //以上分组加载数据
+          let mapValues = {};
+          map.forEach(function (value, key) {
+            const formDataMap = new Map();
+            value.forEach((item, index, arr) => {
+              if (!formDataMap.has(item.group_id)) {
+                formDataMap.set(
+                  item.group_id,
+                  arr.filter((a) => a.group_id == item.group_id),
+                );
+              }
+            });
+            let group: any = [];
+            formDataMap.forEach(function (value, i) {
+              let itemsChars = '';
+              value.forEach((item, index, arr) => {
+                itemsChars += '"' + item.name + '":"' + item.value + '",';
+              });
+              itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
+              group.push(JSON.parse(itemsChars));
+            });
+            mapValues[key] = group;
+            dat[key] = group;
+            console.log('111111111', mapValues);
 
-        // setAssetData(dat);
+          });
+          delete dat.exps;
+        }
+
+        setAssetData(dat);
         const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
@@ -232,7 +233,7 @@ export default function () {
   //     setAssetOptions(assetOptions1)
   //   }
   // }
-  
+
 
   useEffect(() => {
     getAssetstypes().then((res) => {
@@ -244,13 +245,13 @@ export default function () {
         };
       });
       // 新增时，资产类型不能选择物理服务器和虚拟服务器
-      if(!id){
+      if (!id) {
         const insertItems = items.filter(item => item.value !== "物理服务器" && item.value !== "虚拟服务器");
         setAssetTypes(insertItems);
-      }else{
+      } else {
         setAssetTypes(items);
       }
-      
+
 
     });
     let param = {};
@@ -267,7 +268,7 @@ export default function () {
           type: v.type
         });
       });
-      let options1= options.sort((a, b) => localeCompare(a.label, b.label));
+      let options1 = options.sort((a, b) => localeCompare(a.label, b.label));
       options = options1.filter(item => {
         if (item.type.includes('服务器') || item.type.includes('虚拟')) {
           return true
@@ -359,12 +360,12 @@ export default function () {
 
   // IP地址校验规则
   const validateIP = (rule, value) => {
-    if(value){
+    if (value) {
       const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
       if (!regex.test(value)) {
         return Promise.reject('请输入合法的IP地址');
       }
-      
+
       const parts = value.split('.').map(Number);
       if (parts.every(part => part === 0)) {
         return Promise.reject('请输入合法的IP地址');
@@ -375,76 +376,76 @@ export default function () {
     }
     return Promise.resolve();
   };
-  
+
 
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
-    // 获取维保信息详情
-    const getMaintenanceInfo = () => {
-      getMaintenanceInfoById(_.toNumber(id)).then((res) => {
-        if (res.dat) {
-          let dats = {
-            ...res.dat,
-            last_maintenace_date: moment(res.dat.last_maintenace_date * 1000),
-            purchase_data: moment(res.dat.purchase_data * 1000),
-            next_maintenace_date: moment(res.dat.next_maintenace_date * 1000),
-            warranty_date: moment(res.dat.warranty_date * 1000),
-          }
-          if (mode == 'edit') {
-            setMaintenanceStatusNum(res.dat.maintenance_status)
-          }
-          form.setFieldsValue(dats);
+  // 获取维保信息详情
+  const getMaintenanceInfo = () => {
+    getMaintenanceInfoById(_.toNumber(id)).then((res) => {
+      if (res.dat) {
+        let dats = {
+          ...res.dat,
+          last_maintenace_date: moment(res.dat.last_maintenace_date * 1000),
+          purchase_data: moment(res.dat.purchase_data * 1000),
+          next_maintenace_date: moment(res.dat.next_maintenace_date * 1000),
+          warranty_date: moment(res.dat.warranty_date * 1000),
         }
-      })
-    }
-    //保存维保信息
-    const saveMaintenanceInfo = () => {
-      editMaintenanceInfo({
-        asset_id: _.toNumber(id),
-        asset_model: assetData.asset_model,
-        purchase_data: timestamp(assetData.purchase_data),
-        asset_position: assetData.asset_position,
-        warranty_date: timestamp(assetData.warranty_date),
-        last_maintenace_date: timestamp(assetData.last_maintenace_date),
-        next_maintenace_date: timestamp(assetData.next_maintenace_date),
-        maintainers: assetData.maintainers,
-        maintainers_mail: assetData.maintainers_mail,
-        alert_status: assetData.alert_status,
-        maintenance_status: assetData.maintenance_status,
-      }).then((res) => {
-        message.success('操作成功');
-      });
-    }
-    // show 维保记录弹框
-    const showMaintenanceRecord = () => {
-      setMaintenanceRecordModalOpen(true);
-    }
-    const mrhandleOk = () => {
-      let formData = maintenanceRecordForm.getFieldsValue();
-      addMaintenanceHistory({
-        ...formData,
-        asset_id: _.toNumber(id),
-        maintenance_date: timestamp(formData.maintenance_date)
-      }).then((res) => {
-        message.success('操作成功');
-        setMaintenanceRecordModalOpen(false);
-      });
-    };
-    // show 维保历史弹框
-    const showmaintenanceHistory = () => {
-      getMaintenanceHistoryData()
-      setMaintenanceHistoryModalOpen(true);
-    }
-    const getMaintenanceHistoryData = (maintenanceDate = -1) => {
-      getMaintenanceHistory({ id: _.toNumber(id), maintenanceDate: maintenanceDate }).then((res) => {
-        setMaintenanceHistory(res.dat);
-      });
-    }
-    const maintenanceDateChange = (date, dateString) => {
-      getMaintenanceHistoryData(!date ? -1 : timestamp(date))
-    }
-    const mhhandleOk = () => {
-      setMaintenanceHistoryModalOpen(false);
-    };
+        if (mode == 'edit') {
+          setMaintenanceStatusNum(res.dat.maintenance_status)
+        }
+        form.setFieldsValue(dats);
+      }
+    })
+  }
+  //保存维保信息
+  const saveMaintenanceInfo = () => {
+    editMaintenanceInfo({
+      asset_id: _.toNumber(id),
+      asset_model: assetData.asset_model,
+      purchase_data: timestamp(assetData.purchase_data),
+      asset_position: assetData.asset_position,
+      warranty_date: timestamp(assetData.warranty_date),
+      last_maintenace_date: timestamp(assetData.last_maintenace_date),
+      next_maintenace_date: timestamp(assetData.next_maintenace_date),
+      maintainers: assetData.maintainers,
+      maintainers_mail: assetData.maintainers_mail,
+      alert_status: assetData.alert_status,
+      maintenance_status: assetData.maintenance_status,
+    }).then((res) => {
+      message.success('操作成功');
+    });
+  }
+  // show 维保记录弹框
+  const showMaintenanceRecord = () => {
+    setMaintenanceRecordModalOpen(true);
+  }
+  const mrhandleOk = () => {
+    let formData = maintenanceRecordForm.getFieldsValue();
+    addMaintenanceHistory({
+      ...formData,
+      asset_id: _.toNumber(id),
+      maintenance_date: timestamp(formData.maintenance_date)
+    }).then((res) => {
+      message.success('操作成功');
+      setMaintenanceRecordModalOpen(false);
+    });
+  };
+  // show 维保历史弹框
+  const showmaintenanceHistory = () => {
+    getMaintenanceHistoryData()
+    setMaintenanceHistoryModalOpen(true);
+  }
+  const getMaintenanceHistoryData = (maintenanceDate = -1) => {
+    getMaintenanceHistory({ id: _.toNumber(id), maintenanceDate: maintenanceDate }).then((res) => {
+      setMaintenanceHistory(res.dat);
+    });
+  }
+  const maintenanceDateChange = (date, dateString) => {
+    getMaintenanceHistoryData(!date ? -1 : timestamp(date))
+  }
+  const mhhandleOk = () => {
+    setMaintenanceHistoryModalOpen(false);
+  };
   return (
     <div className='asset_every'>
       <div className='assetmgt_header_select'>
@@ -490,8 +491,8 @@ export default function () {
                       options={assetTypes}
                       placeholder='请选择资产类型'
                       disabled={id != null}
-                      onChange={(val) => {                       
-                        setCurrentType(val);                        
+                      onChange={(val) => {
+                        setCurrentType(val);
                       }}
                     />
                   </Form.Item>
@@ -522,7 +523,7 @@ export default function () {
                     /> */}
                     <AutoComplete
                       allowClear={true}
-                      disabled={currentType==="物理服务器" || currentType==="虚拟服务器"}
+                      disabled={currentType === "物理服务器" || currentType === "虚拟服务器"}
                       options={assetOptions}
                       onChange={handleChange}
                       // onSearch={(text) => getPanelValue(text)}
@@ -768,13 +769,13 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='维保人员' name='maintainers' rules={[{ required: true }]}>
-                    <Input placeholder='请输入维保人员' />
+                  <Form.Item label='维保人员' name='maintainers' rules={[{ required: true },{ pattern: /^[\u4e00-\u9fa5]+$/, message: '请输入有效的中文!' }]}>
+                    <Input  placeholder='请输入维保人员' />
                   </Form.Item>
                 </Col>
 
                 <Col span={12}>
-                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true }]}>
+                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true },{ pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, message: '请输入有效的邮箱!' }]}>
                     <Input placeholder='请输入维保人员邮箱' />
                   </Form.Item>
                 </Col>
@@ -790,7 +791,7 @@ export default function () {
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                     <Select
-                      disabled={maintenanceStatusNum&&maintenanceStatusNum != 2}
+                      disabled={maintenanceStatusNum && maintenanceStatusNum != 2}
                       style={{ width: '100%' }}
                       options={maintenanceStatusNum == 2 ? [
                         {
