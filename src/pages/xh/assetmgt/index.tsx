@@ -553,6 +553,9 @@ export default function () {
     
     // console.log('treeQuery', treeQuery);
     treeQuery['status'] = 0
+    treeQuery['groupIds'] = groupIds?.toString()
+    treeQuery['query'] = searchVal?searchVal:undefined;
+    treeQuery['filter'] = filterParam?filterParam:undefined;
     getAssetstypesNew(treeQuery).then(res => {
       const { dat } = res
       dat.forEach(item => {
