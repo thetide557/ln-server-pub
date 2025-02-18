@@ -385,10 +385,10 @@ export default function () {
       if (res.dat) {
         let dats = {
           ...res.dat,
-          last_maintenace_date: moment(res.dat.last_maintenace_date * 1000),
-          purchase_data: moment(res.dat.purchase_data * 1000),
-          next_maintenace_date: moment(res.dat.next_maintenace_date * 1000),
-          warranty_date: moment(res.dat.warranty_date * 1000),
+          last_maintenace_date: res.dat.last_maintenace_date ? moment(res.dat.last_maintenace_date * 1000) : '',
+          purchase_data: res.dat.purchase_data? moment(res.dat.purchase_data * 1000) :'',
+          next_maintenace_date:res.dat.next_maintenace_date? moment(res.dat.next_maintenace_date * 1000): '',
+          warranty_date: res.dat.warranty_date?moment(res.dat.warranty_date * 1000): '',
         }
         if (mode == 'edit') {
           setMaintenanceStatusNum(res.dat.maintenance_status)
@@ -769,13 +769,13 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='维保人员' name='maintainers' rules={[{ required: true },{ pattern: /^[\u4e00-\u9fa5]+$/, message: '请输入有效的中文!' }]}>
-                    <Input  placeholder='请输入维保人员' />
+                  <Form.Item label='维保人员' name='maintainers' rules={[{ required: true }, { pattern: /^[\u4e00-\u9fa5]+$/, message: '请输入有效的中文!' }]}>
+                    <Input placeholder='请输入维保人员' />
                   </Form.Item>
                 </Col>
 
                 <Col span={12}>
-                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true },{ pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, message: '请输入有效的邮箱!' }]}>
+                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true }, { pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, message: '请输入有效的邮箱!' }]}>
                     <Input placeholder='请输入维保人员邮箱' />
                   </Form.Item>
                 </Col>
