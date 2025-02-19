@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
+import { PlusSquareOutlined, MinusSquareOutlined, FileOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';
@@ -29,17 +30,17 @@ import './style.less';
 import _ from 'lodash';
 import { Resizable } from 're-resizable';
 import Accordion from './Accordion';
+import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { deleteXhAssets, getAssetstypes, getAssetsByCondition } from '@/services/assets';
+import { deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { factories } from './catalog';
+import { factories, serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
-import { settings } from 'cluster';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -62,6 +63,8 @@ let queryFilter = [
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'position', label: '资产位置', type: 'input' },
   { name: 'maintenanceStatus', label: '维保状态', type: 'select' },
+  // { name: 'service_level', label: '服务层级', type: 'select' },
+  // { name: 'device_type', label: '设备形态', type: 'select' },
 ];
 
 export default function () {
@@ -84,7 +87,7 @@ export default function () {
 
   const [total, setTotal] = useState<number>(0);
 
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
 
   const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
@@ -94,8 +97,19 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
+  const [title, setTitle] = useState<any>('');
   const groupIds = busiGroups?.map(item => item.id)
   // console.log(groupIds);
+
+  // 资产分组
+  let treeQuery = {}
+  const [treeList, setTreeList] = useState<any>([])
+  const [open, setOpen] = useState<boolean>(false)
+  const [curGroup, setCurGroup] = useState<any>({})
+  const [isShow, setIsShow] = useLocalStorage('left_tissueId', Number(-1))
+  // const [activeColor, setActiveColor] = useLocalStorage('left_asset_type', Number(-1))
+  const [parId, setParId] = useLocalStorage('left_parId')
+  const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1))
   
   const maintenanceStatusOption = [
     {
@@ -134,8 +148,20 @@ export default function () {
         label: factory.label,
       };
     }),
+    service_level: serviceHierarchyOptions.map((item) => {
+      return {
+        value: _.toString(item.value),
+        label: item.label,
+      };
+    }),
+    device_type: deviceFormOptions.map((item) => {
+      return {
+        value: _.toString(item.value),
+        label: item.label,
+      };
+    }),
   };
-  
+
 
   const baseColumns: any[] = [
     {
@@ -347,48 +373,63 @@ export default function () {
       fixed: 'right',
       render: (text: string, record: assetsType) => (
         <Space>
-          <VideoCameraOutlined
-            title='设置监控'
-            onClick={(e) => {
-              localStorage.setItem('left_monitor_type', '0');
-              history.push('/xh/monitor?mode=view&assetId=' + record.id);
-            }}
-          />
-          <FileSearchOutlined
-            title='资产详情'
-            onClick={(e) => {
-              showModal('view', record);
-            }}
-          />
-          <FundOutlined
-            title='监控图表'
-            onClick={(e) => {
-              history.push(`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`);
-            }}
-          />
-          <EditOutlined
-            title='编辑'
-            onClick={(e) => {
-              showModal('update', record);
-            }}
-          />
-          <DeleteOutlined
-            title='删除'
-            className='table-operator-area-warning'
-            onClick={async () => {
-              Modal.confirm({
-                title: t('common:confirm.delete'),
-                onOk: async () => {
-                  await deleteXhAssets({ ids: [record.id.toString()] });
-                  message.success(t('common:success.delete'));
-                  setRefreshKey(_.uniqueId('refreshKey_'));
-                  setSelectedAssets([]);
-                },
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/monitor")) && <VideoCameraOutlined
+              title='设置监控'
+              onClick={(e) => {
+                localStorage.setItem('left_monitor_type', '0');
+                history.push('/xh/monitor?mode=view&assetId=' + record.id);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/detail")) && <FileSearchOutlined
+              title='资产详情'
+              onClick={(e) => {
+                showModal('view', record);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/chart")) && <FundOutlined
+              title='监控图表'
+              onClick={(e) => {
+                history.push(`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/put")) && <EditOutlined
+              title='编辑'
+              onClick={(e) => {
+                showModal('update', record);
+              }}
+            />
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/del")) && <DeleteOutlined
+              title='删除'
+              className='table-operator-area-warning'
+              onClick={async () => {
+                Modal.confirm({
+                  title: t('common:confirm.delete'),
+                  onOk: async () => {
+                    await deleteXhAssets({ ids: [record.id.toString()] });
+                    message.success(t('common:success.delete'));
+                    setRefreshKey(_.uniqueId('refreshKey_'));
+                    setSelectedAssets([]);
+                  },
 
-                onCancel() {},
-              });
-            }}
-          ></DeleteOutlined>
+                  onCancel() { },
+                });
+              }}
+            ></DeleteOutlined>
+          }
+
+
+
+
+
         </Space>
       ),
     },
@@ -505,9 +546,36 @@ export default function () {
     setSelectColumns(showColumns.concat(fixColumns));
   }
 
+  const getAssetTree = () => {
+    // console.log('ac', activeColor);
+    console.log('parId', parId);
+    console.log('left_asset_type', localStorage.getItem('left_asset_type'));
+    
+    // console.log('treeQuery', treeQuery);
+    treeQuery['status'] = 0
+    treeQuery['groupIds'] = groupIds?.toString()
+    treeQuery['query'] = searchVal?searchVal:undefined;
+    treeQuery['filter'] = filterParam?filterParam:undefined;
+    getAssetstypesNew(treeQuery).then(res => {
+      const { dat } = res
+      dat.forEach(item => {
+        item['type_list'] = item['type_list'].map((v) => {
+          return {
+            id: v.name,
+            name: v.name,
+            ...v,
+            parentId: item.id
+          };
+        });
+      })
+      // console.log('dat', dat);
+      setTreeList(dat)
+    })
+  }
+
   useEffect(() => {
     //来源数据字典
-    getAssetstypes().then((res) => {
+    getAssetstypesByParams(treeQuery).then((res) => {
       let arr = ['0'];
       const items = res.dat.map((v) => {
         return {
@@ -536,13 +604,18 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [searchVal, typeId, refreshKey]);
+  }, [searchVal, typeId, refreshKey, tissueId]);
+
+  useEffect(() => {
+    getAssetTree()
+  }, [searchVal]);
 
   useInterval(() => {
     setRefreshKey(_.uniqueId('refreshKey_'));
   }, 1000 * 30);
 
   const getTableData = () => {
+    const parentId = localStorage.getItem('left_parId')
     const param = {
       page: current,
       limit: pageSize,
@@ -551,55 +624,61 @@ export default function () {
 
     if (searchVal != null && searchVal.length > 0) {
       param['query'] = searchVal;
+      treeQuery['query'] = searchVal
     }
-    if (typeId != null && typeId != '0' && modifyType) {
+    if (typeId != null && typeId != '0' && modifyType && parentId) {
       param['type'] = typeId;
+    }
+    if (tissueId != null && !parentId) {
+      param['tissue_tree_id'] = tissueId;
     }
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
+      treeQuery['filter'] = filterParam
     }
     setQueryCondition(param);
+
     getAssetsByCondition(param).then(({ dat }) => {
-      dat.list?.forEach((entity, index) => {
-        let expands = entity.exps;
-        if (expands != null && expands.length > 0) {
-          const map = new Map();
-          expands.forEach((item, index, arr) => {
-            if (!map.has(item.config_category)) {
-              map.set(
-                item.config_category,
-                arr.filter((a) => a.config_category == item.config_category),
-              );
-            }
-          });
-          //以上分组加载数据
-          let mapValues = {};
-          map.forEach(function (value, key) {
-            const formDataMap = new Map();
-            value.forEach((item, index, arr) => {
-              if (!formDataMap.has(item.group_id)) {
-                formDataMap.set(
-                  item.group_id,
-                  arr.filter((a) => a.group_id == item.group_id),
-                );
-              }
-            });
-            let group: any = [];
-            formDataMap.forEach(function (value, i) {
-              let itemsChars = '';
-              value.forEach((item, index, arr) => {
-                itemsChars += '"' + item.name + '":"' + item.value + '",';
-              });
-              itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
-              group.push(JSON.parse(itemsChars));
-            });
-            mapValues[key] = group;
-          });
-          entity.expands = mapValues;
-        }
-      });
+      // dat.list.forEach((entity, index) => {
+      //   let expands = entity.exps;
+      //   if (expands != null && expands.length > 0) {
+      //     const map = new Map();
+      //     expands.forEach((item, index, arr) => {
+      //       if (!map.has(item.config_category)) {
+      //         map.set(
+      //           item.config_category,
+      //           arr.filter((a) => a.config_category == item.config_category),
+      //         );
+      //       }
+      //     });
+      //     //以上分组加载数据
+      //     let mapValues = {};
+      //     map.forEach(function (value, key) {
+      //       const formDataMap = new Map();
+      //       value.forEach((item, index, arr) => {
+      //         if (!formDataMap.has(item.group_id)) {
+      //           formDataMap.set(
+      //             item.group_id,
+      //             arr.filter((a) => a.group_id == item.group_id),
+      //           );
+      //         }
+      //       });
+      //       let group: any = [];
+      //       formDataMap.forEach(function (value, i) {
+      //         let itemsChars = '';
+      //         value.forEach((item, index, arr) => {
+      //           itemsChars += '"' + item.name + '":"' + item.value + '",';
+      //         });
+      //         itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
+      //         group.push(JSON.parse(itemsChars));
+      //       });
+      //       mapValues[key] = group;
+      //     });
+      //     entity.expands = mapValues;
+      //   }
+      // });
       // console.log('1111list', dat.list);
-      
+
       setList(dat.list || []);
       setTotal(dat.total);
     });
@@ -641,7 +720,7 @@ export default function () {
       try {
         const value = tempFn({ temp1: values });
         return value;
-      } catch(e) {
+      } catch (e) {
         console.log('values', values)
         console.log('e', e)
       }
@@ -659,17 +738,17 @@ export default function () {
   const renderMetricsItem = (field, record, index, unit) => {
     let vaue: any = null;
     for (let item of record.metrics_list) {
-      
+
       if (item.name == field) {
         if (unit != null && unit.length > 0) {
-            vaue = item.value;
+          vaue = item.value;
         } else {
           vaue = parseFloat(item.value).toFixed(1);
         }
         break;
       }
     }
-    
+
     if (unit != null && unit.length > 0) {
       return valueFormatter(
         {
@@ -814,6 +893,32 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
 
+  const handleClose = (value: any) => {
+    if (value == 'sure') {
+      getAssetTree()
+    }
+    setOpen(false)
+  }
+
+  const handleClickTree = (item: any, par: any) => {
+    if (par) {
+      setParId(par.id)
+      setTypeId(item.id);
+      setTissueId(undefined)
+    } else {
+      setTissueId(item.id)
+      setTypeId(undefined)
+      localStorage.removeItem('left_parId')
+      setParId(undefined)
+    }
+    // console.log(item);
+    // setActiveColor(item.id)
+    //资产类型操作
+    setCurrent(1);
+    localStorage.setItem('left_asset_type', item.id);
+    setRefreshKey(_.uniqueId('refreshKey_'));
+  }
+
   return (
     <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
       <div style={{ display: 'inline-flex' }} className='asset_list_view'>
@@ -845,8 +950,89 @@ export default function () {
               {!collapse ? <LeftOutlined /> : <RightOutlined />}
             </div>
             <div className='left_tree' style={{ display: 'inline-block' }}>
-              <div className='asset_organize_cls'>组织树列表</div>
-              <Accordion
+              <div className='asset_organize_cls'>
+                <span>组织树列表</span>
+                <span className='add_group' onClick={() => { setOpen(true); setCurGroup({}); setTitle('新增分组') }}>新增分组</span>
+              </div>
+              <div className='tree-list'>
+                {
+                  _.map(treeList, (item) => {
+                    return (
+                      <div key={item.name} className='tree-row'>
+                        <div className='tree-group'>
+                          <span>{isShow == item.id ? <MinusSquareOutlined style={{ fontSize: 13 }} onClick={() => { setIsShow(null as any) }} /> : <PlusSquareOutlined style={{ fontSize: 13 }} onClick={() => {
+                            setIsShow(item.id)
+                          }} />}</span>
+                          <span className='g-name' onClick={() => handleClickTree(item, null)} style={{ backgroundColor: (item.id == localStorage.getItem('left_asset_type') && !localStorage.getItem('left_parId')) ? '#92b7d1' : '' }}>{item.name}</span>
+                          {
+                            item.id != -1 && <Dropdown
+                              // trigger={['click']}
+                              overlay={
+                                <Menu
+                                  style={{ width: '100px' }}
+                                  onClick={({ key }) => {
+                                    // console.log(key);
+                                    if (key === 'edit') {
+                                      setTitle('编辑分组');
+                                      setCurGroup(item);
+                                      setOpen(true);
+                                    } else {
+                                      Modal.confirm({
+                                        title: '是否确认删除该分组？',
+                                        onOk: async () => {
+                                          delAssetstypesNew({ ids: item.id }).then((res) => {
+                                            message.success('删除成功');
+                                            // 删除自己则返回默认
+                                            if (item.id == tissueId) {
+                                              localStorage.setItem('left_tissueId', '-1')
+                                              localStorage.setItem('left_asset_type', '-1')
+                                              localStorage.removeItem('left_parId')
+                                              setTissueId(-1)
+                                              // setActiveColor(-1)
+                                            }
+                                            getAssetTree()
+                                            setRefreshKey(_.uniqueId('refreshKey_'));
+                                            // setSelectedAssets([]);
+                                          });
+                                        },
+                                        onCancel() { },
+                                      });
+                                    }
+
+                                  }}
+                                  items={[
+                                    { key: 'edit', label: '编辑', icon: <EditOutlined />, },
+                                    { key: 'del', label: '删除', icon: <DeleteOutlined /> },
+                                  ]}
+                                ></Menu>
+                              }
+                            >
+                              <span className='more'>...</span>
+                            </Dropdown>
+                          }
+                        </div>
+                        {
+                          (isShow == item.id) && <div className='tree-content'>
+                            {_.map(item.type_list, item1 => {
+                              return (
+                                <div key={item1.id} className='tree-asset'>
+                                  <FileOutlined style={{ fontSize: 13 }} />
+                                  <div style={{ backgroundColor: (item1.id == localStorage.getItem('left_asset_type') && parId == item.id) ? '#92b7d1' : '' }} className='asset-name' onClick={() => handleClickTree(item1, item)}>
+                                    <span>{item1.name}</span>
+                                    <span>{item1.number}</span>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        }
+                      </div>
+                    )
+                  })
+                }
+              </div>
+              {/* 分组树 */}
+              {/* <Accordion
                 isAutoInitialized={true}
                 treeData={treeData}
                 addButton={false}
@@ -863,7 +1049,7 @@ export default function () {
                     setRefreshKey(_.uniqueId('refreshKey_'));
                   }
                 }}
-              />
+              /> */}
             </div>
           </div>
         </Resizable>
@@ -942,76 +1128,84 @@ export default function () {
             </Space>
             <div className='tool_right'>
               <Space>
-                <div>
-                  <Button
-                    onClick={() => {
-                      showModal('add', null);
-                    }}
-                    type='primary'
-                  >
-                    {t('新增')}
-                  </Button>
-                </div>
-                <div>
-                  <Popover placement='bottom' content={popupContent} trigger='click' className='filter_columns'>
-                    <Button icon={<UnorderedListOutlined />}>显示列</Button>
-                  </Popover>
-                </div>
-                <div>
-                  <Dropdown
-                    trigger={['click']}
-                    overlay={
-                      <Menu
-                        style={{ width: '100px' }}
-                        onClick={({ key }) => {
-                          if (key == OperateType.AssetBatchExport) {
-                            setOperateType(key as OperateType);
-                          } else if (key == OperateType.Delete) {
-                            if (selectedAssets.length <= 0) {
-                              message.warning('请选择要批量操作的设备');
-                              return;
-                            } else {
-                              Modal.confirm({
-                                title: '确认要删除吗',
-                                onOk: async () => {
-                                  let rows = selectedAssets?.map((item) => '' + item);
-                                  deleteXhAssets({ ids: rows }).then((res) => {
-                                    message.success('删除成功！');
-                                    setRefreshKey(_.uniqueId('refreshKey_'));
-                                    setSelectedAssets([]);
-                                  });
-                                },
-                                onCancel() {},
-                              });
-                            }
-                          } else if (key == OperateType.UpdateBusi) {
-                            if (selectedAssets.length <= 0) {
-                              message.warning('请选择要批量转移的资产');
-                              return;
-                            }
-                            setOperateType(key as OperateType);
-                          } else {
-                            setOperateType(key as OperateType);
-                          }
-                        }}
-                        items={[
-                          { key: OperateType.AssetBatchImport, label: '导入设备' },
-                          { key: OperateType.AssetBatchExport, label: '导出设备' },
-                          // { key: OperateType.BindTag, label: '绑定标签' },
-                          // { key: OperateType.UnbindTag, label: '解绑标签' },
-                          { key: OperateType.UpdateBusi, label: '批量转移' },
-                          // { key: OperateType.RemoveBusi, label: '移出业务组' },
-                          // { key: OperateType.UpdateNote, label: '修改备注' },
-                          { key: OperateType.Delete, label: '批量删除' },
-                        ]}
-                      ></Menu>
-                    }
-                  >
-                    <Button>
-                      {t('common:btn.batch_operations')} <DownOutlined />
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/add")) && <div>
+                    <Button
+                      onClick={() => {
+                        showModal('add', null);
+                      }}
+                      type='primary'
+                    >
+                      {t('新增')}
                     </Button>
-                  </Dropdown>
-                </div>
+                  </div>
+                }
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/col")) && <div>
+                    <Popover placement='bottom' content={popupContent} trigger='click' className='filter_columns'>
+                      <Button icon={<UnorderedListOutlined />}>显示列</Button>
+                    </Popover>
+                  </div>
+                }
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/ops")) && <div>
+                    <Dropdown
+                      trigger={['click']}
+                      overlay={
+                        <Menu
+                          style={{ width: '100px' }}
+                          onClick={({ key }) => {
+                            if (key == OperateType.AssetBatchExport) {
+                              setOperateType(key as OperateType);
+                            } else if (key == OperateType.Delete) {
+                              if (selectedAssets.length <= 0) {
+                                message.warning('请选择要批量操作的设备');
+                                return;
+                              } else {
+                                Modal.confirm({
+                                  title: '确认要删除吗',
+                                  onOk: async () => {
+                                    let rows = selectedAssets?.map((item) => '' + item);
+                                    deleteXhAssets({ ids: rows }).then((res) => {
+                                      message.success('删除成功！');
+                                      setRefreshKey(_.uniqueId('refreshKey_'));
+                                      setSelectedAssets([]);
+                                    });
+                                  },
+                                  onCancel() { },
+                                });
+                              }
+                            } else if (key == OperateType.UpdateBusi) {
+                              if (selectedAssets.length <= 0) {
+                                message.warning('请选择要批量转移的资产');
+                                return;
+                              }
+                              setOperateType(key as OperateType);
+                            } else {
+                              setOperateType(key as OperateType);
+                            }
+                          }}
+                          items={[
+                            { key: OperateType.AssetBatchImport, label: '导入设备' },
+                            { key: OperateType.AssetBatchExport, label: '导出设备' },
+                            // { key: OperateType.BindTag, label: '绑定标签' },
+                            // { key: OperateType.UnbindTag, label: '解绑标签' },
+                            { key: OperateType.UpdateBusi, label: '批量转移' },
+                            // { key: OperateType.RemoveBusi, label: '移出业务组' },
+                            // { key: OperateType.UpdateNote, label: '修改备注' },
+                            { key: OperateType.Delete, label: '批量删除' },
+                          ]}
+                        ></Menu>
+                      }
+                    >
+                      <Button>
+                        {t('common:btn.batch_operations')} <DownOutlined />
+                      </Button>
+                    </Dropdown>
+                  </div>
+                }
+
+
               </Space>
             </div>
           </div>
@@ -1033,7 +1227,7 @@ export default function () {
                 pagination={{
                   showSizeChanger: true,
                   showQuickJumper: true,
-                 
+
                   total: total,
                   onChange: onPageChange,
                   current: current,
@@ -1056,6 +1250,8 @@ export default function () {
             </div>
           </div>
         </div>
+        {/* 分组弹窗 */}
+        {open && <AccordionModal title={title} open={open} curGroup={curGroup} closeOpen={handleClose} treeData={treeData} />}
       </div>
     </PageLayout>
   );

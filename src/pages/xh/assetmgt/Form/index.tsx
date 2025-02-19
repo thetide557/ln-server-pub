@@ -13,11 +13,10 @@ import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
-import { factories } from '../catalog';
+import { factories, serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
 import { tuple } from 'antd/lib/_util/type';
 import { timestamp, timestampToCST } from '@/utils/day';
-import { nextTick } from 'process';
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -29,10 +28,14 @@ export default function () {
   const [tabIndex, setTabIndex] = useState<string>('base_set');
   const [editType, setEditType] = useState<string>('insert');
   const history = useHistory();
+
   const [hasSave, setHasSave] = useState<boolean>(true);
+
   const { search } = useLocation();
   const { mode, id } = queryString.parse(search);
+
   const [properties, setProperties] = useState({});
+
   const [params, setParams] = useState<{ label: string; name: string; required?: boolean; type: string; options?: [] }[]>([]);
   const [form] = Form.useForm();
   const [assetData, setAssetData] = useState<any>({}); // 集中保存提交的数据
@@ -45,6 +48,7 @@ export default function () {
   const [maintenanceHistory, setMaintenanceHistory] = useState<any[]>([]);
   const [maintenanceStatusNum, setMaintenanceStatusNum] = useState();
   const [maintenanceRecordForm] = Form.useForm();
+  const [maintainersVal, setMaintainersVal] = useState('');
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
@@ -192,12 +196,11 @@ export default function () {
           });
           delete dat.exps;
         }
-        // setAssetData(dat);
+
+        setAssetData(dat);
         const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
-        console.log(dat);
-
         form.setFieldsValue(dat);
         setCurrentType(dat.type);
       });
@@ -239,7 +242,15 @@ export default function () {
           ...v,
         };
       });
-      setAssetTypes(items);
+      // 新增时，资产类型不能选择物理服务器和虚拟服务器
+      if (!id) {
+        const insertItems = items.filter(item => item.value !== "物理服务器" && item.value !== "虚拟服务器");
+        setAssetTypes(insertItems);
+      } else {
+        setAssetTypes(items);
+      }
+
+
     });
     let param = {};
     param['limit'] = -1;
@@ -281,6 +292,7 @@ export default function () {
   }, [id]);
 
   const TabOperteClick = (tabIndex: string) => {
+
     setTabIndex(tabIndex);
     if (tabIndex != 'base_set' && id == null) {
       setHasSave(false);
@@ -343,18 +355,38 @@ export default function () {
     const params = { ident: values.ip }
     setAssetData({ ...assetData, ...values, ...params });
   };
-  const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
 
+  // IP地址校验规则
+  const validateIP = (rule, value) => {
+    if (value) {
+      const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+      if (!regex.test(value)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+
+      const parts = value.split('.').map(Number);
+      if (parts.every(part => part === 0)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+      if (parts.every(part => part === 255)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+    }
+    return Promise.resolve();
+  };
+
+
+  const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
   // 获取维保信息详情
   const getMaintenanceInfo = () => {
     getMaintenanceInfoById(_.toNumber(id)).then((res) => {
       if (res.dat) {
         let dats = {
           ...res.dat,
-          last_maintenace_date: moment(res.dat.last_maintenace_date * 1000),
-          purchase_data: moment(res.dat.purchase_data * 1000),
-          next_maintenace_date: moment(res.dat.next_maintenace_date * 1000),
-          warranty_date: moment(res.dat.warranty_date * 1000),
+          last_maintenace_date: res.dat.last_maintenace_date ? moment(res.dat.last_maintenace_date * 1000) : '',
+          purchase_data: res.dat.purchase_data? moment(res.dat.purchase_data * 1000) :'',
+          next_maintenace_date:res.dat.next_maintenace_date? moment(res.dat.next_maintenace_date * 1000): '',
+          warranty_date: res.dat.warranty_date?moment(res.dat.warranty_date * 1000): '',
         }
         if (mode == 'edit') {
           setMaintenanceStatusNum(res.dat.maintenance_status)
@@ -421,7 +453,6 @@ export default function () {
           type='card'
           size='small'
           onTabClick={(key) => {
-            console.log(key);
             if (key == 'maintenance') {
               getMaintenanceInfo()
             }
@@ -473,7 +504,7 @@ export default function () {
                   {/* <Form.Item label='IP地址' name='ip' rules={[{ required: true }]}>
                     <Input placeholder='请输入IP地址' />
                   </Form.Item> */}
-                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }]}>
+                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }, { validator: validateIP }]}>
                     {/* <Select
                       showSearch
                       options={assetOptions}
@@ -490,6 +521,7 @@ export default function () {
                     /> */}
                     <AutoComplete
                       allowClear={true}
+                      disabled={currentType === "物理服务器" || currentType === "虚拟服务器"}
                       options={assetOptions}
                       onChange={handleChange}
                       // onSearch={(text) => getPanelValue(text)}
@@ -540,6 +572,34 @@ export default function () {
                     />
                   </Form.Item>
                 </Col>
+                {/* <Col span={12}>
+                  <Form.Item label='服务层级' name='service_level' rules={[{ required: false }]}>
+                    <Select
+                      style={{ width: '100%' }}
+                      allowClear
+                      options={serviceHierarchyOptions.map(({ label, value }) => ({
+                        label: label,
+                        value: value,
+                      }))}
+                      placeholder='请选择服务层级'
+                    >
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='设备形态' name='device_type' rules={[{ required: false }]}>
+                    <Select
+                      style={{ width: '100%' }}
+                      allowClear
+                      options={deviceFormOptions.map(({ label, value }) => ({
+                        label: label,
+                        value: value,
+                      }))}
+                      placeholder='请选择设备形态'
+                    >
+                    </Select>
+                  </Form.Item>
+                </Col> */}
                 <Col span={12}>
                   <Form.Item label='备注' name='memo'>
                     <Input placeholder='填写备注' />
@@ -707,13 +767,13 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='维保人员' name='maintainers' rules={[{ required: true }]}>
+                  <Form.Item label='维保人员' name='maintainers' rules={[{ required: true }, { pattern: /^[\u4e00-\u9fa5]+$/, message: '请输入有效的中文!' }]}>
                     <Input placeholder='请输入维保人员' />
                   </Form.Item>
                 </Col>
 
                 <Col span={12}>
-                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true }]}>
+                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true }, { pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, message: '请输入有效的邮箱!' }]}>
                     <Input placeholder='请输入维保人员邮箱' />
                   </Form.Item>
                 </Col>
@@ -729,7 +789,7 @@ export default function () {
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                     <Select
-                      disabled={maintenanceStatusNum&&maintenanceStatusNum != 2}
+                      disabled={maintenanceStatusNum && maintenanceStatusNum != 2}
                       style={{ width: '100%' }}
                       options={maintenanceStatusNum == 2 ? [
                         {
