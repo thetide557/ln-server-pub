@@ -63,6 +63,7 @@
     "lezer-promql": "^0.22.0",
     "lodash": "^4.17.21",
     "logfmt": "1.2.x",
+    "marked": "9.1.6",
     "moment": "^2.29.1",
     "numeral": "^2.0.6",
     "qrcode.react": "^3.1.0",
