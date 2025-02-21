@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useEffect, useState } from 'react';
 import Draggable from 'react-draggable';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -16,14 +17,14 @@ const AiRobot = function () {
   const textAreaRef = useRef<any>(null);
   const location = useLocation();
   const { pathname } = location;
-  console.log('dsdf', pathname);
+  // console.log('dsdf', pathname);
   let isScreen = true
   if (pathname.startsWith('/screenView')) {
     isScreen = true
   } else {
     isScreen = false
   }
-  console.log('is', isScreen);
+  // console.log('is', isScreen);
   
   
   // useEffect(() => {
@@ -142,9 +143,9 @@ const AiRobot = function () {
     })
   }
 
-  useEffect(() => {
-    console.log('aiMessages', aiMessages);
-  }, [aiMessages])
+  // useEffect(() => {
+  //   console.log('aiMessages', aiMessages);
+  // }, [aiMessages])
 
   return (
     <>
