@@ -83,7 +83,7 @@ const AiRobot = function () {
         // 添加用户消息到消息列表
         setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '', sender: 'ai' }]);
         form.setFieldsValue({ 'note': '' })
-        aiRef.current.scrollTpo = aiRef.current.scrollHeight;
+        aiRef.current.scrollTop = aiRef.current.scrollHeight;
         if (textAreaRef.current) {
           e.preventDefault();
           textAreaRef.current.selectionStart = 0;
@@ -131,7 +131,7 @@ const AiRobot = function () {
           }
           // 开始读取流
           readStream();
-          console.log('straaaaa', aiStr);
+          // console.log('straaaaa', aiStr);
           
         } catch (error) {
           setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '访问超时', sender: 'ai' }]);
