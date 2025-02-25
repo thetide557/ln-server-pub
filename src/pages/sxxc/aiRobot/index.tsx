@@ -94,7 +94,7 @@ const AiRobot = function () {
     const timeoutId = setTimeout(() => {
       controller.abort();
       console.log('请求超时');
-
+      setLoading(false)
     }, timeout);
 
     return fetchPromise.finally(() => clearTimeout(timeoutId));
