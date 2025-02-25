@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import Draggable from 'react-draggable';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Input, Form } from 'antd';
-import { CloseOutlined, SyncOutlined } from '@ant-design/icons';
+import { CloseOutlined, SyncOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import { marked } from 'marked';
 import './index.less'
 
@@ -19,6 +19,10 @@ const AiRobot = function () {
   const location = useLocation();
   const { pathname } = location;
   const [loading, setLoading] = useState<any>(false)
+  const knowList = ['如何快速录入多个资产？', '资产信息变更后如何更新？', '告警太多如何降噪？', '告警通知支持哪些渠道？', '如何自定义指标告警阈值？', '巡检结果如何查看？', '能否自动修复巡检发现的问题？', '健康报告包含哪些内容？', '工单处理进度如何跟踪？', '如何自定义可视化大屏？', '大屏数据是否支持实时更新？', '拓扑图中如何标识故障资产？', '平台是否支持信创环境？', '能否设置资产维保到期提醒？', '如何查询某业务组下的所有资产？', '能否屏蔽特定时间段的告警？', '如何监控资产性能？', '什么是一体化运维平台中的资产管理功能？', '如何暂停或启用监控指标？', '如何将工单分配给特定的运维人员？']
+  const [randomList, setRandomList] = useState<any>([])
+  // 终止请求
+  const [controller, setController] = useState(new AbortController());
   // console.log('dsdf', pathname);
   let isScreen = true
   if (pathname.startsWith('/screenView')) {
@@ -26,15 +30,41 @@ const AiRobot = function () {
   } else {
     isScreen = false
   }
-  // console.log('is', isScreen);
+
+  const getRandomTwoElements = (arr) => {
+    if (arr.length < 2) {
+      throw new Error("数组长度必须大于等于2");
+    }
+
+    // 复制数组以避免修改原数组
+    let copyArr = arr.slice();
+    let result = [];
+
+    // 随机选择两个不重复的元素
+    for (let i = 0; i < 2; i++) {
+      let randomIndex = Math.floor(Math.random() * copyArr.length);
+      result.push(copyArr[randomIndex]);
+      copyArr.splice(randomIndex, 1);
+    }
+
+    return result;
+  }
 
 
-  // useEffect(() => {
-  //   // 路由变化时执行的代码
-  //   console.log('当前路由:', location.pathname);
 
-  //   // 可以在这里添加更多的逻辑，比如更新状态、发送请求等
-  // }, [location]);
+  useEffect(() => {
+    let randomElements = getRandomTwoElements(knowList);
+    setRandomList(randomElements)
+    // 清理函数，确保在组件卸载时取消请求
+    return () => {
+      controller.abort();
+    };
+  }, [])
+
+  const aiAsk = () => {
+    let randomElements = getRandomTwoElements(knowList);
+    setRandomList(randomElements)
+  }
 
   const handleDrag = () => {
     isDragging = true;
@@ -58,14 +88,11 @@ const AiRobot = function () {
   };
 
   // fetch请求超时
-  const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-
-    const fetchPromise = fetch(url, { ...options, signal });
-
+  const fetchWithTimeout = (url, options = {}, timeout = 30000) => {
+    
+    const fetchPromise = fetch(url, { ...options, signal: controller.signal });
     const timeoutId = setTimeout(() => {
-      abortController.abort();
+      controller.abort();
       console.log('请求超时');
 
     }, timeout);
@@ -89,7 +116,7 @@ const AiRobot = function () {
           form.setFieldsValue({ 'note': '' })
           aiRef.current.scrollTop = aiRef.current.scrollHeight;
           if (textAreaRef.current) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             textAreaRef.current.selectionStart = 0;
             textAreaRef.current.selectionEnd = 0;
             textAreaRef.current.focus()
@@ -138,14 +165,28 @@ const AiRobot = function () {
           // console.log('straaaaa', aiStr);
 
         } catch (error) {
-          setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '访问超时', sender: 'ai' }]);
-          console.error('Error streaming AI text:', error);
-          setLoading(false)
+          if (error.name === 'AbortError') {
+            console.log('请求已中止');
+            setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: ' ', sender: 'ai' }]);
+          } else {
+            setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '访问超时', sender: 'ai' }]);
+            console.error('Error streaming AI text:', error);
+            setLoading(false)
+          }
         }
-
       }
-
     })
+  }
+
+  const sendAsk = (item) => {
+    form.setFieldsValue({ 'note': item })
+    sendAi()
+  }
+
+  const stopAi = () => {
+    controller.abort();
+    setController(new AbortController()); // 重新创建一个新的 AbortController
+    setLoading(false)
   }
 
   // useEffect(() => {
@@ -161,27 +202,52 @@ const AiRobot = function () {
               <div className='ai-all'>
                 {
                   aiMessages.length == 0 ?
-                    <div className="ai-top">
-                      {
-                        isScreen ? <img className='ai-logo' src="/image/ai/d-logo.png" alt="" /> : <img className='ai-logo' src="/image/ai/l-logo.png" alt="" />
-                      }
-                      <div className='ai-title' style={{ color: (isScreen ? '#fff' : '#333') }}>欢迎使用LingNiu，有什么可以帮助您？</div>
-                    </div> : <div className="ai-content" ref={aiRef}>
-                      <div className="messages">
-                        {aiMessages.map((message, index) => (
-                          <div key={index} className={`ai-message ${message.sender}`}>
-                            {message.sender == 'user' ?
-                              <div className='ai-user'>
-                                <span className='user-text'>{message.text}</span>
-                              </div> : <div className='ai-ai'>
-                                <img className='ai-lrobot' src='/image/ai/l-robot.png'></img>
-                                <div className={isScreen ? 'ai-answer dark-answer' : 'ai-answer'}>
-                                  {message.text ? <div dangerouslySetInnerHTML={{ __html: message.text }}></div> : <SyncOutlined spin />}
-                                </div>
-                              </div>}
-                          </div>
-                        ))}
+                    <div className='ai-noask'>
+                      <div className="ai-top">
+                        {
+                          isScreen ? <img className='ai-logo' src="/image/ai/d-logo.png" alt="" /> : <img className='ai-logo' src="/image/ai/l-logo.png" alt="" />
+                        }
+                        <div className='ai-title' style={{ color: (isScreen ? '#fff' : '#333') }}>欢迎使用LingNiu，有什么可以帮助您？</div>
                       </div>
+                      <div className='ai-random'>
+                        <div className='random-ask' style={{ color: (isScreen ? '#74A1D8' : '#CDCDCD') }}>或许你想问问：</div>
+                        <div className='random-content'>
+                          <div className='random1'>
+                            {randomList.map((item1, index1) => {
+                              return (<div style={{ color: (isScreen ? '#CDE3FF' : '#9F9F9F'), borderColor: (isScreen ? '#9DBEE7' : '#E5E5E5') }} key={index1} onClick={() => sendAsk(item1)}>
+                                {item1}
+                              </div>)
+                            })}
+                          </div>
+                          <SyncOutlined style={{ cursor: 'pointer', color: (isScreen ? '#9DBEE7' : '#767676') }} onClick={aiAsk} />
+                        </div>
+                      </div>
+                    </div>
+                    : <div>
+                      <div className="ai-content" ref={aiRef}>
+                        <div className="messages">
+                          {aiMessages.map((message, index) => (
+                            <div key={index} className={`ai-message ${message.sender}`}>
+                              {message.sender == 'user' ?
+                                <div className='ai-user'>
+                                  <span className='user-text'>{message.text}</span>
+                                </div> : <div className='ai-ai'>
+                                  <img className='ai-lrobot' src='/image/ai/l-robot.png'></img>
+                                  <div className={isScreen ? 'ai-answer dark-answer' : 'ai-answer'}>
+                                    {message.text ? <div dangerouslySetInnerHTML={{ __html: message.text }}></div> : <SyncOutlined spin />}
+                                  </div>
+                                </div>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {
+                        loading && <div className='stop-ai'>
+                          <div className={isScreen ? 'stop1 dark-stop1' : 'stop1'} onClick={stopAi}>
+                            <PauseCircleOutlined /><span className='stop-title'>停止生成</span>
+                          </div>
+                        </div>
+                      }
                     </div>
                 }
               </div>
