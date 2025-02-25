@@ -23,6 +23,7 @@ const AiRobot = function () {
   const [randomList, setRandomList] = useState<any>([])
   // 终止请求
   const [controller, setController] = useState(new AbortController());
+  let flag = false
   // console.log('dsdf', pathname);
   let isScreen = true
   if (pathname.startsWith('/screenView')) {
@@ -92,8 +93,8 @@ const AiRobot = function () {
     
     const fetchPromise = fetch(url, { ...options, signal: controller.signal });
     const timeoutId = setTimeout(() => {
+      flag = true
       controller.abort();
-      console.log('请求超时');
       setLoading(false)
     }, timeout);
 
@@ -166,8 +167,15 @@ const AiRobot = function () {
 
         } catch (error) {
           if (error.name === 'AbortError') {
-            console.log('请求已中止');
-            setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: ' ', sender: 'ai' }]);
+            console.log('flag', flag);
+            if (flag) {
+              console.log('请求超时');
+              setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '请求超时', sender: 'ai' }]);
+              setController(new AbortController()); // 重新创建一个新的 AbortController
+            } else {
+              console.log('请求已中止');
+              setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: ' ', sender: 'ai' }]);
+            }
           } else {
             setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '访问超时', sender: 'ai' }]);
             console.error('Error streaming AI text:', error);
@@ -184,6 +192,7 @@ const AiRobot = function () {
   }
 
   const stopAi = () => {
+    flag = false
     controller.abort();
     setController(new AbortController()); // 重新创建一个新的 AbortController
     setLoading(false)
