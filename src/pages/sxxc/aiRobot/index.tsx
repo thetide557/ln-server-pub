@@ -104,11 +104,11 @@ const AiRobot = function () {
   const sendAi = (e: any) => {
     form.validateFields().then(async (values) => {
       console.log(values);
-      if (values.note.trim() && !loading) {
+      if (values.note?.trim() && !loading) {
         try {
           let aiStr = ''
           const data = {
-            content: values.note,
+            content: values.note.trim(),
             prompt: "",
             kb_cls: "ln"
           }
