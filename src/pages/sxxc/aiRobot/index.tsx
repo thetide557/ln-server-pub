@@ -90,7 +90,7 @@ const AiRobot = function () {
 
   // fetch请求超时
   const fetchWithTimeout = (url, options = {}, timeout = 30000) => {
-    
+
     const fetchPromise = fetch(url, { ...options, signal: controller.signal });
     const timeoutId = setTimeout(() => {
       flag = true
@@ -275,14 +275,11 @@ const AiRobot = function () {
                       onPressEnter={sendAi}
                     />
                   </Form.Item>
-                  <Form.Item>
-                    <div className='ai-send'>
-                      <div></div>
-                      {
-                        loading ? <SyncOutlined spin /> : <img onClick={sendAi} className='ai-icon' src="/image/ai/send.png" alt="submit" />
-                      }
-                    </div>
-                  </Form.Item>
+                  <div className='ai-send'>
+                    {
+                      loading ? <SyncOutlined spin /> : <img onClick={sendAi} className='ai-icon' src="/image/ai/send.png" alt="submit" />
+                    }
+                  </div>
                 </Form>
               </div>
             </div>
