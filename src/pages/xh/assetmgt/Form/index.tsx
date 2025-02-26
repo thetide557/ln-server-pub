@@ -400,19 +400,21 @@ export default function () {
   const showMaintenanceRecord = () => {
     setMaintenanceRecordModalOpen(true);
   }
-  const mrhandleOk = async () => {
+  const mrhandleOk = () => {
     try {
-      const values = await maintenanceRecordForm.validateFields();
-      await addMaintenanceHistory({
-        ...values,
-        asset_id: _.toNumber(id),
-        maintenance_date: timestamp(values.maintenance_date),
-      })
-      message.success('操作成功');
-      setMaintenanceRecordModalOpen(false);
-    } catch (error) {
-      message.error('添加维保记录失败，请重试');
-    }
+      maintenanceRecordForm.validateFields().then(values => {
+        addMaintenanceHistory({
+          ...values,
+          asset_id: _.toNumber(id),
+          maintenance_date: timestamp(values.maintenance_date),
+        }).then(() => {
+          message.success('操作成功');
+          setMaintenanceRecordModalOpen(false);
+        }).catch(err => {
+          message.error('添加维保记录失败，请重试');
+        })
+      });
+    } catch (error) { }
   };
   // show 维保历史弹框
   const showmaintenanceHistory = () => {
@@ -800,7 +802,7 @@ export default function () {
               </Row>
               <Row>
                 <Col span={12} offset={3}>
-                  <Button type="primary" onClick={showMaintenanceRecord}>新增维保记录</Button>
+                  <Button type="primary" disabled={!maintenanceStatusNum}  onClick={showMaintenanceRecord}>新增维保记录</Button>
                 </Col>
               </Row>
             </Card>
