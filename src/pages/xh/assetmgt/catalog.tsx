@@ -172,4 +172,14 @@ export const factories = [
         { "key":"SANTAK" , "value":"山特电子" }, 
         { "key":"Sindoh" , "value":"圣度" },
         { "key": "Other", "value": "其它" }
+];
+export const serviceHierarchyOptions = [
+  { value: '网络层', label: '网络层' },
+  { value: 'IaaS', label: 'IaaS' },
+  { value: 'PaaS', label: 'PaaS' },
+  { value: 'SaaS', label: 'SaaS' },
+]
+export const deviceFormOptions = [
+  { value: '物理设备', label: '物理设备' },
+  { value: '虚拟设备', label: '虚拟设备' }
 ]

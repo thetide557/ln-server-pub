@@ -135,6 +135,22 @@ export const getAssetstypes = function () {
   });
 };
 
+//获取资产类型
+export const getAssetstypesByParams = function (params: any) {
+  return request('/api/n9e/assets/types', {
+    method: RequestMethod.Get,
+    params
+  });
+};
+
+// 获取监控资产
+export const getMonitorAssetstypes = function (params: any) {
+  return request('/api/n9e/assets/monitortypes', {
+    method: RequestMethod.Get,
+    params
+  });
+};
+
 export function bindTags(data) {
   return bindOrUnbindTags(true, data);
 }
@@ -275,6 +291,35 @@ export const changeAssetOrganization = function (data) {
 export const getMonitoringOptions = function () {
   return request(`/api/n9e/monitoring/options`, {
     method: RequestMethod.Get,
+  });
+};
+
+// 查询资产组织树分组
+export const getAssetstypesNew = function (params: any) {
+  return request('/api/n9e/assets/assettissuetree', {
+    method: RequestMethod.Get,
+    params
+  });
+};
+
+export const addAssetstypesNew = function (data: any) {
+  return request('/api/n9e/assets/assettissuetree', {
+    method: RequestMethod.Post,
+    data
+  });
+};
+
+export const editAssetstypesNew = function (data: any) {
+  return request('/api/n9e/assets/assettissuetree', {
+    method: RequestMethod.Put,
+    data
+  });
+};
+
+export const delAssetstypesNew = function (params: any) {
+  return request('/api/n9e/assets/assettissuetree', {
+    method: RequestMethod.Delete,
+    params
   });
 };
 
