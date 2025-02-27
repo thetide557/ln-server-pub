@@ -417,6 +417,7 @@ export default function () {
                     await deleteXhAssets({ ids: [record.id.toString()] });
                     message.success(t('common:success.delete'));
                     setRefreshKey(_.uniqueId('refreshKey_'));
+                    getAssetTree()
                     setSelectedAssets([]);
                   },
 
@@ -1169,6 +1170,7 @@ export default function () {
                                     deleteXhAssets({ ids: rows }).then((res) => {
                                       message.success('删除成功！');
                                       setRefreshKey(_.uniqueId('refreshKey_'));
+                                      getAssetTree()
                                       setSelectedAssets([]);
                                     });
                                   },

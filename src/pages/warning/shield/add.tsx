@@ -35,11 +35,16 @@ const AddShield: React.FC = () => {
      localStorage.setItem("current_alert_display", "card");
   }
 
-
+  // console.log('query', query);
+  
   if (query.busiGroup) {
     query.group_id = _.toNumber(query.busiGroup);
   } else {
-    query.group_id = curBusiId;
+    if (curBusiId == -1) {
+      query.group_id = 1;
+    } else {
+      query.group_id = curBusiId;
+    }
   }
   if (query.datasource_ids) {
     if (_.isString(query.datasource_ids)) {

@@ -221,6 +221,7 @@ export default function TableCpt(props: IProps) {
       page: current,
       limit: pageSize,
       ...filterObj,
+      gid: localStorage.getItem('groupIds'),
     }).then(async (res) => {
 
       let list = res.dat.list;

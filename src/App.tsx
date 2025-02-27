@@ -401,7 +401,7 @@ function App() {
       cluster: curWarn.cluster,
       tags,
     };
-    setAlartMutes(params, curWarn.datasource_id).then((res) => {
+    setAlartMutes(params, curWarn.group_id).then((res) => {
       setOpen1(false)
       message.success('屏蔽成功')
     });

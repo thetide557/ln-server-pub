@@ -147,9 +147,9 @@ const OperateForm: React.FC<Props> = ({ detail = {}, type }: any) => {
       }),
     });
   };
-  form.setFieldsValue({
-    group_id: undefined, // 替换为你的字段名
-  });
+  // form.setFieldsValue({
+  //   group_id: undefined, // 替换为你的字段名
+  // });
   const content = (
     <Form
       form={form}
@@ -206,7 +206,6 @@ const OperateForm: React.FC<Props> = ({ detail = {}, type }: any) => {
         <Form.Item label={"----"+t('common:business_group')} name='group_id'>
           <Select
             disabled={type == 1}
-            defaultValue=''
             options={_.map(busiGroups, (item) => {
               return {
                 label: item.name,
