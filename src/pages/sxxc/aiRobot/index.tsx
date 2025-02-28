@@ -277,7 +277,7 @@ const AiRobot = function () {
                   </Form.Item>
                   <div className='ai-send'>
                     {
-                      loading ? <SyncOutlined spin /> : <img onClick={sendAi} className='ai-icon' src="/image/ai/send.png" alt="submit" />
+                      loading ? <SyncOutlined spin className='ai-loading' /> : <img onClick={sendAi} className='ai-icon' src="/image/ai/send.png" alt="submit" />
                     }
                   </div>
                 </Form>
