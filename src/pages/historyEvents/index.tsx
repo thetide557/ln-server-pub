@@ -34,7 +34,7 @@ import locale from 'antd/es/date-picker/locale/zh_CN';
 import './locale';
 import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
 import { useLocalStorage } from 'react-use';
-
+import TimeRangePicker, { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 const { RangePicker } = DatePicker;
 export const getDefaultHours = () => {
   const locale = window.localStorage.getItem('alert_events_hours');
@@ -60,7 +60,7 @@ export const setDefaultHours = (hours: number) => {
 
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
-  const { busiGroups } = useContext(CommonStateContext);
+  const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
   const [filterType, setFilterType] = useLocalStorage<any>('history_filter_types', 'input');
   const [searchVal, setSearchVal] = useLocalStorage<any>('history_filter_value', null);
@@ -91,6 +91,8 @@ const Event: React.FC = () => {
     query: '',
     type: null,
   });
+
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   useEffect(() => {
     filterOptions['group_id'] = busiGroups.map((group) => {
@@ -215,13 +217,16 @@ const Event: React.FC = () => {
       render: (record: any) => {
         return (
           <Space size={'small'} className='table-operate-column'>
-            <FileSearchOutlined
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/detail")) && <FileSearchOutlined
               title='详情'
               onClick={() => {
                 history.push(`/alert-his-events/${record.id}?from=history`);
               }}
             />
-            <DownloadOutlined
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/export")) && <DownloadOutlined
               className='down_icon'
               title='导出'
               onClick={() => {
@@ -231,7 +236,9 @@ const Event: React.FC = () => {
                 setModalOpen(true);
               }}
             />
-            <DeleteOutlined
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/del")) && <DeleteOutlined
               title='删除'
               onClick={() => {
                 Modal.confirm({
@@ -244,10 +251,14 @@ const Event: React.FC = () => {
                       setRefreshFlag(_.uniqueId('refresh_'));
                     });
                   },
-                  onCancel() {},
+                    onCancel() { },
                 });
               }}
             />
+            }
+
+
+
           </Space>
         );
       },
@@ -356,15 +367,17 @@ const Event: React.FC = () => {
               placeholder={'选择要查询的条件'}
             />
           )}
-          <RangePicker
+          <TimeRangePicker value={range} onChange={setRange} dateFormat='YYYY-MM-DD HH:mm:ss' />
+          {/* <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format='YYYY-MM-DD HH:mm'
             locale={locale}
             onChange={onChange}
             defaultValue={[startTime ? moment(startTime) : null, endTime ? moment(endTime) : null]}
             onOk={onOk}
-          />
+          /> */}
         </Space>
+        {
         <div>
           <Dropdown
             trigger={['click']}
@@ -379,7 +392,7 @@ const Event: React.FC = () => {
                         onOk: async () => {
                           setModalOpen(true);
                         },
-                        onCancel() {},
+                          onCancel() { },
                       });
                     } else {
                       setModalOpen(true);
@@ -399,14 +412,14 @@ const Event: React.FC = () => {
                             setSelectRowKeys([]);
                           });
                         },
-                        onCancel() {},
+                          onCancel() { },
                       });
                     }
                   }
                 }}
                 items={[
-                  { key: 'export', label: '导出' },
-                  { key: 'delete', label: '批量删除' },
+                    (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/exportAll")) && { key: 'export', label: '导出' },
+                    (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/delAll")) && { key: 'delete', label: '批量删除' },
                 ]}
               ></Menu>
             }
@@ -416,6 +429,8 @@ const Event: React.FC = () => {
             </Button>
           </Dropdown>
         </div>
+        }
+
       </div>
     );
   }
@@ -427,6 +442,9 @@ const Event: React.FC = () => {
     if (end > 0) {
       filterObj['end'] = end;
     }
+    const parsedRange = parseRange(range);
+    filterObj["start"] = moment(parsedRange.start).unix();
+    filterObj["end"] = moment(parsedRange.end).unix();
 
     return getEvents({
       page: current,
@@ -458,7 +476,7 @@ const Event: React.FC = () => {
   };
 
   const { tableProps } = useAntdTable(fetchData, {
-    refreshDeps: [refreshFlag, JSON.stringify(filterObj)],
+    refreshDeps: [refreshFlag, JSON.stringify(filterObj), JSON.stringify(range)],
     defaultPageSize: 30,
     debounceWait: 500,
   });

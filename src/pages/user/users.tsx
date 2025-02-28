@@ -667,7 +667,7 @@ const Resource: React.FC = () => {
           <UserInfoModal
             visible={visible}
             action={action as ActionType}
-            width={650}
+            width={820}
             userType={(actionType == 'team') ? UserType.Team : UserType.User}
             onClose={handleClose}
             onSearch={event => {

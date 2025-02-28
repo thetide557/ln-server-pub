@@ -91,7 +91,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       setLoading(false);
     });
   };
-  const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 10 } };
+  const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 18 } };
   const validatePassword = (_, value) => {
     if (value && value.length >= 8) {
       const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&-*.]/].reduce((acc, regex) => {
