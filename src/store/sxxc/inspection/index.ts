@@ -53,7 +53,9 @@ export interface ModalProps {
   memberId?: string;
   onSearch?: any;
   width?: number;
+  formData?: any
 }
 export interface InspectionFormProps {
   inspectionId?: string;
+  formData?: any
 }
