@@ -40,7 +40,7 @@ let queryFilter = [
   { name: 'nickname', label: '显示名', type: 'input' },
   { name: 'email', label: '邮箱', type: 'input' },
   { name: 'phone', label: '手机号', type: 'input' },
-  { name: 'statu', label: '状态', type: 'select' },
+  { name: 'status', label: '状态', type: 'select' },
   { name: 'role', label: '角色', type: 'select' },
 ]
 
@@ -48,6 +48,8 @@ const { confirm } = Modal;
 
 
 const Resource: React.FC = () => {
+  console.log( useContext(CommonStateContext));
+  
   const { t } = useTranslation('user');
   const commonState = useContext(CommonStateContext);
   const [visible, setVisible] = useState<boolean>(false);
@@ -59,7 +61,7 @@ const Resource: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   const [status, setStatus] = useState<number>();
   const [role, setRole] = useState<string>();
-  const { profile } = useContext(CommonStateContext);
+  const { profile, permList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'users' });
   const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
   const [groupMap, setGroupMap] = useState({});
@@ -132,7 +134,7 @@ const Resource: React.FC = () => {
 
       dat.forEach((item, index) => {
         groupMap[item.id] = item.name;  
-        setGroupMap({...groupMap})      
+        setGroupMap({ ...groupMap })
       });
       
       let arr = ["0"];
@@ -148,7 +150,7 @@ const Resource: React.FC = () => {
 
 
   useEffect(() => {
-    filterOptions["statu"] = [{ value: '0', label: '禁用' }, { value: '1', label: '启用' }]
+    filterOptions["status"] = [{ value: '0', label: '禁用' }, { value: '1', label: '启用' }]
     setFilterOptions({ ...filterOptions })
     getRoles().then((res) => {
       let items = res.map(role => {
@@ -192,7 +194,7 @@ const Resource: React.FC = () => {
       dataIndex: 'group_name',
       render: (val, record) => {
         let names = new Array();
-        for(var i=0;i<val.length;i++){
+        for (var i = 0; i < val.length; i++) {
           names.push(groupMap[val[i]]);
         }
         return names ? names.join(",") : ''//renderDataMap["organ_"+val];
@@ -234,7 +236,8 @@ const Resource: React.FC = () => {
       align: 'center',
       render: (text: string, record) => (
         <>
-          <PoweroffOutlined className='oper-name'
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/status")) && <PoweroffOutlined className='oper-name'
             title={record.status === 1 ? ('已启用') : ('已禁用')}
             style={{ color: record.status === 1 ? ('green') : ('gray') }}
             onClick={e => {
@@ -254,13 +257,18 @@ const Resource: React.FC = () => {
               }
 
             }} />
-          <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
-
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/put")) && <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
           </EditOutlined>
-          <UndoOutlined title='重置密码' className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/resetPassword")) && <UndoOutlined title='重置密码' className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
             {t('account:password.reset')}
           </UndoOutlined>
-          <a className='oper-name'
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/users/del")) && <a className='oper-name'
             onClick={() => {
               if ("" + record.id == "1") {
                 message.error("默认超管账号，禁止在此操作！");
@@ -268,7 +276,7 @@ const Resource: React.FC = () => {
               }
               confirm({
                 title: t('common:confirm.delete'),
-                okText:'确定',
+                  okText: '确定',
                 cancelText: "取消",
                 onOk: () => {
                   deleteUser(record.id).then((_) => {
@@ -283,6 +291,10 @@ const Resource: React.FC = () => {
           >
             <DeleteOutlined className='table-operator-area-warning' title='删除' />
           </a>
+          }
+
+
+
         </>
       ),
     },
@@ -450,7 +462,7 @@ const Resource: React.FC = () => {
   };
   const { tableProps } = useAntdTable(getTableData, {
     defaultPageSize: pagination.pageSize,
-    refreshDeps: [query, refreshFlag,groupMap],
+    refreshDeps: [query, refreshFlag, groupMap],
   });
 
   const onSelectNone = () => {
@@ -483,12 +495,14 @@ const Resource: React.FC = () => {
         <div style={{ width: '245px', display: 'list-item' }}>
           <div className='sub-title'>
             团队列表
-            <PlusSquareOutlined
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/users/addGroup")) && <PlusSquareOutlined
               className='user_add_group_button'
               onClick={() => {
                 handleClick(ActionType.CreateTeam, 0, "team");
               }}
             />
+            }
           </div>
           <Tree
             onSelect={(keys, e) => {
@@ -529,14 +543,17 @@ const Resource: React.FC = () => {
                   }}
                 >
                   {teamInfo && teamInfo.name}
-                  <EditOutlined
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/user-groups/put")) && <EditOutlined
                     style={{
                       marginLeft: '8px',
                       fontSize: '14px',
                     }}
                     onClick={() => handleClick(ActionType.EditTeam, teamId, "team")}
                   ></EditOutlined>
-                  <DeleteOutlined
+                  }
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/user-groups/del")) && <DeleteOutlined
                     style={{
                       marginLeft: '8px',
                       fontSize: '14px',
@@ -557,6 +574,7 @@ const Resource: React.FC = () => {
                       });
                     }}
                   />
+                  }
                 </Col>
                 <Col
                   style={{
@@ -627,8 +645,10 @@ const Resource: React.FC = () => {
               )}
               </Space>
               <div className='event-table-search-right'>
-                <Button className='btn' type="primary" onClick={() => { handleOperateClick("add") }}>新增
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/users/add")) && <Button className='btn' type="primary" onClick={() => { handleOperateClick("add") }}>新增
                 </Button>
+                }
                 {profile.roles?.includes('Admin') && (
                   <div className='user-manage-operate-list'>
                     <Dropdown

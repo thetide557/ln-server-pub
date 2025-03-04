@@ -57,6 +57,7 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
         values.contacts.forEach((item: Contacts) => {
           contacts[item.key] = item.value;
         });
+      contacts = JSON.stringify(contacts)
       let params = { ...values, contacts, confirm: undefined };
 
       if (action === ActionType.CreateUser) {
