@@ -26,7 +26,7 @@ import { getInspectionList, addInspection, editInspection } from '@/services/sxx
 
 
 const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
-    const { visible, onClose, inspection, inspectionId, width } = props;
+    const { visible, onClose, inspection, inspectionId, width, formData } = props;
     const inspectionRef = useRef(null as any);
     const isInspection: boolean = (inspection === InspectionType.CreateInspection || inspection === InspectionType.EditInspection) ? true : false;
 
@@ -34,6 +34,9 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
         if (isInspection) {
             let form = inspectionRef.current.form;
             let form1 = inspectionRef.current.form.getFieldsValue(true)
+            let ipList = inspectionRef.current.ipList
+            console.log('iplist', ipList);
+            
             // console.log('form1', form1);
 
 
@@ -75,9 +78,19 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
                 delete params.hosts
                 params.scopeContext = params.scopeContext.join(',')
             } else if (params.scope == 3) {
-                delete params.scopeContext
+                // delete params.scopeContext
+                let arr:any = []
+                ipList.forEach(item1 => {
+                    values.hosts.forEach(item2 =>{
+                        if (item1.ident == item2) {
+                            arr.push(item1.group_id)
+                        }
+                    })
+                })
+                params.scopeContext = [...new Set(arr)].join(',')
                 params.hosts = params.hosts.join(',')
             }
+            
             if (inspection === InspectionType.CreateInspection) {
                 console.log('新增巡检',params)
                 addInspection(params).then((res) => {
@@ -131,7 +144,7 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
                 </Button>,
             ]}
         >
-            {isInspection && <Inspection ref={inspectionRef} inspectionId={inspectionId} />}
+            {isInspection && <Inspection ref={inspectionRef} inspectionId={inspectionId} formData={formData} />}
         </Modal>
     );
 };

@@ -191,12 +191,19 @@ const Event: React.FC = () => {
             }       
             localStorage.setItem('current_alert_display', "card");
             setChooseVal('severity')
+            setFilterType('select');
+            setFilterParam('severity');
+            if (filterType == "input") {
+              setSearchVal('')
+            }
             
           }} />
           <Button icon={<UnorderedListOutlined />} onClick={() => {
             setView('list')
             localStorage.setItem('current_alert_display', "list")
-            setChooseVal('')
+            setChooseVal('severity')
+            setFilterType('select');
+            setFilterParam('severity');
           }} />
 
          

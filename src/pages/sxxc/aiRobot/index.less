@@ -1,0 +1,223 @@
+.nav-bar {
+    position: absolute;
+    bottom: 135px;
+    right: 28px;
+    z-index: 9999999;
+    .r-robot {
+      display: flex;
+      justify-content: space-between;
+      .robot {
+        width: calc((85 / 1920) * 100vw);
+        height: calc((75 / 1920) * 100vw);
+        background: url(/image/ai/robot.png) no-repeat;
+        background-size: 100% 100%;
+        // margin-left: 80%;
+        cursor: move;
+      }
+    }
+    .r-dialog {
+      width: calc((500 / 1920) * 100vw);
+      height: calc((620 / 1920) * 100vw);
+      background: #FFFFFF;
+      box-shadow: 0px 2px 6px 0px rgba(0,0,0,0.3);
+      border-radius: calc((11 / 1920) * 100vw);
+      margin-bottom: 5px;
+      padding: calc((10 / 1920) * 100vw);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: calc((17 / 1920) * 100vw);
+      .ai-noask {
+        height: calc((470 / 1920) * 100vw);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        .ai-top {
+          text-align: center;
+          margin-top: calc((27 / 1920) * 100vw);
+          .ai-logo {
+            width: calc((71 / 1920) * 100vw);
+            height: calc((65 / 1920) * 100vw);
+          }
+          .ai-title {
+            font-family: Microsoft YaHei, Microsoft YaHei;
+            font-weight: 700;
+            
+            color: #333333;
+            line-height: 18px;
+            text-align: center;
+            font-style: normal;
+            text-transform: none;
+            margin-top: 5px;
+          }
+        }
+        .ai-random {
+          font-size: calc((16 / 1920) * 100vw);
+          // margin-bottom: calc((5 / 1920) * 100vw);
+          .random-ask {
+            color: #CDCDCD;
+            text-align: left;
+            font-style: normal;
+            text-transform: none;
+            margin-bottom: 3px;
+          }
+          .random-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            .random1 {
+              display: flex;
+               // flex-wrap: wrap;
+              overflow-x: auto;
+              width: 92%;
+              &::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+              }
+              >div {
+                color: #9F9F9F;
+                padding: calc((3 / 1920) * 100vw) calc((6/ 1920) * 100vw);
+                border: 1px solid #E5E5E5;
+                white-space: nowrap;
+                border-radius: calc((107 / 1920) * 100vw);
+                cursor: pointer;
+                margin-bottom: 3px;
+                &:first-child {
+                  margin-right: 5px;
+                 
+                }
+              }
+            }
+          }
+        }
+      }
+      .ai-content {
+        position: relative;
+        height: calc((430 / 1920) * 100vw);
+        overflow-y: auto;
+        padding: 0px 5px;
+        &::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        .ai-user {
+          margin: 10px 0;
+          display: flex;
+          justify-content: flex-end;
+          .user-text {
+            display: inline-block;
+            max-width: 85%;
+            background: #539FF7;
+            border-radius: 3px;
+            color: #fff;
+            padding: 2px 8px;
+          }
+        }
+        .ai-ai {
+          display: flex;
+          .ai-lrobot {
+            width: calc((24 / 1920) * 100vw);
+            height: calc((24 / 1920) * 100vw);
+          }
+          .ai-answer {
+            max-width: 85%;
+            // height: 345px;
+            background: #F7F7F7;
+            border-radius: 3px;
+            margin-left: 5px;
+            padding: 2px 8px;
+            color: #525252;
+            overflow-x: auto;
+          }
+          .dark-answer {
+            background: #205A96;
+            color: #fff;
+            h1,h2,h3,h4,h5,h6 {
+              color: #fff;
+            }
+          }
+        }
+      }
+      .stop-ai {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        .stop1 {
+          cursor: pointer;
+          width: calc((110 / 1920) * 100vw);
+          height: calc((35 / 1920) * 100vw);
+          line-height: calc((35 / 1920) * 100vw);
+          border-radius: calc((110 / 1920) * 100vw);
+          border: 1px solid #E5E5E5;
+          text-align: center;
+          margin: calc((7 / 1920) * 100vw);
+          font-size: calc((15 / 1920) * 100vw);
+          color: #409EFF;
+          .stop-title {
+            padding-left: 3px;
+          }
+        }
+        .dark-stop1 {
+          border: 1px solid #9DBEE7;
+          color: #fff;
+        }
+      }
+      .ai-bottom {
+        padding-bottom: calc((3 / 1920) * 100vw);
+        .ai-form {
+          .ant-form-item {
+            margin-bottom: 0;
+          }
+          .ai-note {
+            border: 0;
+            border-top: 1px solid #d9d9d9;
+            resize: none;
+            outline: none;
+            font-size: calc((17 / 1920) * 100vw);
+            height: calc((100 / 1920) * 100vw);
+            &::-webkit-scrollbar {
+              width: 6px;
+              height: 6px;
+            }
+          }
+          /* 覆盖antd TextArea获得焦点时的边框样式 */
+          .ai-note:focus {
+            border: 0;
+            border-top: 1px solid #d9d9d9;
+            box-shadow: none !important; /* 移除焦点时的阴影 */
+            outline: none !important; /* 移除可能的轮廓线 */
+          }
+          .dark-note {
+            background: #35649E;
+            color: #fff!important;
+            border-top: 1px solid #598CCA!important;
+          }
+          .ai-send {
+            display: flex;
+            justify-content: flex-end;
+            .ai-icon {
+              width: calc((36 / 1920) * 100vw);
+              height: calc((24 / 1920) * 100vw);
+              cursor: pointer;
+            }
+            .ai-loading {
+              font-size: calc((18 / 1920) * 100vw);;
+            }
+          }
+        }
+       
+      }
+     
+    }
+  }
+
+// input
+input::placeholder {
+  // font-size: 12px;
+  line-height: 18px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}

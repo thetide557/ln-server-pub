@@ -62,6 +62,7 @@ const Resource: React.FC = () => {
     const { profile, permList, busiGroups } = useContext(CommonStateContext);
     const groupIds = busiGroups?.map(item => item.id)
     const pagination = usePagination({ PAGESIZE_KEY: 'inspectionList' });
+    const [formData, setFormData] = useState<any>({})
 
     const taskColumn: ColumnsType<Inspection> = [
         {
@@ -169,11 +170,13 @@ const Resource: React.FC = () => {
             }
             getInspectionDetailByGroup(id, params).then((res) => {
                 if (res.code != 200) return message.error(res.msg)
+                setFormData(res.data)
                 setVisible(true)
             });
         } else {
             setInspectionId('');
             setVisible(true);
+            setFormData({})
         }
         setInspection(type);
     }
@@ -343,8 +346,11 @@ const Resource: React.FC = () => {
                             </Form.Item>
                         </Space> */}
                         <Space>
-                            <Button style={{ marginRight: '16px' }} onClick={handleSubmit}
-                            >查询</Button>
+                            {
+                                (profile.roles?.includes('Admin') || permList.includes('/inspection/inspectionQuery')) && <Button style={{ marginRight: '16px' }} onClick={handleSubmit}
+                                >查询</Button>
+                            }
+                            
                         </Space>
                         <Space>
                             {
@@ -368,6 +374,7 @@ const Resource: React.FC = () => {
                         width={1200}
                         onClose={handleClose}
                         inspectionId={inspectionId}
+                        formData={formData}
                     />
                 </div>
             </div>

@@ -190,7 +190,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
                 <Option value={item.name} key={index}>
                   <div>
                     <div>{item.name}</div>
-                    <div style={{ color: '#8c8c8c' }}>{item.note}</div>
+                    <div style={{ color: '#8c8c8c', overflowY: 'auto' }}>{item.note}</div>
                   </div>
                 </Option>
               ))}

@@ -151,19 +151,19 @@ const index = (_props: any) => {
               </>
             }
             {
-              (profile.roles?.includes("Admin") || permList.includes("/job-task/put")) && <>
+              (profile.roles?.includes("Admin") || permList.includes("/job-tpls/put")) && <>
                 <Link to={{ pathname: `/job-tpls/${record.id}/modify` }}>{t('common:btn.modify')}</Link>
                 <Divider type='vertical' />
               </>
             }
             {
-              (profile.roles?.includes("Admin") || permList.includes("/job-task/copy")) && <>
+              (profile.roles?.includes("Admin") || permList.includes("/job-tpls/copy")) && <>
                 <Link to={{ pathname: `/job-tpls/${record.id}/clone` }}>{t('common:btn.clone')}</Link>
                 <Divider type='vertical' />
               </>
             }
             {
-              (profile.roles?.includes("Admin") || permList.includes("/job-task/del")) && <Popconfirm
+              (profile.roles?.includes("Admin") || permList.includes("/job-tpls/del")) && <Popconfirm
                 title={<div style={{ width: 100 }}>{t('common:confirm.delete')}</div>}
                 onConfirm={() => {
                   handleDelBtnClick(record.id);
@@ -216,7 +216,7 @@ const index = (_props: any) => {
                   </Link>
                 }
                 {
-                  (profile.roles?.includes("Admin") || permList.includes("/job-task/ops")) && <Dropdown
+                  (profile.roles?.includes("Admin") || permList.includes("/job-tpls/ops")) && <Dropdown
                     overlay={
                       <Menu>
                         <Menu.Item>

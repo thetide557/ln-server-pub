@@ -43,7 +43,7 @@ const timeFormat = 'HH:mm:ss'
 const { Option } = Select;
 const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, ref) => {
     const { t } = useTranslation();
-    const { inspectionId } = props;
+    const { inspectionId, formData } = props;
     const [form] = Form.useForm();
     const [taskForm] = Form.useForm()
     const [initialValues, setInitialValues] = useState<Inspection>();
@@ -188,7 +188,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         // })
         getAssetsByCondition(query).then(res => {
             let list = res.dat?.list?.filter(item => {
-                if(item.status == 1){
+                if (item.status == 1) {
                     if (item.type == '物理服务器' || item.type == '虚拟服务器') {
                         return true
                     }
@@ -198,7 +198,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
 
             setIpList(list)
         })
-        
+
     }
 
     const getTaskType = () => {
@@ -245,38 +245,40 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
     }
 
     const getInspectionInfo = (id: string) => {
-        const params = {
-            groupIds: localStorage.getItem('groupIds')
-        }
-        getInspectionDetailByGroup(id, params).then((res) => {
-            setType(res.data.executeCycle)
-            setScope(res.data.scope)
-            res.data.excuteTime = dayjs(res.data.excuteTime, timeFormat)
-            res.data.groupId = Number(res.data.groupId)
-            console.log('--->time', res.data.excuteTime)
-            setSelectedRowKeys(res.data.scriptId?.split(',').map(item => Number(item)))
+        console.log('formData', formData);
+        let formObj = { ...formData }
+        // const params = {
+        //     groupIds: localStorage.getItem('groupIds')
+        // }
+        // getInspectionDetailByGroup(id, params).then((res) => {
+        setType(formObj.executeCycle)
+        setScope(formObj.scope)
+        formObj.excuteTime = dayjs(formObj.excuteTime, timeFormat)
+        formObj.groupId = Number(formObj.groupId)
+        console.log('--->time', formObj.excuteTime)
+        setSelectedRowKeys(formObj.scriptId?.split(',').map(item => Number(item)))
 
-            if (res.data.executeCycle == 2) {
-                res.data.week = res.data.week.split(',').map(item => Number(item))
-            } else if (res.data.executeCycle == 3) {
-                res.data.excuteDate = dayjs(res.data.excuteDate, dateFormat)
-            }
-            if (res.data.scope == 2) {
-                res.data.scopeContext = res.data.scopeContext.split(',').map(item => Number(item))
-            } else if (res.data.scope == 3) {
-                res.data.hosts = res.data.hosts.split(',')
-            }
-            console.log('初始化表单', res.data)
-            setInitialValues(
-                Object.assign({}, res.data),
-            );
-            setLoading(false);
-        });
+        if (formObj.executeCycle == 2) {
+            formObj.week = formObj.week.split(',').map(item => Number(item))
+        } else if (formObj.executeCycle == 3) {
+            formObj.excuteDate = dayjs(formObj.excuteDate, dateFormat)
+        }
+        if (formObj.scope == 2) {
+            formObj.scopeContext = formObj.scopeContext.split(',').map(item => Number(item))
+        } else if (formObj.scope == 3) {
+            formObj.hosts = formObj.hosts.split(',')
+        }
+        console.log('初始化表单', formObj)
+        setInitialValues(
+            Object.assign({}, formObj),
+        );
+        setLoading(false);
+        // });
     };
 
     return !loading ? (
         <>
-            <Form form={form} initialValues={initialValues} preserve={false}  labelCol={{ span: 2 }}>
+            <Form form={form} initialValues={initialValues} preserve={false} labelCol={{ span: 2 }}>
                 <Form.Item label={'巡检名称：'} name='name' rules={[{ required: true, message: '请输入巡检名称' }]}>
                     <Input placeholder='巡检名称' max={20} disabled={inspectionId ? true : false} />
                 </Form.Item>

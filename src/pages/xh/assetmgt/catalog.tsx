@@ -171,6 +171,8 @@ export const factories = [
         { "key":"Sharp" , "value":"夏普" },
         { "key":"SANTAK" , "value":"山特电子" }, 
         { "key":"Sindoh" , "value":"圣度" },
+        { "key":"Tong" , "value":"东方通" },
+        { "key":"KingBase" , "value":"人大金仓" },
         { "key": "Other", "value": "其它" }
 ];
 export const serviceHierarchyOptions = [

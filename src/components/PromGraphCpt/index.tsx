@@ -79,7 +79,8 @@ export default function index(props: IProps) {
   const [promql, setPromql] = useState<string | undefined>(promQL);
   const [queryStats, setQueryStats] = useState<QueryStats | null>(null);
   const [errorContent, setErrorContent] = useState('');
-  const [tabActiveKey, setTabActiveKey] = useState(type);
+  const { profile, permList } = useContext(CommonStateContext);
+  const [tabActiveKey, setTabActiveKey] = useState<any>(type);
   const [timestamp, setTimestamp] = useState<number>(); // for table
   const [refreshFlag, setRefreshFlag] = useState(_.uniqueId('refreshFlag_')); // for table
   const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' }); // for graph
@@ -88,7 +89,7 @@ export default function index(props: IProps) {
   const [metricsExplorerVisible, setMetricsExplorerVisible] = useState(false);
   const [completeEnabled, setCompleteEnabled] = useState(true);
   const promQLInputRef = useRef<any>(null);
-  const { profile, permList } = useContext(CommonStateContext);
+
 
   useEffect(() => {
     if (typeof defaultTime === 'number') {
@@ -102,9 +103,19 @@ export default function index(props: IProps) {
     }
   }, [defaultTime]);
 
+  // useEffect(() => {
+  //   setTabActiveKey(type);
+  // }, [type]);
+
   useEffect(() => {
-    setTabActiveKey(type);
-  }, [type]);
+    if (profile.roles?.includes("Admin") || permList.includes("/metric/explorer/table")) {
+      setTabActiveKey('table')
+    } else if (profile.roles?.includes("Admin") || permList.includes("/metric/explorer/graph")) {
+      setTabActiveKey('graph')
+    } else {
+      setTabActiveKey('')
+    }
+  }, [])
 
   useEffect(() => {
     setValue(promql);
@@ -227,40 +238,44 @@ export default function index(props: IProps) {
           type='card'
           tabBarExtraContent={queryStats && <QueryStatsView {...queryStats} />}
         >
-          <TabPane tab='表格' key='table'>
-            <Table
-              url={url}
-              contentMaxHeight={contentMaxHeight}
-              datasourceValue={datasourceValue}
-              promql={promql}
-              setQueryStats={setQueryStats}
-              setErrorContent={setErrorContent}
-              timestamp={timestamp}
-              setTimestamp={(val) => {
-                setTimestamp(val);
-              }}
-              refreshFlag={refreshFlag}
-            />
-          </TabPane>
-          <TabPane tab='图表' key='graph'>
-            <Graph
-              url={url}
-              contentMaxHeight={contentMaxHeight}
-              datasourceValue={datasourceValue}
-              promql={promql}
-              setQueryStats={setQueryStats}
-              setErrorContent={setErrorContent}
-              range={range}
-              setRange={(newRange) => {
-                setRange(newRange);
-                onTimeChange && onTimeChange(newRange);
-              }}
-              step={step}
-              setStep={setStep}
-              graphOperates={graphOperates}
-              refreshFlag={refreshFlag}
-            />
-          </TabPane>
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/metric/explorer/table")) && <TabPane tab='表格' key='table'>
+              <Table
+                url={url}
+                contentMaxHeight={contentMaxHeight}
+                datasourceValue={datasourceValue}
+                promql={promql}
+                setQueryStats={setQueryStats}
+                setErrorContent={setErrorContent}
+                timestamp={timestamp}
+                setTimestamp={(val) => {
+                  setTimestamp(val);
+                }}
+                refreshFlag={refreshFlag}
+              />
+            </TabPane>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/metric/explorer/graph")) && <TabPane tab='图表' key='graph'>
+              <Graph
+                url={url}
+                contentMaxHeight={contentMaxHeight}
+                datasourceValue={datasourceValue}
+                promql={promql}
+                setQueryStats={setQueryStats}
+                setErrorContent={setErrorContent}
+                range={range}
+                setRange={(newRange) => {
+                  setRange(newRange);
+                  onTimeChange && onTimeChange(newRange);
+                }}
+                step={step}
+                setStep={setStep}
+                graphOperates={graphOperates}
+                refreshFlag={refreshFlag}
+              />
+            </TabPane>
+          }
         </Tabs>
       </div>
       <MetricsExplorer

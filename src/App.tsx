@@ -37,7 +37,6 @@ import Content from './routers';
 import { getSystemTheme } from '@/services/login';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
-
 import './App.less';
 import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
@@ -45,6 +44,7 @@ import TopMenu from './components/menu/topMenuXH'; //西航版本
 import { useLocalStorage } from 'react-use';
 import { getAlertEventsById, getHistoryEventsById, getWarningChart, setAlartMutes, updataprocess } from '@/pages/sxxc/screenView/alarmApi';
 import AlarmChartLine from '@/pages/sxxc/screenView/alarmChartLine';
+import AiRobot from '@/pages/sxxc/aiRobot';
 
 interface IProfile {
   admin?: boolean;
@@ -112,7 +112,7 @@ export const initTheme = {
 // 可以匿名访问的路由 TODO: job-task output 应该也可以匿名访问
 const anonymousRoutes = ['/login', '/callback', '/chart', '/dashboards/share/'];
 // 判断是否是匿名访问的路由
-const anonymous = _.some(anonymousRoutes, (route) => location.pathname.startsWith(route));
+const anonymous = _.some(anonymousRoutes, (route) => window.location.pathname.startsWith(route));
 // 初始化数据 context
 export const CommonStateContext = createContext({} as ICommonState);
 
@@ -122,7 +122,7 @@ function App() {
   const { t, i18n } = useTranslation();
   const isPlus = useIsPlus();
   const initialized = useRef(false);
-  const path = location.pathname;
+  const path = window.location.pathname;
   const alertWebsocket = useRef<WebSocket | null>(null);
   const licenseWebsocket = useRef<WebSocket | null>(null);
   const audioRef = useRef<any>(null);
@@ -154,7 +154,7 @@ function App() {
     },
     permList: [],
     setPermList: (permList) => {
-      setCommonState((state) => ({ ...state, permList }));
+      setCommonState((state: any) => ({ ...state, permList }));
     },
     busiGroups: [],
     setBusiGroups: (busiGroups) => {
@@ -191,7 +191,7 @@ function App() {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [curWarn, setCurWarn] = useState({})
+  const [curWarn, setCurWarn] = useState<any>({})
   const [open1, setOpen1] = useState(false)
   const timeLensDefault = [
     {
@@ -266,7 +266,7 @@ function App() {
     getAlertEventsById(alertId).then(res => {
       setIsModalOpen(true);
       // console.log(1111, res.dat);
-      setCurWarn(res.dat)  
+      setCurWarn(res.dat)
       let query = ''
       if (res.dat.rule_replay && res.dat.rule_replay.queries && res.dat.rule_replay.queries.length > 0) {
         query = res.dat.rule_replay.queries[0].prom_ql.replace(/\$asset_id/g, res.dat.asset_id)
@@ -281,24 +281,24 @@ function App() {
   // 小数位数判断
   const getDecimalPlaces = (num) => {
     // 将数字转换为字符串
-      const numStr = num.toString();
-      
-      // 查找小数点的位置
-      const decimalIndex = numStr.indexOf('.');
-      
-      // 如果小数点不存在，返回0
-      if (decimalIndex === -1) {
-          return 0;
-      }
-      
-      // 返回小数点后的字符长度
-      return numStr.substring(decimalIndex + 1).length;
+    const numStr = num.toString();
+
+    // 查找小数点的位置
+    const decimalIndex = numStr.indexOf('.');
+
+    // 如果小数点不存在，返回0
+    if (decimalIndex === -1) {
+      return 0;
+    }
+
+    // 返回小数点后的字符长度
+    return numStr.substring(decimalIndex + 1).length;
   }
 
 
   const handleClick = () => {
-    if (location.pathname != '/screenView') {
-      location.href = '/alert-cur-events/' + alertId;
+    if (window.location.pathname != '/screenView') {
+      window.location.href = '/alert-cur-events/' + alertId;
     } else {
       setTimeout(() => {
         setDialogShow('0')
@@ -306,14 +306,6 @@ function App() {
       handleAlarm()
     }
   }
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
 
   // 处理
   const handleDeal = () => {
@@ -371,48 +363,48 @@ function App() {
     // console.log(val);
     time1 = val
     // console.log(time1);
-    
+
   }
 
   // 告警屏蔽
   const saveWarnig = () => {
     // console.log(111, curWarn);
-      const timestamp = Math.floor(new Date().getTime() / 1000);
-      let tags = [];
-      if (curWarn.tags.length > 0) {
-        curWarn.tags.forEach((item) => {
-          let arr = item.split("=");
-          tags.push({
-            func: "==",
-            key: arr[0],
-            value: arr[1],
-          });
+    const timestamp = Math.floor(new Date().getTime() / 1000);
+    let tags: any = [];
+    if (curWarn.tags.length > 0) {
+      curWarn.tags.forEach((item) => {
+        let arr = item.split("=");
+        tags.push({
+          func: "==",
+          key: arr[0],
+          value: arr[1],
         });
-      }
-      const params = {
-        note: curWarn.rule_name + timestamp,
-        group_id: curWarn.group_id,
-        prod: curWarn.rule_prod,
-        cate: curWarn.cate,
-        datasource_ids: [curWarn.datasource_id],
-        severities: [curWarn.severity],
-        mute_time_type: 0,
-        btime: timestamp,
-        etime: timestamp + Number(time1),
-        periodic_mutes: [
-          {
-            enable_days_of_week: "1 2 3 4 5 6 0",
-            enable_stime: "00:00",
-            enable_etime: "00:00",
-          },
-        ],
-        cluster: curWarn.cluster,
-        tags,
-      };
-      setAlartMutes(params, curWarn.datasource_id).then((res) => {
-        setOpen1(false)
-        message.success('屏蔽成功')
       });
+    }
+    const params = {
+      note: curWarn.rule_name + timestamp,
+      group_id: curWarn.group_id,
+      prod: curWarn.rule_prod,
+      cate: curWarn.cate,
+      datasource_ids: [curWarn.datasource_id],
+      severities: [curWarn.severity],
+      mute_time_type: 0,
+      btime: timestamp,
+      etime: timestamp + Number(time1),
+      periodic_mutes: [
+        {
+          enable_days_of_week: "1 2 3 4 5 6 0",
+          enable_stime: "00:00",
+          enable_etime: "00:00",
+        },
+      ],
+      cluster: curWarn.cluster,
+      tags,
+    };
+    setAlartMutes(params, curWarn.group_id).then((res) => {
+      setOpen1(false)
+      message.success('屏蔽成功')
+    });
   }
 
   useLayoutEffect(() => {
@@ -484,8 +476,8 @@ function App() {
             groupIds = busiGroups.map(item => item.id).toString()
           }
           localStorage.setItem('groupIds', groupIds)
-          
-          
+
+
           const { dat: permList } = await getMenuPerm()
           const datasourceList = await getDatasourceBriefList();
           const { licenseRulesRemaining, licenseExpireDays, feats } = await getLicense(t);
@@ -519,7 +511,7 @@ function App() {
               feats,
             };
           });
-          if (_.isEmpty(datasourceList) && !_.startsWith(location.pathname, '/help/source')) {
+          if (_.isEmpty(datasourceList) && !_.startsWith(window.location.pathname, '/help/source')) {
             Modal.warning({
               title: t('common:datasource.empty_modal.title'),
               okText: _.includes(profile.roles, 'Admin') ? t('common:datasource.empty_modal.btn1') : t('common:datasource.empty_modal.btn2'),
@@ -565,6 +557,7 @@ function App() {
               <>
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
+                <AiRobot />
                 <div className='content-box'>
                   <Content />
                 </div>
@@ -606,17 +599,17 @@ function App() {
             <div className="row t-row">
               <div className="col col1">
                 <div>告警规则名称：</div>
-                <Tooltip placement="bottom" title={curWarn.rule_name} color='#fff' overlayInnerStyle={{color: '#000'}}>
+                <Tooltip placement="bottom" title={curWarn.rule_name} color='#fff' overlayInnerStyle={{ color: '#000' }}>
                   <div className='w-title'>{curWarn.rule_name}</div>
                 </Tooltip>
               </div>
               {
                 curWarn.id && <div className="col2">
-                {
-                  curWarn.processe == 1 ? <div>已处理</div> : <div onClick={handleDeal}>是否已处理</div>
-                }
-                <div onClick={handlePb}>屏蔽</div>
-              </div>
+                  {
+                    curWarn.processe == 1 ? <div>已处理</div> : <div onClick={handleDeal}>是否已处理</div>
+                  }
+                  <div onClick={handlePb}>屏蔽</div>
+                </div>
               }
             </div>
             {curWarn.asset_id ? <div className="row">
@@ -697,7 +690,7 @@ function App() {
               </div>
             </div>
             <div className="row last-row">
-             <div className="col last-col1">
+              <div className="col last-col1">
                 <img
                   className="dian"
                   src="/image/alarm/dian.png"
@@ -705,9 +698,9 @@ function App() {
                 />
                 <div className='last-title'>
                   <span>回放PromQL： </span>
-                  <Tooltip placement="bottom" title={query1} color='#fff' overlayInnerStyle={{color: '#000'}}>
+                  <Tooltip placement="bottom" title={query1} color='#fff' overlayInnerStyle={{ color: '#000' }}>
                     <span className='reproml'>{query1}</span>
-                  </Tooltip> 
+                  </Tooltip>
                 </div>
               </div>
               <div className="col">
@@ -730,7 +723,7 @@ function App() {
             <CloseOutlined className="el-icon-close" onClick={() => { setOpen1(false) }} />
           </div>
           <div className='icont'>
-            <span style={{marginRight: '10px', fontSize: '18px'}}>屏蔽时长：</span>
+            <span style={{ marginRight: '10px', fontSize: '18px' }}>屏蔽时长：</span>
             <Select
               dropdownClassName='warn-sel'
               className='alarm-select'
@@ -742,7 +735,7 @@ function App() {
           </div>
           <div className="dialog-footer">
             <div onClick={() => setOpen1(false)}>取 消</div>
-            <div type="primary" onClick={saveWarnig}>确 定</div>
+            <div onClick={saveWarnig}>确 定</div>
           </div>
         </Modal>
       </Modal>

@@ -56,7 +56,7 @@ export default function Servers() {
     >
       <div>
         <div style={{ padding: 20 }}>
-          {profile.admin ? (
+          {/* {profile.admin ? ( */}
             <div>
               <Table
                 size='small'
@@ -107,9 +107,9 @@ export default function Servers() {
                 ]}
               />
             </div>
-          ) : (
+          {/* ) : (
             <div>{t('unauthorized')}</div>
-          )}
+          )} */}
         </div>
       </div>
     </PageLayout>

@@ -389,6 +389,7 @@ const Event: React.FC = () => {
       p: current,
       limit: pageSize,
       ...filterObj,
+      gid: localStorage.getItem('groupIds'),
     }).then((res) => {
       return {
         total: res.dat.total,

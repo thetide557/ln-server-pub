@@ -337,6 +337,7 @@ export default function () {
                     deleteXhMonitor(record.id).then((res) => {
                       message.success('删除成功');
                       setRefreshFlag(_.uniqueId('refreshFlag_'));
+                      getAssetTree()
                     });
                   },
                   onCancel() { },
@@ -738,6 +739,7 @@ export default function () {
                                   deleteXhBatchMonitor({ ids: selectedAssets.toString().split(',') }).then((res) => {
                                     message.success('删除成功');
                                     setRefreshFlag(_.uniqueId('refreshFlag_'));
+                                    getAssetTree()
                                   });
                                 },
                                 onCancel() { },
