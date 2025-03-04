@@ -2,14 +2,14 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Form, Input, Modal, Select, message } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { CommonStateContext } from '@/App';
-import { addAssetstypesNew, editAssetstypesNew } from '@/services/assets';
+import { addAssetstypesNew, addXhAssetstypesNew, editAssetstypesNew, editXhAssetstypesNew } from '@/services/assets';
 import _ from 'lodash';
 import './index.less';
 
 const AccordionModal = (props: any) => {
   const { busiGroups } = useContext(CommonStateContext);
   const [form] = Form.useForm();
-  const { title, open, closeOpen, treeData, curGroup } = props
+  const { title, open, closeOpen, treeData, curGroup,level,parentId } = props
   // console.log(treeData);
   const optionList = treeData[0]?.children || []
   const [checkList, setCheckList] = useState<any>([])
@@ -17,7 +17,7 @@ const AccordionModal = (props: any) => {
   useEffect(() => {
     console.log(curGroup);
     if (curGroup.name) {
-      const typsList = curGroup.type_list.map(item => item.name)
+      const typsList = curGroup.type_list?.map(item => item.name)
       // 修改
       const obj = {
         id: curGroup.id,
@@ -34,16 +34,21 @@ const AccordionModal = (props: any) => {
     // console.log(data);
     form.validateFields().then((data) => {
       let params = { ...data, status: 0 };
-      params.types = params.types.toString()
+      // params.types = params.types.toString()
       // console.log(curGroup);
       if (curGroup.name) {
-        editAssetstypesNew({ ...params, id: curGroup.id }).then(res => {
+        params.level = curGroup.group_level
+        // editAssetstypesNew({ ...params, id: curGroup.id }).then(res => {
+        editXhAssetstypesNew({ ...params  },curGroup.id).then(res => {
           message.success('修改成功')
           // refreshTree()
           closeOpen('sure')
         })
       } else {
-        addAssetstypesNew(params).then(res => {
+        params.level = level
+        params.parent_id = parentId
+        // addAssetstypesNew(params).then(res => {
+        addXhAssetstypesNew(params).then(res => {
           message.success('新增成功')
           // refreshTree()
           closeOpen('sure')
@@ -96,7 +101,7 @@ const AccordionModal = (props: any) => {
         <Form.Item name="name" label="分组名称" rules={[{ required: true }]}>
           <Input placeholder="请输入分组名称" maxLength={20} />
         </Form.Item>
-        <Form.Item name="types" label="分组设备" rules={[{ required: true, message: '请选择分组内的设备类型' }]}>
+        <Form.Item name="types" label="分组设备" rules={[{ required: level===3, message: '请选择分组内的设备类型' }]}>
           <Select
             mode="multiple"
             placeholder="请选择分组内的设备类型"

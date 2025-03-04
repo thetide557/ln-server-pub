@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
-import { PlusSquareOutlined, MinusSquareOutlined, FileOutlined } from '@ant-design/icons';
+import { PlusSquareOutlined, MinusSquareOutlined, FileOutlined, PlusOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';
@@ -33,7 +33,7 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew } from '@/services/assets';
+import { deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
@@ -546,6 +546,26 @@ export default function () {
     setSelectColumns(showColumns.concat(fixColumns));
   }
 
+  // 递归处理树形结构
+  function processTypeList(node) {
+    // 处理当前节点的 type_list
+    if (node.type_list?.length) {
+      node['type_list'] = node['type_list'].map((v) => {
+        return {
+          id: v.name,
+          name: v.name,
+          ...v,
+          parentId: node.id
+        };
+      });
+    }
+    // 如果有子节点，递归处理子节点
+    if (node.sub_groups?.length) {
+        node.sub_groups.forEach(child => {
+            processTypeList(child);
+        });
+    }
+  }
   const getAssetTree = () => {
     // console.log('ac', activeColor);
     console.log('parId', parId);
@@ -558,17 +578,20 @@ export default function () {
     treeQuery['filter'] = filterParam?filterParam:undefined;
     getAssetstypesNew(treeQuery).then(res => {
       const { dat } = res
+      // dat.forEach(item => {
+      //   item['type_list'] = item['type_list'].map((v) => {
+      //     return {
+      //       id: v.name,
+      //       name: v.name,
+      //       ...v,
+      //       parentId: item.id
+      //     };
+      //   });
+      // })
       dat.forEach(item => {
-        item['type_list'] = item['type_list'].map((v) => {
-          return {
-            id: v.name,
-            name: v.name,
-            ...v,
-            parentId: item.id
-          };
-        });
-      })
-      // console.log('dat', dat);
+        processTypeList(item);
+      });
+      console.log('dat', dat);
       setTreeList(dat)
     })
   }
@@ -630,7 +653,8 @@ export default function () {
       param['type'] = typeId;
     }
     if (tissueId != null && !parentId) {
-      param['tissue_tree_id'] = tissueId;
+      // param['tissue_tree_id'] = tissueId;
+      param['group_id'] = tissueId;
     }
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
@@ -919,8 +943,187 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   }
 
+  /** 资产树组件 */
+  const [level, setLevel] = useState<number | undefined>(undefined);
+  const [parentId, setParentId] = useState(null);
+  const TreeNode = ({ item, expandedIds, onToggle }) => {
+    const isExpanded = expandedIds.has(item.id);
+    return (
+      <div key={item.name} className="tree-row">
+        <div
+          className="tree-group"
+          style={{ marginLeft: `${(item.group_level - 1) * 20}px` }}
+        >
+          <span
+            onClick={() => {
+              onToggle(item.id);
+            }}
+          >
+            {isExpanded ? (
+              <MinusSquareOutlined style={{ fontSize: 13 }} />
+            ) : (
+              <PlusSquareOutlined style={{ fontSize: 13 }} />
+            )}
+          </span>
+          <span
+            className="g-name"
+            onClick={() => handleClickTree(item, null)}
+            style={{
+              backgroundColor:
+                item.id == localStorage.getItem("left_asset_type") &&
+                !localStorage.getItem("left_parId")
+                  ? "#92b7d1"
+                  : "",
+            }}
+          >
+            {item.name}
+          </span>
+          {item.id != -1 && (
+            <Dropdown
+              // trigger={['click']}
+              overlay={
+                <Menu
+                  style={{ width: "100px" }}
+                  onClick={({ key }) => {
+                    // console.log(key);
+                    if (key === "edit") {
+                      setTitle("编辑分组");
+                      setCurGroup(item);
+                      setOpen(true);
+                    } else if (key === "del") {
+                      Modal.confirm({
+                        title: "是否确认删除该分组？",
+                        onOk: async () => {
+                          // delAssetstypesNew({ ids: item.id }).then((res) => {
+                          delXhAssetstypesNew( item.id ).then((res) => {
+                            message.success("删除成功");
+                            // 删除自己则返回默认
+                            if (item.id == tissueId) {
+                              localStorage.setItem("left_tissueId", "-1");
+                              localStorage.setItem("left_asset_type", "-1");
+                              localStorage.removeItem("left_parId");
+                              setTissueId(-1);
+                              // setActiveColor(-1)
+                            }
+                            getAssetTree();
+                            setRefreshKey(_.uniqueId("refreshKey_"));
+                            // setSelectedAssets([]);
+                          });
+                        },
+                        onCancel() {},
+                      });
+                    } else if (key === "add-sub") {
+                      setTitle("新增分组");
+                      setOpen(true);
+                      setCurGroup({});
+                      setLevel(item.group_level + 1); // 分组层级
+                      setParentId(item.id);
+                    }
+                  }}
+                  items={[
+                    ...(item.group_level < 3 && !item.type_list?.length
+                      ? [
+                          {
+                            key: "add-sub",
+                            label: "新增分组",
+                            icon: <PlusOutlined />,
+                          },
+                        ]
+                      : []),
+                    { key: "edit", label: "编辑", icon: <EditOutlined /> },
+                    { key: "del", label: "删除", icon: <DeleteOutlined /> },
+                  ]}
+                ></Menu>
+              }
+            >
+              <span className="more">...</span>
+            </Dropdown>
+          )}
+        </div>
+        {isExpanded && item.type_list?.length > 0 && (
+          <div
+            className="tree-content"
+            style={{ marginLeft: `${item.group_level * 24}px` }}
+          >
+            {_.map(item.type_list, (item1) => {
+              return (
+                <div key={item1.id} className="tree-asset">
+                  <FileOutlined style={{ fontSize: 13 }} />
+                  <div
+                    style={{
+                      backgroundColor:
+                        item1.id == localStorage.getItem("left_asset_type") &&
+                        parId == item.id
+                          ? "#92b7d1"
+                          : "",
+                    }}
+                    className="asset-name"
+                    onClick={() => handleClickTree(item1, item)}
+                  >
+                    <span>{item1.name}</span>
+                    <span>{item1.number}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {isExpanded &&
+          item.sub_groups?.length > 0 &&
+          item.sub_groups.map((child) => {
+            return (
+              <TreeNode
+                key={child.id}
+                item={child}
+                expandedIds={expandedIds}
+                onToggle={onToggle}
+              />
+            );
+          })}
+      </div>
+    );
+  };
+  // 资产组织树
+  const AssetTree = ({ data }) => {
+    //  展开的节点列表
+    const [expandedIds, setExpandedIds] = useState(() => {
+      try {
+        const saved = localStorage.getItem("expandedIds");
+        return new Set(JSON.parse(saved || "[]"));
+      } catch {
+        return new Set();
+      }
+    });
+
+    useEffect(() => {
+      localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
+    }, [expandedIds]);
+
+    const handleToggle = (nodeId) => {
+      setExpandedIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.has(nodeId) ? newSet.delete(nodeId) : newSet.add(nodeId);
+        return newSet;
+      });
+    };
+
+    return (
+      <div>
+        {data.map((node) => (
+          <TreeNode
+            key={node.id}
+            item={node}
+            expandedIds={expandedIds}
+            onToggle={handleToggle}
+          />
+        ))}
+      </div>
+    );
+  };
+
+
   return (
-    <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
+    <PageLayout icon={<GroupOutlined />} title={"资产管理"}>
       <div style={{ display: 'inline-flex' }} className='asset_list_view'>
         <Resizable
           style={{
@@ -952,10 +1155,22 @@ export default function () {
             <div className='left_tree' style={{ display: 'inline-block' }}>
               <div className='asset_organize_cls'>
                 <span>组织树列表</span>
-                <span className='add_group' onClick={() => { setOpen(true); setCurGroup({}); setTitle('新增分组') }}>新增分组</span>
+                <span
+                  className="add_group"
+                  onClick={() => {
+                    setOpen(true);
+                    setCurGroup({});
+                    setTitle("新增分组");
+                    setLevel(1);
+                    setParentId(null);
+                  }}
+                >
+                  新增分组
+                </span>
               </div>
               <div className='tree-list'>
-                {
+                <AssetTree data={treeList} />	
+                {/* {
                   _.map(treeList, (item) => {
                     return (
                       <div key={item.name} className='tree-row'>
@@ -1029,7 +1244,7 @@ export default function () {
                       </div>
                     )
                   })
-                }
+                } */}
               </div>
               {/* 分组树 */}
               {/* <Accordion
@@ -1251,7 +1466,17 @@ export default function () {
           </div>
         </div>
         {/* 分组弹窗 */}
-        {open && <AccordionModal title={title} open={open} curGroup={curGroup} closeOpen={handleClose} treeData={treeData} />}
+        {open && (
+          <AccordionModal
+            title={title}
+            open={open}
+            curGroup={curGroup}
+            closeOpen={handleClose}
+            treeData={treeData}
+            level={level}
+            parentId={parentId}
+          />
+        )}
       </div>
     </PageLayout>
   );

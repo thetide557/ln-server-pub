@@ -323,6 +323,29 @@ export const delAssetstypesNew = function (params: any) {
   });
 };
 
+
+// 新增资产分组
+export const addXhAssetstypesNew = function (data: any) {
+  return request('/api/n9e/xh/group', {
+    method: RequestMethod.Post,
+    data
+  });
+};
+// 修改资产分组
+export const editXhAssetstypesNew = function (data: any,id:any) {
+  return request(`/api/n9e/xh/updategroup?group_id=${id}`, {
+    method: RequestMethod.Put,
+    data
+  });
+};
+// 删除资产分组
+export const delXhAssetstypesNew = function (id) {
+  return request(`/api/n9e/xh/deletegroup?group_id=${id}`, {
+    method: RequestMethod.Delete,
+  });
+};
+
+
 // 查询资产清单维保信息
 export const getMaintenanceInfoById = function (id) {
   return request('/api/n9e/asset-maintenance-info/' + id, {
