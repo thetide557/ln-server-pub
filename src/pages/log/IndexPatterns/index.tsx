@@ -53,7 +53,7 @@ export default function Servers() {
     <PageLayout title={t('title')}>
       <div>
         <div style={{ padding: 10 }}>
-          {profile.admin ? (
+          {/* {profile.admin ? ( */}
             <div>
               <div style={{ textAlign: 'right' }}>
                 {
@@ -126,9 +126,9 @@ export default function Servers() {
                 ]}
               />
             </div>
-          ) : (
+          {/* ) : (
             <div>{t('unauthorized')}</div>
-          )}
+          )} */}
         </div>
       </div>
     </PageLayout>
