@@ -169,7 +169,7 @@ export default function () {
       dataIndex: 'name',
       Ced: 'left',
       ellipsis: true,
-      // width: 120,
+      width: 120,
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
@@ -190,7 +190,7 @@ export default function () {
       title: '资产类型',
       dataIndex: 'type',
       Ced: 'left',
-      // width: 120,
+      width: 120,
       align: 'center',
       ellipsis: true,
       sorter: (a, b) => {
@@ -201,7 +201,7 @@ export default function () {
       title: 'IP地址',
       dataIndex: 'ip',
       align: 'center',
-      // width: 120,
+      width: 120,
       ellipsis: true,
       render(value, record, index) {
         return (
@@ -223,7 +223,7 @@ export default function () {
       title: '厂商',
       dataIndex: 'manufacturers',
       align: 'center',
-      // width: 120,
+      width: 120,
       ellipsis: true,
     },
     {
@@ -231,7 +231,7 @@ export default function () {
       dataIndex: 'position',
       align: 'center',
       ellipsis: true,
-      // width: 120,
+      width: 120,
       sorter: (a, b) => {
         return a.position.localeCompare(b.position);
       },
@@ -241,7 +241,7 @@ export default function () {
       dataIndex: 'group_id',
       align: 'center',
       ellipsis: true,
-      // width: 120,
+      width: 120,
       render(value, record, index) {
         if (value > 0) {
           let groupName = '';
@@ -258,7 +258,7 @@ export default function () {
       title: '管理状态',
       dataIndex: 'status',
       align: 'center',
-      // width: 120,
+      width: 120,
       ellipsis: true,
       sorter: (a, b) => {
         return a.status - b.status;
@@ -285,7 +285,7 @@ export default function () {
       title: '运行状态',
       dataIndex: 'health',
       align: 'center',
-      // width: 120,
+      width: 120,
       ellipsis: true,
       sorter: (a, b) => {
         return a.health - b.health;
@@ -318,7 +318,7 @@ export default function () {
       title: '维保状态',
       dataIndex: 'maintenance_status',
       align: 'center',
-      // width: 120,
+      width: 120,
       ellipsis: true,
       render(value, record, index) {
         let label;
@@ -355,7 +355,7 @@ export default function () {
       dataIndex: 'create_at',
       align: 'center',
       ellipsis: true,
-      // width: 130,
+      width: 130,
       render(text, record, index) {
         return moment.unix(text).format('YYYY-MM-DD HH:mm:ss');
       },

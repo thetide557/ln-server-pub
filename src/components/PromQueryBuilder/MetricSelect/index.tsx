@@ -18,7 +18,7 @@ interface IProps {
 export default function index(props: IProps) {
   const { datasourceValue, params, value, onChange } = props;
   const [metricData, setMetricData] = useState<string[]>([]);
-  const [searchValue, setSearchValue] = useState<string | undefined>();
+  const [searchValue, setSearchValue] = useState<any>();
 
   useEffect(() => {
     getMetric(params, datasourceValue).then((res) => {
@@ -77,6 +77,7 @@ export default function index(props: IProps) {
           onChange(val);
         }}
       />
+      <div style={{marginTop: '10px', width: '650px'}}><span style={{color: '#0A4B9D'}}>指标关键词说明：</span> {cn_name[searchValue] ? cn_name[searchValue] : en_name[searchValue] ? en_name[searchValue] : ''}</div>
     </FormItem>
   );
 }

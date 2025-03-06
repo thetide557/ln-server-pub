@@ -58,6 +58,10 @@ const en_US = {
     title: 'Update business group',
     label: 'Business group',
   },
+  auto_busi: {
+    title: 'Auto business group',
+    label: 'Business group',
+  },
   remove_busi: {
     title: 'Remove business group',
     msg: 'Warning: Remove the business group, the business group manager will no longer have permission to operate these hosts! You may need to clear the tags and notes of this batch of hosts beforehand!',

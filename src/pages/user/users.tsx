@@ -298,9 +298,9 @@ const Resource: React.FC = () => {
     },
   ];
 
-  if (!profile.roles?.includes('Admin')) {
-    userColumns.pop(); //普通用户不展示操作列
-  }
+  // if (!profile.roles?.includes('Admin')) {
+  //   userColumns.pop(); //普通用户不展示操作列
+  // }
 
   const handleClick = (type: ActionType, id: any, operate: string) => {
     setAction(type);
