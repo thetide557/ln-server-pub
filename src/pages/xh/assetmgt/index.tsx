@@ -947,7 +947,9 @@ export default function () {
   /** 资产树组件 */
   const [level, setLevel] = useState<number | undefined>(undefined);
   const [parentId, setParentId] = useState(null);
-  const TreeNode = ({ item, expandedIds, onToggle }) => {
+
+  // isAllAssets：一个布尔值，用于标记当前节点是否是"全部资产"的子节点。
+  const TreeNode = ({ item, expandedIds, onToggle ,isAllAssets = false }) => {
     const isExpanded = expandedIds.has(item.id);
     return (
       <div key={item.name} className="tree-row">
@@ -979,7 +981,7 @@ export default function () {
           >
             {item.name}
           </span>
-          {item.id != -1 && (
+          {item.id != -1 &&!isAllAssets && (
             <Dropdown
               // trigger={['click']}
               overlay={
@@ -1078,6 +1080,7 @@ export default function () {
                 item={child}
                 expandedIds={expandedIds}
                 onToggle={onToggle}
+                isAllAssets={item.id === -1 || isAllAssets}
               />
             );
           })}
