@@ -244,6 +244,15 @@ export default function () {
       const assetTypes = await fetchAssetTypes(id);
       setAssetTypes(assetTypes);
 
+      // 资产信息新增时 设置资产类型的默认值
+      const asset_type = localStorage.getItem('left_asset_type')
+      if (!id && assetTypes.some(item => item.name === asset_type)) {
+        form.setFieldsValue({
+          type: asset_type,
+        });
+        setCurrentType(asset_type)
+      }
+
       const param = { limit: -1 };
       const res = await getAssetsByCondition(param);
       const options = res.dat?.list.map((v) => ({
