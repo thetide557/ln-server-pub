@@ -61,6 +61,14 @@ export function moveTargetBusi(data) {
   });
 }
 
+// 更新业务组
+export function autoTargetBusi(data) {
+  return request(`/api/n9e/targetsAuto/bgid`, {
+    method: RequestMethod.Put,
+    data: Object.assign({ bgid: -1 }, data),
+  });
+}
+
 // 修改对象备注
 export function updateTargetNote(data) {
   return request(`/api/n9e/targets/note`, {

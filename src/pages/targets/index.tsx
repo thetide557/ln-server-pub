@@ -15,12 +15,12 @@
  *
  */
 import React, { useEffect, useState, useCallback, useContext } from 'react';
-import { Modal, Tag, Form, Input, Alert, Select, Tooltip } from 'antd';
+import { Modal, Tag, Form, Input, Alert, Select, Tooltip, message } from 'antd';
 import { DatabaseOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import _, { debounce } from 'lodash';
 import classNames from 'classnames';
-import { bindTags, unbindTags, moveTargetBusi, updateTargetNote, deleteTargets, getTargetTags } from '@/services/targets';
+import { bindTags, unbindTags, moveTargetBusi, updateTargetNote, deleteTargets, getTargetTags, autoTargetBusi } from '@/services/targets';
 import PageLayout from '@/components/pageLayout';
 import { getBusiGroups } from '@/services/common';
 import { CommonStateContext } from '@/App';
@@ -35,6 +35,7 @@ enum OperateType {
   BindTag = 'bindTag',
   UnbindTag = 'unbindTag',
   UpdateBusi = 'updateBusi',
+  AutoBusi = 'autoBusi',
   RemoveBusi = 'removeBusi',
   UpdateNote = 'updateNote',
   Delete = 'delete',
@@ -220,10 +221,21 @@ const OperationModal: React.FC<OperateionModalProps> = ({ operateType, setOperat
     };
   };
 
+  // 更新业务组
+  const autoBusiDetail = () => {
+    return {
+      operateTitle: t('auto_busi.title'),
+      requestFunc: autoTargetBusi,
+      isFormItem: true,
+      render() {},
+    };
+  };
+
   const operateDetail = {
     bindTagDetail,
     unbindTagDetail,
     updateBusiDetail,
+    autoBusiDetail,
     removeBusiDetail,
     updateNoteDetail,
     deleteDetail,
@@ -265,6 +277,7 @@ const OperationModal: React.FC<OperateionModalProps> = ({ operateType, setOperat
           reloadList();
           form.resetFields();
           setConfirmLoading(false);
+          message.success('操作成功')
         })
         .catch(() => setConfirmLoading(false));
     });

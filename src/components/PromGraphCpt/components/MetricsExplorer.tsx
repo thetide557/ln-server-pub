@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import { Input, Modal } from 'antd';
 import { getPromData } from '../services';
+import {cn_name,en_name} from "@/components/PromQueryBuilder/components/metrics_translation"
 
 interface MetricsExplorer {
   url: string;
@@ -32,6 +33,8 @@ const MetricsExplorer: React.FC<MetricsExplorer> = ({ url, datasourceValue, show
   const [filteredMetrics, setFilteredMetrics] = useState<string[]>(metrics);
 
   function checkMetric(value: string) {
+    console.log(value);
+    
     insertAtCursor(value);
     updateShow(false);
   }
@@ -55,10 +58,11 @@ const MetricsExplorer: React.FC<MetricsExplorer> = ({ url, datasourceValue, show
           setFilteredMetrics(metrics.filter((metric) => metric.includes(value)));
         }}
       />
-      <div className='prom-graph-metrics-explorer-list' onClick={(e) => checkMetric((e.target as HTMLElement).innerText)}>
+      <div className='prom-graph-metrics-explorer-list'>
         {filteredMetrics.map((metric) => (
-          <div className='prom-graph-metrics-explorer-list-item' key={metric}>
-            {metric}
+          <div className='prom-graph-metrics-explorer-list-item' key={metric} onClick={() => checkMetric(metric)}>
+            <div>{metric}</div>
+            <div>{cn_name[metric] ? cn_name[metric] : en_name[metric] ? en_name[metric] : ''}</div>
           </div>
         ))}
       </div>

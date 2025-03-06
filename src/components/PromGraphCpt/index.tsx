@@ -31,6 +31,7 @@ import Graph from './Graph';
 import QueryStatsView, { QueryStats } from './components/QueryStatsView';
 import MetricsExplorer from './components/MetricsExplorer';
 import { CommonStateContext } from '@/App';
+import {cn_name,en_name} from "../PromQueryBuilder/components/metrics_translation"
 import './locale';
 import './style.less';
 
@@ -75,7 +76,7 @@ export default function index(props: IProps) {
     headerExtra,
     executeQuery,
   } = props;
-  const [value, setValue] = useState<string | undefined>(promQL); // for promQLInput
+  const [value, setValue] = useState<any>(promQL); // for promQLInput
   const [promql, setPromql] = useState<string | undefined>(promQL);
   const [queryStats, setQueryStats] = useState<QueryStats | null>(null);
   const [errorContent, setErrorContent] = useState('');
@@ -223,6 +224,7 @@ export default function index(props: IProps) {
           </span>
         </Input.Group>
       </div>
+      <div className='key-des'><span className='key-title'>指标关键词说明：</span> {cn_name[value] ? cn_name[value] : en_name[value] ? en_name[value] : ''}</div>
       {errorContent && <Alert style={{ marginBottom: 16 }} message={errorContent} type='error' />}
       <div style={{ minHeight: 0, height: '100%' }}>
         <Tabs
@@ -286,9 +288,14 @@ export default function index(props: IProps) {
         insertAtCursor={(val) => {
           if (promQLInputRef.current !== null) {
             const { from, to } = promQLInputRef.current.state.selection.ranges[0];
+            // console.log('from',from);
+            // console.log('to',to);
+            // console.log(promQLInputRef.current);
+            
             promQLInputRef.current.dispatch(
               promQLInputRef.current.state.update({
                 changes: { from, to, insert: val },
+                // changes: { from: 0, to: value?.length || 0, insert: val },
               }),
             );
           }
