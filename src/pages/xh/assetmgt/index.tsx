@@ -547,25 +547,57 @@ export default function () {
     setSelectColumns(showColumns.concat(fixColumns));
   }
 
-  // 递归处理树形结构
-  function processTypeList(node) {
-    // 处理当前节点的 type_list
-    if (node.type_list?.length) {
-      node['type_list'] = node['type_list'].map((v) => {
-        return {
-          id: v.name,
-          name: v.name,
-          ...v,
-          parentId: node.id
-        };
-      });
+  // // 树形结构数据递归排序函数
+  // const sortTree = (nodes) => {
+  //   if (!nodes || nodes.length === 0) {
+  //       return [];
+  //   }
+  //   // 对当前层节点按 id 升序排序
+  //   const sortedNodes = nodes.sort((a, b) => {
+  //       if (typeof a.id === 'string' && typeof b.id === 'string') {
+  //           return a.id.localeCompare(b.id);
+  //       }
+  //       return a.id - b.id;
+  //   });
+  //   // 递归处理子节点
+  //   sortedNodes.forEach((node) => {
+  //       if (node.sub_groups && node.sub_groups.length > 0) {
+  //           node.sub_groups = sortTree(node.sub_groups);
+  //       }
+  //   });
+  //   return sortedNodes;
+  // };
+  // 递归处理树形结构，排序、处理type_list
+  function sortAndProcessTypeList(nodes) {
+    if (!nodes || nodes.length === 0) {
+      return [];
     }
-    // 如果有子节点，递归处理子节点
-    if (node.sub_groups?.length) {
-        node.sub_groups.forEach(child => {
-            processTypeList(child);
+    // 对当前层节点按 id 升序排序
+    const sortedNodes = nodes.sort((a, b) => {
+      if (typeof a.id === "string" && typeof b.id === "string") {
+        return a.id.localeCompare(b.id);
+      }
+      return a.id - b.id;
+    });
+    // 处理当前层节点的 type_list 并递归处理子节点
+    sortedNodes.forEach((node) => {
+      // 处理当前节点的 type_list
+      if (node.type_list?.length) {
+        node["type_list"] = node["type_list"].map((v) => {
+          return {
+            id: v.name,
+            name: v.name,
+            ...v,
+            parentId: node.id,
+          };
         });
-    }
+      }
+      // 如果有子节点，递归处理子节点
+      if (node.sub_groups?.length) {
+        node.sub_groups = sortAndProcessTypeList(node.sub_groups);
+      }
+    })
+    return sortedNodes;
   }
   const getAssetTree = () => {
     // console.log('ac', activeColor);
@@ -589,11 +621,11 @@ export default function () {
       //     };
       //   });
       // })
-      dat.forEach(item => {
-        processTypeList(item);
-      });
-      console.log('dat', dat);
-      setTreeList(dat)
+      // console.log('dat', dat);
+      // setTreeList(dat)
+      const processDat = sortAndProcessTypeList(dat)
+      console.log('dat', processDat);
+      setTreeList(processDat)
     })
   }
 
@@ -993,6 +1025,7 @@ export default function () {
                       setTitle("编辑分组");
                       setCurGroup(item);
                       setOpen(true);
+                      setLevel(item.group_level);
                     } else if (key === "del") {
                       Modal.confirm({
                         title: "是否确认删除该分组？",

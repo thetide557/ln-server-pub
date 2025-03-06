@@ -80,7 +80,7 @@ const AccordionModal = (props: any) => {
 
   const remove = (item) => {
     // console.log(item);
-    const data = checkList.filter(param => param != item)
+    const data = checkList?.filter(param => param != item)
     // console.log(data);
     form.setFieldsValue({
       types: data
@@ -123,7 +123,7 @@ const AccordionModal = (props: any) => {
           <div className='check-box'>
             <div className="check-title">
               <div className="check-num">
-                已选（{checkList.length}）
+                已选（{checkList?.length}）
               </div>
               <div className="check-reset" onClick={reset}>
                 <div className="check-icon"></div>
