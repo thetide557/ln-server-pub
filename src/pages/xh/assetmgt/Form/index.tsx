@@ -336,10 +336,12 @@ export default function () {
   };
 
   const updateData = (changedValues, values) => {
-    // console.log(changedValues);
-    // console.log(values);
+    console.log(changedValues);
+    console.log(values);
+    // const params = { ident: values.ip }
+    // setAssetData({ ...assetData, ...values, ...params });
     const params = { ident: values.ip }
-    setAssetData({ ...assetData, ...values, ...params });
+    setAssetData({ ...assetData, ...values});
   };
 
   // IP地址校验规则
