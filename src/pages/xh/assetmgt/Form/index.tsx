@@ -196,7 +196,6 @@ export default function () {
           delete dat.exps;
         }
 
-        setAssetData(dat);
         const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
@@ -245,6 +244,15 @@ export default function () {
       const assetTypes = await fetchAssetTypes(id);
       setAssetTypes(assetTypes);
 
+      // 资产信息新增时 设置资产类型的默认值
+      const asset_type = localStorage.getItem('left_asset_type')
+      if (!id && assetTypes.some(item => item.name === asset_type)) {
+        form.setFieldsValue({
+          type: asset_type,
+        });
+        setCurrentType(asset_type)
+      }
+
       const param = { limit: -1 };
       const res = await getAssetsByCondition(param);
       const options = res.dat?.list.map((v) => ({
@@ -269,7 +277,6 @@ export default function () {
   }, [id]);
 
   const TabOperteClick = (tabIndex: string) => {
-
     setTabIndex(tabIndex);
     if (tabIndex != 'base_set' && id == null) {
       setHasSave(false);
@@ -307,7 +314,9 @@ export default function () {
           });
         await addXHAssetExpansion(subItem, id, v.name);
       });
-      saveMaintenanceInfo();
+      if(form.getFieldsValue().asset_position){
+        saveMaintenanceInfo();
+      }
       history.goBack();
       // loadAssetInfo(id);
     }
@@ -327,10 +336,12 @@ export default function () {
   };
 
   const updateData = (changedValues, values) => {
-    // console.log(changedValues);
-    // console.log(values);
+    console.log(changedValues);
+    console.log(values);
+    // const params = { ident: values.ip }
+    // setAssetData({ ...assetData, ...values, ...params });
     const params = { ident: values.ip }
-    setAssetData({ ...assetData, ...values, ...params });
+    setAssetData({ ...assetData, ...values});
   };
 
   // IP地址校验规则
@@ -380,18 +391,19 @@ export default function () {
 
   //保存维保信息
   const saveMaintenanceInfo = () => {
+    let formData = form.getFieldsValue();
     editMaintenanceInfo({
       asset_id: _.toNumber(id),
-      asset_model: assetData.asset_model,
-      purchase_data: timestamp(assetData.purchase_data),
-      asset_position: assetData.asset_position,
-      warranty_date: timestamp(assetData.warranty_date),
-      last_maintenace_date: timestamp(assetData.last_maintenace_date),
-      next_maintenace_date: timestamp(assetData.next_maintenace_date),
-      maintainers: assetData.maintainers,
-      maintainers_mail: assetData.maintainers_mail,
-      alert_status: assetData.alert_status,
-      maintenance_status: assetData.maintenance_status,
+      asset_model: formData.asset_model,
+      purchase_data: timestamp(formData.purchase_data),
+      asset_position: formData.asset_position,
+      warranty_date: timestamp(formData.warranty_date),
+      last_maintenace_date: timestamp(formData.last_maintenace_date),
+      next_maintenace_date: timestamp(formData.next_maintenace_date),
+      maintainers: formData.maintainers,
+      maintainers_mail: formData.maintainers_mail,
+      alert_status: formData.alert_status,
+      maintenance_status: formData.maintenance_status,
     }).then((res) => {
       message.success('操作成功');
     });
