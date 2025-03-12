@@ -31,7 +31,12 @@ const getMenuList = (t) => {
         {
           key: '/xh/assetmgt',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('资产清单'),
+          label: t('运维资产清单'),
+        },
+        {
+          key: '/xh/iotassetmgt',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('物联网资产管理'),
         },
         // {
         //   key: '/serverVideoAsset',

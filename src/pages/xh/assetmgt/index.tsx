@@ -547,26 +547,7 @@ export default function () {
     setSelectColumns(showColumns.concat(fixColumns));
   }
 
-  // // 树形结构数据递归排序函数
-  // const sortTree = (nodes) => {
-  //   if (!nodes || nodes.length === 0) {
-  //       return [];
-  //   }
-  //   // 对当前层节点按 id 升序排序
-  //   const sortedNodes = nodes.sort((a, b) => {
-  //       if (typeof a.id === 'string' && typeof b.id === 'string') {
-  //           return a.id.localeCompare(b.id);
-  //       }
-  //       return a.id - b.id;
-  //   });
-  //   // 递归处理子节点
-  //   sortedNodes.forEach((node) => {
-  //       if (node.sub_groups && node.sub_groups.length > 0) {
-  //           node.sub_groups = sortTree(node.sub_groups);
-  //       }
-  //   });
-  //   return sortedNodes;
-  // };
+
   // 递归处理树形结构，排序、处理type_list
   function sortAndProcessTypeList(nodes) {
     if (!nodes || nodes.length === 0) {
@@ -1160,7 +1141,7 @@ export default function () {
 
 
   return (
-    <PageLayout icon={<GroupOutlined />} title={"资产管理"}>
+    <PageLayout icon={<GroupOutlined />} title={"运维资产清单"}>
       <div style={{ display: 'inline-flex' }} className='asset_list_view'>
         <Resizable
           style={{
