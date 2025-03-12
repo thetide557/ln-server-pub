@@ -42,7 +42,7 @@ import TimeRangePicker, { IRawTimeRange, parseRange } from '@/components/TimeRan
 
 const { confirm } = Modal;
 export const SeverityColor = ['red', 'orange', 'yellow', 'green'];
-export const SeverityFont = ['S1', 'S2', 'S3', '已修复'];
+export const SeverityFont = ['紧急告警', '重要告警', '一般告警', '已修复'];
 export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) {
   confirm({
     title: t('delete_confirm.title'),
@@ -147,9 +147,12 @@ const Event: React.FC = () => {
   useEffect(() => {
     setView(display);
     filterOptions["severity"] = [
-      { label: 'S1', value: '1' },
-      { label: 'S2', value: '2' },
-      { label: 'S3', value: '3' },
+      // { label: 'S1', value: '1' },
+      // { label: 'S2', value: '2' },
+      // { label: 'S3', value: '3' },
+      { label: '紧急告警', value: '1' },
+      { label: '重要告警', value: '2' },
+      { label: '一般告警', value: '3' },
     ];
     filterOptions["group_id"] = busiGroups.map(group => {
       return {

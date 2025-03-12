@@ -84,10 +84,15 @@ const en_US = {
     hour: 'Hour',
     weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   },
+  // severity: {
+  //   1: 'S1',
+  //   2: 'S2',
+  //   3: 'S3',
+  // },
   severity: {
-    1: 'S1',
-    2: 'S2',
-    3: 'S3',
+    1: '紧急告警',
+    2: '重要告警',
+    3: '一般告警',
   },
 
   tpl: 'Self-healing',

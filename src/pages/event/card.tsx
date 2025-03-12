@@ -311,7 +311,7 @@ function Card(props: Props, ref) {
           {cardList?.map((card, i) => (
             <Col span={span} key={i}>
               <div className={`event-card ${SeverityColor[card.severity - 1]} ${SeverityColor[card.severity - 1]}-left-border`} onClick={() => fetchCardDetail(card)}>
-                <div className='event-card-title'>告警级别：S{card.severity}</div>
+                <div className='event-card-title'>告警级别：{card.severity == 1 ? '紧急告警' : card.severity == 2 ? '重要告警' : card.severity == 3 ? '一般告警' : ''}</div>
                 <div className='event-card-num'>{card.total}</div>
               </div>
             </Col>

@@ -132,7 +132,8 @@ export default function List(props: ListProps) {
                       marginRight: 0,
                     }}
                   >
-                    S{severity}
+                    {/* S{severity} */}
+                    {severity == 1 ? '紧急告警' : severity == 2 ? '重要告警' : severity == 3 ? '一般告警' : null}
                   </Tag>
                 );
               })}
@@ -349,9 +350,12 @@ export default function List(props: ListProps) {
       setTypeOptions(_.cloneDeep(typeOptions));
     });
     filterOptions['severity'] = [
-      { label: 'S1', value: '1' },
-      { label: 'S2', value: '2' },
-      { label: 'S3', value: '3' },
+      // { label: 'S1', value: '1' },
+      // { label: 'S2', value: '2' },
+      // { label: 'S3', value: '3' },
+      { label: '紧急告警', value: '1' },
+      { label: '重要告警', value: '2' },
+      { label: '一般告警', value: '3' },
     ];
     setFilterOptions({ ...filterOptions });
   }, []);
