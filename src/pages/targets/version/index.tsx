@@ -104,7 +104,7 @@ export default function () {
         fetch(`/api/n9e/target/version/delete-gz?filename=${filenameToDelete}`, {
           method: 'DELETE',
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+            Authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}`,
           },
         })
           .then(response => {
@@ -141,7 +141,7 @@ export default function () {
     multiple: false,
     action: '/api/n9e/target/version',
     
-    headers: { Authorization: `Bearer ${localStorage.getItem('access_token') || ''}` },
+    headers: { Authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}` },
     
     onChange(info) {
       const { status, response } = info.file;

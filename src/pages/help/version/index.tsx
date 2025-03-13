@@ -31,7 +31,7 @@ const props: UploadProps = {
   multiple: false,
   maxCount: 1,
   action: '/api/n9e/server/update',
-  headers: { Authorization: `Bearer ${localStorage.getItem('access_token') || ''}` },
+  headers: { Authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}` },
   onChange(info) {
     const { status } = info.file;
     if (status !== 'uploading') {
