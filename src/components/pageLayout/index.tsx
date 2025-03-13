@@ -58,6 +58,8 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
           Logout().then(() => {
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('refresh_token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');

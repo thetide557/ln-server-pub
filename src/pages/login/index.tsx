@@ -153,6 +153,9 @@ export default function Login() {
         const { access_token, refresh_token } = dat;
         sessionStorage.setItem('access_token', access_token);
         sessionStorage.setItem('refresh_token', refresh_token);
+        // 嵌入的子项目之前用的local
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('refresh_token', refresh_token);
         // 资产管理默认左侧树
         localStorage.setItem('left_asset_type', '-1');
         if (!err) {
