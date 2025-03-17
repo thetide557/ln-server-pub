@@ -235,9 +235,12 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
         label={
           <Space>
             {t('account:profile.moreContact')}
-            <Link to='/help/notification-settings?tab=contacts' target='_blank'>
+            {/* <Link to='/help/notification-settings?tab=contacts' target='_blank'>
               {t('account:profile.moreContactLinkToSetting')}
-            </Link>
+            </Link> */}
+            <div style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open('/help/notification-settings?tab=contacts')}}>
+              {t('account:profile.moreContactLinkToSetting')}
+            </div>
           </Space>
         }
         labelCol={{span: 7 }}
