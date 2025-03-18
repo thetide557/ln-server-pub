@@ -33,6 +33,14 @@ export const getAssetsByCondition = function (params) {
   // })
 };
 
+// 获取资产列表 告警数据分权分域
+export const getAssetsByGroupsMember = function (params) {
+  return request('/api/n9e/busi-groups/member', {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
 export const getAsset = function (id: string) {
   return request(`/api/n9e/assets/${id}`, {
     method: RequestMethod.Get,

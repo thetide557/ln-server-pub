@@ -19,7 +19,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form, Input, Select, Card, Row, Col, Tag, Tooltip } from 'antd';
 import { panelBaseProps } from '../constants';
-import { getAssetsByCondition } from '@/services/assets';
+import { getAssetsByCondition, getAssetsByGroupsMember } from '@/services/assets';
 import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
@@ -52,7 +52,29 @@ export default function Base({ type, form, assetId, onAssetChange }) {
 
     if (type == 1) {
       param['limit'] = -1;
-      getAssetsByCondition(param).then((res) => {
+      // getAssetsByCondition(param).then((res) => {
+      //   let options = new Array();
+      //   res.dat.list.map((v) => {
+      //     assetList[v.id] = v;
+      //     options.push({
+      //       value: v.id,
+      //       label: `[${v.type}]-[${v.ip}]-${v.name}`,
+      //     });
+      //   });
+      //   options = options.sort((a, b) => localeCompare(a.label, b.label));
+      //   setAssetOptions(options);
+      //   setAssetList({ ...assetList });
+      //   let ipOptions = new Array();
+      //   res.dat.list.map((v) => {
+      //     ipOptions.push({
+      //       value: v.id,
+      //       label: v.ip,
+      //     });
+      //   });
+      // });
+
+      // 获取资产列表 告警数据分权分域
+      getAssetsByGroupsMember(param).then((res) => {
         let options = new Array();
         res.dat.list.map((v) => {
           assetList[v.id] = v;
