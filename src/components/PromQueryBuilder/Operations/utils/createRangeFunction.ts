@@ -1,12 +1,15 @@
 import { PromVisualQueryOperationCategory, QueryBuilderOperationDef, QueryBuilderOperationParamDef } from '../../types';
-import { getPromOperationDisplayName } from './index';
+import { getPromOperationDisplayName, getPromOperationDisplayLabel } from './index';
 import { operationWithRangeVectorRenderer } from './renderer';
 import { addOperationWithRangeVector } from './addOperationHandler';
 
 export function createRangeFunction(name: string): QueryBuilderOperationDef {
+  // console.log('hhhh', name);
+  
   return {
     id: name,
     name: getPromOperationDisplayName(name),
+    label: getPromOperationDisplayLabel(name),
     params: [getRangeVectorParamDef()],
     defaultParams: ['5m'],
     alternativesKey: 'range function',

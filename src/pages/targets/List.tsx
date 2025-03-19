@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Table, Tag, Tooltip, Space, Input, Dropdown, Menu, Button, Modal, message, Select, MenuProps } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, DownOutlined, ReloadOutlined, CopyOutlined, ApartmentOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { useAntdTable } from 'ahooks';
+import { useAntdTable, useInterval } from 'ahooks';
 import _ from 'lodash';
 import moment from 'moment';
 import { useTranslation, Trans } from 'react-i18next';
@@ -463,6 +463,10 @@ export default function List(props: IProps) {
       pageSize: tableProps.pagination.pageSize,
     });
   }, [tableQueryContent, curBusiId, refreshFlag, downtime]);
+
+  useInterval(() => {
+    setRefreshFlag(_.uniqueId('refreshKey_'));
+  }, 1000 * 15);
 
   return (
     <div>

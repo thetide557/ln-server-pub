@@ -27,6 +27,9 @@ export default function index(props: IProps) {
   const { operations } = query;
   const addOperationOptions = getOperationDefinitions();
   const categories = _.groupBy(addOperationOptions, 'category');
+  // console.log('addOperationOptions', addOperationOptions);
+  // console.log('operations', operations);
+  // console.log('categories', categories);
 
   return (
     <div className='prom-query-builder-operations-container'>
@@ -58,7 +61,7 @@ export default function index(props: IProps) {
               children: _.map(options, (option) => {
                 return {
                   value: option.id,
-                  label: option.name,
+                  label: option.label ? `${option.name}（${option.label}）` : `${option.name}`,
                 };
               }),
             };

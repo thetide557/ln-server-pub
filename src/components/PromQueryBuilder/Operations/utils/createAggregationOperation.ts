@@ -7,7 +7,7 @@ import {
   PromVisualQueryOperation,
   QueryWithOperations,
 } from '../../types';
-import { getPromOperationDisplayName, getRangeVectorParamDef } from './index';
+import { getPromOperationDisplayLabel, getPromOperationDisplayName, getRangeVectorParamDef } from './index';
 import { functionRendererLeft, getAggregationByRenderer, getAggregationWithoutRenderer, operationWithRangeVectorRenderer } from './renderer';
 import { defaultAddOperationHandler, addOperationWithRangeVector } from './addOperationHandler';
 
@@ -16,6 +16,7 @@ export function createAggregationOperation<T extends QueryWithOperations>(name: 
     {
       id: name,
       name: getPromOperationDisplayName(name),
+      label: getPromOperationDisplayLabel(name),
       params: [
         {
           name: 'By label',
@@ -35,6 +36,7 @@ export function createAggregationOperation<T extends QueryWithOperations>(name: 
     {
       id: `__${name}_by`,
       name: `${getPromOperationDisplayName(name)} by`,
+      label: `按…分组的${getPromOperationDisplayLabel(name)}`,
       params: [
         {
           name: 'Label',
@@ -56,6 +58,7 @@ export function createAggregationOperation<T extends QueryWithOperations>(name: 
     {
       id: `__${name}_without`,
       name: `${getPromOperationDisplayName(name)} without`,
+      label: `忽略…的${getPromOperationDisplayLabel(name)}`,
       params: [
         {
           name: 'Label',
@@ -135,6 +138,7 @@ export function createAggregationOverTime(name: string): QueryBuilderOperationDe
   return {
     id: name,
     name: getPromOperationDisplayName(name),
+    label: getPromOperationDisplayLabel(name),
     params: [getRangeVectorParamDef()],
     defaultParams: ['5m'],
     alternativesKey: 'overtime function',

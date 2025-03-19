@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { PromVisualQuery, PromVisualQueryOperationCategory, QueryBuilderOperationDef, PromVisualQueryOperationId, QueryBuilderOperationParamDef } from '../../types';
+import { PromVisualQuery, PromVisualQueryOperationCategory, QueryBuilderOperationDef, PromVisualQueryOperationId, QueryBuilderOperationParamDef, PromVisualQueryOperationLabel } from '../../types';
 import { createAggregationOperation, createAggregationOperationWithParam, createAggregationOverTime } from './createAggregationOperation';
 import { createRangeFunction } from './createRangeFunction';
 import { createFunction } from './createFunction';
@@ -40,6 +40,7 @@ export function getOperationDefinitions(): QueryBuilderOperationDef[] {
     {
       id: PromVisualQueryOperationId.ArithmeticBinary,
       name: 'Arithmetic',
+      label: '算术二元操作符',
       params: [
         {
           name: 'Operator',
@@ -62,6 +63,7 @@ export function getOperationDefinitions(): QueryBuilderOperationDef[] {
     {
       id: PromVisualQueryOperationId.ComparisonBinary,
       name: 'Comparison',
+      label: '比较二元操作符',
       params: [
         {
           name: 'Operator',
@@ -85,6 +87,7 @@ export function getOperationDefinitions(): QueryBuilderOperationDef[] {
     {
       id: PromVisualQueryOperationId.NestedQuery,
       name: 'Binary operation with query',
+      label: '嵌套查询',
       params: [],
       defaultParams: [],
       category: PromVisualQueryOperationCategory.BinaryOps,
@@ -296,6 +299,13 @@ export function getRangeVectorParamDef(): QueryBuilderOperationParamDef {
 
 export function getPromOperationDisplayName(funcName: string) {
   return _.capitalize(funcName.replace(/_/g, ' '));
+}
+
+export function getPromOperationDisplayLabel(funcName: string) {
+  // console.log('afdgshfdg', funcName);
+  // console.log('ada', PromVisualQueryOperationLabel);
+  // console.log('erew', PromVisualQueryOperationLabel[funcName]);
+  return PromVisualQueryOperationLabel[funcName]
 }
 
 function addNestedQueryHandler(def: QueryBuilderOperationDef, query: PromVisualQuery): PromVisualQuery {
