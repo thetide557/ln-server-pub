@@ -38,6 +38,8 @@ export default function Operations(props: IProps) {
   const { profile, permList } = useContext(CommonStateContext);
 
   useEffect(() => {
+    // console.log(111, disabled);
+    
     if (roleId) {
       getOperationsByRole(roleId).then((res) => {
         setOperations(res);

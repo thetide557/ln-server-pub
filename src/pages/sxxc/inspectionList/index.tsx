@@ -62,6 +62,8 @@ const Resource: React.FC = () => {
     const { profile, permList, busiGroups } = useContext(CommonStateContext);
     const groupIds = busiGroups?.map(item => item.id)
     const pagination = usePagination({ PAGESIZE_KEY: 'inspectionList' });
+    const [pageNum, setPageNum] = useState(1)
+    
     const [formData, setFormData] = useState<any>({})
 
     const taskColumn: ColumnsType<Inspection> = [
@@ -194,7 +196,7 @@ const Resource: React.FC = () => {
         }
         editInspectionStatus(params).then(res => {
             console.log(res)
-            run({ current: 1, pageSize: pagination.pageSize });
+            run({ current: pageNum, pageSize: pagination.pageSize });
         })
     }
 
@@ -216,6 +218,7 @@ const Resource: React.FC = () => {
 
     const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
     const getTableData = ({ current, pageSize }): Promise<any> => {
+        setPageNum(current)
         const params = {
             ...form.getFieldsValue(),
             pageSize: pageSize,

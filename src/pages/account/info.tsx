@@ -66,7 +66,7 @@ export default function Info() {
     name: 'photo',
     action: '/api/n9e/xh/users/photo',
     headers: {
-      authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+      authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}`,
     },
 
   };

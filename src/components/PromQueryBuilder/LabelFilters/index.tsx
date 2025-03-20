@@ -65,7 +65,7 @@ export default function index(props: IProps) {
                 }}
               >
                 <LabelNameSelect
-                  style={{ width: '30%' }}
+                  style={{ width: '25%' }}
                   metric={metric}
                   labels={list}
                   datasourceValue={datasourceValue}
@@ -79,7 +79,7 @@ export default function index(props: IProps) {
                   }}
                 />
                 <Select
-                  style={{ width: 60 }}
+                  style={{ width: 100 }}
                   value={item.op}
                   onChange={(val) => {
                     replace(index, {
@@ -88,17 +88,17 @@ export default function index(props: IProps) {
                     });
                   }}
                 >
-                  <Select.Option value='='>=</Select.Option>
-                  <Select.Option value='!='>!=</Select.Option>
-                  <Select.Option value='=~'>=~</Select.Option>
-                  <Select.Option value='!~'>!~</Select.Option>
+                  <Select.Option value='='>=（等于）</Select.Option>
+                  <Select.Option value='!='>!=（不等于）</Select.Option>
+                  <Select.Option value='=~'>=~（属于）</Select.Option>
+                  <Select.Option value='!~'>!~（不属于）</Select.Option>
                 </Select>
                 <LabelValueSelect
                   label={item.label}
                   datasourceValue={datasourceValue}
                   params={params}
                   style={{
-                    width: `calc(100% - 30% - 60px - 32px)`,
+                    width: `calc(100% - 35% - 60px - 32px)`,
                   }}
                   value={item.value}
                   onChange={(val) => {

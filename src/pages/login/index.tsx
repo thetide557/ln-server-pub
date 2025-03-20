@@ -151,6 +151,9 @@ export default function Login() {
       .then((res) => {
         const { dat, err } = res;
         const { access_token, refresh_token } = dat;
+        sessionStorage.setItem('access_token', access_token);
+        sessionStorage.setItem('refresh_token', refresh_token);
+        // 嵌入的子项目之前用的local
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
         // 资产管理默认左侧树

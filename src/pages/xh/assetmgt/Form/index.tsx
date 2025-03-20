@@ -3,7 +3,7 @@ import './style.less';
 import React, { Fragment, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs, DatePicker, Modal, InputNumber, Timeline, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import _ from 'lodash';
+import _, { forEach } from 'lodash';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
 import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory } from '@/services/assets';
@@ -15,7 +15,10 @@ import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import { factories, serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
-import { timestamp, timestampToCST } from '@/utils/day';
+import { timestamp, timestampToCST,isSameDay,getPreviousWeekTimestamp } from '@/utils/day';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -48,6 +51,8 @@ export default function () {
   const [maintenanceStatusNum, setMaintenanceStatusNum] = useState<number | null>(null);
   const [maintenanceRecordForm] = Form.useForm();
   const [maintainersVal, setMaintainersVal] = useState('');
+  const [scheduleMaintenanceDateOption, setScheduleMaintenanceDateOption] = useState<any[]>([]);
+  const [scheduleMaintenanceDate, setScheduleMaintenanceDate] = useState(1742104719);
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
@@ -314,7 +319,7 @@ export default function () {
           });
         await addXHAssetExpansion(subItem, id, v.name);
       });
-      if(form.getFieldsValue().asset_position){
+      if (form.getFieldsValue().asset_position) {
         saveMaintenanceInfo();
       }
       history.goBack();
@@ -338,8 +343,10 @@ export default function () {
   const updateData = (changedValues, values) => {
     // console.log(changedValues);
     // console.log(values);
+    // const params = { ident: values.ip }
+    // setAssetData({ ...assetData, ...values, ...params });
     const params = { ident: values.ip }
-    setAssetData({ ...assetData, ...values, ...params });
+    setAssetData({ ...assetData, ...values });
   };
 
   // IP地址校验规则
@@ -367,12 +374,26 @@ export default function () {
   const getMaintenanceInfo = async () => {
     try {
       const res = await getMaintenanceInfoById(_.toNumber(id));
+      getMaintenanceHistoryData()
       if (res.dat) {
         const formattedData = formatMaintenanceData(res.dat);
         if (mode === 'edit') {
-          setMaintenanceStatusNum(res.dat.maintenance_status);
+          setMaintenanceStatusNum(res.dat.maintenance_status.toString());
         }
         form.setFieldsValue(formattedData);
+        
+        // 计划维保日期option
+        let dataStr = timestampToCST(res.dat.next_maintenace_date).toString()
+        setScheduleMaintenanceDateOption([
+          {
+            label: dataStr,
+            value: res.dat.next_maintenace_date
+          },
+          {
+            label: '无计划',
+            value: -1
+          },
+        ])
       }
     } catch (error) {
       console.error('Error fetching maintenance info:', error);
@@ -399,7 +420,6 @@ export default function () {
       last_maintenace_date: timestamp(formData.last_maintenace_date),
       next_maintenace_date: timestamp(formData.next_maintenace_date),
       maintainers: formData.maintainers,
-      maintainers_mail: formData.maintainers_mail,
       alert_status: formData.alert_status,
       maintenance_status: formData.maintenance_status,
     }).then((res) => {
@@ -408,18 +428,31 @@ export default function () {
   }
   // show 维保记录弹框
   const showMaintenanceRecord = () => {
+    maintenanceRecordForm.resetFields()
+    // maintenanceRecordForm.setFieldsValue({})
     setMaintenanceRecordModalOpen(true);
   }
+
+  const disabledDate = (current) => {
+    let newData = getPreviousWeekTimestamp(scheduleMaintenanceDate*1000)
+    return current && current < dayjs(moment(newData));
+  };
+  // 维保记录新增
   const mrhandleOk = () => {
     try {
       maintenanceRecordForm.validateFields().then(values => {
         addMaintenanceHistory({
           ...values,
           asset_id: _.toNumber(id),
-          maintenance_date: timestamp(values.maintenance_date),
+          actual_maintenance_date: timestamp(values.actual_maintenance_date),
         }).then(() => {
-          message.success('操作成功');
           setMaintenanceRecordModalOpen(false);
+          if(values.schedule_maintenance_date !=-1){
+            message.success('操作成功,请更新下次维保时间！');
+            form.setFieldsValue({ next_maintenace_date: '' });
+          }else{
+            message.success('操作成功');
+          }
         }).catch(err => {
           message.error('添加维保记录失败，请重试');
         })
@@ -432,8 +465,15 @@ export default function () {
     setMaintenanceHistoryModalOpen(true);
   }
   const getMaintenanceHistoryData = (maintenanceDate = -1) => {
-    getMaintenanceHistory({ id: _.toNumber(id), maintenanceDate: maintenanceDate }).then((res) => {
+    getMaintenanceHistory({ id: _.toNumber(id), actual_maintenance_date: maintenanceDate }).then((res) => {
       setMaintenanceHistory(res.dat);
+      let next_maintenace_date = form.getFieldValue('next_maintenace_date')
+      let next_maintenace_date2 = next_maintenace_date['_i']/1000;
+      let findItem = res.dat.find(x=>isSameDay(x.actual_maintenance_date,next_maintenace_date2))
+
+      if(findItem.actual_maintenance_date){
+        setScheduleMaintenanceDate(prevCount => prevCount= findItem.actual_maintenance_date)
+      }
     });
   }
   const maintenanceDateChange = (date, dateString) => {
@@ -767,18 +807,12 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='下次维保日期' name='next_maintenace_date' rules={[{ required: true }]}>
-                    <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} placeholder='请选择下次维保日期' />
+                    <DatePicker format='YYYY-MM-DD' disabledDate={scheduleMaintenanceDate != -1 ? disabledDate : null} style={{ width: '100%' }} placeholder='请选择下次维保日期' />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item label='维保人员' name='maintainers' rules={[{ required: true }, { pattern: /^[\u4e00-\u9fa5]+$/, message: '请输入有效的中文!' }]}>
                     <Input placeholder='请输入维保人员' />
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item label='维保人员邮箱' name='maintainers_mail' rules={[{ required: true }, { pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/, message: '请输入有效的邮箱!' }]}>
-                    <Input placeholder='请输入维保人员邮箱' />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -793,9 +827,9 @@ export default function () {
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                     <Select
-                      disabled={maintenanceStatusNum && maintenanceStatusNum != 2}
+                      disabled={maintenanceStatusNum && maintenanceStatusNum != '2'}
                       style={{ width: '100%' }}
-                      options={maintenanceStatusNum == 2 ? [
+                      options={maintenanceStatusNum == '2' ? [
                         {
                           label: '维保中',
                           value: 0
@@ -812,7 +846,7 @@ export default function () {
               </Row>
               <Row>
                 <Col span={12} offset={3}>
-                  <Button type="primary" disabled={!maintenanceStatusNum}  onClick={showMaintenanceRecord}>新增维保记录</Button>
+                  <Button type="primary" disabled={!maintenanceStatusNum} onClick={showMaintenanceRecord}>新增维保记录</Button>
                 </Col>
               </Row>
             </Card>
@@ -880,21 +914,6 @@ export default function () {
             </Col>
             <Col span={12}>
               <Form.Item
-                label="维保日期"
-                name="maintenance_date"
-                rules={[
-                  {
-                    required: true,
-                  },
-                ]}
-              >
-                <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} placeholder='请选择维保日期' />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={10}>
-            <Col span={12}>
-              <Form.Item
                 label="维保人"
                 name="maintainers"
                 rules={[
@@ -904,6 +923,40 @@ export default function () {
                 ]}
               >
                 <Input placeholder='请输入维保人' />
+              </Form.Item>
+            </Col>
+
+          </Row>
+          <Row gutter={10}>
+            <Col span={12}>
+              <Form.Item
+                label="计划维保日期"
+                name="schedule_maintenance_date"
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <Select
+                  style={{ width: '100%' }}
+                  options={scheduleMaintenanceDateOption}
+                  placeholder='请选择计划维保日期'
+                />
+
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="实际维保日期"
+                name="actual_maintenance_date"
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <DatePicker format='YYYY-MM-DD'  style={{ width: '100%' }} placeholder='请选择维保日期' />
               </Form.Item>
             </Col>
           </Row>
@@ -962,7 +1015,7 @@ export default function () {
                 return (
                   <Timeline.Item color="green" key={index}>
                     <div className='one'>
-                      <span>{timestampToCST(x.maintenance_date)} </span>
+                      <span>{timestampToCST(x.actual_maintenance_date)} </span>
                       <Tag color="blue">{maintenanceTypeOption.filter(item => item.value == x.maintenance_type)[0]?.label}</Tag>
                       {
                         x.expenses.toString() && (

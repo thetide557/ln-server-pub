@@ -178,7 +178,7 @@ export default function () {
     name: 'file',
     action: '/api/n9e/user-config/picture?logoName=' + logoName,
     headers: {
-      authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+      authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}`,
     },
 
   };

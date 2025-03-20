@@ -61,12 +61,12 @@ const TagItem = ({ field, remove, form }: Itag) => {
         <Col span={3}>
           <Form.Item style={{ marginBottom: 0 }} name={[field.name, 'func']} initialValue='=='>
             <Select suffixIcon={<CaretDownOutlined />} onChange={funcChange}>
-              <Option value='=='>==</Option>
-              <Option value='=~'>=~</Option>
-              <Option value='in'>in</Option>
-              <Option value='not in'>not in</Option>
-              <Option value='!='>!=</Option>
-              <Option value='!~'>!~</Option>
+            <Option value='=='>==（等于）</Option>
+              <Option value='=~'>=~（属于）</Option>
+              <Option value='in'>in（在）</Option>
+              <Option value='not in'>not in（不在）</Option>
+              <Option value='!='>!=（不等于）</Option>
+              <Option value='!~'>!~（不属于）</Option>
             </Select>
           </Form.Item>
         </Col>

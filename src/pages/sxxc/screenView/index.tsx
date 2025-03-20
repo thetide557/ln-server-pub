@@ -36,7 +36,7 @@ export default function ScreenView() {
   const baseUrl = '/dataroom/#/bigscreen/preview'
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
-  const token = localStorage.getItem('access_token')
+  const token = sessionStorage.getItem('access_token')
 
   const sendToken = window.onload = function () {
     var iframe: any = document.getElementById('logFrame');

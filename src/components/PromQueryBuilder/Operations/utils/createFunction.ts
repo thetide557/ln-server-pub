@@ -1,5 +1,5 @@
 import { PromVisualQueryOperationCategory, QueryBuilderOperationDef } from '../../types';
-import { getPromOperationDisplayName } from './index';
+import { getPromOperationDisplayName, getPromOperationDisplayLabel } from './index';
 import { functionRendererRight, functionRendererLeft } from './renderer';
 import { defaultAddOperationHandler } from './addOperationHandler';
 
@@ -8,6 +8,7 @@ export function createFunction(definition: Partial<QueryBuilderOperationDef>): Q
     ...definition,
     id: definition.id!,
     name: definition.name ?? getPromOperationDisplayName(definition.id!),
+    label: getPromOperationDisplayLabel(definition.id!),
     params: definition.params ?? [],
     defaultParams: definition.defaultParams ?? [],
     category: definition.category ?? PromVisualQueryOperationCategory.Functions,

@@ -556,8 +556,8 @@ export default function () {//{ selectMenu?:any }
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('access_token');
+            sessionStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');

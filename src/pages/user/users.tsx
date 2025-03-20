@@ -61,6 +61,7 @@ const Resource: React.FC = () => {
   const [role, setRole] = useState<string>();
   const { profile, permList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'users' });
+  const [pageNum, setPageNum] = useState(1)
   const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
   const [groupMap, setGroupMap] = useState({});
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
@@ -247,7 +248,8 @@ const Resource: React.FC = () => {
                     onOk: async () => {
                       updateProperty("status", (record.status === 1 ? 0 : 1), [record.id]).then((res) => {
                         message.success('修改成功');
-                        setRefreshFlag(_.uniqueId('refreshFlag_'));
+                        // setRefreshFlag(_.uniqueId('refreshFlag_'));
+                        run({ current: pageNum, pageSize: pagination.pageSize });
                       });
                     },
                     onCancel() { },
@@ -429,6 +431,7 @@ const Resource: React.FC = () => {
 
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const getTableData = ({ current, pageSize }): Promise<any> => {
+    setPageNum(current)
     let params = {
       page: current,
       limit: pageSize,
@@ -458,7 +461,7 @@ const Resource: React.FC = () => {
       };
     });
   };
-  const { tableProps } = useAntdTable(getTableData, {
+  const { tableProps, run } = useAntdTable(getTableData, {
     defaultPageSize: pagination.pageSize,
     refreshDeps: [query, refreshFlag, groupMap],
   });

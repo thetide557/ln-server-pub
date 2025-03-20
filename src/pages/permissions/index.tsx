@@ -105,7 +105,7 @@ export default function index() {
                 {activeRole?.name !== 'Admin' && (
                   <>
                     {
-                      (profile.roles?.includes("Admin") || permList.includes("/permissions/put")) && <EditOutlined
+                      (profile.roles?.includes("Admin") || (activeRole && activeRole.name !== '运维管理员' && activeRole.name !== '普通用户' && activeRole.name !== '临时用户' && permList.includes("/permissions/put"))) && <EditOutlined
                         onClick={() => {
                           RoleFormModal({
                             action: 'put',
@@ -119,7 +119,7 @@ export default function index() {
                       />
                     }
                     {
-                      (profile.roles?.includes("Admin") || permList.includes("/permissions/del")) && <DeleteOutlined
+                      (profile.roles?.includes("Admin") || (activeRole && activeRole.name !== '运维管理员' && activeRole.name !== '普通用户' && activeRole.name !== '临时用户' && permList.includes("/permissions/del"))) && <DeleteOutlined
                         disabled={activeRole?.name === 'Admin'}
                         onClick={() => {
                           confirm({
@@ -146,7 +146,8 @@ export default function index() {
                 {t('common:table.note')}：{activeRole?.note || '-'}
               </div>
             </div>
-            <Operations data={operations} roleId={activeRole?.id} disabled={activeRole?.name === 'Admin'} />
+            {/* <Operations data={operations} roleId={activeRole?.id} disabled={activeRole?.name === 'Admin'} /> */}
+            <Operations data={operations} roleId={activeRole?.id} disabled={profile.roles?.includes("Admin") ? false : (activeRole?.name === '运维管理员' || activeRole?.name === '普通用户' || activeRole?.name === '临时用户')} />
           </div>
         </div>
       </div>

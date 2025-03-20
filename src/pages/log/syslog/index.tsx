@@ -90,14 +90,13 @@ export default function () {
       align: 'center',
       render: (val, record: any) => {
         return (
-          (profile.roles?.includes("Admin") || permList.includes("/log/syslog/export")) && <Button onClick={() => {
+          (profile.roles?.includes("Admin")) && <Button onClick={() => {
             let ids = new Array();
             ids.push(record.name);
             handleModal("open", ids, record.log_type);
           }}>
             导出
           </Button>
-
         );
       }
     },
@@ -391,7 +390,7 @@ export default function () {
                 </Col>
 
                 {
-                  (profile.roles?.includes("Admin") || permList.includes("/log/syslog/exportAll")) && <Button className='btn' type="primary" style={{ right: '0', position: 'absolute', marginRight: '16px' }}
+                  profile.roles?.includes("Admin") && <Button className='btn' type="primary" style={{ right: '0', position: 'absolute', marginRight: '16px' }}
                     onClick={() => {
                       if (selectRowKeys.length <= 0) {
                         Modal.confirm({

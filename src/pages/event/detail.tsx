@@ -101,7 +101,7 @@ const EventDetailPage: React.FC = () => {
       label: t('detail.severity'),
       key: 'severity',
       render: (severity) => {
-        return <Tag color={priorityColor[severity - 1]}>S{severity}</Tag>;
+        return <Tag color={priorityColor[severity - 1]}>{severity == 1 ? '紧急告警' : severity == 2 ? '重要告警' : severity == 3 ? '一般告警' : ''}</Tag>;
       },
     },
     {

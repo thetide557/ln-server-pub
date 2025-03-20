@@ -103,9 +103,12 @@ const Event: React.FC = () => {
       };
     });
     filterOptions['severity'] = [
-      { label: 'S1', value: '1' },
-      { label: 'S2', value: '2' },
-      { label: 'S3', value: '3' },
+      // { label: 'S1', value: '1' },
+      // { label: 'S2', value: '2' },
+      // { label: 'S3', value: '3' },
+      { label: '紧急告警', value: '1' },
+      { label: '重要告警', value: '2' },
+      { label: '一般告警', value: '3' },
     ];
     setFilterOptions({ ...filterOptions });
   }, []);

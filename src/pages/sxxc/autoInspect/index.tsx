@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 // import { DeleteOutlined, DownOutlined, EditOutlined, PlusSquareOutlined, PoweroffOutlined, SearchOutlined, UndoOutlined, UserOutlined } from '@ant-design/icons';
 
 const autoInspect = function () {
-  const token = localStorage.getItem('access_token')
+  const token = sessionStorage.getItem('access_token')
   // const iframeRef = useRef(null);
   // const handleload = () => {
   //   const domElement:any = iframeRef?.current;

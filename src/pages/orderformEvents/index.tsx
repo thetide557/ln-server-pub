@@ -327,9 +327,12 @@ const Event: React.FC = () => {
               });
             }}
           >
-            <Select.Option key={1} value={1}>S1</Select.Option>
+            {/* <Select.Option key={1} value={1}>S1</Select.Option>
             <Select.Option key={2} value={2}>S2</Select.Option>
-            <Select.Option key={3} value={3}>S3</Select.Option>
+            <Select.Option key={3} value={3}>S3</Select.Option> */}
+            <Select.Option key={1} value={1}>紧急告警</Select.Option>
+            <Select.Option key={2} value={2}>重要告警</Select.Option>
+            <Select.Option key={3} value={3}>一般告警</Select.Option>
           </Select>
           <Select
             style={{ minWidth: 60 }}
