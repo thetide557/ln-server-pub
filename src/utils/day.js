@@ -25,12 +25,7 @@ export function isSameDay(timestamp1, timestamp2) {
 }
  
 export function getPreviousWeekTimestamp(timestamp) {
-    // 将 13 位时间戳转换为日期对象
     const date = new Date(timestamp);
-
-    // 减去 7 天
     date.setDate(date.getDate() - 7);
-
-    // 返回前 7 天的时间戳
     return date.getTime();
 }
