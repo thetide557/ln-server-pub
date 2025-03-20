@@ -477,8 +477,6 @@ export default function () {
     setMaintenanceHistoryModalOpen(true);
   }
   const getMaintenanceHistoryData = (maintenanceDate = -1) => {
-    console.log(maintenanceDate);
-    
     getMaintenanceHistory({ id: _.toNumber(id), actual_maintenance_date: maintenanceDate }).then((res) => {
       setMaintenanceHistory(res.dat);
       // let next_maintenace_date = form.getFieldValue('next_maintenace_date')
