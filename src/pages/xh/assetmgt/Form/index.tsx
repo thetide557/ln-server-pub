@@ -52,7 +52,9 @@ export default function () {
   const [maintenanceRecordForm] = Form.useForm();
   const [maintainersVal, setMaintainersVal] = useState('');
   const [scheduleMaintenanceDateOption, setScheduleMaintenanceDateOption] = useState<any[]>([]);
-  const [scheduleMaintenanceDate, setScheduleMaintenanceDate] = useState(1742104719);
+  const [scheduleMaintenanceDate, setScheduleMaintenanceDate] = useState('');
+  const [maintenanceStatus, setMaintenanceStatus] = useState('');
+  
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
@@ -434,9 +436,19 @@ export default function () {
   }
 
   const disabledDate = (current) => {
-    let newData = getPreviousWeekTimestamp(scheduleMaintenanceDate*1000)
-    return current && current < dayjs(moment(newData));
+    return current && current < moment().startOf('day');
   };
+  // 下次维保时间选择关联维保状态选择
+  const nextMaintenaceDate = (date,dateString) =>{
+    form.setFieldsValue({'maintenance_status':''})
+    var dateToCheck = moment(dateString);
+    var today = moment().startOf('day');
+    if (dateToCheck.isSame(today, 'day')) {
+      setMaintenanceStatus(true)
+    } else {
+      setMaintenanceStatus(false)
+    }
+  }
   // 维保记录新增
   const mrhandleOk = () => {
     try {
@@ -465,15 +477,17 @@ export default function () {
     setMaintenanceHistoryModalOpen(true);
   }
   const getMaintenanceHistoryData = (maintenanceDate = -1) => {
+    console.log(maintenanceDate);
+    
     getMaintenanceHistory({ id: _.toNumber(id), actual_maintenance_date: maintenanceDate }).then((res) => {
       setMaintenanceHistory(res.dat);
-      let next_maintenace_date = form.getFieldValue('next_maintenace_date')
-      let next_maintenace_date2 = next_maintenace_date['_i']/1000;
-      let findItem = res.dat.find(x=>isSameDay(x.actual_maintenance_date,next_maintenace_date2))
+      // let next_maintenace_date = form.getFieldValue('next_maintenace_date')
+      // let next_maintenace_date2 = next_maintenace_date['_i']/1000;
+      // let findItem = res.dat.find(x=>isSameDay(x.actual_maintenance_date,next_maintenace_date2))
 
-      if(findItem.actual_maintenance_date){
-        setScheduleMaintenanceDate(prevCount => prevCount= findItem.actual_maintenance_date)
-      }
+      // if(findItem.actual_maintenance_date){
+      //   setScheduleMaintenanceDate(prevCount => prevCount= findItem.actual_maintenance_date)
+      // }
     });
   }
   const maintenanceDateChange = (date, dateString) => {
@@ -807,7 +821,7 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='下次维保日期' name='next_maintenace_date' rules={[{ required: true }]}>
-                    <DatePicker format='YYYY-MM-DD' disabledDate={scheduleMaintenanceDate != -1 ? disabledDate : null} style={{ width: '100%' }} placeholder='请选择下次维保日期' />
+                    <DatePicker format='YYYY-MM-DD' onChange={nextMaintenaceDate} disabledDate={disabledDate} style={{ width: '100%' }} placeholder='请选择下次维保日期' />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -829,16 +843,23 @@ export default function () {
                     <Select
                       disabled={maintenanceStatusNum && maintenanceStatusNum != '2'}
                       style={{ width: '100%' }}
-                      options={maintenanceStatusNum == '2' ? [
+                      options={[
                         {
                           label: '维保中',
-                          value: 0
+                          value: 0,
+                          disabled: maintenanceStatus? false:true,
+                        },
+                        {
+                          label: '已正常',
+                          value: 1,
+                          disabled: maintenanceStatus? true:false,
                         },
                         {
                           label: '待维保',
-                          value: 2
+                          value: 2,
+                          disabled: maintenanceStatus? false:true,
                         }
-                      ] : maintenanceStatusOption}
+                      ]}
                       placeholder='请选择维保状态'
                     />
                   </Form.Item>
@@ -966,7 +987,7 @@ export default function () {
                 label="维保费用(元)"
                 name="expenses"
               >
-                <InputNumber placeholder='请输入维保费用' style={{ width: '100%' }} />
+                <InputNumber min="0" placeholder='请输入维保费用' style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col span={12}>

@@ -3,8 +3,6 @@ export function timestamp(data) {
     return Math.round(new Date(data).getTime() / 1000)
 }
 
-
-
 export function timestampToCST(timestamp) {
     let tampLength = timestamp.toString().length;
     let date = new Date(tampLength == 13 ? timestamp : timestamp * 1000);
@@ -16,7 +14,6 @@ export function timestampToCST(timestamp) {
     // s = date.getSeconds();
     return Y + M + D;
 }
-
 
 export function isSameDay(timestamp1, timestamp2) {
     const date1 = new Date(timestamp1);

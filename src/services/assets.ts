@@ -378,8 +378,8 @@ export const addMaintenanceHistory = function (data) {
 };
 
 // 查询维保历史
-export const getMaintenanceHistory = function ({id, maintenanceDate}) {
-  return request('/api/n9e/asset-maintenance-history?assetId=' + id + '&maintenance_date=' + maintenanceDate, {
+export const getMaintenanceHistory = function ({id, actual_maintenance_date}) {
+  return request('/api/n9e/asset-maintenance-history?assetId=' + id + '&maintenance_date=' + actual_maintenance_date, {
     method: RequestMethod.Get,
   });
 };
