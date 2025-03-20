@@ -181,7 +181,7 @@ export const PromVisualQueryOperationLabel =  {
   "present": "存在",
   "present_over_time": "一段时间内存在",
   "quantile": "分位数",
-  "quantile_overTime": "一段时间内的分位数",
+  "quantile_over_time": "一段时间内的分位数",
   "rad": "弧度",
   "rate": "速率",
   "resets": "重置次数",

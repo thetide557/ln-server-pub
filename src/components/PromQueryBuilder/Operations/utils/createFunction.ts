@@ -8,7 +8,7 @@ export function createFunction(definition: Partial<QueryBuilderOperationDef>): Q
     ...definition,
     id: definition.id!,
     name: definition.name ?? getPromOperationDisplayName(definition.id!),
-    label: definition.name ?? getPromOperationDisplayLabel(definition.id!),
+    label: getPromOperationDisplayLabel(definition.id!),
     params: definition.params ?? [],
     defaultParams: definition.defaultParams ?? [],
     category: definition.category ?? PromVisualQueryOperationCategory.Functions,
