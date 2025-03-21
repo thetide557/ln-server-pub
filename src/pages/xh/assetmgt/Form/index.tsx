@@ -383,7 +383,6 @@ export default function () {
           setMaintenanceStatusNum(res.dat.maintenance_status.toString());
         }
         form.setFieldsValue(formattedData);
-        setMaintenanceStatus(timestampToCST(res.dat.next_maintenace_date))
         // 计划维保日期option
         let dataStr = timestampToCST(res.dat.next_maintenace_date).toString()
         setScheduleMaintenanceDateOption([
@@ -468,7 +467,7 @@ export default function () {
         }).then(() => {
           setMaintenanceRecordModalOpen(false);
           if(values.schedule_maintenance_date !=-1){
-            message.success('操作成功,请更新下次维保时间！');
+            message.success('操作成功,注意：请更新下次维保时间并且需点击保存按钮进行提交！若未保存则视为新增维保记录失败');
             getMaintenanceInfo()
             form.setFieldsValue({ next_maintenace_date: '' });
           }else{
@@ -847,6 +846,7 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
+                  {/* disabled={maintenanceStatusNum && maintenanceStatusNum != '2'} */}
                     <Select
                       disabled={maintenanceStatusNum && maintenanceStatusNum != '2'}
                       style={{ width: '100%' }}
