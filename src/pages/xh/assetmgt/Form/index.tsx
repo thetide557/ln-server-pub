@@ -53,8 +53,7 @@ export default function () {
   const [maintainersVal, setMaintainersVal] = useState('');
   const [scheduleMaintenanceDateOption, setScheduleMaintenanceDateOption] = useState<any[]>([]);
   const [scheduleMaintenanceDate, setScheduleMaintenanceDate] = useState('');
-  const [maintenanceStatus, setMaintenanceStatus] = useState('');
-  
+  const [maintenanceStatusOption, setMaintenanceStatusOption] = useState([]);
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
@@ -77,7 +76,7 @@ export default function () {
       value: 3
     },
   ]
-  const maintenanceStatusOption = [
+  const maintenanceStatusOpt = [
     {
       label: '维保中',
       value: 0
@@ -375,6 +374,7 @@ export default function () {
   // 获取维保信息详情
   const getMaintenanceInfo = async () => {
     try {
+      setMaintenanceStatusOption(maintenanceStatusOpt)
       const res = await getMaintenanceInfoById(_.toNumber(id));
       getMaintenanceHistoryData()
       if (res.dat) {
@@ -444,9 +444,14 @@ export default function () {
     var dateToCheck = moment(dateString);
     var today = moment().startOf('day');
     if (dateToCheck.isSame(today, 'day')) {
-      setMaintenanceStatus(true)
+      let opts = maintenanceStatusOpt.filter(x=>x.value!=1)
+      setMaintenanceStatusOption(opts)
+      form.setFieldsValue({maintenance_status:2})
+      
     } else {
-      setMaintenanceStatus(false)
+      let opts = maintenanceStatusOpt.filter(x=>x.value==1)
+      setMaintenanceStatusOption(opts)
+      form.setFieldsValue({maintenance_status:1})
     }
   }
   // 维保记录新增
@@ -841,23 +846,7 @@ export default function () {
                     <Select
                       disabled={maintenanceStatusNum && maintenanceStatusNum != '2'}
                       style={{ width: '100%' }}
-                      options={[
-                        {
-                          label: '维保中',
-                          value: 0,
-                          disabled: maintenanceStatus? false:true,
-                        },
-                        {
-                          label: '已正常',
-                          value: 1,
-                          disabled: maintenanceStatus? true:false,
-                        },
-                        {
-                          label: '待维保',
-                          value: 2,
-                          disabled: maintenanceStatus? false:true,
-                        }
-                      ]}
+                      options={maintenanceStatusOption}
                       placeholder='请选择维保状态'
                     />
                   </Form.Item>
