@@ -376,8 +376,6 @@ export default function () {
     try {
       setMaintenanceStatusOption(maintenanceStatusOpt)
       const res = await getMaintenanceInfoById(_.toNumber(id));
-      console.log(res);
-      
       getMaintenanceHistoryData()
       if (res.dat) {
         const formattedData = formatMaintenanceData(res.dat);
@@ -471,6 +469,7 @@ export default function () {
           setMaintenanceRecordModalOpen(false);
           if(values.schedule_maintenance_date !=-1){
             message.success('操作成功,请更新下次维保时间！');
+            getMaintenanceInfo()
             form.setFieldsValue({ next_maintenace_date: '' });
           }else{
             message.success('操作成功');
