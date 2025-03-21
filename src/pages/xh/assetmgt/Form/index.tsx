@@ -376,6 +376,8 @@ export default function () {
     try {
       setMaintenanceStatusOption(maintenanceStatusOpt)
       const res = await getMaintenanceInfoById(_.toNumber(id));
+      console.log(res);
+      
       getMaintenanceHistoryData()
       if (res.dat) {
         const formattedData = formatMaintenanceData(res.dat);
@@ -383,7 +385,7 @@ export default function () {
           setMaintenanceStatusNum(res.dat.maintenance_status.toString());
         }
         form.setFieldsValue(formattedData);
-        
+        setMaintenanceStatus(timestampToCST(res.dat.next_maintenace_date))
         // 计划维保日期option
         let dataStr = timestampToCST(res.dat.next_maintenace_date).toString()
         setScheduleMaintenanceDateOption([
@@ -441,13 +443,16 @@ export default function () {
   // 下次维保时间选择关联维保状态选择
   const nextMaintenaceDate = (date,dateString) =>{
     form.setFieldsValue({'maintenance_status':''})
+    setMaintenanceStatus(dateString)
+  }
+  // 根据维保时间设置维保状态option及默认值
+  const setMaintenanceStatus = (dateString) =>{
     var dateToCheck = moment(dateString);
     var today = moment().startOf('day');
     if (dateToCheck.isSame(today, 'day')) {
       let opts = maintenanceStatusOpt.filter(x=>x.value!=1)
       setMaintenanceStatusOption(opts)
       form.setFieldsValue({maintenance_status:2})
-      
     } else {
       let opts = maintenanceStatusOpt.filter(x=>x.value==1)
       setMaintenanceStatusOption(opts)
