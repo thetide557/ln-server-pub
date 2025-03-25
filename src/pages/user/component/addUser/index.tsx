@@ -15,7 +15,7 @@
  *
  */
 import React, { useEffect, useState } from 'react';
-import { Tag, Input, Table } from 'antd';
+import { Tag, Input, Table, Select, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/lib/table';
 import { useTranslation } from 'react-i18next';
@@ -27,9 +27,9 @@ import { forEach } from 'lodash';
 
 const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
   const { t } = useTranslation('user');
-  const { teamId, onSelect ,userIds} = props;
+  const { teamId, onSelect, userIds } = props;
   const [teamInfo, setTeamInfo] = useState<Team>();
-  const [selectedUser, setSelectedUser] = useState<React.Key[]>(userIds?userIds:[]);
+  const [selectedUser, setSelectedUser] = useState<React.Key[]>(userIds ? userIds : []);
   const [selectedUserRows, setSelectedUserRows] = useState<User[]>([]);
   const [query, setQuery] = useState('');
   const [queryUsers, setQueryUsers] = useState<any[]>([]);
@@ -56,6 +56,20 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
       render: (text: string, record) => record.phone || '-',
     },
   ];
+  const [searchVal, setSearchVal] = useState<any>(null);
+  const [filterType, setFilterType] = useState<string>("");
+  const [filterParam, setFilterParam] = useState<string>("");
+  const [filterName, setFilterName] = useState<string>("");
+  const [filterOptions, setFilterOptions] = useState<any>({});
+  const { Option } = Select;
+  let queryFilter = [
+    { name: 'username', label: '用户名', type: 'input' },
+    { name: 'nickname', label: '显示名', type: 'input' },
+    { name: 'email', label: '邮箱', type: 'input' },
+    { name: 'phone', label: '手机号', type: 'input' },
+    // { name: 'status', label: '状态', type: 'select' },
+    // { name: 'role', label: '角色', type: 'select' },
+  ]
   useEffect(() => {
     getTeam();
   }, []);
@@ -78,37 +92,41 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
     onSelect(newKeys);
     setSelectedUser(newKeys);
     let selectedUsers = new Array;
-    for(let i = 0; i < newKeys.length;i++){
-      queryUsers.forEach(user=>{
-         if(user.id==newKeys[i]){
+    for (let i = 0; i < newKeys.length; i++) {
+      queryUsers.forEach(user => {
+        if (user.id == newKeys[i]) {
           selectedUsers.push(user);
-         }
+        }
       })
     }
     setSelectedUserRows(selectedUsers);
   };
 
   const getTableData = ({ current, pageSize }): Promise<any> => {
-    const params = {
+    let params = {
       page: current,
       limit: pageSize,
     };
+    if (filterName != null && searchVal != null && searchVal.length > 0) {
+      params["type"] = filterName;
+      params["query"] = searchVal;
+      // console.log("query", searchVal)
+    }
 
     return getUserInfoList({
       ...params,
-      query,
     }).then((res) => {
       return {
         total: res.dat.total,
         list: res.dat.list,
       };
-      setQueryUsers(res.dat.list);
+      // setQueryUsers(res.dat.list);
 
     });
   };
   const { tableProps } = useAntdTable(getTableData, {
     defaultPageSize: 5,
-    refreshDeps: [query],
+    refreshDeps: [query, searchVal],
   });
 
   return (
@@ -138,14 +156,50 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
           );
         })}
       </div>
-      <Input
-        className={'searchInput'}
-        prefix={<SearchOutlined />}
-        placeholder={t('user.search_placeholder')}
-        onPressEnter={(e) => {
-          setQuery((e.target as HTMLInputElement).value);
-        }}
-      />
+      <Space style={{marginBottom: '5px'}}>
+        <div className='event-table-search-left'>
+          <Select
+            placeholder="选择过滤器"
+            style={{ width: 200 }}
+            allowClear
+            onChange={(value) => {
+              queryFilter.forEach((item) => {
+                if (item.name == value) {
+                  setFilterType(item.type);
+                  setFilterName(item.name);
+                }
+              })
+              setFilterParam(value);
+              setSearchVal(null)
+            }}>
+            {queryFilter.map((item, index) => (
+              <Option value={item.name} key={index}>{item.label}</Option>
+            ))
+            }
+          </Select>
+        </div>
+
+        {filterType == "input" && (
+          <Input
+            className={'searchInput'}
+            value={searchVal}
+            allowClear
+            onChange={(e) => setSearchVal(e.target.value)}
+            suffix={<SearchOutlined />}
+            placeholder={'输入模糊检索关键字'}
+          />
+        )}
+        {filterType == "select" && (
+          <Select
+            className={'searchInput'}
+            value={searchVal}
+            allowClear
+            options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
+            onChange={(val) => setSearchVal(val)}
+            placeholder={'选择要查询的条件'}
+          />
+        )}
+      </Space>
       <Table
         size='small'
         rowKey='id'

@@ -420,8 +420,8 @@ const Resource: React.FC = () => {
 
 
   const onSelectChange = (selectedRowKeys, rows) => {
-    console.log("onSelectChange", selectedRowKeys)
-    console.log("rows", rows)
+    // console.log("onSelectChange", selectedRowKeys)
+    // console.log("rows", rows)
     setSelectedRowKeys(selectedRowKeys);
     setSelectedRows(rows)
   };
@@ -441,19 +441,19 @@ const Resource: React.FC = () => {
     if (filterName != null && searchVal != null && searchVal.length > 0) {
       params["type"] = filterName;
       params["query"] = searchVal;
-      console.log("query", searchVal)
+      // console.log("query", searchVal)
     }
     if (teamId > 0) {
       params["user_group_id"] = teamId;
-      console.log("user_group_id", teamId)
+      // console.log("user_group_id", teamId)
     }
     if (role != null) {
       params["role"] = role;
-      console.log("role", role)
+      // console.log("role", role)
     }
     if (status != null) {
       params["status"] = status;
-      console.log("status", status)
+      // console.log("status", status)
     }
 
     return getUserInfoList(params).then((res) => {
@@ -620,7 +620,7 @@ const Resource: React.FC = () => {
                       setSearchVal(null)
                     }}>
                     {queryFilter.map((item, index) => (
-                      <option value={item.name} key={index}>{item.label}</option>
+                      <Option value={item.name} key={index}>{item.label}</Option>
                     ))
                     }
                   </Select>
