@@ -110,6 +110,10 @@ export default function () {
   // const [activeColor, setActiveColor] = useLocalStorage('left_asset_type', Number(-1))
   const [parId, setParId] = useLocalStorage('left_parId')
   const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1))
+
+  const [level, setLevel] = useState<number | undefined>(undefined);  // 资产组织树新增分组层级
+  const [parentId, setParentId] = useState(null);  // 资产组织树新增分组父级id
+  const [isAllAssets, setIsAllAssets] = useLocalStorage('left_asset_isallassets', false); // 资产组织树点击的是否是全部资产下的节点
   
   const maintenanceStatusOption = [
     {
@@ -641,7 +645,7 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [searchVal, typeId, refreshKey, tissueId]);
+  }, [searchVal, typeId, refreshKey, tissueId,treeList]);
 
   useEffect(() => {
     getAssetTree()
@@ -670,6 +674,46 @@ export default function () {
       // param['tissue_tree_id'] = tissueId;
       param['group_id'] = tissueId;
     }
+    // 点击全部资产下的查询时，group_id传-1
+    if (isAllAssets) {
+      param["group_id"] = -1;
+      // 根据tissueId的值 查找对应的type_list
+      if (tissueId != null && !parentId) {
+        const treeItem = treeList
+          .find((item) => item.id === -1)
+          ?.sub_groups?.find((item) => item.id === tissueId);
+          // console.log('treeItem', treeItem);
+        const typeListNames = treeItem?.type_list
+          ?.map((item) => item.name)
+          .join(",");
+        if (typeListNames) {
+          param["types"] = typeListNames;
+        } else {
+          param["types"] = "";
+        }
+      }
+
+      // switch (tissueId) {
+      //   case 1001:
+      //     param['types'] = "物理服务器,网络设备";
+      //     break;
+      //   case 1002:
+      //     param['types'] = "虚拟服务器";
+      //     break;
+      //     case 1003:
+      //     param['types'] = "MySQL, Redis, Mongodb, VictoriaMetrics, HTTP服务, 网络端点, 应用服务, Rabbitmq, Nginx, Apache, postgresql";
+      //     break;
+      //     case 1004:
+      //     param['types'] = "ln-server";
+      //     break;
+      //     case 1005:
+      //     param['types'] = "log统计";
+      //     break;
+      //   default:
+      //     break;
+      // }
+    }
+    
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
       treeQuery['filter'] = filterParam
@@ -938,7 +982,12 @@ export default function () {
     setOpen(false)
   }
 
-  const handleClickTree = (item: any, par: any) => {
+  // const handleClickTree = (item: any, par: any) => {
+  const handleClickTree = (item: any, par: any,isAllAssets:boolean) => {
+    // console.log('isAllAssets', isAllAssets)
+      // 是否是全部资产下的节点点击
+    setIsAllAssets(isAllAssets)
+    
     if (par) {
       setParId(par.id)
       setTypeId(item.id);
@@ -958,9 +1007,6 @@ export default function () {
   }
 
   /** 资产树组件 */
-  const [level, setLevel] = useState<number | undefined>(undefined);
-  const [parentId, setParentId] = useState(null);
-
   // isAllAssets：一个布尔值，用于标记当前节点是否是"全部资产"的子节点。
   const TreeNode = ({ item, expandedIds, onToggle ,isAllAssets = false }) => {
     const isExpanded = expandedIds.has(item.id);
@@ -983,7 +1029,8 @@ export default function () {
           </span>
           <span
             className="g-name"
-            onClick={() => handleClickTree(item, null)}
+            // onClick={() => handleClickTree(item, null)}
+            onClick={() => handleClickTree(item, null,isAllAssets)}
             style={{
               backgroundColor:
                 item.id == localStorage.getItem("left_asset_type") &&
@@ -1075,7 +1122,9 @@ export default function () {
                           : "",
                     }}
                     className="asset-name"
-                    onClick={() => handleClickTree(item1, item)}
+                    // onClick={() => handleClickTree(item1, item)}
+
+                    onClick={() => handleClickTree(item1, item,isAllAssets)}
                   >
                     <span>{item1.name}</span>
                     <span>{item1.number}</span>
