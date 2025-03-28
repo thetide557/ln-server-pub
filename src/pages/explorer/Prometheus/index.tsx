@@ -20,10 +20,8 @@ export default function Prometheus(props: IProps) {
   const history = useHistory();
   const { search } = useLocation();
   const query = queryString.parse(search, queryStringOptions);
-  // console.log('query', query);
-  
   const defaultPromQL = _.isString(query.prom_ql) ? query.prom_ql : '';
-
+  
   let defaultTime: undefined | IRawTimeRange;
 
   if (typeof query.start === 'string' && typeof query.end === 'string') {

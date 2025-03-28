@@ -1,6 +1,6 @@
 // @ts-nocheck
 import './style.less';
-import React, { Fragment, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useCallback, useMemo,useRef } from 'react';
 import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs, DatePicker, Modal, InputNumber, Timeline, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _, { forEach } from 'lodash';
@@ -54,6 +54,8 @@ export default function () {
   const [scheduleMaintenanceDateOption, setScheduleMaintenanceDateOption] = useState<any[]>([]);
   const [scheduleMaintenanceDate, setScheduleMaintenanceDate] = useState('');
   const [maintenanceStatusOption, setMaintenanceStatusOption] = useState([]);
+  const [nextMaintenaceDateNull, setNextMaintenaceDateNull] = useState(false);
+  const isNull = useRef(nextMaintenaceDateNull);
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
@@ -374,15 +376,28 @@ export default function () {
   // 获取维保信息详情
   const getMaintenanceInfo = async () => {
     try {
-      setMaintenanceStatusOption(maintenanceStatusOpt)
+      // setMaintenanceStatusOption(maintenanceStatusOpt)
       const res = await getMaintenanceInfoById(_.toNumber(id));
       getMaintenanceHistoryData()
       if (res.dat) {
         const formattedData = formatMaintenanceData(res.dat);
         if (mode === 'edit') {
+          // var dateToCheck = moment(timestampToCST(res.dat.next_maintenace_date));
+          // var today = moment().startOf('day');
+          if (res.dat.maintenance_status==1) {
+            let opts = maintenanceStatusOpt.filter(x=>x.value==1)
+            setMaintenanceStatusOption(opts)
+          }else{
+            let opts = maintenanceStatusOpt.filter(x=>x.value!=1)
+            setMaintenanceStatusOption(opts)
+          }
           setMaintenanceStatusNum(res.dat.maintenance_status.toString());
         }
         form.setFieldsValue(formattedData);
+        if(isNull.current){
+          form.setFieldsValue({ next_maintenace_date: null });
+        }
+        
         // 计划维保日期option
         let dataStr = timestampToCST(res.dat.next_maintenace_date).toString()
         setScheduleMaintenanceDateOption([
@@ -466,10 +481,14 @@ export default function () {
           actual_maintenance_date: timestamp(values.actual_maintenance_date),
         }).then(() => {
           setMaintenanceRecordModalOpen(false);
+          setMaintenanceStatusOption(maintenanceStatusOpt)
           if(values.schedule_maintenance_date !=-1){
+            setNextMaintenaceDateNull(abs=>{
+              isNull.current =true;
+              return isNull.current;
+            })
             message.success('操作成功,注意：请更新下次维保时间并且需点击保存按钮进行提交！若未保存则视为新增维保记录失败');
             getMaintenanceInfo()
-            form.setFieldsValue({ next_maintenace_date: '' });
           }else{
             message.success('操作成功');
           }
@@ -848,7 +867,6 @@ export default function () {
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                   {/* disabled={maintenanceStatusNum && maintenanceStatusNum != '2'} */}
                     <Select
-                      disabled={maintenanceStatusNum && maintenanceStatusNum != '2'}
                       style={{ width: '100%' }}
                       options={maintenanceStatusOption}
                       placeholder='请选择维保状态'
