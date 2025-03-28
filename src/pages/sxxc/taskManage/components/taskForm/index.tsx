@@ -71,7 +71,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   //     console.log('策略', res)
   //     setStrategyList(res.rows)
   //   })
-  // }
+  }
 
   useImperativeHandle(ref, () => ({
     form: form,
