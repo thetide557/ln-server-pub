@@ -76,19 +76,28 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
                 delete params.hosts
             } else if (params.scope == 2) {
                 delete params.hosts
-                params.scopeContext = params.scopeContext.join(',')
+                // console.log('params1', params.scopeContext);
+                if (Array.isArray(params.scopeContext)) {
+                    params.scopeContext = params.scopeContext.join(',')
+                }
             } else if (params.scope == 3) {
+                // console.log(ipList);
+                // console.log(values.hosts);
                 // delete params.scopeContext
-                let arr:any = []
+                let arr: any = []
+                // 如果 values.hosts 是字符串，则转换为数组
+                if (typeof values.hosts === 'string') {
+                    values.hosts = values.hosts.split(',');
+                }
                 ipList.forEach(item1 => {
-                    values.hosts.forEach(item2 =>{
+                    values.hosts.forEach(item2 => {
                         if (item1.ident == item2) {
                             arr.push(item1.group_id)
                         }
                     })
                 })
                 params.scopeContext = [...new Set(arr)].join(',')
-                params.hosts = params.hosts.join(',')
+                params.hosts = values.hosts.join(',')
             }
             
             if (inspection === InspectionType.CreateInspection) {
