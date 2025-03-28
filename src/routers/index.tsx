@@ -56,6 +56,8 @@ import orderformDetail from '@/pages/event/orderformdetail';
 import historyEvents from '@/pages/historyEvents';
 import XhAssetMgt from '@/pages/xh/assetmgt';
 import XhAssetAdd from '@/pages/xh/assetmgt/Add';
+import IotAssetMgt from '@/pages/sxxc/iotAssetMgt';
+import IotAssetMgtView from '@/pages/sxxc/iotAssetMgt/Form';
 import XhMonitor from '@/pages/xh/monitor';
 import XhMonitorAdd from '@/pages/xh/monitor/Add';
 import XhMonitorMutiAdd from '@/pages/xh/monitor/MutiAdd';
@@ -165,7 +167,9 @@ export default function Content() {
         <Route path='/log/syslog' component={LogSystem} exact />
         <Route path='/xh/assetmgt' component={XhAssetMgt} exact />
         <Route path='/xh/assetmgt/add' component={XhAssetAdd} exact />
-        
+        <Route path='/xh/iotassetmgt' component={IotAssetMgt} exact /> // 物联网资产管理
+        <Route path='/xh/iotassetmgt/view' component={IotAssetMgtView} exact /> // 物联网资产管理查看操作
+
         <Route path='/xh/monitor' component={XhMonitor} exact />
         <Route path='/xh/monitor/add' component={XhMonitorAdd} exact />
         <Route path='/xh/monitor/muti/add' component={XhMonitorMutiAdd} exact />        
