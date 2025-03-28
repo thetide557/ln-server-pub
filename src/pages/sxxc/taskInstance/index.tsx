@@ -241,12 +241,12 @@ const Resource: React.FC = () => {
     })
   }
 
-  const getStrategy = () => {
-    getStrategyList({}).then((res) => {
-      console.log('策略', res)
-      setStrategyList(res.rows)
-    })
-  }
+  // const getStrategy = () => {
+  //   getStrategyList({}).then((res) => {
+  //     console.log('策略', res)
+  //     setStrategyList(res.rows)
+  //   })
+  // }
 
   const onChangeType = (val) => {
     console.log(val)

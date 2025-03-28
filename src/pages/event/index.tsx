@@ -109,7 +109,7 @@ const Event: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [filterType, setFilterType] = useLocalStorage<any>('current_filter_types', "select");
-  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
+  const [range, setRange] = useLocalStorage<IRawTimeRange>('alert_cur_range', { start: 'now-1h', end: 'now' });
 
   const onChange = (
     value: DatePickerProps['value'] | RangePickerProps['value'],

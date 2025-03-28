@@ -190,11 +190,15 @@ const Resource: React.FC = () => {
     },
     {
       title: '所属团队',
-      dataIndex: 'group_name',
+      dataIndex: 'group_id',
       render: (val, record) => {
         let names = new Array();
+        // console.log('groupMap', groupMap);
         for (var i = 0; i < val.length; i++) {
-          names.push(groupMap[val[i]]);
+          if (groupMap[val[i]]) {
+            names.push(groupMap[val[i]]);
+          }
+          // names.push(groupMap[val[i]]);
         }
         return names ? names.join(",") : ''//renderDataMap["organ_"+val];
       },
@@ -236,7 +240,7 @@ const Resource: React.FC = () => {
       render: (text: string, record) => (
         <>
           {
-            (profile.roles?.includes("Admin") || permList.includes("/users/status")) && <PoweroffOutlined className='oper-name'
+            (profile.roles?.includes("Admin") || (permList.includes("/users/status") && record.id != '1')) && <PoweroffOutlined className='oper-name'
               title={record.status === 1 ? ('已启用') : ('已禁用')}
               style={{ color: record.status === 1 ? ('green') : ('gray') }}
               onClick={e => {
@@ -259,16 +263,16 @@ const Resource: React.FC = () => {
               }} />
           }
           {
-            (profile.roles?.includes("Admin") || permList.includes("/users/put")) && <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
+            (profile.roles?.includes("Admin") || (permList.includes("/users/put") && record.id != '1')) && <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
             </EditOutlined>
           }
           {
-            (profile.roles?.includes("Admin") || permList.includes("/users/resetPassword")) && <UndoOutlined title='重置密码' className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
+            (profile.roles?.includes("Admin") || (permList.includes("/users/resetPassword") && record.id != '1')) && <UndoOutlined title='重置密码' className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
               {t('account:password.reset')}
             </UndoOutlined>
           }
           {
-            (profile.roles?.includes("Admin") || permList.includes("/users/del")) && <a className='oper-name'
+            (profile.roles?.includes("Admin") || (permList.includes("/users/del") && record.id != '1')) && <a className='oper-name'
               onClick={() => {
                 if ("" + record.id == "1") {
                   message.error("默认超管账号，禁止在此操作！");
@@ -292,13 +296,11 @@ const Resource: React.FC = () => {
               <DeleteOutlined className='table-operator-area-warning' title='删除' />
             </a>
           }
-
-
-
         </>
       ),
     },
   ];
+  
 
   // if (!profile.roles?.includes('Admin')) {
   //   userColumns.pop(); //普通用户不展示操作列
@@ -418,8 +420,8 @@ const Resource: React.FC = () => {
 
 
   const onSelectChange = (selectedRowKeys, rows) => {
-    console.log("onSelectChange", selectedRowKeys)
-    console.log("rows", rows)
+    // console.log("onSelectChange", selectedRowKeys)
+    // console.log("rows", rows)
     setSelectedRowKeys(selectedRowKeys);
     setSelectedRows(rows)
   };
@@ -439,19 +441,19 @@ const Resource: React.FC = () => {
     if (filterName != null && searchVal != null && searchVal.length > 0) {
       params["type"] = filterName;
       params["query"] = searchVal;
-      console.log("query", searchVal)
+      // console.log("query", searchVal)
     }
     if (teamId > 0) {
       params["user_group_id"] = teamId;
-      console.log("user_group_id", teamId)
+      // console.log("user_group_id", teamId)
     }
     if (role != null) {
       params["role"] = role;
-      console.log("role", role)
+      // console.log("role", role)
     }
     if (status != null) {
       params["status"] = status;
-      console.log("status", status)
+      // console.log("status", status)
     }
 
     return getUserInfoList(params).then((res) => {
@@ -463,7 +465,7 @@ const Resource: React.FC = () => {
   };
   const { tableProps, run } = useAntdTable(getTableData, {
     defaultPageSize: pagination.pageSize,
-    refreshDeps: [query, refreshFlag, groupMap],
+    refreshDeps: [query, refreshFlag],
   });
 
   const onSelectNone = () => {
@@ -618,7 +620,7 @@ const Resource: React.FC = () => {
                       setSearchVal(null)
                     }}>
                     {queryFilter.map((item, index) => (
-                      <option value={item.name} key={index}>{item.label}</option>
+                      <Option value={item.name} key={index}>{item.label}</Option>
                     ))
                     }
                   </Select>

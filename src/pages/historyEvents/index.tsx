@@ -93,7 +93,7 @@ const Event: React.FC = () => {
     type: null,
   });
 
-  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
+  const [range, setRange] = useLocalStorage<IRawTimeRange>('alert_his_range', { start: 'now-1h', end: 'now' });
 
   useEffect(() => {
     filterOptions['group_id'] = busiGroups.map((group) => {

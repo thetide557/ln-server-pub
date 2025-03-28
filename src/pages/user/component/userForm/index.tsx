@@ -217,8 +217,24 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             <Input />
           </Form.Item>
         </Col>
-        <Col span={12} key={"item-" + 8}>
-          <Form.Item label={'所属团队'} name='group_name' rules={[
+        {
+          !userId && (
+            <Col span={12} key={"item-" + 8}>
+              <Form.Item label={'所属团队'} name='group_id' rules={[
+                  {
+                    required: true,
+                  },
+                ]}>
+                <Select mode='multiple' options={treeData}>
+
+                </Select>
+
+              </Form.Item>
+            </Col>
+          )
+        }
+        {/* <Col span={12} key={"item-" + 8}>
+          <Form.Item label={'所属团队'} name='group_id' rules={[
               {
                 required: true,
               },
@@ -228,7 +244,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             </Select>
 
           </Form.Item>
-        </Col>
+        </Col> */}
       </Row>
 
       <Form.Item

@@ -67,10 +67,10 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
   }
 
   const getStrategy = () => {
-    getStrategyList({}).then((res) => {
-      console.log('策略', res)
-      setStrategyList(res.rows)
-    })
+  //   getStrategyList({}).then((res) => {
+  //     console.log('策略', res)
+  //     setStrategyList(res.rows)
+  //   })
   }
 
   useImperativeHandle(ref, () => ({

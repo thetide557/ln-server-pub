@@ -3,8 +3,6 @@ export function timestamp(data) {
     return Math.round(new Date(data).getTime() / 1000)
 }
 
-
-
 export function timestampToCST(timestamp) {
     let tampLength = timestamp.toString().length;
     let date = new Date(tampLength == 13 ? timestamp : timestamp * 1000);
@@ -17,7 +15,6 @@ export function timestampToCST(timestamp) {
     return Y + M + D;
 }
 
-
 export function isSameDay(timestamp1, timestamp2) {
     const date1 = new Date(timestamp1);
     const date2 = new Date(timestamp2);
@@ -28,12 +25,7 @@ export function isSameDay(timestamp1, timestamp2) {
 }
  
 export function getPreviousWeekTimestamp(timestamp) {
-    // 将 13 位时间戳转换为日期对象
     const date = new Date(timestamp);
-
-    // 减去 7 天
     date.setDate(date.getDate() - 7);
-
-    // 返回前 7 天的时间戳
     return date.getTime();
 }
