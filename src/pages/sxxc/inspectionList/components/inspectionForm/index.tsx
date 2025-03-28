@@ -265,8 +265,10 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         }
         if (formObj.scope == 2) {
             formObj.scopeContext = formObj.scopeContext.split(',').map(item => Number(item))
+            formObj.hosts = []
         } else if (formObj.scope == 3) {
             formObj.hosts = formObj.hosts.split(',')
+            formObj.scopeContext = []
         }
         console.log('初始化表单', formObj)
         setInitialValues(
