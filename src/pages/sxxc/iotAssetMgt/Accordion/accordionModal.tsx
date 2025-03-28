@@ -24,7 +24,11 @@ const AccordionModal = (props: any) => {
   const getDeviceTypes = () => {
     getIotTypeList().then((res) => {
       const { dat } = res;
-      setDeviceTypes(dat);
+      const newDat = dat.map((item) => ({
+        id: item.id,
+        name: item.name
+      }));
+      setDeviceTypes(newDat);
     });
   };
   // 初始化加载设备类型
@@ -40,8 +44,9 @@ const AccordionModal = (props: any) => {
   useEffect(() => {
     console.log("当前分组", curGroup);
     if (curGroup.nodeName) {
-      const typsList = curGroup.TypeIds;
+      const typsList = JSON.parse(curGroup.TypeIds);
       const selectDeviceList = filterDataByIds(deviceTypes, typsList);
+      // console.log("当前分组设备", selectDeviceList);
       // 修改
       const obj = {
         id: curGroup.nodeId,
@@ -51,17 +56,17 @@ const AccordionModal = (props: any) => {
       setCheckList(selectDeviceList);
       form.setFieldsValue(obj);
     }
-  }, []);
+  }, [deviceTypes]);
 
   const handleOk = () => {
     form
       .validateFields()
       .then((data) => {
-        // TODO:API调用
+        // API调用
         let params = { ...data };
         params.Depth = level;
         params.ParentId = parentId;
-        // params.types = params.types.toString()
+        params.TypeIds = JSON.stringify(params.TypeIds)
         // 编辑需要传入节点id
         if (curGroup.nodeName) {
           params.Id = curGroup.nodeId;
@@ -123,9 +128,10 @@ const AccordionModal = (props: any) => {
   const remove = (id) => {
     // console.log(item);
     const data = checkList?.filter((item) => item.id !== id);
+    const newTypeIds = data.map((item) => item.id);
     // console.log(data);
     form.setFieldsValue({
-      TypeIds: data,
+      TypeIds: newTypeIds,
     });
     setCheckList(data);
   };
@@ -146,7 +152,7 @@ const AccordionModal = (props: any) => {
             name="TypeIds"
             label="分组设备"
             rules={[
-              { required: level === 3, message: "请选择分组内的设备类型" },
+              { required: level === 2, message: "请选择分组内的设备类型" },
             ]}
           >
             <Select

@@ -64,10 +64,18 @@ export const getIotTreeList = function () {
     // params,
   });
 };
-// 新增物联网资产分组
+// 新增/编辑物联网资产分组
 export const addIotTree = function (data) {
   return request('/api/n9e/iot/tree/node', {
     method: RequestMethod.Post,
     data,
+  });
+};
+
+// 删除物联网资产分组
+export const delIotTreeNode = function (params) {
+  return request('/api/n9e/iot/tree/node/delete', {
+    method: RequestMethod.Post,
+    params,
   });
 };

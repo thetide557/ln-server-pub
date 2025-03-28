@@ -64,6 +64,7 @@ import {
   getIotPage,
   getIotDeviceList,
   getIotTreeList,
+  delIotTreeNode
 } from "@/services/sxxc/iotAssets";
 
 export enum OperateType {
@@ -196,7 +197,7 @@ export default function () {
     },
   }); // 列宽度调整
 
-  // TODO:根据选择资产类型生成显示列
+  // 根据选择资产类型生成显示列
   useEffect(() => {
     getPagesByType(typeId);
   }, [typeId]);
@@ -259,7 +260,7 @@ export default function () {
     });
   };
 
-  // TODO:获取资产分组树列表
+  // 获取资产分组树列表
   const getAssetTree = () => {
     // console.log('treeQuery', treeQuery);
     // treeQuery["status"] = 0;
@@ -281,11 +282,11 @@ export default function () {
   }, [searchVal]);
 
   // TODO:定时刷新
-  useInterval(() => {
-    setRefreshKey(_.uniqueId("refreshKey_"));
-  }, 1000 * 30);
+  // useInterval(() => {
+  //   setRefreshKey(_.uniqueId("refreshKey_"));
+  // }, 1000 * 30);
 
-  // TODO:资产清单表格数据获取
+  // 资产清单表格数据获取
   const getTableData = () => {
     // const parentId = localStorage.getItem("left_iotparId");
     const param = {
@@ -422,20 +423,11 @@ export default function () {
                           Modal.confirm({
                             title: "是否确认删除该分组？",
                             onOk: async () => {
-                              // delXhAssetstypesNew( item.id ).then((res) => {
-                              //   message.success("删除成功");
-                              //   // 删除自己则返回默认
-                              //   if (item.id == tissueId) {
-                              //     localStorage.setItem("left_tissueId", "-1");
-                              //     localStorage.setItem("left_asset_type", "-1");
-                              //     localStorage.removeItem("left_parId");
-                              //     setTissueId(-1);
-                              //     // setActiveColor(-1)
-                              //   }
-                              //   getAssetTree();
-                              //   setRefreshKey(_.uniqueId("refreshKey_"));
-                              //   // setSelectedAssets([]);
-                              // });
+                              delIotTreeNode({nodeId:node.nodeId}).then((res) => {
+                                message.success("删除成功");
+                                getAssetTree();
+                                setRefreshKey(_.uniqueId("refreshKey_"));
+                              });
                             },
                             onCancel() {},
                           });

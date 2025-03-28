@@ -71,7 +71,24 @@ const FieldConfig = (props) => {
     getIotPage({ typeId }).then((res) => {
       const { dat } = res;
       if (dat) {
-        setPaginationData(dat);
+        // 处理 DisplayOrder 为 0 的情况，转为null
+        const newPaginationData = dat.map((page) => {
+          const newAttributes = page.Attributes.map((attr) => {
+            if (attr.DisplayOrder === 0) {
+              return {
+                ...attr,
+                DisplayOrder: null,
+              };
+            }
+            return attr;
+          });
+          return {
+            ...page,
+            Attributes: newAttributes,
+          };
+        });
+        setPaginationData(newPaginationData);
+        // setPaginationData(dat);
       } else {
         setPaginationData([
           {
@@ -421,7 +438,7 @@ const FieldConfig = (props) => {
       return newPage;
     });
     console.log("分页数据", paginationData, "submitData", submitData);
-    // TODO:API调用
+    // API调用
     form
       .validateFields()
       .then(() => {
