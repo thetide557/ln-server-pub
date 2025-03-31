@@ -44,7 +44,7 @@ const AccordionModal = (props: any) => {
   useEffect(() => {
     console.log("当前分组", curGroup);
     if (curGroup.nodeName) {
-      const typsList = JSON.parse(curGroup.TypeIds);
+      const typsList = curGroup.TypeIds!="-1"?JSON.parse(curGroup.TypeIds) : [];
       const selectDeviceList = filterDataByIds(deviceTypes, typsList);
       // console.log("当前分组设备", selectDeviceList);
       // 修改
@@ -66,7 +66,7 @@ const AccordionModal = (props: any) => {
         let params = { ...data };
         params.Depth = level;
         params.ParentId = parentId;
-        params.TypeIds = JSON.stringify(params.TypeIds)
+        params.TypeIds = params.TypeIds?.length>0 ? JSON.stringify(params.TypeIds) : "-1"
         // 编辑需要传入节点id
         if (curGroup.nodeName) {
           params.Id = curGroup.nodeId;
@@ -236,6 +236,13 @@ const AccordionModal = (props: any) => {
                 );
               })}
             </Select> */}
+          </Form.Item>
+          <Form.Item
+            name="TableName"
+            label="设备表名"
+            rules={[{ required: true, message: "请输入设备表名" }]}
+          >
+            <Input placeholder="请输入设备表名" />
           </Form.Item>
         </Form>
       </Modal>

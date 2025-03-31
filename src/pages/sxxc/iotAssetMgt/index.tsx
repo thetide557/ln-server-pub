@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Button,
   Dropdown,
@@ -17,18 +17,18 @@ import {
   Col,
   Select,
   Tooltip,
-} from "antd";
+} from 'antd';
 import {
   PlusSquareOutlined,
   MinusSquareOutlined,
   FileOutlined,
   PlusOutlined,
   EyeOutlined,
-} from "@ant-design/icons";
-import PageLayout from "@/components/pageLayout";
-import { useTranslation } from "react-i18next";
-import { useAntdResizableHeader } from "use-antd-resizable-header";
-import moment from "moment";
+} from '@ant-design/icons';
+import PageLayout from '@/components/pageLayout';
+import { useTranslation } from 'react-i18next';
+import { useAntdResizableHeader } from 'use-antd-resizable-header';
+import moment from 'moment';
 
 import {
   CheckCircleOutlined,
@@ -46,77 +46,77 @@ import {
   UnorderedListOutlined,
   VideoCameraOutlined,
   StopOutlined,
-} from "@ant-design/icons";
-import "./locale";
-import "./style.less";
-import _ from "lodash";
-import { Resizable } from "re-resizable";
-import AccordionModal from "./Accordion/accordionModal";
-import ColumnConfig from "./ColumnConfig";
-import { assetsType, metricsUnitEnum } from "@/store/assetsInterfaces";
-import { CommonStateContext } from "@/App";
+} from '@ant-design/icons';
+import './locale';
+import './style.less';
+import _ from 'lodash';
+import { Resizable } from 're-resizable';
+import AccordionModal from './Accordion/accordionModal';
+import ColumnConfig from './ColumnConfig';
+import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
+import { CommonStateContext } from '@/App';
 
-import RefreshIcon from "@/components/RefreshIcon";
-import { Link, useHistory } from "react-router-dom";
-import { OperationModal } from "./OperationModal";
-import { useInterval, useLocalStorage } from "react-use";
+import RefreshIcon from '@/components/RefreshIcon';
+import { Link, useHistory } from 'react-router-dom';
+import { OperationModal } from './OperationModal';
+import { useInterval, useLocalStorage } from 'react-use';
 import {
   getIotPage,
   getIotDeviceList,
   getIotTreeList,
-  delIotTreeNode
-} from "@/services/sxxc/iotAssets";
+  delIotTreeNode,
+} from '@/services/sxxc/iotAssets';
 
 export enum OperateType {
-  BindTag = "bindTag",
-  UnbindTag = "unbindTag",
-  AssetBatchImport = "assetBatchImport",
-  AssetBatchExport = "assetBatchExport",
-  UpdateBusi = "updateBusi",
-  RemoveBusi = "removeBusi",
-  UpdateNote = "updateNote",
-  Delete = "delete",
-  ChangeOrganize = "changeOrganize",
-  None = "none",
+  BindTag = 'bindTag',
+  UnbindTag = 'unbindTag',
+  AssetBatchImport = 'assetBatchImport',
+  AssetBatchExport = 'assetBatchExport',
+  UpdateBusi = 'updateBusi',
+  RemoveBusi = 'removeBusi',
+  UpdateNote = 'updateNote',
+  Delete = 'delete',
+  ChangeOrganize = 'changeOrganize',
+  None = 'none',
 }
 
 export default function () {
-  const { t } = useTranslation("iotassets");
+  const { t } = useTranslation('iotassets');
   const history = useHistory();
 
   const [list, setList] = useState<any[]>([]); // 资产清单表格列表数据
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None); // 批量操作类型
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]); // 选中资产
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
-  const [current, setCurrent] = useLocalStorage("iotasset_current_from", 1); // 当前页码
-  const [pageSize, setPageSize] = useLocalStorage("iotasset_current_page", 10); // 每页条数
+  const [current, setCurrent] = useLocalStorage('iotasset_current_from', 1); // 当前页码
+  const [pageSize, setPageSize] = useLocalStorage('iotasset_current_page', 10); // 每页条数
   const [queryFilter, setQueryFilter] = useState<any>([]); // 资产清单过滤条件下拉列表
   const [searchVal, setSearchVal] = useLocalStorage<any>(
-    "iotasset_filter_value",
+    'iotasset_filter_value',
     null
   ); // 资产清单过滤 模糊搜索关键字
   const [filterParam, setFilterParam] = useLocalStorage<any>(
-    "iotasset_filter_param",
-    ""
+    'iotasset_filter_param',
+    ''
   ); // 资产清单过滤条件
-  const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
+  const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [total, setTotal] = useState<number>(0);
 
   const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map((item) => item.id); // 业务组id
 
   const [collapse, setCollapse] = useState(
-    localStorage.getItem("left_iotasset_list") === "1"
+    localStorage.getItem('left_iotasset_list') === '1'
   ); // 左侧资产树折叠
   const [width, setWidth] = useState(
-    _.toNumber(localStorage.getItem("left_iotasset_width") || 200)
+    _.toNumber(localStorage.getItem('left_iotasset_width') || 200)
   ); // 左侧资产树宽度
   const [typeId, setTypeId] = useLocalStorage<number>(
-    "current_iotasset_type_id",
-    1
+    'current_iotasset_type_id',
+    0
   ); // 左侧资产树选中的资产类型
   const [open, setOpen] = useState<boolean>(false); // 新增分组模态框是否显示
-  const [title, setTitle] = useState<any>(""); // 新增分组模态框标题
+  const [title, setTitle] = useState<any>(''); // 新增分组模态框标题
   // 资产分组
   let treeQuery = {}; // 资产树查询条件
   const [treeList, setTreeList] = useState<any>([]); // 资产树列表数据
@@ -124,30 +124,30 @@ export default function () {
   const [level, setLevel] = useState<number | undefined>(undefined);
   const [parentId, setParentId] = useState(-1);
   // const [parId, setParId] = useLocalStorage("left_iotparId", "1"); // 选中的资产类型的父级id
-  const [tissueId, setTissueId] = useLocalStorage("left_tissueId", Number(-1)); // ??左侧资产树选中的分组的id
+  const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1)); // ??左侧资产树选中的分组的id
   const [configOpen, setConfigOpen] = useState<boolean>(false); // 字段配置模态框是否显示
 
   // 资产清单表列固定列
   const fixColumns: any[] = [
     {
-      title: "请配置",
-      align: "center",
+      title: '请配置',
+      align: 'center',
       width: 120,
     },
     {
-      title: "请配置",
-      align: "center",
+      title: '请配置',
+      align: 'center',
       width: 120,
     },
     {
-      title: "请配置",
-      align: "center",
+      title: '请配置',
+      align: 'center',
       width: 120,
     },
     {
-      title: "数据更新时间",
-      dataIndex: "create_at",
-      align: "center",
+      title: '数据更新时间',
+      dataIndex: 'create_at',
+      align: 'center',
       ellipsis: true,
       width: 130,
       // render(text, record, index) {
@@ -158,27 +158,27 @@ export default function () {
       },
     },
     {
-      title: "配置更新人",
-      dataIndex: "create_by",
-      align: "center",
+      title: '配置更新人',
+      dataIndex: 'create_by',
+      align: 'center',
       ellipsis: true,
       width: 130,
     },
     {
-      title: "操作",
+      title: '操作',
       width: 200,
-      align: "center",
-      fixed: "right",
+      align: 'center',
+      fixed: 'right',
       render: (text, record) => (
         <Space>
-          {(profile.roles?.includes("Admin") ||
-            permList.includes("/xh/iotassetmgt/detail")) && (
+          {(profile.roles?.includes('Admin') ||
+            permList.includes('/xh/iotassetmgt/detail')) && (
             <span
               onClick={(e) => {
-                showModal("view", record);
+                showModal('view', record);
               }}
             >
-              <EyeOutlined style={{ color: "#1890FF" }} />
+              <EyeOutlined style={{ color: '#1890FF' }} />
               <span style={{ marginLeft: 4 }}>查看</span>
             </span>
           )}
@@ -192,14 +192,16 @@ export default function () {
   const { resizableColumns, components, tableWidth } = useAntdResizableHeader({
     columns: useMemo(() => selectColumns, [selectColumns]),
     columnsState: {
-      persistenceType: "localStorage",
+      persistenceType: 'localStorage',
       persistenceKey: `dashboard-table-resizable-iotasset-management`,
     },
   }); // 列宽度调整
 
   // 根据选择资产类型生成显示列
   useEffect(() => {
-    getPagesByType(typeId);
+    if (typeId != 0) {
+      getPagesByType(typeId);
+    }
   }, [typeId]);
 
   // 处理显示列和过滤字段
@@ -219,11 +221,11 @@ export default function () {
     const sortedAttributes = diaplayAttributes.sort(
       (a, b) => a.DisplayOrder - b.DisplayOrder
     );
-    console.log("显示列", sortedAttributes);
+    console.log('显示列', sortedAttributes);
     const columnData = sortedAttributes.map((attr) => ({
       title: attr.Name,
       dataIndex: attr.Name,
-      align: "center",
+      align: 'center',
       width: 120,
       ellipsis: true,
       sorter: (a, b) => {
@@ -250,7 +252,7 @@ export default function () {
         // 过滤掉 fixColumns 中标题为 "请配置" 的项
         setSelectColumns(
           selectedColumn.concat(
-            fixColumns.filter((column) => column.title !== "请配置")
+            fixColumns.filter((column) => column.title !== '请配置')
           )
         );
       }
@@ -269,7 +271,9 @@ export default function () {
     // treeQuery["filter"] = filterParam ? filterParam : undefined;
     getIotTreeList().then((res) => {
       const { dat } = res;
-      setTreeList(dat);
+      if (dat) {
+        setTreeList(dat);
+      }
     });
   };
 
@@ -289,36 +293,38 @@ export default function () {
   // 资产清单表格数据获取
   const getTableData = () => {
     // const parentId = localStorage.getItem("left_iotparId");
-    const param = {
-      pageNum: current,
-      pageSize: pageSize,
-    };
-    if (searchVal != null && searchVal.length > 0) {
-      param["queryValue"] = searchVal;
-    }
-    if (typeId != null) {
-      param["typeId"] = typeId;
-    }
-    if (
-      filterParam != null &&
-      filterParam.length > 0 &&
-      searchVal != null &&
-      searchVal.length > 0
-    ) {
-      param["queryAttribute"] = filterParam;
-    }
+    if (typeId != 0) {
+      const param = {
+        pageNum: current,
+        pageSize: pageSize,
+      };
+      if (searchVal != null && searchVal.length > 0) {
+        param['queryValue'] = searchVal;
+      }
+      if (typeId != null && typeId != 0) {
+        param['typeId'] = typeId;
+      }
+      if (
+        filterParam != null &&
+        filterParam.length > 0 &&
+        searchVal != null &&
+        searchVal.length > 0
+      ) {
+        param['queryAttribute'] = filterParam;
+      }
 
-    getIotDeviceList(param).then(({ dat }) => {
-      setList(dat.list || []);
-      setTotal(dat.total);
-    });
+      getIotDeviceList(param).then(({ dat }) => {
+        setList(dat.list || []);
+        setTotal(dat.total);
+      });
+    }
   };
 
   // 资产清单表格操作：查看
   const showModal = (action: string, formData: any) => {
-    if (action == "view") {
+    if (action == 'view') {
       history.push(
-        "/xh/iotassetmgt/view?mode=view&id=" + formData.id + "&typeId=" + typeId
+        '/xh/iotassetmgt/view?mode=view&id=' + formData.id + '&typeId=' + typeId
       );
     }
   };
@@ -326,12 +332,12 @@ export default function () {
   const onPageChange = (page: number, pageSize: number) => {
     setCurrent(page);
     setPageSize(pageSize);
-    setRefreshKey(_.uniqueId("refreshKey_"));
+    setRefreshKey(_.uniqueId('refreshKey_'));
   };
 
   // 新增分组弹窗关闭
   const handleClose = (value: any) => {
-    if (value == "sure") {
+    if (value == 'sure') {
       getAssetTree();
     }
     setOpen(false);
@@ -339,13 +345,13 @@ export default function () {
 
   // 左侧资产组织树点击
   const handleClickTree = (node: any) => {
-    console.log("handleClickTree", node);
+    console.log('handleClickTree', node);
     setTypeId(node.nodeId);
     //资产类型操作
     setCurrent(1);
-    localStorage.setItem("left_iotasset_type", node.nodeId);
+    localStorage.setItem('left_iotasset_type', node.nodeId);
     // localStorage.setItem("left_iotasset_nodeId", node.nodeId);
-    setRefreshKey(_.uniqueId("refreshKey_"));
+    setRefreshKey(_.uniqueId('refreshKey_'));
   };
 
   /** 左侧资产树组件 */
@@ -353,7 +359,10 @@ export default function () {
   const findParentId = (nodes, targetId) => {
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
-      if (node.subNode && node.subNode.some(child => child.nodeId === targetId)) {
+      if (
+        node.subNode &&
+        node.subNode.some((child) => child.nodeId === targetId)
+      ) {
         return node.nodeId;
       }
       const parentId = findParentId(node.subNode || [], targetId);
@@ -371,12 +380,12 @@ export default function () {
     onToggle,
     isAllAssets = false,
   }) => {
-    const isExpanded = expandedIds.has(level + "_" + node.nodeId);
+    const isExpanded = expandedIds.has(level + '_' + node.nodeId);
     // const hasGroupDevice = (subNodes) => {
     //   return subNodes?.some((child) => child.LeafId !== -1) || false;
     // };
     const hasGroupDevice = (subNodes) => {
-      return subNodes?.some((child) => child.TypeIds === "") || false;
+      return subNodes?.some((child) => child.TypeIds === '') || false;
     };
 
     const canAddGroup = level < 3 && !hasGroupDevice(node.subNode);
@@ -385,7 +394,7 @@ export default function () {
       <div key={node.nodeId}>
         {/* 分组名称 */}
         {/* {node.LeafId === -1 && ( */}
-        {node.TypeIds !== "" && (
+        {node.TypeIds !== '' && (
           <div key={node.nodeId} className="tree-row">
             <div
               className="tree-group"
@@ -393,7 +402,7 @@ export default function () {
             >
               <span
                 onClick={() => {
-                  onToggle(level + "_" + node.nodeId);
+                  onToggle(level + '_' + node.nodeId);
                 }}
               >
                 {isExpanded ? (
@@ -408,31 +417,33 @@ export default function () {
                   // trigger={['click']}
                   overlay={
                     <Menu
-                      style={{ width: "100px" }}
+                      style={{ width: '100px' }}
                       // TODO:新增、编辑、删除分组
                       onClick={({ key }) => {
                         // console.log(key);
-                        if (key === "edit") {
-                          setTitle("编辑分组");
+                        if (key === 'edit') {
+                          setTitle('编辑分组');
                           setCurGroup(node);
                           setOpen(true);
-                          setLevel(level-1);
+                          setLevel(level - 1);
                           const parentId = findParentId(treeList, node.nodeId);
                           setParentId(parentId); // 父级id
-                        } else if (key === "del") {
+                        } else if (key === 'del') {
                           Modal.confirm({
-                            title: "是否确认删除该分组？",
+                            title: '是否确认删除该分组？',
                             onOk: async () => {
-                              delIotTreeNode({nodeId:node.nodeId}).then((res) => {
-                                message.success("删除成功");
-                                getAssetTree();
-                                setRefreshKey(_.uniqueId("refreshKey_"));
-                              });
+                              delIotTreeNode({ nodeId: node.nodeId }).then(
+                                (res) => {
+                                  message.success('删除成功');
+                                  getAssetTree();
+                                  setRefreshKey(_.uniqueId('refreshKey_'));
+                                }
+                              );
                             },
                             onCancel() {},
                           });
-                        } else if (key === "add-sub") {
-                          setTitle("新增分组");
+                        } else if (key === 'add-sub') {
+                          setTitle('新增分组');
                           setOpen(true);
                           setCurGroup({});
                           setLevel(level); // 分组层级
@@ -443,14 +454,14 @@ export default function () {
                         ...(canAddGroup
                           ? [
                               {
-                                key: "add-sub",
-                                label: "新增分组",
+                                key: 'add-sub',
+                                label: '新增分组',
                                 icon: <PlusOutlined />,
                               },
                             ]
                           : []),
-                        { key: "edit", label: "编辑", icon: <EditOutlined /> },
-                        { key: "del", label: "删除", icon: <DeleteOutlined /> },
+                        { key: 'edit', label: '编辑', icon: <EditOutlined /> },
+                        { key: 'del', label: '删除', icon: <DeleteOutlined /> },
                       ]}
                     ></Menu>
                   }
@@ -462,7 +473,7 @@ export default function () {
           </div>
         )}
         {/* 分组内设备类型列表 */}
-        {node.TypeIds === "" && (
+        {node.TypeIds === '' && (
           <div
             className="tree-content"
             style={{ marginLeft: `${(level - 1) * 20}px` }}
@@ -472,9 +483,9 @@ export default function () {
               <div
                 style={{
                   backgroundColor:
-                  node.nodeId == localStorage.getItem("left_iotasset_type") 
-                      ? "#92b7d1"
-                      : "",
+                    node.nodeId == localStorage.getItem('left_iotasset_type')
+                      ? '#92b7d1'
+                      : '',
                 }}
                 className="asset-name"
                 onClick={() => handleClickTree(node)}
@@ -504,8 +515,8 @@ export default function () {
     //  展开的节点列表
     const [expandedIds, setExpandedIds] = useState(() => {
       try {
-        const saved = localStorage.getItem("iotasset_expandedIds");
-        return new Set(JSON.parse(saved || "[]"));
+        const saved = localStorage.getItem('iotasset_expandedIds');
+        return new Set(JSON.parse(saved || '[]'));
       } catch {
         return new Set();
       }
@@ -513,7 +524,7 @@ export default function () {
 
     useEffect(() => {
       localStorage.setItem(
-        "iotasset_expandedIds",
+        'iotasset_expandedIds',
         JSON.stringify([...expandedIds])
       );
     }, [expandedIds]);
@@ -543,7 +554,7 @@ export default function () {
 
   // 字段配置弹窗关闭
   const handleConfigClose = (value: any) => {
-    if (value == "sure") {
+    if (value == 'sure') {
       getPagesByType(typeId);
       getTableData();
     }
@@ -551,13 +562,13 @@ export default function () {
   };
 
   return (
-    <PageLayout icon={<GroupOutlined />} title={"物联网资产清单"}>
-      <div style={{ display: "inline-flex" }} className="asset_list_view">
+    <PageLayout icon={<GroupOutlined />} title={'物联网资产清单'}>
+      <div style={{ display: 'inline-flex' }} className="asset_list_view">
         <Resizable
           style={{
             marginRight: collapse ? 0 : 10,
           }}
-          size={{ width: collapse ? 0 : width, height: "100%" }}
+          size={{ width: collapse ? 0 : width, height: '100%' }}
           enable={{
             right: collapse ? false : true,
           }}
@@ -567,23 +578,23 @@ export default function () {
               curWidth = 200;
             }
             setWidth(curWidth);
-            localStorage.setItem("left_iotasset_width", curWidth.toString());
+            localStorage.setItem('left_iotasset_width', curWidth.toString());
           }}
         >
-          <div className={collapse ? "left-area collapse" : "left-area"}>
+          <div className={collapse ? 'left-area collapse' : 'left-area'}>
             <div
               className="collapse-btn"
               onClick={() => {
                 localStorage.setItem(
-                  "left_iotasset_list",
-                  !collapse ? "1" : "0"
+                  'left_iotasset_list',
+                  !collapse ? '1' : '0'
                 );
                 setCollapse(!collapse);
               }}
             >
               {!collapse ? <LeftOutlined /> : <RightOutlined />}
             </div>
-            <div className="left_tree" style={{ display: "inline-block" }}>
+            <div className="left_tree" style={{ display: 'inline-block' }}>
               <div className="asset_organize_cls">
                 <span>组织树列表</span>
                 <span
@@ -591,7 +602,7 @@ export default function () {
                   onClick={() => {
                     setOpen(true);
                     setCurGroup({});
-                    setTitle("新增分组");
+                    setTitle('新增分组');
                     setLevel(0);
                     setParentId(-1);
                   }}
@@ -610,7 +621,7 @@ export default function () {
             <Space>
               <RefreshIcon
                 onClick={() => {
-                  setRefreshKey(_.uniqueId("refreshKey_"));
+                  setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
               />
               <div className="table-handle-search">
@@ -635,7 +646,7 @@ export default function () {
                   </Select>
                   {
                     <Input
-                      className={"searchInput"}
+                      className={'searchInput'}
                       value={searchVal}
                       allowClear
                       onChange={(e) => {
@@ -647,7 +658,7 @@ export default function () {
                         setCurrent(1);
                       }}
                       suffix={<SearchOutlined />}
-                      placeholder={"输入模糊检索关键字"}
+                      placeholder={'输入模糊检索关键字'}
                     />
                   }
                 </Space>
@@ -655,8 +666,8 @@ export default function () {
             </Space>
             <div className="tool_right">
               <Space>
-                {(profile.roles?.includes("Admin") ||
-                  permList.includes("/xh/assetmgt/add")) && (
+                {(profile.roles?.includes('Admin') ||
+                  permList.includes('/xh/assetmgt/add')) && (
                   <div>
                     <Button
                       onClick={() => {
@@ -668,14 +679,14 @@ export default function () {
                     </Button>
                   </div>
                 )}
-                {(profile.roles?.includes("Admin") ||
-                  permList.includes("/xh/assetmgt/ops")) && (
+                {(profile.roles?.includes('Admin') ||
+                  permList.includes('/xh/assetmgt/ops')) && (
                   <div>
                     <Dropdown
-                      trigger={["click"]}
+                      trigger={['click']}
                       overlay={
                         <Menu
-                          style={{ width: "100px" }}
+                          style={{ width: '100px' }}
                           onClick={({ key }) => {
                             if (key == OperateType.AssetBatchExport) {
                               setOperateType(key as OperateType);
@@ -684,14 +695,14 @@ export default function () {
                           items={[
                             {
                               key: OperateType.AssetBatchExport,
-                              label: "导出设备",
+                              label: '导出设备',
                             },
                           ]}
                         ></Menu>
                       }
                     >
                       <Button>
-                        {t("common:btn.batch_operations")} <DownOutlined />
+                        {t('common:btn.batch_operations')} <DownOutlined />
                       </Button>
                     </Dropdown>
                   </div>
@@ -736,7 +747,7 @@ export default function () {
                 assets={selectedAssets}
                 names={selectedAssetsName}
                 reloadList={() => {
-                  setRefreshKey(_.uniqueId("refreshKey_"));
+                  setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
                 typeId={Number(typeId)}
               />

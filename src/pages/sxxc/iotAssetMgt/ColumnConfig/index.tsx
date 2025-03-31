@@ -50,8 +50,10 @@ const FieldConfig = (props) => {
   const [paginationData, setPaginationData] = useState<PageConfig[]>([]);
 
   useEffect(() => {
-    getFieldsByType(typeId);
-    getPagesByType(typeId);
+    if(typeId!=0){
+      getFieldsByType(typeId);
+      getPagesByType(typeId);
+    }
   }, [typeId]);
   useEffect(() => {
     form.setFieldsValue({ paginationData });
