@@ -272,7 +272,7 @@ const Resource: React.FC = () => {
 
   useEffect(() => {
     getTaskType()
-    getStrategy()
+    // getStrategy()
   }, []);
 
   return (
