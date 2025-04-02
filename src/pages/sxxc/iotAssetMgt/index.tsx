@@ -245,8 +245,8 @@ export default function () {
 
   const getPagesByType = (typeId) => {
     setSelectColumns(fixColumns);
-    // setFilterParam('');
-    // setSearchVal(null);
+    setFilterParam('');
+    setSearchVal(null);
     getIotPage({ typeId }).then((res) => {
       const { dat } = res;
       const { selectedColumn, filterArr } = processDataAndFilter(dat);
