@@ -365,12 +365,12 @@ export default function () {
   const TreeNode = ({
     node,
     level,
-    parentNode = null,
+    parentNode,
     expandedIds,
     onToggle,
     isAllAssets = false,
   }) => {
-    const parentId = parentNode ? parentNode.nodeId : null;
+    const parentId = parentNode?.nodeId || -1;
     const isExpanded = expandedIds.has(level + '_' + node.nodeId);
     // const hasGroupDevice = (subNodes) => {
     //   return subNodes?.some((child) => child.LeafId !== -1) || false;
