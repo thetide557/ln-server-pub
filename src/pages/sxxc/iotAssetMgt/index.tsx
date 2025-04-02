@@ -146,20 +146,20 @@ export default function () {
     },
     {
       title: '数据更新时间',
-      dataIndex: 'create_at',
+      dataIndex: 'data_update_time',
       align: 'center',
       ellipsis: true,
       width: 130,
-      // render(text, record, index) {
-      //   return moment.unix(text).format("YYYY-MM-DD HH:mm:ss");
-      // },
+      render(text, record, index) {
+        return moment(text).format("YYYY-MM-DD HH:mm:ss");
+      },
       sorter: (a, b) => {
-        return a.create_at > b.create_at ? 1 : -1;
+        return a.data_update_time > b.data_update_time ? 1 : -1;
       },
     },
     {
       title: '配置更新人',
-      dataIndex: 'create_by',
+      dataIndex: 'page_update_user',
       align: 'center',
       ellipsis: true,
       width: 130,
@@ -172,7 +172,7 @@ export default function () {
       render: (text, record) => (
         <Space>
           {(profile.roles?.includes('Admin') ||
-            permList.includes('/xh/iotassetmgt/detail')) && (
+            permList.includes('/sxxc/iotassetmgt/detail')) && (
             <span
               onClick={(e) => {
                 showModal('view', record);
@@ -244,6 +244,9 @@ export default function () {
   }
 
   const getPagesByType = (typeId) => {
+    setSelectColumns(fixColumns);
+    // setFilterParam('');
+    // setSearchVal(null);
     getIotPage({ typeId }).then((res) => {
       const { dat } = res;
       const { selectedColumn, filterArr } = processDataAndFilter(dat);
@@ -255,6 +258,8 @@ export default function () {
             fixColumns.filter((column) => column.title !== '请配置')
           )
         );
+      }else{
+        setSelectColumns(fixColumns);
       }
 
       // 过滤字段
@@ -279,11 +284,11 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [searchVal, typeId, refreshKey, tissueId]);
+  }, [typeId, refreshKey, filterParam,searchVal]);
 
   useEffect(() => {
     getAssetTree();
-  }, [searchVal]);
+  }, []);
 
   // TODO:定时刷新
   // useInterval(() => {
@@ -344,42 +349,28 @@ export default function () {
   };
 
   // 左侧资产组织树点击
-  const handleClickTree = (node: any) => {
-    console.log('handleClickTree', node);
+  const handleClickTree = (node: any,parentId) => {
+    // console.log('handleClickTree', node,"父节点",parentId);
     setTypeId(node.nodeId);
-    //资产类型操作
+    //资产清单查询条件清空
     setCurrent(1);
+    setFilterParam('');
+    setSearchVal(null);
     localStorage.setItem('left_iotasset_type', node.nodeId);
-    // localStorage.setItem("left_iotasset_nodeId", node.nodeId);
-    setRefreshKey(_.uniqueId('refreshKey_'));
+    localStorage.setItem('left_iotasset_parent', parentId);
   };
 
   /** 左侧资产树组件 */
-  // 递归查找父级节点
-  const findParentId = (nodes, targetId) => {
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      if (
-        node.subNode &&
-        node.subNode.some((child) => child.nodeId === targetId)
-      ) {
-        return node.nodeId;
-      }
-      const parentId = findParentId(node.subNode || [], targetId);
-      if (parentId) {
-        return parentId;
-      }
-    }
-    return null;
-  };
   // isAllAssets：一个布尔值，用于标记当前节点是否是"全部资产"的子节点。
   const TreeNode = ({
     node,
     level,
+    parentNode = null,
     expandedIds,
     onToggle,
     isAllAssets = false,
   }) => {
+    const parentId = parentNode ? parentNode.nodeId : null;
     const isExpanded = expandedIds.has(level + '_' + node.nodeId);
     // const hasGroupDevice = (subNodes) => {
     //   return subNodes?.some((child) => child.LeafId !== -1) || false;
@@ -426,7 +417,7 @@ export default function () {
                           setCurGroup(node);
                           setOpen(true);
                           setLevel(level - 1);
-                          const parentId = findParentId(treeList, node.nodeId);
+                          // console.log('父级id', parentId);
                           setParentId(parentId); // 父级id
                         } else if (key === 'del') {
                           Modal.confirm({
@@ -483,12 +474,12 @@ export default function () {
               <div
                 style={{
                   backgroundColor:
-                    node.nodeId == localStorage.getItem('left_iotasset_type')
+                    node.nodeId  == localStorage.getItem('left_iotasset_type') && parentId == localStorage.getItem('left_iotasset_parent')
                       ? '#92b7d1'
                       : '',
                 }}
                 className="asset-name"
-                onClick={() => handleClickTree(node)}
+                onClick={() => handleClickTree(node,parentId)}
               >
                 <span>{node.nodeName}</span>
                 {/* <span>{node.number}</span> */}
@@ -502,6 +493,7 @@ export default function () {
               key={child.nodeId}
               node={child}
               level={level + 1}
+              parentNode={node}
               expandedIds={expandedIds}
               onToggle={onToggle}
               isAllAssets={node.nodeId === -1 || isAllAssets}
@@ -546,6 +538,7 @@ export default function () {
             level={1}
             expandedIds={expandedIds}
             onToggle={handleToggle}
+            parentNode={null}
           />
         ))}
       </div>
@@ -597,18 +590,23 @@ export default function () {
             <div className="left_tree" style={{ display: 'inline-block' }}>
               <div className="asset_organize_cls">
                 <span>组织树列表</span>
-                <span
-                  className="add_group"
-                  onClick={() => {
-                    setOpen(true);
-                    setCurGroup({});
-                    setTitle('新增分组');
-                    setLevel(0);
-                    setParentId(-1);
-                  }}
-                >
-                  新增分组
-                </span>
+                
+                {(profile.roles?.includes('Admin') ||
+                    permList.includes('/sxxc/iotassetmgt/addgroup')) && (
+                    <span
+                      className="add_group"
+                      onClick={() => {
+                        setOpen(true);
+                        setCurGroup({});
+                        setTitle('新增分组');
+                        setLevel(0);
+                        setParentId(-1);
+                      }}
+                    >
+                      新增分组
+                    </span>
+                )}
+                
               </div>
               <div className="tree-list">
                 <AssetTree data={treeList} />
@@ -628,7 +626,8 @@ export default function () {
                 <Space>
                   {/* 资产清单过滤条件 */}
                   <Select
-                    defaultValue={filterParam}
+                    // defaultValue={filterParam}
+                    value={filterParam}
                     placeholder="选择过滤器"
                     style={{ width: 120 }}
                     // allowClear
@@ -667,7 +666,7 @@ export default function () {
             <div className="tool_right">
               <Space>
                 {(profile.roles?.includes('Admin') ||
-                  permList.includes('/xh/assetmgt/add')) && (
+                  permList.includes('/sxxc/iotassetmgt/config')) && (
                   <div>
                     <Button
                       onClick={() => {
@@ -680,7 +679,7 @@ export default function () {
                   </div>
                 )}
                 {(profile.roles?.includes('Admin') ||
-                  permList.includes('/xh/assetmgt/ops')) && (
+                  permList.includes('/sxxc/iotassetmgt/batchops')) && (
                   <div>
                     <Dropdown
                       trigger={['click']}

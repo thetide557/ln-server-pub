@@ -85,8 +85,10 @@ export default function () {
 
   // TODO:根据选择资产类型生成分页数据
   useEffect(() => {
-    getPagesByType(typeId)
-  }, []);
+    if(typeId !=0){
+      getPagesByType(typeId);
+    }
+  }, [typeId]);
   const getPagesByType = (typeId: number) => {
     getIotPage({ typeId }).then((res) => {
       const { dat } = res;
