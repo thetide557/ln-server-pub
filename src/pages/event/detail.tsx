@@ -38,6 +38,7 @@ import PrometheusDetail from './Detail/Prometheus';
 import Host from './Detail/Host';
 import './detail.less';
 import { getStrategiesByRuleIds } from '@/services/warning';
+import Solution from './Solution'
 const { Paragraph } = Typography;
 const EventDetailPage: React.FC = () => {
   const { t } = useTranslation('AlertCurEvents');
@@ -320,6 +321,7 @@ const EventDetailPage: React.FC = () => {
                       </div>
                     );
                   })}
+                  {/* <Solution /> */}
               </div>
             )}
           </Card>
