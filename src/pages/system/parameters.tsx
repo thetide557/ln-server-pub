@@ -32,6 +32,7 @@ export default function () {
     { label: 'ERROR', value: "4" }
   ];
   const [swithCaptcha, setSwithCaptcha] = useState<any>();
+  const [switchAi, setSwitchAi] = useState<any>();
   const [swithRsa, setSwithRsa] = useState<any>();
   const [checkBoxCheck, setCheckBoxCheck] = useState<any>();
   const [checkedValues, setCheckedValues] = useState<any>([]);
@@ -40,6 +41,7 @@ export default function () {
   useEffect(() => {
     setSwithCaptcha(true);
     setSwithRsa(true);
+    setSwitchAi(true);
     getParametersList().then(({ dat }) => {
       console.log("AAAAAAAAAAAAAA")
       console.log(dat);
@@ -48,6 +50,9 @@ export default function () {
       }
       if (dat.open_rsa == 2) {
         setSwithRsa(false);
+      }
+      if (dat.enable_deepseek == 2) {
+        setSwitchAi(false);
       }
       let groups = [];
       if (dat.log_lever) {
@@ -80,13 +85,20 @@ export default function () {
     values["log_lever"] = radioCheck;
     values["captcha"] = swithCaptcha ? 1 : 2;
     values["open_rsa"] = swithRsa ? 1 : 2;
+    values["enable_deepseek"] = switchAi ? 1 : 2;
     updateParametersList(values).then((res) => {
       message.success('保存成功');
+      window.location.reload()
     });
   };
 
   const onSwitchCaptchaChange = (checked: boolean) => {
     setSwithCaptcha(checked);
+    console.log(`switch to ${checked}`);
+  };
+
+  const onSwitchAiChange = (checked: boolean) => {
+    setSwitchAi(checked);
     console.log(`switch to ${checked}`);
   };
   const onSwitchRsaChange = (checked: boolean) => {
@@ -133,9 +145,14 @@ export default function () {
                   <Input />
                 </Form.Item>
               </Col>
-              <Col span={8}>
+              <Col span={4}>
                 <Form.Item label='启用验证码' name='captcha' className="form-item" labelAlign='right'>
                   <Switch checked={swithCaptcha} onChange={onSwitchCaptchaChange}></Switch>
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item label='启用ai助手' name='enable_deepseek' className="form-item" labelAlign='right'>
+                  <Switch checked={switchAi} onChange={onSwitchAiChange}></Switch>
                 </Form.Item>
               </Col>
             </Row>

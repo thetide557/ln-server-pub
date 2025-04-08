@@ -91,3 +91,10 @@ export function getMenuPerm() {
     method: RequestMethod.Get,
   });
 }
+
+// ai机器人显示隐藏
+export function getShowDeepSeek() {
+  return request(`/api/n9e/auth/ifshowdeepseek`, {
+    method: RequestMethod.Get,
+  });
+}
