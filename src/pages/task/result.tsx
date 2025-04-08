@@ -127,13 +127,13 @@ const index = (props: any) => {
       render: (_text, record) => {
         return (
           <span>
-            <Link to={`/job-task/${curBusiId}/output/${params.id}/${record.host}/stdout`} target='_blank'>
+            <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${params.id}/${record.host}/stdout`)}}>
               stdout
-            </Link>
+            </span>
             <Divider type='vertical' />
-            <a href={`/job-task/${curBusiId}/output/${params.id}/${record.host}/stderr`} target='_blank'>
+            <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${params.id}/${record.host}/stderr`)}}>
               stderr
-            </a>
+            </span>
           </span>
         );
       },
@@ -181,13 +181,13 @@ const index = (props: any) => {
           <Row style={{ marginBottom: 20 }}>
             <Col span={18}>
               <div>
-                <a href={`/job-task/${curBusiId}/output/${taskId}/stdout`} target='_blank'>
+                <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${taskId}/stdout`)}}>
                   stdouts
-                </a>
+                </span>
                 <Divider type='vertical' />
-                <a href={`/job-task/${curBusiId}/output/${taskId}/stderr`} target='_blank'>
+                <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${taskId}/stderr`)}}>
                   stderrs
-                </a>
+                </span>
                 <Divider type='vertical' />
                 <Link to={{ pathname: `/job-tasks/${taskId}/detail` }}>{t('task.meta')}</Link>
                 <Divider type='vertical' />

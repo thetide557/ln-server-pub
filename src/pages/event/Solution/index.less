@@ -1,0 +1,89 @@
+.ai-solution {
+  padding-left: 40px;
+  margin: 20px 0;
+
+  .ai-top {
+    width: 98.6%;
+    height: 32px;
+    background: #d7e7ff;
+    border-radius: 3px 3px 3px 3px;
+    border: 1px solid #82b4ff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+
+    .ai-title {
+      > img {
+        margin-right: 5px;
+      }
+    }
+    .ai-show {
+      cursor: pointer;
+      color: #0066ff;
+      .ai-show-text {
+        padding-right: 5px;
+      }
+    }
+  }
+
+  .ai-content {
+    .ai-card {
+      margin: 10px 0;
+      display: flex;
+      flex-wrap: wrap;
+      .ai-card-item {
+        width: 287px;
+        height: 162px;
+        background: url("/image/solution/card.jpg") no-repeat;
+        background-size: 100% 100%;
+        margin: 0 15px 15px 0;
+        padding: 0 5px 0 12px;
+        &:last-child {
+          margin-right: 0;
+        }
+        .ai-card-item-title {
+          font-family: SourceHanSansSC, SourceHanSansSC;
+          font-weight: bold;
+          font-size: 12px;
+          color: #333333;
+          line-height: 28px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .ai-card-item-wrap {
+          height: 95px;
+          // overflow: hidden;
+          .ai-card-item-keywords {
+            display: flex;
+            margin: 12px 0 3px;
+            overflow-x: auto;
+            padding-bottom: 3px;
+            &::-webkit-scrollbar {
+              height: 5px;
+            }
+            .ai-card-item-keyword {
+              white-space: nowrap;
+              box-sizing: border-box;
+              background: #97f9ff;
+              border-radius: 1px;
+              border: 1px solid #3fc2ff;
+              margin-right: 7px;
+              padding: 1px 2px;
+              font-size: 11px;
+              color: #005fb0;
+            }
+          }
+          .ai-card-item-content {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3; /* 控制显示行数 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+  }
+}

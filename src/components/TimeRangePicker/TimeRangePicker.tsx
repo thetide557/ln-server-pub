@@ -128,6 +128,11 @@ export default function index(props: ITimeRangePickerProps) {
                   }
                   setRange(newRange as IRawTimeRange);
                   setAbsoluteHistoryCache(newRange, dateFormat);
+                  // 新增：根据选择的 key 设置 rangeStatus 对应的值为 undefined
+                  setRangeStatus({
+                    ...rangeStatus,
+                    [key]: undefined,
+                  });
                 }}
               />
             }
