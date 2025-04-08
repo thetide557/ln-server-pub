@@ -29,6 +29,7 @@ import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';
 import moment from 'moment';
+import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare'
 
 import {
   CheckCircleOutlined,
@@ -115,6 +116,7 @@ export default function () {
     'current_iotasset_type_id',
     0
   ); // 左侧资产树选中的资产类型
+  const [parId, setParId] = useLocalStorage("left_iotasset_parent", -1); // 选中的资产类型的父级id
   const [open, setOpen] = useState<boolean>(false); // 新增分组模态框是否显示
   const [title, setTitle] = useState<any>(''); // 新增分组模态框标题
   // 资产分组
@@ -123,7 +125,6 @@ export default function () {
   const [curGroup, setCurGroup] = useState<any>({}); // 当前编辑的分组
   const [level, setLevel] = useState<number | undefined>(undefined);
   const [parentId, setParentId] = useState(-1);
-  // const [parId, setParId] = useLocalStorage("left_iotparId", "1"); // 选中的资产类型的父级id
   const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1)); // ??左侧资产树选中的分组的id
   const [configOpen, setConfigOpen] = useState<boolean>(false); // 字段配置模态框是否显示
 
@@ -229,7 +230,8 @@ export default function () {
       width: 120,
       ellipsis: true,
       sorter: (a, b) => {
-        return a[attr.Name].localeCompare(b[attr.Name]);
+        // return a[attr.Name].localeCompare(b[attr.Name]);
+        return localeCompare(a[attr.Name], b[attr.Name])
       },
     }));
 
@@ -242,7 +244,7 @@ export default function () {
     filterArr = filterArr.concat(filterData);
     return { selectedColumn, filterArr };
   }
-
+  // TODO:重新 调接口  获取显示列 ，下拉筛选 label设为字段中文名
   const getPagesByType = (typeId) => {
     setSelectColumns(fixColumns);
     setFilterParam('');
@@ -264,7 +266,26 @@ export default function () {
 
       // 过滤字段
       setQueryFilter(filterArr);
+      // 初始化筛选项，默认选中第一个显示列
+      setFilterParam(filterArr[0]?.name);
     });
+  };
+
+  const findDeviceType = (nodes: any[], parentIds: number[] = []): { firstTypeId: number ; expand: number[],firstParentId: number} => {
+    for (const node of nodes) {
+      if (node.TypeIds === "") {
+        // 若当前节点符合条件，返回节点 ID、展开路径和父节点 ID
+        const firstParentId = parentIds.length > 0 ? parentIds[parentIds.length - 1] : -1;
+        return { firstTypeId: node.nodeId, expand: parentIds, firstParentId };
+      }
+      if (node.subNode && node.subNode.length > 0) {
+        const result = findDeviceType(node.subNode, [...parentIds, node.nodeId]);
+        if (result.firstTypeId !== 0) {
+          return result;
+        }
+      }
+    }
+    return { firstTypeId: 0, expand: [], firstParentId: -1};
   };
 
   // 获取资产分组树列表
@@ -278,6 +299,27 @@ export default function () {
       const { dat } = res;
       if (dat) {
         setTreeList(dat);
+        // 初始化展开节点以及选中的设备类型
+        const { firstTypeId, expand, firstParentId } = findDeviceType(dat);
+        if (
+          localStorage.getItem("current_iotasset_type_id") == null ||
+          localStorage.getItem("current_iotasset_type_id") == "0"
+        ) {
+          setTypeId(firstTypeId);
+        }
+        if (
+          localStorage.getItem("left_iotasset_parent") == null ||
+          localStorage.getItem("left_iotasset_parent") == "-1"
+        ) {
+          setParId(firstParentId);
+        }
+        if (
+          localStorage.getItem("iotasset_expandedIds") == "[]" ||
+          localStorage.getItem("iotasset_expandedIds") == null
+        ) {
+          setExpandedIds(new Set(expand));
+        }
+        // console.log("firstParentId", firstTypeId, expand, firstParentId);
       }
     });
   };
@@ -303,9 +345,9 @@ export default function () {
         pageNum: current,
         pageSize: pageSize,
       };
-      if (searchVal != null && searchVal.length > 0) {
-        param['queryValue'] = searchVal;
-      }
+      // if (searchVal != null && searchVal.length > 0) {
+      //   param['queryValue'] = searchVal;
+      // }
       if (typeId != null && typeId != 0) {
         param['typeId'] = typeId;
       }
@@ -316,6 +358,7 @@ export default function () {
         searchVal.length > 0
       ) {
         param['queryAttribute'] = filterParam;
+        param['queryValue'] = searchVal;
       }
 
       getIotDeviceList(param).then(({ dat }) => {
@@ -352,12 +395,12 @@ export default function () {
   const handleClickTree = (node: any,parentId) => {
     // console.log('handleClickTree', node,"父节点",parentId);
     setTypeId(node.nodeId);
+    setParId(parentId)
     //资产清单查询条件清空
     setCurrent(1);
     setFilterParam('');
     setSearchVal(null);
-    localStorage.setItem('left_iotasset_type', node.nodeId);
-    localStorage.setItem('left_iotasset_parent', parentId);
+    // localStorage.setItem('left_iotasset_type', node.nodeId);
   };
 
   /** 左侧资产树组件 */
@@ -371,7 +414,7 @@ export default function () {
     isAllAssets = false,
   }) => {
     const parentId = parentNode?.nodeId || -1;
-    const isExpanded = expandedIds.has(level + '_' + node.nodeId);
+    const isExpanded = expandedIds.has(node.nodeId);
     // const hasGroupDevice = (subNodes) => {
     //   return subNodes?.some((child) => child.LeafId !== -1) || false;
     // };
@@ -393,7 +436,7 @@ export default function () {
             >
               <span
                 onClick={() => {
-                  onToggle(level + '_' + node.nodeId);
+                  onToggle(node.nodeId);
                 }}
               >
                 {isExpanded ? (
@@ -474,12 +517,12 @@ export default function () {
               <div
                 style={{
                   backgroundColor:
-                    node.nodeId  == localStorage.getItem('left_iotasset_type') && parentId == localStorage.getItem('left_iotasset_parent')
+                    node.nodeId  == typeId && parentId == parId
                       ? '#92b7d1'
                       : '',
                 }}
                 className="asset-name"
-                onClick={() => handleClickTree(node,parentId)}
+                onClick={() => handleClickTree(node,parentId)} 
               >
                 <span>{node.nodeName}</span>
                 {/* <span>{node.number}</span> */}
@@ -502,17 +545,24 @@ export default function () {
       </div>
     );
   };
-
+  const [expandedIds, setExpandedIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('iotasset_expandedIds');
+      return new Set(JSON.parse(saved || '[]'));
+    } catch {
+      return new Set();
+    }
+  });
   const AssetTree = ({ data }) => {
     //  展开的节点列表
-    const [expandedIds, setExpandedIds] = useState(() => {
-      try {
-        const saved = localStorage.getItem('iotasset_expandedIds');
-        return new Set(JSON.parse(saved || '[]'));
-      } catch {
-        return new Set();
-      }
-    });
+    // const [expandedIds, setExpandedIds] = useState(() => {
+    //   try {
+    //     const saved = localStorage.getItem('iotasset_expandedIds');
+    //     return new Set(JSON.parse(saved || '[]'));
+    //   } catch {
+    //     return new Set();
+    //   }
+    // });
 
     useEffect(() => {
       localStorage.setItem(
@@ -651,6 +701,9 @@ export default function () {
                       onChange={(e) => {
                         if (e != undefined) {
                           setSearchVal(e.target.value);
+                          if(!filterParam){
+                            message.warning('提示：暂无筛选项');
+                          }
                         } else {
                           setSearchVal(null);
                         }

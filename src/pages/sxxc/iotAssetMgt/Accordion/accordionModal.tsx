@@ -164,7 +164,8 @@ const AccordionModal = (props: any) => {
                 <>
                   {menu}
                   {/* admin账号显示该选项 */}
-                  {profile.roles?.includes("Admin") && (
+                  { (profile.roles?.includes('Admin') ||
+                    permList.includes('/sxxc/iotassetmgt/adddevicetype')) && (
                     <div
                       className="ant-select-item"
                       style={{ padding: "8px 12px", cursor: "pointer" }}

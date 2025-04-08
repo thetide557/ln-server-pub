@@ -11,7 +11,7 @@ import {
   Dropdown,
   message,
 } from "antd";
-import { PlusSquareOutlined } from "@ant-design/icons";
+import { PlusSquareOutlined,MinusSquareFilled } from "@ant-design/icons";
 import { CommonStateContext } from "@/App";
 import _ from "lodash";
 import "./style.less";
@@ -23,6 +23,7 @@ import {
 
 interface FieldItem {
   Id: number | null;
+  tempFieldId?: string;
   Name: string;
   SortOrder: number | null;
   DisplayOrder: number | null | undefined;
@@ -43,7 +44,7 @@ const FieldConfig = (props) => {
   const { open, closeOpen, typeId } = props;
   // console.log("typeId", typeId,typeof typeId);
   const [form] = Form.useForm();
-  const [selectedFields, setSelectedFields] = useState<(number | null)[]>([]);
+  const [selectedFields, setSelectedFields] = useState<(any)[]>([]);
   const [fieldsList, setFieldsList] = useState<any>([]); // 可选的字段名称
 
   // 存储分页数据
@@ -73,16 +74,16 @@ const FieldConfig = (props) => {
     getIotPage({ typeId }).then((res) => {
       const { dat } = res;
       if (dat) {
-        // 处理 DisplayOrder 为 0 的情况，转为null
+        // 处理 DisplayOrder  和 SortOrder 为 0 的情况，转为null
         const newPaginationData = dat.map((page) => {
           const newAttributes = page.Attributes.map((attr) => {
-            if (attr.DisplayOrder === 0) {
-              return {
-                ...attr,
-                DisplayOrder: null,
-              };
-            }
-            return attr;
+            const updatedDisplayOrder = attr.DisplayOrder === 0 ? null : attr.DisplayOrder;
+            const updatedSortOrder = attr.SortOrder === 0 ? null : attr.SortOrder;
+            return {
+              ...attr,
+              DisplayOrder: updatedDisplayOrder,
+              SortOrder: updatedSortOrder,
+            };
           });
           return {
             ...page,
@@ -117,6 +118,15 @@ const FieldConfig = (props) => {
     ]);
   };
 
+  // TODO:删除分页
+  const handleDelPagination = (paginationId: string)=>{
+    setPaginationData(
+      paginationData.filter((page) => 
+          page.PageId
+            ? page.PageId !== paginationId
+            : page.tempPageId !== paginationId
+    ))
+  }
   // 添加字段行
   const handleAddRow = (paginationId: string) => {
     setPaginationData(
@@ -132,10 +142,11 @@ const FieldConfig = (props) => {
               ...page.Attributes,
               {
                 Id: null,
+                tempFieldId: _.uniqueId("fields_"), // 新增临时ID
                 Name: "",
                 SortOrder: null,
                 DisplayOrder: null,
-                PageId: null,
+                PageId: page.PageId ? Number(page.PageId) : null,
                 TypeId: typeId,
               },
             ],
@@ -147,7 +158,7 @@ const FieldConfig = (props) => {
   };
 
   // 显示列字段：过滤出 DisplayOrder 不等于 null 的属性
-  // TODO:显示列DisplayOrder值是null/undefined的时候，传递到后端就变成0了
+  // 显示列DisplayOrder值是null/undefined的时候，传递到后端就变成0了
   const getDisplayFields = (paginationData) => {
     let result: {
       Id: number | null;
@@ -174,7 +185,7 @@ const FieldConfig = (props) => {
   };
 
   // 批量移出显示列
-  // TODO:显示列DisplayOrder值是null/undefined的时候，传递到后端就变成0了
+  // 显示列DisplayOrder值是null/undefined的时候，传递到后端就变成0了
   const handleBatchRemove = (paginationId: string, fieldIds: any[]) => {
     const newData = paginationData.map((page) => {
       if (
@@ -182,10 +193,16 @@ const FieldConfig = (props) => {
           ? page.PageId === paginationId
           : page.tempPageId === paginationId
       ) {
+        // 批量操作没有选中数据时，为全部数据
+        if (fieldIds.length === 0) {
+          fieldIds = page.Attributes.map((f) => f.Id || f.tempFieldId);
+        }
+        // console.log("fieldIds11111移出", fieldIds);
         const updatedFields = [...page.Attributes];
         // 更新状态
         updatedFields.forEach((f) => {
-          if (fieldIds.includes(f.Id)) {
+          const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          if (fieldIds.includes(id)) {
             // if (f.DisplayOrder !== null) {
             f.DisplayOrder = null;
             // }
@@ -200,10 +217,10 @@ const FieldConfig = (props) => {
     });
 
     // 重新计算显示排序
-    const displayFields = getDisplayFields(newData).sort(
+    const displayFields = getDisplayFields(newData).filter(field => field.DisplayOrder!== null && field.DisplayOrder!== undefined) ?.sort(
       (a, b) => (a.DisplayOrder || 0) - (b.DisplayOrder || 0)
-    ); // 按原顺序排序
-
+    ); 
+    // console.log("显示列要排序的字段", displayFields);  
     // 重新编号
     displayFields.forEach((field, index) => {
       field.DisplayOrder = index + 1;
@@ -225,7 +242,6 @@ const FieldConfig = (props) => {
   };
 
   // 批量设为显示列
-  // TODO:显示列DisplayOrder值是null/undefined的时候，传递到后端就变成0了
   const handleBatchDisplay = (paginationId: string, fieldIds: any[]) => {
     const newData = paginationData.map((page) => {
       if (
@@ -233,11 +249,19 @@ const FieldConfig = (props) => {
           ? page.PageId === paginationId
           : page.tempPageId === paginationId
       ) {
+        // 批量操作没有选中数据时，为全部数据
+        if (fieldIds.length === 0) {
+          fieldIds = page.Attributes.map((f) => f.Id || f.tempFieldId);
+        }
+        // console.log("fieldIds设为", fieldIds);
         const updatedFields = [...page.Attributes];
         updatedFields.forEach((f) => {
           // if (fieldIds.includes(f.Id) && f.DisplayOrder === null && f.DisplayOrder=== 0) {
-          if (fieldIds.includes(f.Id)) {
-            f.DisplayOrder = undefined;
+          const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          if (fieldIds.includes(id)) {
+            if (f.DisplayOrder === null) {
+              f.DisplayOrder = undefined; // 初始值为 undefined
+            }
           }
         });
         return {
@@ -278,104 +302,130 @@ const FieldConfig = (props) => {
     //   }
     //   return page;
     // });
-
+   
     const newData = paginationData.map((page) => {
       if (
         page.PageId
           ? page.PageId === paginationId
           : page.tempPageId === paginationId
       ) {
-        const remainFields =
-          page.Attributes.filter((f) => !fieldIds.includes(f.Id)) || [];
+        // const remainFields =
+        //   page.Attributes.filter((f) => !fieldIds.includes(f.Id)) || [];
+        // 批量操作没有选中数据时，为全部数据
+        if (fieldIds.length === 0) {
+          fieldIds = page.Attributes.map((f) => f.Id || f.tempFieldId);
+        }
+        // console.log("fieldIds删除", fieldIds);
+        const remainFields = page.Attributes.filter((f) => {
+          const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          return !fieldIds.includes(id);
+        }) || [];
+        console.log("删除后剩余分页排序的字段", remainFields);
         // 删除之后处理排序逻辑
-        if (remainFields.length) {
+        const fieldsWithSortOrder = remainFields.filter((field) => field.SortOrder!== null && field.SortOrder!== undefined);
+        console.log("删除后要重新排序的字段", fieldsWithSortOrder);
+        if (fieldsWithSortOrder.length) {
           // 处理分页字段排序
-          remainFields.sort((a, b) => (a.SortOrder || 0) - (b.SortOrder || 0));
-          remainFields.forEach((field, index) => {
+          fieldsWithSortOrder.sort((a, b) => (a.SortOrder || 0) - (b.SortOrder || 0));
+          fieldsWithSortOrder.forEach((field, index) => {
             field.SortOrder = index + 1;
           });
         }
+        const updatedRemainFields = remainFields.map((field) => {
+          const sortedField = fieldsWithSortOrder.find((f) => f.Id === field.Id);
+          return sortedField || field;
+        });
         return {
           ...page,
-          Attributes: remainFields,
+          Attributes: updatedRemainFields,
         };
       }
       return page;
+
     });
 
     // 处理显示列字段排序
     const displayFields = getDisplayFields(newData);
-    displayFields.sort((a, b) => (a.DisplayOrder || 0) - (b.DisplayOrder || 0));
-    displayFields?.forEach((field, index) => {
+    const fieldsWithDisplayOrder = displayFields.filter(field => field.DisplayOrder!== null && field.DisplayOrder!== undefined) || [];
+    fieldsWithDisplayOrder.sort((a, b) => (a.DisplayOrder || 0) - (b.DisplayOrder || 0));
+    fieldsWithDisplayOrder?.forEach((field, index) => {
       field.DisplayOrder = index + 1;
     });
     // 更新显示列字段的排序
     newData?.forEach((page) => {
       page.Attributes?.forEach((f) => {
-        const displayField = displayFields.find((item) => item.Id === f.Id);
+        const displayField = fieldsWithDisplayOrder.find((item) => item.Id === f.Id);
         if (displayField) {
           f.DisplayOrder = displayField.DisplayOrder;
         }
       });
     });
-
     // 更新表单数据
     // form.setFieldsValue({ paginationData: newData });
     setPaginationData(newData);
   };
 
   // 获取已选中的字段名称
-  const getSelectedAttributeNames = () => {
-    let selectedNames: string[] = [];
-    paginationData.forEach((page) => {
-      page.Attributes?.forEach((attr) => {
-        if (attr.PageId !== -1 && attr.Name) {
-          selectedNames.push(attr.Name);
-        }
-      });
-    });
-    return selectedNames;
-  };
+  // const getSelectedAttributeNames = () => {
+  //   let selectedNames: string[] = [];
+  //   paginationData.forEach((page) => {
+  //     page.Attributes?.forEach((attr) => {
+  //       if (attr.PageId !== -1 && attr.Name) {
+  //         selectedNames.push(attr.Name);
+  //       }
+  //     });
+  //   });
+  //   return selectedNames;
+  // };
   // 生成去重的分页字段排序选项
-  const getAvailablePageOrders = (
-    paginationId: string,
-    currentFieldId: number | null
-  ) => {
-    // 获取当前分页所有字段
-    const currentPage = paginationData.find((page) =>
-      page.PageId
-        ? page.PageId === paginationId
-        : page.tempPageId === paginationId
-    );
-    if (!currentPage?.Attributes) return [];
+  // const getAvailablePageOrders = (
+  //   paginationId: string,
+  //   currentFieldId: number | null
+  // ) => {
+  //   // 获取当前分页所有字段
+  //   const currentPage = paginationData.find((page) =>
+  //     page.PageId
+  //       ? page.PageId === paginationId
+  //       : page.tempPageId === paginationId
+  //   );
+  //   if (!currentPage?.Attributes) return [];
 
-    // 收集已使用的排序值（排除当前字段自身）
-    const usedOrders = currentPage.Attributes.filter(
-      (f) => f.PageId !== -1 && f.Id !== currentFieldId && f.SortOrder !== null
-    ).map((f) => f.SortOrder);
+  //   // 收集已使用的排序值（排除当前字段自身）
+  //   const usedOrders = currentPage.Attributes.filter(
+  //     (f) => f.PageId !== -1 && f.Id !== currentFieldId && f.SortOrder !== null
+  //   ).map((f) => f.SortOrder);
 
-    // 生成可用选项
-    return Array.from(
-      { length: currentPage.Attributes.length },
-      (_, i) => i + 1
-    )
-      .filter((n) => !usedOrders.includes(n))
-      .map((n) => ({ label: n, value: n }));
-  };
+  //   // 生成可用选项
+  //   return Array.from(
+  //     { length: currentPage.Attributes.length },
+  //     (_, i) => i + 1
+  //   )
+  //     .filter((n) => !usedOrders.includes(n))
+  //     .map((n) => ({ label: n, value: n }));
+  // };
+
   // 生成去重的显示列字段排序选项
-  const getAvailableDisplayOrders = (currentFieldId: number | null) => {
-    // 获取所有显示列字段
-    const displayFields = getDisplayFields(paginationData);
-    // 收集已使用的排序值（排除当前字段自身）
-    const usedOrders = displayFields
-      .filter((f) => f.Id !== currentFieldId && f.DisplayOrder !== undefined)
-      .map((f) => f.DisplayOrder);
+  // const getAvailableDisplayOrders = (currentFieldId: number | null) => {
+  //   // 获取所有显示列字段
+  //   const displayFields = getDisplayFields(paginationData);
+  //   // 收集已使用的排序值（排除当前字段自身）
+  //   const usedOrders = displayFields
+  //     .filter((f) => f.Id !== currentFieldId && f.DisplayOrder !== undefined)
+  //     .map((f) => f.DisplayOrder);
 
-    // 生成可用选项
-    return Array.from({ length: displayFields.length }, (_, i) => i + 1)
-      .filter((n) => !usedOrders.includes(n))
-      .map((n) => ({ label: n, value: n }));
-  };
+  //   // 生成可用选项
+  //   return Array.from({ length: displayFields.length }, (_, i) => i + 1)
+  //     .filter((n) => !usedOrders.includes(n))
+  //     .map((n) => ({ label: n, value: n }));
+  // };
+
+
+  // 生成显示列字段排序选项
+  const getDisplayOrders = () => {
+    const displayFields = getDisplayFields(paginationData);
+    return Array.from({ length: displayFields.length }, (_, i) => i + 1).map((n) => ({ label: n, value: n }));
+  }
+
 
   // 同步表单数据到分页数据
   const syncFormToState = (changedValues: any, allValues: any) => {
@@ -437,6 +487,14 @@ const FieldConfig = (props) => {
       if (newPage.tempPageId) {
         delete newPage.tempPageId;
       }
+      // 删除 Attributes 中每个数据项的 tempFieldId 属性
+      newPage.Attributes = newPage.Attributes.map((attr) => {
+        const newAttr = { ...attr };
+        if (newAttr.tempFieldId) {
+          delete newAttr.tempFieldId;
+        }
+        return newAttr;
+      });
       return newPage;
     });
     console.log("分页数据", paginationData, "submitData", submitData);
@@ -463,7 +521,7 @@ const FieldConfig = (props) => {
     <Modal
       visible={open}
       title="字段配置"
-      width={650}
+      width={800}
       onOk={handleOk}
       onCancel={handleCancel}
     >
@@ -486,6 +544,14 @@ const FieldConfig = (props) => {
                   <PlusSquareOutlined
                     style={{ fontSize: 13, color: "#1890FF" }}
                   />
+                </span>
+                <span
+                  style={{ marginLeft: "10px" }}
+                  onClick={()=>handleDelPagination(pagination.tempPageId
+                    ? pagination.tempPageId
+                    : pagination.PageId)}
+                >
+                  <MinusSquareFilled style={{ fontSize: 13, color: "#aaaaaa"}}/>
                 </span>
               </div>
               <Form.Item
@@ -514,8 +580,10 @@ const FieldConfig = (props) => {
               >
                 <Input placeholder="请输入分页名称" maxLength={20} />
               </Form.Item>
-              {(profile.roles?.includes("Admin") ||
-                permList.includes("/xh/assetmgt/ops")) && (
+              {
+              // (profile.roles?.includes("Admin") ||
+              //   permList.includes("/xh/assetmgt/ops")) && 
+              (
                 <div className="batch-operation">
                   <Dropdown
                     trigger={["click"]}
@@ -579,7 +647,7 @@ const FieldConfig = (props) => {
                 rowClassName="column-config-table-row"
                 rowSelection={{
                   onChange: (_, record) => {
-                    setSelectedFields(record ? record.map(({ Id }) => Id) : []);
+                    setSelectedFields(record ? record.map((item) => item.Id || item.tempFieldId) : []);
                   },
                 }}
                 columns={[
@@ -610,14 +678,14 @@ const FieldConfig = (props) => {
                         ]}
                       >
                         <Select placeholder="请输入字段" showSearch>
-                          {/* {fieldsList.map((item) => {
+                          {fieldsList.map((item) => {
                           return (
                             <Select.Option value={item.Name} key={item.Id}>
                               {item.Name}
                             </Select.Option>
                           );
-                        })} */}
-                          {fieldsList
+                        })}
+                          {/* {fieldsList
                             .filter(
                               (item) =>
                                 !getSelectedAttributeNames().includes(item.Name)
@@ -628,8 +696,26 @@ const FieldConfig = (props) => {
                                   {item.Name}
                                 </Select.Option>
                               );
-                            })}
+                            })} */}
                         </Select>
+                      </Form.Item>
+                    ),
+                  },
+                  {
+                    title: "中文名称",
+                    dataIndex: "Alias",
+                    width: 150,
+                    render: (_, record, fieldIndex) => (
+                      <Form.Item
+                        name={[
+                          "paginationData",
+                          paginationIndex,
+                          "Attributes",
+                          fieldIndex,
+                          "Alias",
+                        ]}
+                      >
+                        <Input placeholder='请输入字段中文名' />
                       </Form.Item>
                     ),
                   },
@@ -645,29 +731,30 @@ const FieldConfig = (props) => {
                           fieldIndex,
                           "SortOrder",
                         ]}
-                        // rules={[
-                        //   { required: true },
-                        //   {
-                        //     validator: (_, value) => {
-                        //       const duplicates = pagination.Attributes.filter(
-                        //         (f: FieldItem, idx: number) =>
-                        //           idx !== fieldIndex && f.SortOrder === value
-                        //       );
-                        //       return duplicates.length === 0
-                        //         ? Promise.resolve()
-                        //         : Promise.reject("该排序值已被使用");
-                        //     },
-                        //   },
-                        // ]}
+                        rules={[
+                          // { required: true },
+                          { required: Boolean(record.Name), message: '请选择分页字段排序' }
+                          // {
+                          //   validator: (_, value) => {
+                          //     const duplicates = pagination.Attributes.filter(
+                          //       (f: FieldItem, idx: number) =>
+                          //         idx !== fieldIndex && f.SortOrder === value
+                          //     );
+                          //     return duplicates.length === 0
+                          //       ? Promise.resolve()
+                          //       : Promise.reject("该排序值已被使用");
+                          //   },
+                          // },
+                        ]}
                       >
-                        {/* <Select placeholder="请选择排序">
+                      <Select placeholder="请选择排序">
                         {pagination.Attributes.map((_, i) => (
                           <Select.Option key={i} value={i + 1}>
                             {i + 1}
                           </Select.Option>
                         ))}
-                      </Select> */}
-                        <Select
+                      </Select>
+                        {/* <Select
                           options={getAvailablePageOrders(
                             pagination.tempPageId
                               ? pagination.tempPageId
@@ -675,7 +762,7 @@ const FieldConfig = (props) => {
                             record.Id
                           )}
                           placeholder="选择排序"
-                        />
+                        /> */}
                       </Form.Item>
                     ),
                   },
@@ -691,27 +778,25 @@ const FieldConfig = (props) => {
                           fieldIndex,
                           "DisplayOrder",
                         ]}
+                        rules={[
+                          { required: Boolean(record.Name) && record.DisplayOrder === undefined, message: '请选择显示列排序' }
+                        ]}
                       >
-                        {/* <Select
+                      <Select
                         placeholder="请选择排序"
-                        disabled={!record.isDisplay}
+                        disabled={record.DisplayOrder === null ||
+                          record.DisplayOrder === 0}
+                        options={getDisplayOrders()}
                       >
-                        {pagination.Attributes
-                          .filter((f) => f.isDisplay)
-                          .map((f, i) => (
-                            <Select.Option key={i} value={i + 1}>
-                              {i + 1}
-                            </Select.Option>
-                          ))}
-                      </Select> */}
-                        <Select
+                      </Select>
+                        {/* <Select
                           options={getAvailableDisplayOrders(record.Id)}
                           placeholder="选择排序"
                           disabled={
                             record.DisplayOrder === null ||
                             record.DisplayOrder === 0
                           }
-                        />
+                        /> */}
                       </Form.Item>
                     ),
                   },
@@ -719,7 +804,7 @@ const FieldConfig = (props) => {
                     title: "操作",
                     render: (_, record) => (
                       <>
-                        {/* TODO:显示列DisplayOrder值是null/undefined的时候，传递到后端就变成0了 */}
+                        {/* 显示列DisplayOrder值是null/undefined的时候，传递到后端就变成0了 */}
                         {record.DisplayOrder === null ||
                         record.DisplayOrder === 0 ? (
                           <Button
@@ -730,7 +815,7 @@ const FieldConfig = (props) => {
                                 pagination.tempPageId
                                   ? pagination.tempPageId
                                   : pagination.PageId,
-                                [record.Id]
+                                  [record.Id || record.tempFieldId]
                               );
                             }}
                           >
@@ -745,7 +830,7 @@ const FieldConfig = (props) => {
                                 pagination.tempPageId
                                   ? pagination.tempPageId
                                   : pagination.PageId,
-                                [record.Id]
+                                  [record.Id || record.tempFieldId]
                               )
                             }
                           >
@@ -761,7 +846,7 @@ const FieldConfig = (props) => {
                               pagination.tempPageId
                                 ? pagination.tempPageId
                                 : pagination.PageId,
-                              [record.Id]
+                              [record.Id || record.tempFieldId]
                             )
                           }
                           style={{ marginLeft: 10 }}
