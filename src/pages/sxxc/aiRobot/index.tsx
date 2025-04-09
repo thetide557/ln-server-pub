@@ -5,6 +5,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Input, Form } from 'antd';
 import { CloseOutlined, SyncOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import { marked } from 'marked';
+import { getShowDeepSeek } from '@/services/common';
 import './index.less'
 
 const AiRobot = function () {
@@ -23,6 +24,7 @@ const AiRobot = function () {
   const [randomList, setRandomList] = useState<any>([])
   // 终止请求
   const [controller, setController] = useState(new AbortController());
+  const [deepseekShow, setDeepseekShow] = useState(true)
   let flag = false
   // console.log('dsdf', pathname);
   let isScreen = true
@@ -54,6 +56,14 @@ const AiRobot = function () {
 
 
   useEffect(() => {
+    if (!pathname.startsWith('/login')) {
+      getShowDeepSeek().then((res) => {
+        if (res.dat) {
+          setDeepseekShow(res.dat.show)
+        }
+      })
+    }
+    
     let randomElements = getRandomTwoElements(knowList);
     setRandomList(randomElements)
     // 清理函数，确保在组件卸载时取消请求
@@ -144,7 +154,7 @@ const AiRobot = function () {
             const { done, value } = await reader.read();
 
             if (done) {
-              setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: marked(aiStr), sender: 'ai' }]);
+              // setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: marked(aiStr), sender: 'ai' }]);
               console.log('Streaming finished.');
               setLoading(false)
               return;
@@ -170,7 +180,7 @@ const AiRobot = function () {
             console.log('flag', flag);
             if (flag) {
               console.log('请求超时');
-              setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '请求超时', sender: 'ai' }]);
+              setAiMessages([...aiMessages, { text: values.note, sender: 'user' }, { text: '访问超时', sender: 'ai' }]);
               setController(new AbortController()); // 重新创建一个新的 AbortController
             } else {
               console.log('请求已中止');
@@ -204,7 +214,7 @@ const AiRobot = function () {
 
   return (
     <>
-      {!pathname.startsWith('/login') && <Draggable bounds="parent" handle=".robot" onDrag={handleDrag} onStop={handleStop}>
+      {!pathname.startsWith('/login') && deepseekShow && <Draggable bounds="parent" handle=".robot" onDrag={handleDrag} onStop={handleStop}>
         <div className='nav-bar'>
           {
             aiShow && <div className="r-dialog" style={{ background: (isScreen ? '#35649E' : '#fff') }}>
