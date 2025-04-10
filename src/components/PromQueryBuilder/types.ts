@@ -32,7 +32,7 @@ export interface QueryWithOperations {
 
 export interface PromVisualQuery {
   metric?: string;
-  // labels: PromVisualQueryLabelFilter[];
+  labels: PromVisualQueryLabelFilter[];
   operations: PromVisualQueryOperation[];
   binaryQueries?: Array<PromVisualQueryBinary<PromVisualQuery>>;
 }
