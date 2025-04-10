@@ -263,10 +263,10 @@ const AiRobotSse = function () {
                   ...aiMessages,
                   { text: values.note, sender: "user" },
                   {
-                    text: marked.parse(aiStr),
+                    text: marked(aiStr),
                     sender: "ai",
-                    thinkContent: marked.parse(thinkContent),
-                    afterThinkContent: marked.parse(afterThinkContent),
+                    thinkContent: marked(thinkContent),
+                    afterThinkContent: marked(afterThinkContent),
                   },
                 ]);
               } else {
@@ -275,7 +275,7 @@ const AiRobotSse = function () {
                 setAiMessages([
                   ...aiMessages,
                   { text: values.note, sender: "user" },
-                  { text: marked.parse(aiStr), sender: "ai" },
+                  { text: marked(aiStr), sender: "ai" },
                 ]);
               }
               // 继续读取流式响应
