@@ -42,7 +42,6 @@ function renderBinaryQuery(leftOperand: string, binaryQuery: PromVisualQueryBina
   if (binaryQuery.vectorMatches) {
     result += `${binaryQuery.vectorMatchesType}(${binaryQuery.vectorMatches}) `;
   }
-
   return result + renderQuery(binaryQuery.query, true);
 }
 
@@ -68,19 +67,16 @@ function renderLabels(labels: PromVisualQueryLabelFilter[]) {
 
 export function renderQuery(query: PromVisualQuery, nested?: boolean) {
   let queryString = `${query.metric ?? ''}${renderLabels(query.labels)}`;
-  // let queryString = `${query.metric ?? ''}`;
   queryString = renderOperations(queryString, query.operations);
-
   if (!nested && hasBinaryOp(query) && Boolean(query.binaryQueries?.length)) {
     queryString = `(${queryString})`;
   }
 
-  queryString = renderBinaryQueries(queryString, query.binaryQueries);
+   queryString = renderBinaryQueries(queryString, query.binaryQueries);
 
   if (nested && (hasBinaryOp(query) || Boolean(query.binaryQueries?.length))) {
     queryString = `(${queryString})`;
   }
-
   return queryString;
 }
 
