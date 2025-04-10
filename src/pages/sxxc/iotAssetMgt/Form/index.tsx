@@ -150,7 +150,7 @@ export default function () {
     return (
       <Input
         key={"v" + v.Name}
-        placeholder={`请填写${v.Name}`}
+        placeholder={`请填写${v.Alias}`}
         name={v.Name}
       />
     );
@@ -208,7 +208,7 @@ export default function () {
                           <Col key={field.Name + findex_} span={12}>
                           
                             <Form.Item
-                              label={field.Name}
+                              label={field.Alias}
                               key={field.Name + "_" + findex_}
                               name={field.Name}
                               // rules={[

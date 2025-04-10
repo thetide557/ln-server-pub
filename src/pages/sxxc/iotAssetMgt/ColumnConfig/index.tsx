@@ -10,6 +10,7 @@ import {
   Menu,
   Dropdown,
   message,
+  Tooltip
 } from "antd";
 import { PlusSquareOutlined,MinusSquareFilled } from "@ant-design/icons";
 import { CommonStateContext } from "@/App";
@@ -25,6 +26,7 @@ interface FieldItem {
   Id: number | null;
   tempFieldId?: string;
   Name: string;
+  Alias: string;
   SortOrder: number | null;
   DisplayOrder: number | null | undefined;
   PageId: number | null;
@@ -120,12 +122,36 @@ const FieldConfig = (props) => {
 
   // TODO:删除分页
   const handleDelPagination = (paginationId: string)=>{
-    setPaginationData(
-      paginationData.filter((page) => 
+    // 检查当前分页数量是否大于 1
+  if (paginationData.length > 1) {
+    const newData = paginationData.filter((page) => 
           page.PageId
             ? page.PageId !== paginationId
             : page.tempPageId !== paginationId
-    ))
+    )
+    // 更新显示列排序
+    const displayFields = getDisplayFields(newData).filter(field => field.DisplayOrder!== null && field.DisplayOrder!== undefined) ?.sort(
+      (a, b) => (a.DisplayOrder || 0) - (b.DisplayOrder || 0)
+    ); 
+    displayFields.forEach((field, index) => {
+      field.DisplayOrder = index + 1;
+    });
+    // 更新显示列字段的排序
+    newData?.forEach((page) => {
+      page.Attributes?.forEach((f) => {
+        const displayField = displayFields.find((item) => item.Id === f.Id);
+        if (displayField) {
+          f.DisplayOrder = displayField.DisplayOrder;
+        }
+      });
+    });
+    setPaginationData(newData);
+
+  }else {
+    // 当分页数量为 1 时，提示信息
+    message.warning('至少保留一个分页');
+  }
+    
   }
   // 添加字段行
   const handleAddRow = (paginationId: string) => {
@@ -144,6 +170,7 @@ const FieldConfig = (props) => {
                 Id: null,
                 tempFieldId: _.uniqueId("fields_"), // 新增临时ID
                 Name: "",
+                Alias: "",
                 SortOrder: null,
                 DisplayOrder: null,
                 PageId: page.PageId ? Number(page.PageId) : null,
@@ -429,7 +456,27 @@ const FieldConfig = (props) => {
 
   // 同步表单数据到分页数据
   const syncFormToState = (changedValues: any, allValues: any) => {
-    // console.log("allValues", allValues);
+    // console.log("allValues", changedValues,allValues);
+    // 判断 Name 是否发生变化
+    let pageIndex = undefined;
+    let attrIndex = undefined;
+    if (changedValues.paginationData) {
+      changedValues.paginationData.forEach((page,i) => {
+        if (page && page.Attributes) {
+          pageIndex = i
+          page.Attributes.forEach((attr,j) => {
+            if (attr && Object.prototype.hasOwnProperty.call(attr, 'Name')) {
+              attrIndex = j
+            }
+          })
+        }
+      });
+    }
+    // console.log("字段名称发生变化", pageIndex,attrIndex);
+    if(pageIndex !== undefined && attrIndex !== undefined){
+      allValues.paginationData[pageIndex].Attributes[attrIndex].Alias = ''
+    }
+
     // 将表单数据转换为与分页数据状态相同的结构
     const formPages: PageConfig[] = allValues.paginationData.map(
       (formPage: any, index: number) => ({
@@ -443,6 +490,7 @@ const FieldConfig = (props) => {
               paginationData[index]?.Attributes[fieldIndex].PageId ||
               Number(formPage.PageId), // 保留原始PageId
             TypeId: typeId,
+            Alias: formField.Alias || fieldsList.find((item) => item.Name === formField.Name)?.Alias,
           })) || [],
       })
     );
@@ -521,7 +569,7 @@ const FieldConfig = (props) => {
     <Modal
       visible={open}
       title="字段配置"
-      width={800}
+      width={850}
       onOk={handleOk}
       onCancel={handleCancel}
     >
@@ -569,7 +617,7 @@ const FieldConfig = (props) => {
                     validator: (_, value) => {
                       const duplicateNames = paginationData.filter(
                         (page, index) =>
-                          index !== paginationIndex && page.PageName === value
+                          index !== paginationIndex && page.PageName && page.PageName === value
                       );
                       return duplicateNames.length === 0
                         ? Promise.resolve()
@@ -665,19 +713,45 @@ const FieldConfig = (props) => {
                           "Name",
                         ]}
                         rules={[
+                          // TODO:字段名重复值校验
                           {
                             validator: (_, value) => {
-                              const duplicates = pagination.Attributes.filter(
-                                (f) => f.Name === value
-                              );
-                              return duplicates.length <= 1
-                                ? Promise.resolve()
-                                : Promise.reject("字段名称重复");
+                              let isDuplicate = false;
+                              // 遍历所有分页数据
+                              paginationData.forEach((page, pageIndex) => {
+                                page.Attributes.forEach((attr, attrIndex) => {
+                                  // 排除当前字段本身
+                                  if (
+                                    pageIndex !== paginationIndex ||
+                                    attrIndex !== fieldIndex
+                                  ) {
+                                    if (attr.Name && attr.Name === value) {
+                                      isDuplicate = true;
+                                    }
+                                  }
+                                });
+                              });
+                              return isDuplicate
+                                ? Promise.reject("字段名称重复")
+                                : Promise.resolve();
                             },
                           },
                         ]}
                       >
-                        <Select placeholder="请输入字段" showSearch>
+                        <Select placeholder="请选择字段" showSearch 
+        //                 onChange={(value) => {
+        //   const selectedField = fieldsList.find((item) => item.Name === value);
+        //   console.log("111111",selectedField);
+        //   if (selectedField) {
+        //     form.setFieldsValue({
+        //       // [`paginationData[${paginationIndex}].Attributes[${fieldIndex}].Alias`]: selectedField.Alias,
+        //       // [['paginationData', paginationIndex, 'Attributes', fieldIndex, 'Alias'].join('.')]: selectedField.Alias
+        //       'paginationData':{[paginationIndex]:{'Attributes':{[fieldIndex]:{'Alias':selectedField.Alias}}}}
+        //     });
+            
+        //   }
+        // }}
+        >
                           {fieldsList.map((item) => {
                           return (
                             <Select.Option value={item.Name} key={item.Id}>
@@ -705,18 +779,48 @@ const FieldConfig = (props) => {
                     title: "中文名称",
                     dataIndex: "Alias",
                     width: 150,
+                    // ellipsis: true,
                     render: (_, record, fieldIndex) => (
-                      <Form.Item
-                        name={[
-                          "paginationData",
-                          paginationIndex,
-                          "Attributes",
-                          fieldIndex,
-                          "Alias",
-                        ]}
-                      >
-                        <Input placeholder='请输入字段中文名' />
-                      </Form.Item>
+                      <Tooltip title={record.Alias || ''}> 
+                        <Form.Item
+                          name={[
+                            "paginationData",
+                            paginationIndex,
+                            "Attributes",
+                            fieldIndex,
+                            "Alias",
+                          ]}
+                          rules={[
+                            // { required: true },
+                            { required: Boolean(record.Name), message: '请输入中文名称' },
+                            // TODO:字段中文名称重复值校验
+                            {
+                              validator: (_, value) => {
+                                let isDuplicate = false;
+                                // 遍历所有分页数据
+                                paginationData.forEach((page, pageIndex) => {
+                                  page.Attributes.forEach((attr, attrIndex) => {
+                                    // 排除当前字段本身
+                                    if (
+                                      pageIndex !== paginationIndex ||
+                                      attrIndex !== fieldIndex
+                                    ) {
+                                      if (attr.Alias && attr.Alias === value) {
+                                        isDuplicate = true;
+                                      }
+                                    }
+                                  });
+                                });
+                                return isDuplicate
+                                  ? Promise.reject("中文名称重复")
+                                  : Promise.resolve();
+                              },
+                            },
+                          ]}
+                        > 
+                          <Input placeholder='请输入中文名称' maxLength={20}/>
+                        </Form.Item>
+                      </Tooltip>
                     ),
                   },
                   {
@@ -733,18 +837,18 @@ const FieldConfig = (props) => {
                         ]}
                         rules={[
                           // { required: true },
-                          { required: Boolean(record.Name), message: '请选择分页字段排序' }
-                          // {
-                          //   validator: (_, value) => {
-                          //     const duplicates = pagination.Attributes.filter(
-                          //       (f: FieldItem, idx: number) =>
-                          //         idx !== fieldIndex && f.SortOrder === value
-                          //     );
-                          //     return duplicates.length === 0
-                          //       ? Promise.resolve()
-                          //       : Promise.reject("该排序值已被使用");
-                          //   },
-                          // },
+                          { required: Boolean(record.Name), message: '请选择分页字段排序' },
+                          {
+                            validator: (_, value) => {
+                              const duplicates = pagination.Attributes.filter(
+                                (f: FieldItem, idx: number) =>
+                                  idx !== fieldIndex && f.SortOrder && f.SortOrder === value
+                              );
+                              return duplicates.length === 0
+                                ? Promise.resolve()
+                                : Promise.reject("分页排序值重复");
+                            },
+                          },
                         ]}
                       >
                       <Select placeholder="请选择排序">
@@ -778,8 +882,44 @@ const FieldConfig = (props) => {
                           fieldIndex,
                           "DisplayOrder",
                         ]}
+                        // TODO:显示列排序值重复校验
                         rules={[
-                          { required: Boolean(record.Name) && record.DisplayOrder === undefined, message: '请选择显示列排序' }
+                          { required: Boolean(record.Name) && record.DisplayOrder === undefined, message: '请选择显示列排序' },
+                          // {
+                          //   validator: (_, value) => {
+                          //     const displayFields = getDisplayFields(paginationData);
+                          //     const duplicates = displayFields.filter(
+                          //       (f) =>
+                          //         f.DisplayOrder === value
+                          //     );
+                          //     return duplicates.length === 0
+                          //       ? Promise.resolve()
+                          //       : Promise.reject("该显示列排序值已被使用");
+                          //   },
+                          // },
+                          {
+                            validator: (_, value) => {
+                              let isDuplicate = false;
+                              // 遍历所有分页数据
+                              paginationData.forEach((page, pageIndex) => {
+                                page.Attributes.forEach((attr, attrIndex) => {
+                                  // 排除当前字段本身
+                                  if (
+                                    pageIndex !== paginationIndex ||
+                                    attrIndex !== fieldIndex
+                                  ) {
+                                    if (attr.DisplayOrder && attr.DisplayOrder === value) {
+                                      isDuplicate = true;
+                                    }
+                                  }
+                                });
+                              });
+                              return isDuplicate
+                                ? Promise.reject("显示列排序值重复")
+                                : Promise.resolve();
+                            },
+                          },
+                          
                         ]}
                       >
                       <Select

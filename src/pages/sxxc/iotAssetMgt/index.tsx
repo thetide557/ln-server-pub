@@ -66,6 +66,7 @@ import {
   getIotDeviceList,
   getIotTreeList,
   delIotTreeNode,
+  getIotAttributeList
 } from '@/services/sxxc/iotAssets';
 
 export enum OperateType {
@@ -209,22 +210,10 @@ export default function () {
   function processDataAndFilter(data) {
     let selectedColumn: any[] = [];
     let filterArr: any[] = [];
-    let diaplayAttributes: any[] = [];
-    data?.map((page) => {
-      const filteredAttributes = page.Attributes.filter(
-        (attr) =>
-          attr.pageId !== -1 &&
-          attr.DisplayOrder !== null &&
-          attr.DisplayOrder !== 0
-      );
-      diaplayAttributes = [...diaplayAttributes, ...filteredAttributes];
-    });
-    const sortedAttributes = diaplayAttributes.sort(
-      (a, b) => a.DisplayOrder - b.DisplayOrder
-    );
-    console.log('显示列', sortedAttributes);
-    const columnData = sortedAttributes.map((attr) => ({
-      title: attr.Name,
+
+    console.log('显示列', data);
+    const columnData = data.map((attr) => ({
+      title: attr.Alias,
       dataIndex: attr.Name,
       align: 'center',
       width: 120,
@@ -235,21 +224,21 @@ export default function () {
       },
     }));
 
-    const filterData = sortedAttributes.map((attr) => ({
+    const filterData = data.map((attr) => ({
       name: attr.Name,
-      label: attr.Name,
+      label: attr.Alias,
     }));
 
     selectedColumn = selectedColumn.concat(columnData);
     filterArr = filterArr.concat(filterData);
     return { selectedColumn, filterArr };
   }
-  // TODO:重新 调接口  获取显示列 ，下拉筛选 label设为字段中文名
+  // 获取显示列 ，下拉筛选 label设为字段中文名
   const getPagesByType = (typeId) => {
     setSelectColumns(fixColumns);
     setFilterParam('');
     setSearchVal(null);
-    getIotPage({ typeId }).then((res) => {
+    getIotAttributeList({ typeId ,showDisplayed:true}).then((res) => {
       const { dat } = res;
       const { selectedColumn, filterArr } = processDataAndFilter(dat);
       // 显示列
@@ -400,6 +389,7 @@ export default function () {
     setCurrent(1);
     setFilterParam('');
     setSearchVal(null);
+    getPagesByType(node.nodeId);
     // localStorage.setItem('left_iotasset_type', node.nodeId);
   };
 
