@@ -167,34 +167,47 @@ const AiRobotSse = function () {
     return answers;
   };
 
-  //   发送ai请求
+    /**
+   * 发送AI请求函数
+   * 
+   * 该函数用于处理用户输入，发送AI请求，并处理返回的流式响应。函数会更新AI消息列表，并处理可能的错误和超时情况。
+   * 
+   */
   const sendAi = (e: any) => {
+    // 验证表单字段并获取用户输入
     form.validateFields().then(async (values) => {
       console.log(values);
+      // 检查用户输入是否有效且当前没有正在进行的请求
       if (values.note?.trim() && !loading) {
         setTaskId(undefined);
         try {
           let aiStr = "";
+          // 构造请求数据
           const data = {
             inputs: { 角色: "羚牛一体化运维平台助手" },
             query: `${values.note.trim()}`,
             user: localStorage.getItem("username"),
-            response_mode: "streaming",
+            response_mode: "streaming", // 流式响应模式
           };
+          // 更新AI消息列表，添加用户输入和空的AI响应
           setAiMessages([
             ...aiMessages,
             { text: values.note, sender: "user" },
             { text: "", sender: "ai" },
           ]);
+          // 清空输入框并滚动到消息列表底部
           form.setFieldsValue({ note: "" });
           aiRef.current.scrollTop = aiRef.current.scrollHeight;
+          // 处理文本区域焦点
           if (textAreaRef.current) {
             if (e) e.preventDefault();
             textAreaRef.current.selectionStart = 0;
             textAreaRef.current.selectionEnd = 0;
             textAreaRef.current.focus();
           }
+          // 设置加载状态为true
           setLoading(true);
+          // 发送AI请求
           const response: any = await fetchWithTimeout(
             "/v1/chat-messages",
             {
@@ -207,31 +220,41 @@ const AiRobotSse = function () {
             },
             60000
           );
-
+  
+          // 处理请求失败的情况
           if (!response.ok) {
             setLoading(false);
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-
+  
+          // 读取流式响应
           const reader = response.body.getReader();
-
+  
+          /**
+           * 读取流式响应的递归函数
+           * 
+           * 该函数会不断读取流式响应的数据块，并更新AI消息列表。如果流式响应结束或发生错误，会进行相应的处理。
+           */
           async function readStream() {
             try {
               const { done, value } = await reader.read();
+              // 如果流式响应结束，设置加载状态为false
               if (done) {
                 console.log("Streaming finished.");
                 setLoading(false);
                 return;
               }
+              // 解码数据块并处理
               const textDecoder = new TextDecoder("utf-8");
               const chunkText = textDecoder.decode(value, { stream: true });
               let str1 = processChunk(chunkText);
               aiStr += str1;
               // console.log("aiStr", aiStr);
+              // 检查是否包含think标签
               const thinkRegex = /<think>(.*?)<\/think>(.*)/s;
               const match = aiStr.match(thinkRegex);
-
               if (match) {
+                // 如果包含think标签，分别处理think标签内外的内容
                 const thinkContent = match[1].trim();
                 const afterThinkContent = match[2].trim();
                 // console.log("think标签中的内容:", thinkContent);
@@ -240,28 +263,25 @@ const AiRobotSse = function () {
                   ...aiMessages,
                   { text: values.note, sender: "user" },
                   {
-                    text: marked(aiStr),
+                    text: marked.parse(aiStr),
                     sender: "ai",
-                    thinkContent: marked(thinkContent),
-                    afterThinkContent: marked(afterThinkContent),
+                    thinkContent: marked.parse(thinkContent),
+                    afterThinkContent: marked.parse(afterThinkContent),
                   },
                 ]);
               } else {
                 // console.log("未找到think标签");
+                // 如果不包含think标签，直接更新AI消息列表
                 setAiMessages([
                   ...aiMessages,
                   { text: values.note, sender: "user" },
-                  { text: marked(aiStr), sender: "ai" },
+                  { text: marked.parse(aiStr), sender: "ai" },
                 ]);
               }
-
-              // setAiMessages([
-              //   ...aiMessages,
-              //   { text: values.note, sender: "user" },
-              //   { text: marked(aiStr), sender: "ai" },
-              // ]);
+              // 继续读取流式响应
               readStream();
             } catch (error) {
+              // 处理流式响应中的错误
               if (error.name === "AbortError") {
                 setAiMessages([
                   ...aiMessages,
@@ -277,9 +297,9 @@ const AiRobotSse = function () {
           }
           readStream();
         } catch (error: any) {
+          // 处理请求中的错误
           if (error.name === "AbortError") {
             setLoading(false);
-            // console.log("flag", flag);
             if (flag) {
               console.log("请求超时");
               setAiMessages([
@@ -475,7 +495,7 @@ const AiRobotSse = function () {
                                               defaultActiveKey={[index]}
                                             >
                                               <Panel
-                                                header="已深度思考"
+                                                header="深度思考完成"
                                                 key={index}
                                               >
                                                 <div
@@ -502,22 +522,24 @@ const AiRobotSse = function () {
                                           //     __html: message.text,
                                           //   }}
                                           // ></div>
-                                          <Collapse
-                                            bordered={false}
-                                            defaultActiveKey={[index]}
-                                          >
-                                            <Panel
-                                              header={"深度思考中..."}
-                                              key={index}
+                                          message.text.length > 1 && (
+                                            <Collapse
+                                              bordered={false}
+                                              defaultActiveKey={[index]}
                                             >
-                                              <div
-                                                className="ai-think"
-                                                dangerouslySetInnerHTML={{
-                                                  __html: message.text,
-                                                }}
-                                              ></div>
-                                            </Panel>
-                                          </Collapse>
+                                              <Panel
+                                                header={"深度思考中..."}
+                                                key={index}
+                                              >
+                                                <div
+                                                  className="ai-think"
+                                                  dangerouslySetInnerHTML={{
+                                                    __html: message.text,
+                                                  }}
+                                                ></div>
+                                              </Panel>
+                                            </Collapse>
+                                          )
                                         )}
                                       </div>
                                     ) : (
