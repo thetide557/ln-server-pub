@@ -294,11 +294,11 @@ export default function () {
                 const query: PromVisualQuery = {
                   metric: record.monitoring_sql,
                   labels: [
-                    {
-                      label: 'asset_id',
-                      value: record.asset_id,
-                      op: '=',
-                    },
+                    // {
+                    //   label: 'asset_id',
+                    //   value: record.asset_id,
+                    //   op: '=',
+                    // },
                   ],
                   operations: [],
                 };

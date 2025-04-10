@@ -102,6 +102,11 @@ export default defineConfig({
         target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.23.134:17000/',
         changeOrigin: true,
+      },
+      '/v1': {
+        // target: 'http://10.250.250.24:18000/',
+        target: 'http://10.250.250.9:17000/',
+        changeOrigin: true,
       }
     },
   },

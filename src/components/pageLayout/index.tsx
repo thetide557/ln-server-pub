@@ -63,6 +63,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');
+            localStorage.removeItem('deepseek_token');
             history.push('/login');
           });
         }}
