@@ -214,7 +214,7 @@ const AiRobotSse = function () {
               method: "POST",
               headers: {
                 "Content-type": "application/json",
-                Authorization: "Bearer app-46pUHSbpV4pWgGnftV3ZeyiO",
+                Authorization: `Bearer ${localStorage.getItem("deepseek_token")}`,
               },
               body: JSON.stringify(data),
             },
@@ -356,7 +356,7 @@ const AiRobotSse = function () {
           method: "POST",
           headers: {
             "Content-type": "application/json",
-            Authorization: "Bearer app-46pUHSbpV4pWgGnftV3ZeyiO",
+            Authorization: `Bearer ${localStorage.getItem("deepseek_token")}`,
           },
           body: JSON.stringify(data),
         },

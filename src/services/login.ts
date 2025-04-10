@@ -131,3 +131,10 @@ export const getRSAConfig = function () {
     method: RequestMethod.Get,
   });
 };
+
+// ai的token
+export function getDeepseektoken() {
+  return request(`/api/n9e/auth/deepseektoken`, {
+    method: RequestMethod.Get,
+  });
+}

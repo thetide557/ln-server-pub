@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
-import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, getRSAConfig } from '@/services/login';
+import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, getRSAConfig, getDeepseektoken } from '@/services/login';
 import './login.less';
 // import cookie from "react-cookies";
 // @ts-ignore
@@ -158,6 +158,10 @@ export default function Login() {
         localStorage.setItem('refresh_token', refresh_token);
         // 资产管理默认左侧树
         localStorage.setItem('left_asset_type', '-1');
+        // 获取deepseek的toekn
+        getDeepseektoken().then(res => {
+          localStorage.setItem('deepseek_token', res.dat.deepseek_token);
+        })
         if (!err) {
           getBigScreen().then(res => {
             if (res.dat.list.length > 0) {
