@@ -44,7 +44,7 @@ import TopMenu from './components/menu/topMenuXH'; //西航版本
 import { useLocalStorage } from 'react-use';
 import { getAlertEventsById, getHistoryEventsById, getWarningChart, setAlartMutes, updataprocess } from '@/pages/sxxc/screenView/alarmApi';
 import AlarmChartLine from '@/pages/sxxc/screenView/alarmChartLine';
-import AiRobot from '@/pages/sxxc/aiRobot';
+import AiRobotSse from '@/pages/sxxc/aiRobot/sse';
 
 interface IProfile {
   admin?: boolean;
@@ -557,7 +557,7 @@ function App() {
               <>
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
-                <AiRobot />
+                <AiRobotSse />
                 <div className='content-box'>
                   <Content />
                 </div>

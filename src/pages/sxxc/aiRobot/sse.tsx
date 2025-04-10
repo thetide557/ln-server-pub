@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Draggable from "react-draggable";
 import { useHistory, useLocation } from "react-router-dom";
-import { Input, Form } from "antd";
+import { Input, Form, Collapse, Divider } from "antd";
 import {
   CloseOutlined,
   SyncOutlined,
@@ -13,6 +13,7 @@ import { getShowDeepSeek } from "@/services/common";
 import "./index.less";
 
 const AiRobotSse = function () {
+  const { Panel } = Collapse;
   // ai机器人
   const [aiShow, setAiShow] = useState(false);
   const [form] = Form.useForm();
@@ -141,11 +142,10 @@ const AiRobotSse = function () {
 
     buffer += chunk;
     const lines = buffer.split("\n");
-    console.log("lines", lines);
 
     buffer = lines.pop() || ""; // 保留未完成的一行
     let answers = "";
-    console.log("lines", lines);
+    // console.log("lines", lines);
 
     lines.forEach((line) => {
       if (line.startsWith("data:")) {
@@ -227,13 +227,39 @@ const AiRobotSse = function () {
               const chunkText = textDecoder.decode(value, { stream: true });
               let str1 = processChunk(chunkText);
               aiStr += str1;
-              console.log("aiStr", aiStr);
+              // console.log("aiStr", aiStr);
+              const thinkRegex = /<think>(.*?)<\/think>(.*)/s;
+              const match = aiStr.match(thinkRegex);
 
-              setAiMessages([
-                ...aiMessages,
-                { text: values.note, sender: "user" },
-                { text: marked(aiStr), sender: "ai" },
-              ]);
+              if (match) {
+                const thinkContent = match[1].trim();
+                const afterThinkContent = match[2].trim();
+                // console.log("think标签中的内容:", thinkContent);
+                // console.log("think标签后的内容:", afterThinkContent);
+                setAiMessages([
+                  ...aiMessages,
+                  { text: values.note, sender: "user" },
+                  {
+                    text: marked(aiStr),
+                    sender: "ai",
+                    thinkContent: marked(thinkContent),
+                    afterThinkContent: marked(afterThinkContent),
+                  },
+                ]);
+              } else {
+                // console.log("未找到think标签");
+                setAiMessages([
+                  ...aiMessages,
+                  { text: values.note, sender: "user" },
+                  { text: marked(aiStr), sender: "ai" },
+                ]);
+              }
+
+              // setAiMessages([
+              //   ...aiMessages,
+              //   { text: values.note, sender: "user" },
+              //   { text: marked(aiStr), sender: "ai" },
+              // ]);
               readStream();
             } catch (error) {
               if (error.name === "AbortError") {
@@ -243,20 +269,17 @@ const AiRobotSse = function () {
                   { text: " ", sender: "ai" },
                 ]);
                 console.log("流式请求已中止");
-                setTaskId(undefined)
-                setLoading(false);
               } else {
                 console.error("Error streaming AI text:", error);
-                setTaskId(undefined)
-                setLoading(false);
               }
+              setLoading(false);
             }
           }
           readStream();
         } catch (error: any) {
           if (error.name === "AbortError") {
             setLoading(false);
-            console.log("flag", flag);
+            // console.log("flag", flag);
             if (flag) {
               console.log("请求超时");
               setAiMessages([
@@ -288,7 +311,6 @@ const AiRobotSse = function () {
 
   const sendAsk = (item, e) => {
     form.setFieldsValue({ note: item });
-    setTaskId(undefined);
     sendAi(e);
   };
 
@@ -320,29 +342,25 @@ const AiRobotSse = function () {
         },
         60000
       ).then((response) => {
-        setTaskId(undefined);
         console.log("任务已停止");
       });
     } else {
       // 如果不存在 taskId，中止当前请求并重新创建 AbortController
       if (controller) {
-        setTaskId(undefined);
-        setLoading(false);
-        console.log('终止1');
         controller.abort();
         setController(new AbortController());
-        console.log('终止2');
+        console.log("终止");
       }
     }
   };
 
-  useEffect(() => {
-    console.log("aiMessages", aiMessages);
-  }, [aiMessages]);
+  // useEffect(() => {
+  //   console.log("aiMessages", aiMessages);
+  // }, [aiMessages]);
 
-  useEffect(() => {
-    console.log("taskId", taskId);
-  }, [taskId]);
+  // useEffect(() => {
+  //   console.log("taskId", taskId);
+  // }, [taskId]);
 
   return (
     <>
@@ -447,12 +465,61 @@ const AiRobotSse = function () {
                                         : "ai-answer"
                                     }
                                   >
-                                    {message.text && message.text.length > 0 ? (
-                                      <div
-                                        dangerouslySetInnerHTML={{
-                                          __html: message.text,
-                                        }}
-                                      ></div>
+                                    {message.text?.length > 0 ? (
+                                      <div className="ai-answer-content">
+                                        {message.afterThinkContent?.length >
+                                        0 ? (
+                                          <>
+                                            <Collapse
+                                              bordered={false}
+                                              defaultActiveKey={[index]}
+                                            >
+                                              <Panel
+                                                header="已深度思考"
+                                                key={index}
+                                              >
+                                                <div
+                                                  className="ai-think"
+                                                  dangerouslySetInnerHTML={{
+                                                    __html:
+                                                      message.thinkContent,
+                                                  }}
+                                                ></div>
+                                              </Panel>
+                                            </Collapse>
+                                            <Divider />
+                                            <div
+                                              dangerouslySetInnerHTML={{
+                                                __html:
+                                                  message.afterThinkContent,
+                                              }}
+                                            ></div>
+                                          </>
+                                        ) : (
+                                          // <div
+                                          //   className="ai-think"
+                                          //   dangerouslySetInnerHTML={{
+                                          //     __html: message.text,
+                                          //   }}
+                                          // ></div>
+                                          <Collapse
+                                            bordered={false}
+                                            defaultActiveKey={[index]}
+                                          >
+                                            <Panel
+                                              header={"深度思考中..."}
+                                              key={index}
+                                            >
+                                              <div
+                                                className="ai-think"
+                                                dangerouslySetInnerHTML={{
+                                                  __html: message.text,
+                                                }}
+                                              ></div>
+                                            </Panel>
+                                          </Collapse>
+                                        )}
+                                      </div>
                                     ) : (
                                       <SyncOutlined spin />
                                     )}
