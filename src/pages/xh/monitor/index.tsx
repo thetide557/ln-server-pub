@@ -293,13 +293,13 @@ export default function () {
               onClick={() => {
                 const query: PromVisualQuery = {
                   metric: record.monitoring_sql,
-                  labels: [
-                    {
-                      label: 'asset_id',
-                      value: record.asset_id,
-                      op: '=',
-                    },
-                  ],
+                  // labels: [
+                  //   {
+                  //     label: 'asset_id',
+                  //     value: record.asset_id,
+                  //     op: '=',
+                  //   },
+                  // ],
                   operations: [],
                 };
                 const prom_ql = renderQuery(query);
