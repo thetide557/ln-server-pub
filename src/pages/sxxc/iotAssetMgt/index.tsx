@@ -236,6 +236,7 @@ export default function () {
   // 获取显示列 ，下拉筛选 label设为字段中文名
   const getPagesByType = (typeId) => {
     setSelectColumns(fixColumns);
+    setQueryFilter([]);
     setFilterParam('');
     setSearchVal(null);
     getIotAttributeList({ typeId ,showDisplayed:true}).then((res) => {

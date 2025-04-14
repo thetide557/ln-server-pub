@@ -155,9 +155,11 @@ const AccordionModal = (props: any) => {
               { required: level === 2, message: "请选择分组内的设备类型" },
             ]}
           >
+            {/* 当有多级分组时，上层分级应该禁用编辑中的分组设备 */}
             <Select
               mode="multiple"
               placeholder="请选择分组内的设备类型"
+              disabled={curGroup.TypeIds == "-1" && curGroup.subNode?.length > 0}
               onChange={handleChange}
               allowClear
               dropdownRender={(menu) => (

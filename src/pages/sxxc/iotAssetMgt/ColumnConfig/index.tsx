@@ -473,8 +473,11 @@ const FieldConfig = (props) => {
       });
     }
     // console.log("字段名称发生变化", pageIndex,attrIndex);
+    // 字段中文名称默认值设置
     if(pageIndex !== undefined && attrIndex !== undefined){
-      allValues.paginationData[pageIndex].Attributes[attrIndex].Alias = ''
+      // allValues.paginationData[pageIndex].Attributes[attrIndex].Alias = ''
+      const updateAttr = allValues.paginationData[pageIndex].Attributes[attrIndex]
+      updateAttr. Alias = fieldsList.find((item) => item.Name === updateAttr.Name)?.Alias || '';
     }
 
     // 将表单数据转换为与分页数据状态相同的结构
@@ -490,7 +493,9 @@ const FieldConfig = (props) => {
               paginationData[index]?.Attributes[fieldIndex].PageId ||
               Number(formPage.PageId), // 保留原始PageId
             TypeId: typeId,
-            Alias: formField.Alias || fieldsList.find((item) => item.Name === formField.Name)?.Alias,
+            // Alias: formField.Alias || fieldsList.find((item) => item.Name === formField.Name)?.Alias,
+            // 去除 Alias 属性值的前后空格
+            Alias:formField.Alias.trim()            
           })) || [],
       })
     );
