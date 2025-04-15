@@ -162,6 +162,7 @@ const AccordionModal = (props: any) => {
               disabled={curGroup.TypeIds == "-1" && curGroup.subNode?.length > 0}
               onChange={handleChange}
               allowClear
+              optionFilterProp='children'
               dropdownRender={(menu) => (
                 <>
                   {menu}

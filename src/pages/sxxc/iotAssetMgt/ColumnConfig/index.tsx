@@ -228,7 +228,8 @@ const FieldConfig = (props) => {
         const updatedFields = [...page.Attributes];
         // 更新状态
         updatedFields.forEach((f) => {
-          const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          // const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          const id = f.Id || f.tempFieldId;
           if (fieldIds.includes(id)) {
             // if (f.DisplayOrder !== null) {
             f.DisplayOrder = null;
@@ -270,6 +271,7 @@ const FieldConfig = (props) => {
 
   // 批量设为显示列
   const handleBatchDisplay = (paginationId: string, fieldIds: any[]) => {
+    console.log("设为显示列", fieldIds);
     const newData = paginationData.map((page) => {
       if (
         page.PageId
@@ -284,7 +286,8 @@ const FieldConfig = (props) => {
         const updatedFields = [...page.Attributes];
         updatedFields.forEach((f) => {
           // if (fieldIds.includes(f.Id) && f.DisplayOrder === null && f.DisplayOrder=== 0) {
-          const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          // const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          const id = f.Id || f.tempFieldId;
           if (fieldIds.includes(id)) {
             if (f.DisplayOrder === null) {
               f.DisplayOrder = undefined; // 初始值为 undefined
@@ -344,7 +347,8 @@ const FieldConfig = (props) => {
         }
         // console.log("fieldIds删除", fieldIds);
         const remainFields = page.Attributes.filter((f) => {
-          const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          // const id = f.Id!== null && f.Id!== undefined? f.Id : f.tempFieldId;
+          const id = f.Id || f.tempFieldId;
           return !fieldIds.includes(id);
         }) || [];
         console.log("删除后剩余分页排序的字段", remainFields);
@@ -456,7 +460,7 @@ const FieldConfig = (props) => {
 
   // 同步表单数据到分页数据
   const syncFormToState = (changedValues: any, allValues: any) => {
-    // console.log("allValues", changedValues,allValues);
+    console.log("allValues", changedValues,allValues);
     // 判断 Name 是否发生变化
     let pageIndex = undefined;
     let attrIndex = undefined;
@@ -477,7 +481,7 @@ const FieldConfig = (props) => {
     if(pageIndex !== undefined && attrIndex !== undefined){
       // allValues.paginationData[pageIndex].Attributes[attrIndex].Alias = ''
       const updateAttr = allValues.paginationData[pageIndex].Attributes[attrIndex]
-      updateAttr. Alias = fieldsList.find((item) => item.Name === updateAttr.Name)?.Alias || '';
+      updateAttr.Alias = fieldsList.find((item) => item.Name === updateAttr.Name)?.Alias || '';
     }
 
     // 将表单数据转换为与分页数据状态相同的结构
@@ -487,8 +491,9 @@ const FieldConfig = (props) => {
         ...formPage,
         Attributes:
           formPage.Attributes?.map((formField: any, fieldIndex: number) => ({
-            Id: fieldsList.find((item) => item.Name === formField.Name)?.Id,
+            ...paginationData[index]?.Attributes[fieldIndex],
             ...formField,
+            Id: fieldsList.find((item) => item.Name === formField.Name)?.Id,
             PageId:
               paginationData[index]?.Attributes[fieldIndex].PageId ||
               Number(formPage.PageId), // 保留原始PageId
@@ -693,7 +698,7 @@ const FieldConfig = (props) => {
                   (f) => f.PageId !== -1
                 )}
                 // rowKey="Id"
-                rowKey={(record, index) => `${record.Id}_${index}`}
+                rowKey={(record) => `${record.Id || record.tempFieldId}_${record.Name}`}
                 pagination={false}
                 bordered
                 size="small"
@@ -759,7 +764,7 @@ const FieldConfig = (props) => {
         >
                           {fieldsList.map((item) => {
                           return (
-                            <Select.Option value={item.Name} key={item.Id}>
+                            <Select.Option value={item.Name} key={item.Id + item.Name}>
                               {item.Name}
                             </Select.Option>
                           );

@@ -153,6 +153,9 @@ export default function () {
       ellipsis: true,
       width: 130,
       render(text, record, index) {
+        if (!text) {
+          return '-';
+        }
         return moment(text).format("YYYY-MM-DD HH:mm:ss");
       },
       sorter: (a, b) => {
