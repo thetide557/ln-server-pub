@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import { marked } from "marked";
 import { getShowDeepSeek } from "@/services/common";
+import LoadingDots from '@/pages/sxxc/aiRobot/loading';
 import "./index.less";
 
 const AiRobotSse = function () {
@@ -52,6 +53,8 @@ const AiRobotSse = function () {
   const [controller, setController] = useState(new AbortController());
   const [deepseekShow, setDeepseekShow] = useState(true);
   const [taskId, setTaskId] = useState<any>(undefined);
+  // 请求成功与失败状态
+  const [success, setSuccess] = useState(false);
   let flag = false;
   // console.log('dsdf', pathname);
   let isScreen = true;
@@ -167,11 +170,11 @@ const AiRobotSse = function () {
     return answers;
   };
 
-    /**
+  /**
    * 发送AI请求函数
-   * 
+   *
    * 该函数用于处理用户输入，发送AI请求，并处理返回的流式响应。函数会更新AI消息列表，并处理可能的错误和超时情况。
-   * 
+   *
    */
   const sendAi = (e: any) => {
     // 验证表单字段并获取用户输入
@@ -214,25 +217,29 @@ const AiRobotSse = function () {
               method: "POST",
               headers: {
                 "Content-type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("deepseek_token")}`,
+                Authorization: `Bearer ${localStorage.getItem(
+                  "deepseek_token"
+                )}`,
               },
               body: JSON.stringify(data),
             },
             60000
           );
-  
+
           // 处理请求失败的情况
           if (!response.ok) {
+            setSuccess(false);
             setLoading(false);
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-  
+
           // 读取流式响应
           const reader = response.body.getReader();
-  
+          setSuccess(true);
+
           /**
            * 读取流式响应的递归函数
-           * 
+           *
            * 该函数会不断读取流式响应的数据块，并更新AI消息列表。如果流式响应结束或发生错误，会进行相应的处理。
            */
           async function readStream() {
@@ -280,7 +287,7 @@ const AiRobotSse = function () {
               }
               // 继续读取流式响应
               readStream();
-            } catch (error) {
+            } catch (error:any) {
               // 处理流式响应中的错误
               if (error.name === "AbortError") {
                 setAiMessages([
@@ -297,9 +304,10 @@ const AiRobotSse = function () {
           }
           readStream();
         } catch (error: any) {
+          setLoading(false);
+          setSuccess(false);
           // 处理请求中的错误
           if (error.name === "AbortError") {
-            setLoading(false);
             if (flag) {
               console.log("请求超时");
               setAiMessages([
@@ -317,6 +325,7 @@ const AiRobotSse = function () {
               ]);
             }
           } else {
+            console.log('无法访问');
             setAiMessages([
               ...aiMessages,
               { text: values.note, sender: "user" },
@@ -515,35 +524,40 @@ const AiRobotSse = function () {
                                               }}
                                             ></div>
                                           </>
-                                        ) : (
-                                          // <div
-                                          //   className="ai-think"
-                                          //   dangerouslySetInnerHTML={{
-                                          //     __html: message.text,
-                                          //   }}
-                                          // ></div>
-                                          message.text.length > 1 && (
-                                            <Collapse
-                                              bordered={false}
-                                              defaultActiveKey={[index]}
+                                        ) : // <div
+                                        //   className="ai-think"
+                                        //   dangerouslySetInnerHTML={{
+                                        //     __html: message.text,
+                                        //   }}
+                                        // ></div>
+                                        message.text.length > 1 && success ? (
+                                          <Collapse
+                                            bordered={false}
+                                            defaultActiveKey={[index]}
+                                          >
+                                            <Panel
+                                              header={"深度思考中..."}
+                                              key={index}
                                             >
-                                              <Panel
-                                                header={"深度思考中..."}
-                                                key={index}
-                                              >
-                                                <div
-                                                  className="ai-think"
-                                                  dangerouslySetInnerHTML={{
-                                                    __html: message.text,
-                                                  }}
-                                                ></div>
-                                              </Panel>
-                                            </Collapse>
-                                          )
+                                              <div
+                                                className="ai-think"
+                                                dangerouslySetInnerHTML={{
+                                                  __html: message.text,
+                                                }}
+                                              ></div>
+                                            </Panel>
+                                          </Collapse>
+                                        ) : (
+                                          <div
+                                            className="ai-think"
+                                            dangerouslySetInnerHTML={{
+                                              __html: message.text,
+                                            }}
+                                          ></div>
                                         )}
                                       </div>
                                     ) : (
-                                      <SyncOutlined spin />
+                                      <LoadingDots />
                                     )}
                                   </div>
                                 </div>

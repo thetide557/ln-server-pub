@@ -1,0 +1,334 @@
+// 告警弹窗
+.warn-dialog {
+  .ant-modal-header {
+    display: none;
+  }
+
+  .ant-modal-content {
+    width: 100%;
+    height: 503px;
+    background: url(/image/alarm/dialog.png) no-repeat;
+    background-size: 100% 100%;
+    box-shadow: none;
+    color: #DCEEFF;
+
+    .ant-modal-close {
+      display: none;
+    }
+
+    .warn-header {
+      width: 100%;
+      height: 49px;
+      line-height: 49px;
+      text-align: right;
+      background: url(/image/alarm/title1.png) no-repeat;
+      background-size: 100% 100%;
+
+      .el-icon-close {
+        cursor: pointer;
+        margin-right: 10px;
+        font-size: 22px;
+        color: #72c7f4;
+        font-weight: 700;
+      }
+    }
+
+    .warn-cont {
+      .asset1 {
+        padding: 5px 10px 0;
+        width: 100%;
+        color: #dceeff;
+        font-family: SourceHanSansSC, SourceHanSansSC;
+
+        .t-row {
+          width: 400px;
+          height: 47px;
+          background: url("/image/alarm/title2.png") no-repeat;
+          background-size: 100% 100%;
+          margin-left: -20px;
+
+          .col1 {
+            margin-top: -16px;
+            padding-left: 47px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            .w-title {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          }
+
+          .col2 {
+            display: flex;
+            margin-top: -10px;
+
+            >div {
+              cursor: pointer;
+              text-align: center;
+              width: 133px;
+              height: 37px;
+              line-height: 37px;
+              margin-right: 10px;
+              background: url("/image/alarm/btn.png") no-repeat;
+              background-size: 100% 100%;
+              font-size: 14px;
+              color: #ffffff;
+            }
+          }
+        }
+
+        .row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 17px;
+          width: 100%;
+          line-height: 35px;
+
+          .dian {
+            width: 27px;
+            height: 27px;
+            vertical-align: middle;
+          }
+
+          .col {
+            flex: 1;
+            display: flex;
+            align-items: center;
+
+            .serverity {
+              display: flex;
+              align-items: center;
+
+              .s-img {
+                >img {
+                  vertical-align: middle;
+                  width: 82px;
+                  height: 22px;
+                }
+              }
+            }
+          }
+
+          .col-zc {
+            overflow: hidden;
+           >span {
+             display: inline-block;
+             width: 98%;
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;
+           }
+         }
+
+          // .row1 {
+          //   display: inline-block;
+          //   width: 33%;
+          // }
+        }
+        .last-row {
+          .last-col1 {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            .last-title {
+              width: 91%;
+              display: flex;
+              align-items: center;
+              .reproml {
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+          }
+        }
+      }
+
+      .chart1 {
+        width: 98%;
+        height: 170px;
+      }
+    }
+  }
+}
+
+.warn-dialog1 {
+  .ant-modal-content {
+    width: 100%;
+    height: 240px;
+    background: url(/image/alarm/dialog.png) no-repeat;
+    background-size: 100% 100%;
+    box-shadow: none;
+    color: #DCEEFF;
+
+    .ant-modal-close {
+      display: none;
+    }
+
+    .header {
+      width: 100%;
+      height: 49px;
+      line-height: 49px;
+      text-align: right;
+      background: url("/image/alarm/title1.png") no-repeat;
+      background-size: 100% 100%;
+
+      .el-icon-close {
+        cursor: pointer;
+        margin-right: 10px;
+        font-size: 20px;
+        color: #72c7f4;
+        font-weight: 700;
+      }
+    }
+
+    .icont {
+      color: #fff;
+      padding: 20px;
+
+      .alarm-select {
+        .ant-select-selector {
+          background: #172F69;
+          color: #fff;
+          border-color: #409EFF;
+          // border: 0;
+        }
+
+        .ant-select-arrow {
+          color: #fff;
+        }
+      }
+    }
+
+    .dialog-footer {
+      display: flex;
+      position: absolute;
+      bottom: 10%;
+      left: 60%;
+
+      // transform: translateX(-50%);
+      >div {
+        cursor: pointer;
+        text-align: center;
+        width: 80px;
+        height: 37px;
+        line-height: 37px;
+        margin-right: 10px;
+        background: url("/image/alarm/btn.png") no-repeat;
+        background-size: 100% 100%;
+        font-size: 14px;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.warn-sel {
+  background: #0f2b4f;
+  color: #ccc;
+
+  .ant-select-item {
+    background: #0f2b4f;
+
+    // color: #fff;
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .ant-select-item-option-selected {
+    color: #fff;
+  }
+}
+
+.handle-warn {
+  .ant-modal-content {
+    color: #fff;
+      border: 0;
+      width: 400px;
+      // height: 503px;
+      background: url("/image/alarm/dialog.png") no-repeat;
+      background-size: 100% 100%;
+      background: #132B64;
+    .ant-modal-body {
+      .ant-modal-confirm-title {
+        color: #fff;
+        font-size: 18px;
+      }
+      .ant-modal-confirm-content {
+        color: #fff;
+        font-size: 15px;
+      }
+      .anticon-exclamation-circle {
+        margin-top: 3px;
+      }
+      .ant-btn {
+        cursor: pointer;
+        text-align: center;
+        width: 80px;
+        height: 37px;
+        // line-height: 37px;
+        // margin-right: 10px;
+        background: url("/image/alarm/btn.png") no-repeat;
+        background-size: 100% 100%;
+        font-size: 14px;
+        color: #ffffff;
+        border: 0;
+      }
+      .ant-btn-primary {
+        background-color: transparent!important;
+      }
+    }
+  }
+
+  .el-message-box__header {
+    .el-message-box__title {
+      color: #fff;
+      font-size: 18px;
+    }
+
+    .el-message-box__close {
+      color: #fff;
+    }
+  }
+
+  .el-message-box__content {
+    .el-message-box__message {
+      color: #fff;
+    }
+  }
+
+  .el-message-box__btns {
+    .save1 {
+      cursor: pointer;
+      text-align: center;
+      width: 80px;
+      height: 37px;
+      // line-height: 37px;
+      // margin-right: 10px;
+      background: url("/image/alarm/btn.png") no-repeat;
+      background-size: 100% 100%;
+      font-size: 14px;
+      color: #ffffff;
+      border: 0;
+    }
+
+    .cancel1 {
+      cursor: pointer;
+      text-align: center;
+      width: 80px;
+      height: 37px;
+      // line-height: 37px;
+      // margin-right: 10px;
+      background: url("/image/alarm/btn.png") no-repeat;
+      background-size: 100% 100%;
+      font-size: 14px;
+      color: #ffffff;
+      border: 0;
+    }
+  }
+}
