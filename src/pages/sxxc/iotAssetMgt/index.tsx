@@ -153,6 +153,9 @@ export default function () {
       ellipsis: true,
       width: 130,
       render(text, record, index) {
+        if (!text) {
+          return '-';
+        }
         return moment(text).format("YYYY-MM-DD HH:mm:ss");
       },
       sorter: (a, b) => {
@@ -201,9 +204,9 @@ export default function () {
 
   // 根据选择资产类型生成显示列
   useEffect(() => {
-    if (typeId != 0) {
+    // if (typeId != 0) {
       getPagesByType(typeId);
-    }
+    // }
   }, [typeId]);
 
   // 处理显示列和过滤字段
@@ -239,6 +242,9 @@ export default function () {
     setQueryFilter([]);
     setFilterParam('');
     setSearchVal(null);
+    if (typeId == 0) {
+      return;
+    }
     getIotAttributeList({ typeId ,showDisplayed:true}).then((res) => {
       const { dat } = res;
       const { selectedColumn, filterArr } = processDataAndFilter(dat);
@@ -285,6 +291,7 @@ export default function () {
     // treeQuery["groupIds"] = groupIds?.toString();
     // treeQuery["query"] = searchVal ? searchVal : undefined;
     // treeQuery["filter"] = filterParam ? filterParam : undefined;
+    setTreeList([]);
     getIotTreeList().then((res) => {
       const { dat } = res;
       if (dat) {
@@ -303,13 +310,24 @@ export default function () {
         ) {
           setParId(firstParentId);
         }
-        if (
-          localStorage.getItem("iotasset_expandedIds") == "[]" ||
-          localStorage.getItem("iotasset_expandedIds") == null
-        ) {
-          setExpandedIds(new Set(expand));
-        }
+        // if (
+        //   localStorage.getItem("iotasset_expandedIds") == "[]" ||
+        //   localStorage.getItem("iotasset_expandedIds") == null
+        // ) {
+        //   setExpandedIds(new Set(expand));
+        // }
+        setExpandedIds((prevExpandedIds) => {
+          const newSet = new Set(prevExpandedIds);
+          expand.forEach((id) => {
+            if (!newSet.has(id)) {
+              newSet.add(id);
+            }
+          });
+          return newSet;
+        });
         // console.log("firstParentId", firstTypeId, expand, firstParentId);
+      }else{
+        setTreeList([]);
       }
     });
   };
@@ -330,6 +348,8 @@ export default function () {
   // 资产清单表格数据获取
   const getTableData = () => {
     // const parentId = localStorage.getItem("left_iotparId");
+    setList([]);
+    setTotal(0);
     if (typeId != 0) {
       const param = {
         pageNum: current,
@@ -455,13 +475,41 @@ export default function () {
                           setParentId(parentId); // 父级id
                         } else if (key === 'del') {
                           Modal.confirm({
-                            title: '是否确认删除该分组？',
+                            title: "是否确认删除该分组？",
                             onOk: async () => {
                               delIotTreeNode({ nodeId: node.nodeId }).then(
                                 (res) => {
-                                  message.success('删除成功');
+                                  message.success("删除成功");
+                                  // 定义递归函数查找节点及其子节点
+                                  const findNode = (
+                                    nodes: any[],
+                                    targetId: number | undefined
+                                  ) => {
+                                    for (const node of nodes) {
+                                      if (node.nodeId === targetId) {
+                                        return true;
+                                      }
+                                      if (
+                                        node.subNode &&
+                                        node.subNode.length > 0
+                                      ) {
+                                        if (findNode(node.subNode, targetId)) {
+                                          return true;
+                                        }
+                                      }
+                                    }
+                                    return false;
+                                  };
+                                  // if(node.nodeId == parId){
+                                  //   setParId(-1);
+                                  //   setTypeId(0);
+                                  // }
+                                  if (findNode([node], parId)) {
+                                    setTypeId(0);
+                                    setParId(-1);
+                                  }
                                   getAssetTree();
-                                  setRefreshKey(_.uniqueId('refreshKey_'));
+                                  setRefreshKey(_.uniqueId("refreshKey_"));
                                 }
                               );
                             },

@@ -85,16 +85,19 @@ export default function () {
 
   // TODO:根据选择资产类型生成分页数据
   useEffect(() => {
-    if(typeId !=0){
+    // if(typeId !=0){
       getPagesByType(typeId);
-    }
+    // }
   }, [typeId]);
   const getPagesByType = (typeId: number) => {
+    if (!typeId) return;
     getIotPage({ typeId }).then((res) => {
       const { dat } = res;
       const newDat = dat.map((page) => ({
         ...page,
-        Attributes: page.Attributes.sort((a, b) => a.SortOrder - b.SortOrder),
+        // Attributes: page.Attributes.sort((a, b) => a.SortOrder - b.SortOrder),
+        // 过滤 PageId 不等于 -1 且 SortOrder 不等于 0 的项，然后排序
+        Attributes: page.Attributes?.filter(item => item.PageId !== -1 && item.SortOrder !== 0)?.sort((a, b) => a.SortOrder - b.SortOrder),
       }));
       setFormItems(newDat);
       setTabIndex(newDat[0].PageId)
@@ -105,6 +108,7 @@ export default function () {
   // TODO:获取资产详细信息，表单的回显值设置
   const loadAssetInfo = (id) => {
     if(id){
+      if (!typeId) return;
       const param = {
         id,
         typeId
