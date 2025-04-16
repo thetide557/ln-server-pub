@@ -38,10 +38,11 @@ const AlarmChartLine = function (props: any) {
   const chartRef = useRef(null);
 
   useEffect(() => {
-    console.log(curWarn);
+    // console.log(curWarn);
+    let myChart;
     if (curWarn.id) {
       const chartDom = chartRef.current;
-      let myChart = echarts.init(chartDom);
+      myChart = echarts.init(chartDom);
       let query = ''
       if (curWarn.rule_replay && curWarn.rule_replay.queries && curWarn.rule_replay.queries.length > 0) {
         query = curWarn.rule_replay.queries[0].prom_ql.replace(/\$asset_id/g, curWarn.asset_id)
