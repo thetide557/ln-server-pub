@@ -489,3 +489,18 @@ export const getAlertEventList = function (params) {
     params,
   }).then((res) => res?.dat?.list || []);
 };
+
+// 告警推荐方案
+export function getRuleSolution(arid) {
+  return request(`/api/n9e/alert-rule-solution/${arid}`, {
+    method: RequestMethod.Get,
+  });
+}
+
+export function getFeedbacks(flag, id) {
+  return request(`/api/n9e/alert-rule-solution/feedbacks/${id}?favorite=${flag}`, {
+    method: RequestMethod.Put,
+  });
+}
+
+

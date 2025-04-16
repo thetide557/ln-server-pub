@@ -1,75 +1,54 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Input, Modal, Collapse, Divider } from "antd";
+import { Input, Modal, Collapse, Divider, message } from "antd";
 import {
   UpOutlined,
   DownOutlined,
   SearchOutlined,
   SyncOutlined,
+  PauseCircleOutlined,
 } from "@ant-design/icons";
 import { marked } from "marked";
 import LoadingDots from "@/pages/sxxc/aiRobot/loading";
+import { getRuleSolution, getFeedbacks } from "@/services/warning";
 import "./index.less";
 import _ from "lodash";
+import { Div } from "lezer-promql";
 
-const Solution = () => {
+const Solution = (props) => {
   const { Panel } = Collapse;
+  const { ruleId } = props;
   const [show, setShow] = useState<boolean>(true);
-  const [solutions, setSolutions] = useState<any>([
-    {
-      title: "如何解决CPU占用率过高问题？",
-      keyWords: ["CPU", "占用率", "问题", "解决"],
-      content:
-        "CPU占用率过高问题，可能是由于程序运行过多导致，可以通过优化程序代码、减少程序运行次数、使用多核CPU等方法解决。",
-    },
-    {
-      title: "如何解决内存占用率过高问题？",
-      keyWords: ["内存", "占用率", "问题", "解决"],
-      content:
-        "内存占用率过高问题，可能是由于程序运行过多导致，可以通过优化程序代码、减少程序运行次数、使用多核CPU等方法解决。",
-    },
-    {
-      title: "如何解决内存占用率过高问题？",
-      keyWords: ["内存", "占用率", "问题", "解决"],
-      content:
-        "内存占用率过高问题，可能是由于程序运行过多导致，可以通过优化程序代码、减少程序运行次数、使用多核CPU等方法解决。",
-    },
-    {
-      title: "如何解决内存占用率过高问题asf法国还是你阿萨德刚是束带结发？",
-      keyWords: [
-        "内存",
-        "占用率",
-        "问题",
-        "解决",
-        "asf",
-        "法国",
-        "你阿萨德刚是束带结发",
-      ],
-      content:
-        "内存占用率过高问题，可能是由于程序运行过多导致，可以通过优化程序代码、减少程序运行次数、使用多核CPU等方法解决。ceshi可能是由于程序运行过多导致可能是由于程序运行过多导致123",
-    },
-    {
-      title: "如何解决内存占用率过高问题？",
-      keyWords: ["内存", "占用率", "问题", "解决"],
-      content:
-        "内存占用率过高问题，可能是由于程序运行过多导致，可以通过优化程序代码、减少程序运行次数、使用多核CPU等方法解决。",
-    },
-    {
-      title: "如何解决内存占用率过高问题？",
-      keyWords: ["内存", "占用率", "问题", "解决"],
-      content:
-        "内存占用率过高问题，可能是由于程序运行过多导致，可以通过优化程序代码、减少程序运行次数、使用多核CPU等方法解决。",
-    },
-  ]);
+  const [solutions, setSolutions] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [detail, setDetail] = useState<any>({});
   const [loading, setLoading] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>("");
   const [aiMessages, setAiMessages] = useState<any>({});
+  // 停止传任务id
   const [taskId, setTaskId] = useState<any>(undefined);
+  // 点赞功能传messageId
+  const [messageId, setMessageId] = useState<any>(undefined);
   // 终止请求
   const [controller, setController] = useState(new AbortController());
   // 请求成功与失败状态
   const [success, setSuccess] = useState(false);
+  const [feedback, setFeedback] = useState<any>(undefined);
+
   let flag = false;
+  // console.log("ruleId", ruleId);
+
+  const getSolutions = () => {
+    getRuleSolution(ruleId).then((res) => {
+      const arr = res.dat.slice(0, 3);
+      arr.forEach((item: any) => {
+        if (item.keywords) {
+          item.keywords = item.keywords.split("、");
+        }
+      });
+      // console.log(arr);
+      setSolutions(arr);
+    });
+  };
 
   // fetch请求超时
   const fetchWithTimeout = (url, options = {}, timeout = 60000) => {
@@ -103,6 +82,9 @@ const Solution = () => {
           if (parsedAnswer?.task_id) {
             setTaskId(parsedAnswer.task_id);
           }
+          if (parsedAnswer?.message_id) {
+            setMessageId(parsedAnswer.message_id);
+          }
           if (parsedAnswer?.answer) {
             answers = parsedAnswer.answer;
           }
@@ -121,7 +103,10 @@ const Solution = () => {
     }
     if (value.trim() && !loading) {
       setTaskId(undefined);
-      setAiMessages({});
+      setMessageId(undefined);
+      setFeedback(undefined);
+      setAiMessages({ text: "", sender: "ai" });
+      setQuery(value);
       try {
         let aiStr = "";
         // 构造请求数据
@@ -233,6 +218,7 @@ const Solution = () => {
   };
 
   const stopAi = () => {
+    if (!loading) return;
     // 更新全局状态，停止任务执行
     flag = false;
     console.log("taskId", taskId);
@@ -264,12 +250,47 @@ const Solution = () => {
     }
   };
 
+  const refreshAi = () => {
+    handleSearch(query);
+  };
+
   const handleDetail = (item: any) => {
     setIsModalOpen(true);
     setDetail(item);
   };
 
+  const handleBtn = (item: any, flag1: boolean, type: string) => {
+    getFeedbacks(flag1, item.id).then((_res) => {
+      message.success("操作成功");
+      // if (type === "card") {
+      getSolutions();
+      // }
+    });
+  };
+
+  const searchBtn = (flag1: string) => {
+    if (messageId) {
+      const data = { user: localStorage.getItem("username"), rating: flag1 };
+      fetchWithTimeout(
+        `/v1/messages/${messageId}/feedbacks`,
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("deepseek_token")}`,
+          },
+          body: JSON.stringify(data),
+        },
+        60000
+      ).then((response) => {
+        flag1 === "like" ? setFeedback("like") : setFeedback("dislike");
+        message.success("操作成功");
+      });
+    }
+  };
+
   useEffect(() => {
+    getSolutions();
     // 清理函数，确保在组件卸载时取消请求
     return () => {
       controller.abort();
@@ -307,7 +328,7 @@ const Solution = () => {
                     <div className="ai-card-item-title">{item.title}</div>
                     <div className="ai-card-item-wrap">
                       <div className="ai-keywords">
-                        {_.map(item.keyWords, (keyWord, index1) => {
+                        {_.map(item.keywords, (keyWord, index1) => {
                           return (
                             <div className="ai-keyword" key={index1}>
                               {keyWord}
@@ -315,13 +336,26 @@ const Solution = () => {
                           );
                         })}
                       </div>
-                      <div className="ai-card-item-content">{item.content}</div>
+
+                      <div className="ai-card-item-content">
+                        {item.introduction}
+                      </div>
                     </div>
                     <div className="ai-card-item-btn">
                       <div className="btn-left">
                         <div className="btn-left-icon">
-                          <img src="/image/solution/good1.png" alt="" />
-                          <img src="/image/solution/bad1.png" alt="" />
+                          <img
+                            title="喜欢"
+                            src="/image/solution/good1.png"
+                            alt=""
+                            onClick={() => handleBtn(item, true, "card")}
+                          />
+                          <img
+                            title="不喜欢"
+                            src="/image/solution/bad1.png"
+                            alt=""
+                            onClick={() => handleBtn(item, false, "card")}
+                          />
                         </div>
                       </div>
                       <div
@@ -350,13 +384,34 @@ const Solution = () => {
               <div className="ai-search-des">
                 <div className="l-des">内容由 AI 生成，请仔细甄别</div>
                 <div className="r-des">
-                  {/* <img src="/image/solution/good1.png" alt="" />
-                  <img src="/image/solution/bad1.png" alt="" /> */}
-                  {loading && (
+                  {messageId && !loading && !feedback && (
+                    <>
+                      <img
+                        title="喜欢"
+                        src="/image/solution/good1.png"
+                        alt=""
+                        onClick={() => searchBtn("like")}
+                      />
+                      <img
+                        title="不喜欢"
+                        src="/image/solution/bad1.png"
+                        alt=""
+                        onClick={() => searchBtn("dislike")}
+                      />
+                    </>
+                  )}
+                  {feedback === "like" ? (
+                    <img title="喜欢" src="/image/solution/good2.png" alt="" />
+                  ) : feedback === "dislike" ? (
+                    <img title="不喜欢" src="/image/solution/bad2.png" alt="" />
+                  ) : (
+                    ""
+                  )}
+                  {messageId && !loading && (
                     <SyncOutlined
-                      spin={loading}
+                      title="重新回答"
                       style={{ cursor: "pointer" }}
-                      onClick={stopAi}
+                      onClick={refreshAi}
                     />
                   )}
                 </div>
@@ -407,6 +462,12 @@ const Solution = () => {
                   loading && <LoadingDots />
                 )}
               </div>
+              {loading && (
+                <div className="ai-search-stop" onClick={stopAi}>
+                  <PauseCircleOutlined />
+                  <span className="stop-title">停止回答</span>
+                </div>
+              )}
             </div>
           </div>
           <Modal
@@ -421,7 +482,7 @@ const Solution = () => {
             <div className="ai-detail">
               <div className="ai-detail-title">{detail.title}</div>
               <div className="ai-keywords">
-                {_.map(detail.keyWords, (keyWord, index) => {
+                {_.map(detail.keywords, (keyWord, index) => {
                   return (
                     <div className="ai-keyword" key={index}>
                       {keyWord}
@@ -429,19 +490,32 @@ const Solution = () => {
                   );
                 })}
               </div>
-              <div className="ai-des">
-                简介：这是一个方案简介这是一个方案简介这是一个方案简介这是一个方案简介这是一个方案简介
-              </div>
+              <div className="ai-des">简介：{detail.introduction}</div>
               <div className="ai-search-des">
                 <div className="l-des">内容由 AI 生成，请仔细甄别</div>
                 <div className="r-des">
-                  {/* <img src="/image/solution/good1.png" alt="" />
-                  <img src="/image/solution/bad1.png" alt="" /> */}
+                  <img
+                    title="喜欢"
+                    src="/image/solution/good1.png"
+                    alt=""
+                    onClick={() => handleBtn(detail, true, "detail")}
+                  />
+                  <img
+                    title="不喜欢"
+                    src="/image/solution/bad1.png"
+                    alt=""
+                    onClick={() => handleBtn(detail, false, "detail")}
+                  />
                   {/* <img src="/image/solution/refresh.png" alt="" /> */}
                 </div>
               </div>
-              <div className="ai-search-cont">
-                CPU占用率过高问题，可能是由于程序运行过多导致，可以通过优化程序代码、减少程序运行次数、使用多核CPU等方法解决。
+              <div className="ai-search-cont ai-detail-cont">
+                <div
+                  className="ai-think"
+                  dangerouslySetInnerHTML={{
+                    __html: detail.content ? marked(detail.content) : "",
+                  }}
+                ></div>
               </div>
             </div>
           </Modal>

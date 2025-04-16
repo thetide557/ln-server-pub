@@ -573,7 +573,7 @@ const AiRobotSse = function () {
                             onClick={stopAi}
                           >
                             <PauseCircleOutlined />
-                            <span className="stop-title">停止生成</span>
+                            <span className="stop-title">停止回答</span>
                           </div>
                         </div>
                       )}

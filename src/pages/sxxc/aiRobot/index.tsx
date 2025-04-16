@@ -263,7 +263,7 @@ const AiRobot = function () {
                       {
                         loading && <div className='stop-ai'>
                           <div className={isScreen ? 'stop1 dark-stop1' : 'stop1'} onClick={stopAi}>
-                            <PauseCircleOutlined /><span className='stop-title'>停止生成</span>
+                            <PauseCircleOutlined /><span className='stop-title'>停止回答</span>
                           </div>
                         </div>
                       }
