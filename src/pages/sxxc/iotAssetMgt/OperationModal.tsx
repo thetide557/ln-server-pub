@@ -619,6 +619,10 @@ export const OperationModal = ({
         params = { ...params, ...names };
       }
       console.log("资产导出", assetsList, params);
+      if(typeId == 0){
+        message.warning("暂无设备");
+        return
+      }
       // TODO:构建导出 API 的 URL
       let url = "/api/n9e/iot/device/export?typeId=" + typeId;
       let exportTitle = "物联网资产";

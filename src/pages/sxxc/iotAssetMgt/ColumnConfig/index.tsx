@@ -53,10 +53,10 @@ const FieldConfig = (props) => {
   const [paginationData, setPaginationData] = useState<PageConfig[]>([]);
 
   useEffect(() => {
-    if(typeId!=0){
+    // if(typeId!=0){
       getFieldsByType(typeId);
       getPagesByType(typeId);
-    }
+    // }
   }, [typeId]);
   useEffect(() => {
     form.setFieldsValue({ paginationData });
@@ -65,14 +65,29 @@ const FieldConfig = (props) => {
 
   // 根据选择资产类型生成可选字段列表
   const getFieldsByType = (typeId: number) => {
+    if (typeId === 0) {
+      setFieldsList([]);
+      return;
+    }
     getIotAttributeList({ typeId }).then((res) => {
       const { dat } = res;
-      setFieldsList(dat);
+      setFieldsList(dat || []);
     });
   };
 
   // 根据选择资产类型生成分页数据
   const getPagesByType = (typeId: number) => {
+    if (typeId === 0) {
+      setPaginationData([
+        {
+          PageId: "",
+          tempPageId: _.uniqueId("pages_"), // 新增临时ID
+          PageName: "",
+          Attributes: [],
+        },
+      ]);
+      return;
+    }
     getIotPage({ typeId }).then((res) => {
       const { dat } = res;
       if (dat) {
