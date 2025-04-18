@@ -321,7 +321,7 @@ const EventDetailPage: React.FC = () => {
                       </div>
                     );
                   })}
-                  {/* <Solution /> */}
+                  <Solution ruleId={eventDetail.rule_id} />
               </div>
             )}
           </Card>

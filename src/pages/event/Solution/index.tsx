@@ -12,12 +12,11 @@ import LoadingDots from "@/pages/sxxc/aiRobot/loading";
 import { getRuleSolution, getFeedbacks } from "@/services/warning";
 import "./index.less";
 import _ from "lodash";
-import { Div } from "lezer-promql";
 
 const Solution = (props) => {
   const { Panel } = Collapse;
   const { ruleId } = props;
-  const [show, setShow] = useState<boolean>(true);
+  const [show, setShow] = useState<boolean>(false);
   const [solutions, setSolutions] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [detail, setDetail] = useState<any>({});
@@ -476,7 +475,7 @@ const Solution = (props) => {
             onCancel={() => {
               setIsModalOpen(false);
             }}
-            width="50%"
+            width="55%"
             footer={null}
           >
             <div className="ai-detail">

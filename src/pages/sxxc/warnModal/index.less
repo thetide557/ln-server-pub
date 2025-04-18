@@ -1,32 +1,44 @@
 // 告警弹窗
 .warn-dialog {
+  padding-bottom: 10px;
   .ant-modal-header {
     display: none;
   }
 
   .ant-modal-content {
+    // position: relative;
     width: 100%;
-    height: 503px;
     background: url(/image/alarm/dialog.png) no-repeat;
     background-size: 100% 100%;
     box-shadow: none;
-    color: #DCEEFF;
-
+    color: #dceeff;
+    min-height: 503px;
     .ant-modal-close {
       display: none;
     }
 
     .warn-header {
-      width: 100%;
-      height: 49px;
-      line-height: 49px;
-      text-align: right;
-      background: url(/image/alarm/title1.png) no-repeat;
-      background-size: 100% 100%;
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      // position: absolute;
+      // top: 45px;
+      // width: 94%;
+      // height: 55px;
+      // line-height: 55px;
+      // text-align: right;
+      // background: url(/image/alarm/title1.png) no-repeat;
+      // background-size: 100% 100%;
+      // margin-bottom: 80px;
+      > img {
+        width: 100%;
+        height: 50px;
+      }
 
       .el-icon-close {
+        position: absolute;
         cursor: pointer;
-        margin-right: 10px;
+        right:5%;
         font-size: 22px;
         color: #72c7f4;
         font-weight: 700;
@@ -34,6 +46,7 @@
     }
 
     .warn-cont {
+      font-size: 16px;
       .asset1 {
         padding: 5px 10px 0;
         width: 100%;
@@ -44,19 +57,22 @@
           width: 400px;
           height: 47px;
           background: url("/image/alarm/title2.png") no-repeat;
-          background-size: 100% 100%;
-          margin-left: -20px;
+          background-size: 80% 100%;
+          margin-left: -12px;
 
           .col1 {
+            width: 100%;
+            transform: skewX(-10deg);
+            font-size: 17px;
             margin-top: -16px;
-            padding-left: 47px;
+            padding-left: 40px;
             display: flex;
             align-items: center;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             .w-title {
-              overflow: hidden;
+              overflow-x: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
             }
@@ -65,8 +81,9 @@
           .col2 {
             display: flex;
             margin-top: -10px;
+            align-items: center;
 
-            >div {
+            > div {
               cursor: pointer;
               text-align: center;
               width: 133px;
@@ -78,6 +95,13 @@
               font-size: 14px;
               color: #ffffff;
             }
+            .pb-btn {
+              width: 62px;
+              height: 35px;
+              line-height: 35px;
+              background: url("/image/alarm/pb-btn.png") no-repeat;
+              background-size: 100% 100%;
+            }
           }
         }
 
@@ -85,9 +109,9 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-size: 17px;
+          font-size: 16px;
           width: 100%;
-          line-height: 35px;
+          line-height: 32px;
 
           .dian {
             width: 27px;
@@ -105,7 +129,7 @@
               align-items: center;
 
               .s-img {
-                >img {
+                > img {
                   vertical-align: middle;
                   width: 82px;
                   height: 22px;
@@ -116,14 +140,14 @@
 
           .col-zc {
             overflow: hidden;
-           >span {
-             display: inline-block;
-             width: 98%;
-             white-space: nowrap;
-             overflow: hidden;
-             text-overflow: ellipsis;
-           }
-         }
+            > span {
+              display: inline-block;
+              width: 98%;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
 
           // .row1 {
           //   display: inline-block;
@@ -152,24 +176,179 @@
         width: 98%;
         height: 170px;
       }
+      .warn-solution {
+        margin: 10px 0 50px;
+        .line {
+          margin: 2px 0;
+          width: 100%;
+          height: 2px;
+          // background: linear-gradient(to right, #1491e8, rgba(20, 145, 232, 0));
+          background: #1491e8;
+          opacity: 0.5;
+        }
+        .line1 {
+          margin-top: -15px;
+        }
+        .solution-title {
+          .solution-des {
+            padding-left: 10px;
+            font-size: 12px;
+            color: #d2e2ff;
+          }
+          .solution-show {
+            transform: skewX(-10deg);
+            margin-top: -15px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #c3f6ff;
+            .solution-show-icon {
+              margin-left: 5px;
+              color: #419ff7;
+              transform: skewX(10deg);
+            }
+          }
+        }
+        .solution-card {
+          color: #dceeff;
+          margin-top: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          .solution-card-item {
+            width: 249px;
+            height: 180px;
+            background: url("/image/alarm/solution-card.png") no-repeat;
+            background-size: 100% 100%;
+            margin: 0 15px 20px 0;
+            padding: 0 5px 0 12px;
+            &:last-child {
+              margin-right: 0;
+            }
+            .solution-card-item-title {
+              font-family: SourceHanSansSC, SourceHanSansSC;
+              // font-weight: bold;
+              font-size: 14px;
+              // color: #fff;
+              height: 43px;
+              line-height: 43px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+            .solution-card-item-wrap {
+              font-size: 12px;
+              height: 95px;
+              .solution-card-item-content {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                line-clamp: 3;
+                -webkit-line-clamp: 3; /* 控制显示行数 */
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+            .solution-card-item-btn {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              .btn-left {
+                img {
+                  width: 18px;
+                  height: 18px;
+                  margin-right: 8px;
+                  cursor: pointer;
+                }
+              }
+              .btn-right {
+                width: 70px;
+                height: 32px;
+                line-height: 32px;
+                background: url("/image/alarm/btn.png") no-repeat;
+                background-size: 100% 100%;
+                text-align: center;
+                margin-right: 5px;
+                color: #fff;
+                font-size: 12px;
+                cursor: pointer;
+              }
+            }
+          }
+        }
+        .solution-search {
+          width: 100%;
+          margin-bottom: 20px;
+          .solution-search-input {
+            .solution-input {
+              .ant-input-wrapper {
+                input {
+                  border-color: #3FA9E7;
+                  background: #061E4C;
+                  color: #dceeff;
+                  border-right: none;
+                  box-shadow: none;
+                  &::placeholder {
+                    color: #dceeff;
+                  }
+                }
+                // &:hover {
+                //   border-right: none;
+                // }
+              }
+              // .ant-input-affix-wrapper-focused {
+              //   border-color: #2178e3;
+              //   background: #ebf3ff;
+              //   box-shadow: none;
+              //   border-right: none;
+              // }
+              .ant-btn-default {
+                border-left: none;
+                border-color: #3FA9E7;
+                background: #061E4C;
+                color: #3FA9E7;
+                &:hover {
+                  border-left: none;
+                }
+              }
+             
+              // .ant-input-clear-icon {
+              //   color: #2178e3;
+              // }
+            }
+          }
+          .solution-search-stop {
+            width: 100px;
+            margin: auto;
+            margin-top: 20px;
+            font-size: 13px;
+            text-align: center;
+            border: 1px solid #3FA9E7;
+            // border-radius: 100px;
+            padding: 3px 0;
+            cursor: pointer;
+            color: #dceeff;
+            .stop-title {
+              padding-left: 5px;
+            }
+          }
+        }
+      }
     }
   }
 }
 
-.warn-dialog1 {
+.warn-dialogpb {
   .ant-modal-content {
     width: 100%;
-    height: 240px;
+    min-height: 240px;
     background: url(/image/alarm/dialog.png) no-repeat;
     background-size: 100% 100%;
     box-shadow: none;
-    color: #DCEEFF;
+    color: #dceeff;
 
     .ant-modal-close {
       display: none;
     }
 
-    .header {
+    .pb-header {
       width: 100%;
       height: 49px;
       line-height: 49px;
@@ -192,9 +371,9 @@
 
       .alarm-select {
         .ant-select-selector {
-          background: #172F69;
+          background: #172f69;
           color: #fff;
-          border-color: #409EFF;
+          border-color: #409eff;
           // border: 0;
         }
 
@@ -211,7 +390,7 @@
       left: 60%;
 
       // transform: translateX(-50%);
-      >div {
+      > div {
         cursor: pointer;
         text-align: center;
         width: 80px;
@@ -248,12 +427,12 @@
 .handle-warn {
   .ant-modal-content {
     color: #fff;
-      border: 0;
-      width: 400px;
-      // height: 503px;
-      background: url("/image/alarm/dialog.png") no-repeat;
-      background-size: 100% 100%;
-      background: #132B64;
+    border: 0;
+    width: 400px;
+    // height: 503px;
+    background: url("/image/alarm/dialog.png") no-repeat;
+    background-size: 100% 100%;
+    background: #132b64;
     .ant-modal-body {
       .ant-modal-confirm-title {
         color: #fff;
@@ -280,8 +459,11 @@
         border: 0;
       }
       .ant-btn-primary {
-        background-color: transparent!important;
+        background-color: transparent !important;
       }
+    }
+    .ant-modal-close-x {
+      margin-top: 10px;
     }
   }
 
@@ -329,6 +511,133 @@
       font-size: 14px;
       color: #ffffff;
       border: 0;
+    }
+  }
+}
+
+.solution-keywords {
+  display: flex;
+  margin: 3px 0;
+  overflow-x: auto;
+  padding-bottom: 3px;
+  &::-webkit-scrollbar {
+    height: 5px;
+    background: #dceeff;
+  }
+  .solution-keyword {
+    white-space: nowrap;
+    box-sizing: border-box;
+    background: #056d8e;
+    border-radius: 1px;
+    border: 1px solid #39b4f0;
+    margin-right: 7px;
+    padding: 0px 5px;
+    font-size: 11px;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.solution-search-des {
+  display: flex;
+  margin: 15px 0;
+  justify-content: space-between;
+  align-items: center;
+  .l-des {
+    font-style: italic;
+    color: #c4cfda;
+    font-size: 11px;
+  }
+  .r-des {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    > img {
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .refresh-btn {
+      cursor: pointer;
+      color: #2881BE;
+    }
+  }
+}
+.solution-search-cont {
+  width: 100%;
+  max-height: 1000px;
+  overflow-y: auto;
+  background: #02184F;
+  border-radius: 3px 3px 3px 3px;
+  border: 1px solid #2780BD;
+  // opacity: 0.8;
+  color: #dceeff;
+  font-size: 13px;
+  padding: 15px;
+  h1,h2,h3,h4,h5,h6 {
+    color: #dceeff;
+  }
+  .ant-collapse {
+    background: #17306A;
+    h1,h2,h3,h4,h5,h6 {
+      color: #dceeff;
+    }
+    .ant-collapse-header {
+      color: #dceeff;
+    }
+    .ant-collapse-content-box {
+      color: #dceeff;
+    }
+  }
+  .ant-divider {
+    // color: #fff;
+    border-color: #2780BD;
+  }
+}
+
+.solution-modal {
+  .ant-modal-header {
+    display: none;
+  }
+  .ant-modal-content {
+    // position: relative;
+    width: 100%;
+    background: url(/image/alarm/detail-card.png) no-repeat;
+    background-size: 100% 100%;
+    box-shadow: none;
+    color: #dceeff;
+    // min-height: 503px;
+    .ant-modal-close-x {
+      // display: none;
+      margin-top: 35px;
+      margin-right: 10px;
+      color: #79D3FF;
+      font-size: 18px;
+    }
+  }
+  .modal-solution-title {
+    margin: 15px 0 5px;
+    width: 337px;
+    height: 28px;
+    background: url('/image/alarm/detail-title.png');
+    background-size: 100% 100%;
+    font-size: 17px;
+    padding-left: 20px;
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .solution-detail {
+    font-size: 12px;
+    padding: 10px;
+    .solution-detail-title {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+    .solution-des {
+      margin-top: 8px;
     }
   }
 }

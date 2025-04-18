@@ -557,7 +557,7 @@ const AiRobotSse = function () {
                                         )}
                                       </div>
                                     ) : (
-                                      <LoadingDots />
+                                      <LoadingDots theme={isScreen ? 'dark' : ''}  />
                                     )}
                                   </div>
                                 </div>

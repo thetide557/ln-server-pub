@@ -59,6 +59,7 @@
           .ai-card-item-content {
             display: -webkit-box;
             -webkit-box-orient: vertical;
+            line-clamp: 3;
             -webkit-line-clamp: 3; /* 控制显示行数 */
             overflow: hidden;
             text-overflow: ellipsis;
@@ -133,24 +134,25 @@
           // }
         }
       }
+      .ai-search-stop {
+        width: 100px;
+        margin: auto;
+        margin-top: 20px;
+        font-size: 13px;
+        text-align: center;
+        border: 1px solid #2178e3;
+        // border-radius: 100px;
+        padding: 3px 0;
+        cursor: pointer;
+        color: #2178e3;
+        .stop-title {
+          padding-left: 5px;
+        }
+      }
     }
   }
 
-  .ai-search-stop {
-    width: 100px;
-    margin: auto;
-    margin-top: 20px;
-    font-size: 13px;
-    text-align: center;
-    border: 1px solid #2178e3;
-    // border-radius: 100px;
-    padding: 3px 0;
-    cursor: pointer;
-    color: #2178e3;
-    .stop-title {
-      padding-left: 5px;
-    }
-  }
+  
 }
 
 .ai-detail {
@@ -164,7 +166,6 @@
     font-size: 14px;
     padding-left: 15px;
     font-weight: bold;
-    
     margin-bottom: 10px;
     background: url("/image/solution/title-card.png") no-repeat;
     background-size: 100% 100%;
@@ -192,6 +193,9 @@
     padding: 0px 5px;
     font-size: 11px;
     color: #005fb0;
+    &:last-child {
+      margin-right: 0;
+    }
   }
 }
 
