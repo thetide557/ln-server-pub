@@ -116,6 +116,7 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
     return getUserInfoList({
       ...params,
     }).then((res) => {
+      onSelect(selectedUser)
       return {
         total: res.dat.total,
         list: res.dat.list,

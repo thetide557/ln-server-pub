@@ -519,7 +519,7 @@ const WarnModal = (props) => {
   return (
     <>
       {/* 大屏告警弹窗 */}
-      <Modal
+      {curWarn.id && <Modal
         className="warn-dialog"
         width={850}
         visible={visible}
@@ -937,6 +937,7 @@ const WarnModal = (props) => {
           </div>
         </Modal>
       </Modal>
+      }
     </>
   );
 };
