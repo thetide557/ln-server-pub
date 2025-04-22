@@ -712,7 +712,7 @@ const WarnModal = (props) => {
                             </div>
 
                             <div className="solution-card-item-content">
-                              {item.introduction}
+                              简介：{item.introduction}
                             </div>
                           </div>
                           <div className="solution-card-item-btn">

@@ -337,7 +337,7 @@ const Solution = (props) => {
                       </div>
 
                       <div className="ai-card-item-content">
-                        {item.introduction}
+                        简介：{item.introduction}
                       </div>
                     </div>
                     <div className="ai-card-item-btn">
