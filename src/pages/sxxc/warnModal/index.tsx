@@ -505,7 +505,7 @@ const WarnModal = (props) => {
 
   useEffect(() => {
     if (curWarn.rule_id) {
-      getSolutions();
+      // getSolutions();
     }
   }, [curWarn.rule_id]);
 
@@ -669,7 +669,7 @@ const WarnModal = (props) => {
           </div>
 
           {/* 解决方案 */}
-          <div className="warn-solution asset1">
+          {/* <div className="warn-solution asset1">
             <div className="line"></div>
             <div className="row t-row solution-title">
               <div className="col col1">
@@ -849,7 +849,7 @@ const WarnModal = (props) => {
               )
             }
 
-          </div>
+          </div> */}
         </div>
 
 

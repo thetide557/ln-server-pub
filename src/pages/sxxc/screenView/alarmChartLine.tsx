@@ -171,7 +171,7 @@ const AlarmChartLine = function (props: any) {
 
   return (
     <div style={{ marginTop: '5px' }}>
-      <div ref={chartRef} style={{ width: '780px', height: '170px' }}></div>
+      <div ref={chartRef} style={{ width: '100%', height: '170px' }}></div>
     </div>
   );
 };
