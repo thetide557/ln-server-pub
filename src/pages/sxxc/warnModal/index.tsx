@@ -284,18 +284,11 @@ const WarnModal = (props) => {
     return fetchPromise.finally(() => clearTimeout(timeoutId));
   };
 
-  //   处理see数据
-  let buffer = "";
   const processChunk = (chunk) => {
     if (!chunk) return ""; // 处理空 chunk 的情况
-
-    buffer += chunk;
-    const lines = buffer.split("\n");
-
-    buffer = lines.pop() || ""; // 保留未完成的一行
+    const lines = chunk.split("\n");
     let answers = "";
     // console.log("lines", lines);
-
     lines.forEach((line) => {
       if (line.startsWith("data:")) {
         const answer = line.slice(5); // 移除 data: 前缀
