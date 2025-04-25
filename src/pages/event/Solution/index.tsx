@@ -98,7 +98,7 @@ const Solution = (props) => {
 
   const handleSearch = async (value: string) => {
     if (!value && !loading) {
-      return setAiMessages("");
+      return setAiMessages({ text: "", sender: "ai" });
     }
     if (value.trim() && !loading) {
       setTaskId(undefined);
