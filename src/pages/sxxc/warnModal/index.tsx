@@ -285,6 +285,7 @@ const WarnModal = (props) => {
   };
 
   const processChunk = (chunk) => {
+    // console.log("chunk", chunk);
     if (!chunk) return ""; // 处理空 chunk 的情况
     const lines = chunk.split("\n");
     let answers = "";
