@@ -56,7 +56,12 @@ function FormModal(props: IProps & ModalWrapProps) {
         >
           <Input />
         </Form.Item>
-        <Form.Item label='标识' name='channel'>
+        <Form.Item label='标识' name='channel' rules={[
+            {
+              required: true,
+              message: '请输入标识',
+            },
+          ]}>
           <Input disabled={mode === 'update'} />
         </Form.Item>
         <Form.Item>
