@@ -16,7 +16,7 @@ import _ from "lodash";
 const Solution = (props) => {
   const { Panel } = Collapse;
   const { ruleId } = props;
-  const [show, setShow] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(true);
   const [solutions, setSolutions] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [detail, setDetail] = useState<any>({});

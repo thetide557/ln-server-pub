@@ -125,14 +125,14 @@ const EventDetailPage: React.FC = () => {
           : '';
       },
     },
-    ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod) ? [{ label: t('detail.target_note'), key: 'target_note' }] : [false]),
-    {
-      label: t('detail.trigger_time'),
-      key: 'trigger_time',
-      render(time) {
-        return moment(time * 1000).format('YYYY-MM-DD HH:mm:ss');
-      },
-    },
+    // ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod) ? [{ label: t('detail.target_note'), key: 'target_note' }] : [false]),
+    // {
+    //   label: t('detail.trigger_time'),
+    //   key: 'trigger_time',
+    //   render(time) {
+    //     return moment(time * 1000).format('YYYY-MM-DD HH:mm:ss');
+    //   },
+    // },
     {
       label: t('detail.trigger_value'),
       key: 'trigger_value',
@@ -181,42 +181,42 @@ const EventDetailPage: React.FC = () => {
         return `${content} s`;
       },
     },
-    {
-      label: t('detail.prom_for_duration'),
-      key: 'prom_for_duration',
-      render(content) {
-        return `${content} s`;
-      },
-    },
-    {
-      label: t('detail.notify_channels'),
-      key: 'notify_channels',
-      render(channels) {
-        return channels.join(' ');
-      },
-    },
-    {
-      label: t('detail.notify_groups_obj'),
-      key: 'notify_groups_obj',
-      render(groups) {
-        return groups ? groups.map((group) => <Tag color='purple'>{group.name}</Tag>) : '';
-      },
-    },
-    {
-      label: t('detail.callbacks'),
-      key: 'callbacks',
-      render(callbacks) {
-        return callbacks
-          ? callbacks.map((callback) => (
-            <Tag>
-              <Paragraph copyable style={{ margin: 0 }}>
-                {callback}
-              </Paragraph>
-            </Tag>
-          ))
-          : '';
-      },
-    },
+    // {
+    //   label: t('detail.prom_for_duration'),
+    //   key: 'prom_for_duration',
+    //   render(content) {
+    //     return `${content} s`;
+    //   },
+    // },
+    // {
+    //   label: t('detail.notify_channels'),
+    //   key: 'notify_channels',
+    //   render(channels) {
+    //     return channels.join(' ');
+    //   },
+    // },
+    // {
+    //   label: t('detail.notify_groups_obj'),
+    //   key: 'notify_groups_obj',
+    //   render(groups) {
+    //     return groups ? groups.map((group) => <Tag color='purple'>{group.name}</Tag>) : '';
+    //   },
+    // },
+    // {
+    //   label: t('detail.callbacks'),
+    //   key: 'callbacks',
+    //   render(callbacks) {
+    //     return callbacks
+    //       ? callbacks.map((callback) => (
+    //         <Tag>
+    //           <Paragraph copyable style={{ margin: 0 }}>
+    //             {callback}
+    //           </Paragraph>
+    //         </Tag>
+    //       ))
+    //       : '';
+    //   },
+    // },
   ];
 
   if (eventDetail?.annotations) {
