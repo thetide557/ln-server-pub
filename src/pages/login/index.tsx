@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
-import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, getRSAConfig, getDeepseektoken } from '@/services/login';
+import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, getRSAConfig, getDeepseektoken,authLogin1 } from '@/services/login';
 import './login.less';
 // import cookie from "react-cookies";
 // @ts-ignore
@@ -29,6 +29,8 @@ import { RsaEncry } from '@/utils/rsa';
 import _ from 'lodash';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen } from '@/services/sxxc/bigScreen';
+
+import { sm3Digest,sm2GenerateKey,base64ToHex } from '@/utils/crypto';
 
 export interface DisplayName {
   oidc: string;
@@ -135,6 +137,54 @@ export default function Login() {
   };
   
 
+  // const login = async () => {
+  //   setLoading(true)
+  //   let { username, password, verifyvalue } = form.getFieldsValue();
+  //    // 将用户的登录信息存储到 localStorage 中
+  //    localStorage.setItem('username', username);
+  //    localStorage.setItem('password', password);
+  //    localStorage.setItem('remember', remember ? 'true' : 'false');
+  //   // const rsaConf = await getRSAConfig();
+  //   // const {
+  //   //   dat: { OpenRSA, RSAPublicKey },
+  //   // } = rsaConf;
+  //   // const authPassWord = OpenRSA ? RsaEncry(password, RSAPublicKey) : password;
+  //   authLogin(username, password, captchaidRef.current!, verifyvalue)
+  //     .then((res) => {
+  //       const { dat, err } = res;
+  //       const { access_token, refresh_token } = dat;
+  //       sessionStorage.setItem('access_token', access_token);
+  //       sessionStorage.setItem('refresh_token', refresh_token);
+  //       // 嵌入的子项目之前用的local
+  //       localStorage.setItem('access_token', access_token);
+  //       localStorage.setItem('refresh_token', refresh_token);
+  //       // 资产管理默认左侧树
+  //       localStorage.setItem('left_asset_type', '-1');
+  //       // 获取deepseek的toekn
+  //       getDeepseektoken().then(res => {
+  //         localStorage.setItem('deepseek_token', res.dat.deepseek_token);
+  //       })
+  //       if (!err) {
+  //         getBigScreen().then(res => {
+  //           if (res.dat.list.length > 0) {
+  //             window.location.href = '/screenView'
+  //           } else {
+  //             window.location.href = '/home';
+  //           }
+  //         }).catch(_ => {
+  //           window.location.href = '/home';
+  //         })
+  //       }
+  //     })
+  //     .catch(() => {
+  //       setLoading(false)
+  //       if (showcaptcha) {
+  //         refreshCaptcha();
+  //       }
+  //     });
+  // };
+
+  // TODO:登录接口加密
   const login = async () => {
     setLoading(true)
     let { username, password, verifyvalue } = form.getFieldsValue();
@@ -142,14 +192,21 @@ export default function Login() {
      localStorage.setItem('username', username);
      localStorage.setItem('password', password);
      localStorage.setItem('remember', remember ? 'true' : 'false');
-    // const rsaConf = await getRSAConfig();
-    // const {
-    //   dat: { OpenRSA, RSAPublicKey },
-    // } = rsaConf;
-    // const authPassWord = OpenRSA ? RsaEncry(password, RSAPublicKey) : password;
-    authLogin(username, password, captchaidRef.current!, verifyvalue)
+     const authPassWord = base64ToHex(sm3Digest(password));
+     const { publicKey, privateKey } = sm2GenerateKey();
+     authLogin1(
+       username,
+       authPassWord,
+       captchaidRef.current!,
+       verifyvalue,
+       publicKey
+     )
       .then((res) => {
         const { dat, err } = res;
+        const { serverKey } = dat;
+        const clientKey = privateKey;
+        sessionStorage.setItem("clientKey", clientKey);
+        sessionStorage.setItem("serverKey", serverKey);
         const { access_token, refresh_token } = dat;
         sessionStorage.setItem('access_token', access_token);
         sessionStorage.setItem('refresh_token', refresh_token);
@@ -181,6 +238,7 @@ export default function Login() {
         }
       });
   };
+
 
   return (
     <div className='login-warp'>

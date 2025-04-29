@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import { isObject} from 'lodash-es';
+import { unpackRequestData } from '@/utils/request';
 import React, { useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
@@ -85,10 +87,10 @@ const ExpressionInput = (
           ? {
               remote: {
                 url: datasourceValue ? `${url}/${datasourceValue}` : url,
-                fetchFn: (resource, options = {}) => {
+                fetchFn: async (resource, options = {}) => {
                   const params = options.body?.toString();
                   const search = params ? `?${params}` : '';
-                  return fetch(resource + search, {
+                  const res = await fetch(resource + search, {
                     method: 'Get',
                     headers: new Headers(
                       headers
@@ -99,6 +101,40 @@ const ExpressionInput = (
                         : defaultHeaders,
                     ),
                   });
+                  console.log("1111111",res)
+                  // TODO:接口响应数据解密
+                  let data;
+                  const encryptedData = await  res.clone().json();
+                  if (
+                    import.meta.env.VITE_TRANSPORT_SECURITY === "enabled"
+                  ) {
+                    // 检查响应数据是对象类型
+                    if (isObject(encryptedData)) {
+                      data = unpackRequestData(encryptedData, options);
+                    }
+                  } else {
+                    data = encryptedData;
+                  }
+                  // 创建新的 Response 对象
+                  const newRes = new Response(JSON.stringify(data), {
+                    status: res.status,
+                    statusText: res.statusText,
+                    headers: res.headers,
+                  });
+                  console.log("333333",newRes)
+                  return newRes;
+
+                  // return fetch(resource + search, {
+                  //   method: 'Get',
+                  //   headers: new Headers(
+                  //     headers
+                  //       ? {
+                  //           ...defaultHeaders,
+                  //           ...headers,
+                  //         }
+                  //       : defaultHeaders,
+                  //   ),
+                  // });
                 },
               },
             }

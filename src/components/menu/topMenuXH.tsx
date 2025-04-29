@@ -558,6 +558,7 @@ export default function () {//{ selectMenu?:any }
           Logout().then(() => {
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('serverKey');sessionStorage.removeItem('clientKey');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');

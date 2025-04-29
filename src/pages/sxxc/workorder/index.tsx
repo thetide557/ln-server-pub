@@ -9,7 +9,8 @@ const workOrder = function () {
   //   const domElement:any = iframeRef?.current;
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
-  return <iframe src={`/workorder?token=${token}`} style={{ width: '100%', height: '100%' }}></iframe>;
+  // return <iframe src={`/workorder?token=${token}`} style={{ width: '100%', height: '100%' }}></iframe>;
+  return <iframe src='http://localhost:3000/#/workorder/order' style={{ width: '100%', height: '100%' }}></iframe>;
 };
 
 export default workOrder;

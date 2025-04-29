@@ -30,15 +30,35 @@ export const authLogin = function (
   });
 };
 
+/** 登录加密 */
+export const authLogin1 = function (
+  username: string,
+  password: string,
+  captchaid?: string,
+  verifyvalue?: string,
+  clientKey?: string,
+) {
+  return request(`/api/n9e/auth/login`, {
+    method: RequestMethod.Post,
+    data: { username, password, captchaid, verifyvalue, clientKey},
+    noSignature: true,
+    noEncryption: true
+  });
+};
+
 export const getCaptcha = function () {
   return request("/api/n9e/auth/captcha", {
     method: RequestMethod.Post,
+    noSignature: true,
+    noEncryption: true
   });
 };
 export const getSystemTheme = function () {
   return request("/api/n9e/auth/login/title", {
     method: RequestMethod.Get,
     silence: true,
+    noSignature: true,
+    noEncryption: true
   });
 };
 
@@ -46,6 +66,8 @@ export const ifShowCaptcha = function () {
   return request("/api/n9e/auth/ifshowcaptcha", {
     method: RequestMethod.Get,
     silence: true,
+    noSignature: true,
+    noEncryption: true
   });
 };
 
@@ -78,6 +100,8 @@ export const GenCsrfToken = function () {
 export const Logout = function () {
   return request(`/api/n9e/auth/logout`, {
     method: RequestMethod.Post,
+    noSignature: true,
+    noEncryption: true
   });
 };
 
@@ -123,6 +147,8 @@ export const authCallbackOAuth = function (params) {
 export const getSsoConfig = function () {
   return request("/api/n9e/auth/sso-config", {
     method: RequestMethod.Get,
+    noSignature: true,
+    noEncryption: true
   });
 };
 
