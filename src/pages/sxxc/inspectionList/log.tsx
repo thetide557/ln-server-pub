@@ -101,7 +101,7 @@ const Resource: React.FC = () => {
         {
             title: '执行周期',
             dataIndex: 'executeCycle',
-            render: (text, record, index) => typeList.filter(item => item.id == text)[0].value,
+            render: (text, record, index) => typeList.filter(item => item.id == text)[0]?.value,
         },
         {
             title: '执行时间',
