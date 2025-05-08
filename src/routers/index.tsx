@@ -109,7 +109,7 @@ import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import healthReport from '@/pages/sxxc/healthReport'
 import workOrder from '@/pages/sxxc/workorder'
-
+import productionPlan from '@/pages/sxxc/productionPlan'
 // import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
 // import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";
 
@@ -282,7 +282,7 @@ export default function Content() {
         <Route exact path='/autoInspect' component={autoInspect} />
         <Route exact path='/healthReport' component={healthReport} />
         <Route exact path='/workOrder' component={workOrder} />
-
+        <Route exact path='/productionPlan' component={productionPlan} />
         {/* <Route path='/serverVideoAsset' component={serverVideoAsset} exact /> */}
         {/* <Route path='/serverVideoAlarm' component={serverVideoAlarm} exact /> */}
 
