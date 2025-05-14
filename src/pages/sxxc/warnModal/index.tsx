@@ -601,9 +601,9 @@ const WarnModal = (props) => {
                 <img className="dian" src="/image/alarm/dian.png" alt="" />
                 <span>
                   触发值：
-                  {getDecimalPlaces(Number(curWarn.trigger_value)) > 3
-                    ? Number(curWarn.trigger_value).toFixed(3)
-                    : curWarn.trigger_value}
+                  {getDecimalPlaces(Number(curWarn.trigger_value)) > 2
+                    ? Number(curWarn.trigger_value).toFixed(2)
+                    : curWarn.trigger_value}%
                 </span>
               </div>
               <div className="col">
