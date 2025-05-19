@@ -38,11 +38,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('物联网资产管理'),
         },
-        // {
-        //   key: '/serverVideoAsset',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('视频类项目资产清单'),
-        // },
+        {
+          key: '/serverVideoAsset',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('视频类项目资产清单'),
+        },
       ],
     },
     {
@@ -102,11 +102,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('通知模板'),
         },
-        // {
-        //   key: '/serverVideoAlarm',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('视频类项目历史告警'),
-        // },
+        {
+          key: '/serverVideoAlarm',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('视频类项目历史告警'),
+        },
 
       ],
     },
@@ -120,11 +120,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('巡检管理'),
         },
-        {
-          key: '/productionPlan',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('作业计划管理'),
-        },
+        // {
+        //   key: '/productionPlan',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('作业计划管理'),
+        // },
       ],
     },
     {
