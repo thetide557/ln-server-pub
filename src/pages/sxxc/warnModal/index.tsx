@@ -603,7 +603,7 @@ const WarnModal = (props) => {
                   触发值：
                   {getDecimalPlaces(Number(curWarn.trigger_value)) > 2
                     ? Number(curWarn.trigger_value).toFixed(2)
-                    : curWarn.trigger_value}%
+                    : curWarn.trigger_value}
                 </span>
               </div>
               <div className="col">
