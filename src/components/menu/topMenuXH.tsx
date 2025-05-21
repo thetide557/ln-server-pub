@@ -363,6 +363,10 @@ const getMenuList = (t) => {
               key: '/types/dictype',
               label: t('数据字典'),
             },
+            {
+              key: '/help/sso',
+              label: t('单点登录管理'),
+            },
             // {
             //   key: '/system/upgrade',
             //   label: t('系统升级'),
@@ -444,11 +448,11 @@ export default function () {//{ selectMenu?:any }
           setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
         }
       })
-       getDictDataListByType('safety_certification').then((res) => {
-          // console.log(res);
-          if (res.dat?.length > 0) {
-            setSafeUrl(res.dat[0].dict_value);
-          }  
+      getDictDataListByType('safety_certification').then((res) => {
+        // console.log(res);
+        if (res.dat?.length > 0) {
+          setSafeUrl(res.dat[0].dict_value);
+        }  
       })
     }
   }, []);
