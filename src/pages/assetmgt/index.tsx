@@ -388,7 +388,7 @@ export default function (props: IProps) {
                       </Space>
                     ) : (
                       <Space>
-                        <CheckCircleOutlined style={{ color: 'grey' }} />
+                        <CheckCircleOutlined style={{ color: 'red' }} />
                         未生效
                       </Space>
                     );

@@ -239,7 +239,7 @@ export default function () {
           {
             (profile.roles?.includes("Admin") || permList.includes("/xh/monitor/status")) && <PoweroffOutlined
               title={record.status == 1 ? '正常' : '失效'}
-              style={{ color: record.status === 1 ? 'green' : 'gray' }}
+              style={{ color: record.status === 1 ? 'green' : 'red' }}
               onClick={(e) => {
                 let key = new Array();
                 key.push(record.id);

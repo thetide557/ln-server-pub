@@ -212,7 +212,7 @@ export default function List(props: ListProps) {
             {
               (profile.roles?.includes("Admin") || permList.includes("/alert-rules/status")) && <PoweroffOutlined
                 title={record['disabled'] === AlertRuleStatus.Enable ? '已启动' : '未启动'}
-                style={{ color: record['disabled'] === AlertRuleStatus.Enable ? 'green' : 'gray' }}
+                style={{ color: record['disabled'] === AlertRuleStatus.Enable ? 'green' : 'red' }}
                 onClick={(e) => {
                   const { id, disabled } = record;
 
