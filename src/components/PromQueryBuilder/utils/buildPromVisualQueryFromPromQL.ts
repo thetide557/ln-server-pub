@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { SyntaxNode, TreeCursor } from '@lezer/common';
+import _ from "lodash";
+import { SyntaxNode, TreeCursor } from "@lezer/common";
 import {
   AggregateExpr,
   AggregateModifier,
@@ -26,17 +26,30 @@ import {
   StringLiteral,
   VectorSelector,
   Without,
-} from 'lezer-promql';
+} from "lezer-promql";
 
-import { PromVisualQuery, PromVisualQueryLabelFilter, PromVisualQueryOperation, PromVisualQueryBinary, VisualQueryOperationParamValue, PromVisualQueryOperationId } from '../types';
-import { arithmeticBinaryOperators, comparisonBinaryOperators } from '../Operations/utils';
+import {
+  PromVisualQuery,
+  PromVisualQueryLabelFilter,
+  PromVisualQueryOperation,
+  PromVisualQueryBinary,
+  VisualQueryOperationParamValue,
+  PromVisualQueryOperationId,
+} from "../types";
+import {
+  arithmeticBinaryOperators,
+  comparisonBinaryOperators,
+} from "../Operations/utils";
 
-export function buildPromVisualQueryFromPromQL(expr: string, labels?: PromVisualQueryLabelFilter[]): Context {
+export function buildPromVisualQueryFromPromQL(
+  expr: string,
+  labels?: PromVisualQueryLabelFilter[]
+): Context {
   const tree = parser.parse(expr);
   const node = tree.topNode as any;
 
   const visQuery: PromVisualQuery = {
-    metric: '',
+    metric: "",
     labels: labels || [],
     operations: [],
   };
@@ -129,13 +142,19 @@ function handleExpression(expr: string, node: SyntaxNode, context: Context) {
 }
 
 function isIntervalVariableError(node: SyntaxNode) {
-  return node.prevSibling?.type.id === Expr && node.prevSibling?.firstChild?.type.id === VectorSelector;
+  return (
+    node.prevSibling?.type.id === Expr &&
+    node.prevSibling?.firstChild?.type.id === VectorSelector
+  );
 }
 
 function getLabel(expr: string, node: SyntaxNode): PromVisualQueryLabelFilter {
   const label = getString(expr, node.getChild(LabelName));
   const op = getString(expr, node.getChild(MatchOp));
-  const value = getString(expr, node.getChild(StringLiteral)).replace(/"|'/g, '');
+  const value = getString(expr, node.getChild(StringLiteral)).replace(
+    /"|'/g,
+    ""
+  );
   return {
     label,
     op,
@@ -143,7 +162,7 @@ function getLabel(expr: string, node: SyntaxNode): PromVisualQueryLabelFilter {
   };
 }
 
-const rangeFunctions = ['changes', 'rate', 'irate', 'increase', 'delta'];
+const rangeFunctions = ["changes", "rate", "irate", "increase", "delta"];
 
 function handleFunction(expr: string, node: SyntaxNode, context: Context) {
   const visQuery = context.query;
@@ -153,9 +172,9 @@ function handleFunction(expr: string, node: SyntaxNode, context: Context) {
   const body = node.getChild(FunctionCallBody);
   const callArgs = body!.getChild(FunctionCallArgs);
   const params: any[] = [];
-  let interval = '';
+  let interval = "";
 
-  if (rangeFunctions.includes(funcName) || funcName.endsWith('_over_time')) {
+  if (rangeFunctions.includes(funcName) || funcName.endsWith("_over_time")) {
     let match = getString(expr, node).match(/\[(.+)\]/);
     if (match?.[1]) {
       interval = match[1];
@@ -167,7 +186,7 @@ function handleFunction(expr: string, node: SyntaxNode, context: Context) {
   visQuery.operations.unshift(op);
 
   if (callArgs) {
-    if (getString(expr, callArgs) === interval + ']') {
+    if (getString(expr, callArgs) === interval + "]") {
       return;
     }
     updateFunctionArgs(expr, callArgs, context, op);
@@ -205,7 +224,12 @@ function handleAggregation(expr: string, node: SyntaxNode, context: Context) {
   op.params.push(...labels);
 }
 
-function updateFunctionArgs(expr: string, node: SyntaxNode | null, context: Context, op: PromVisualQueryOperation) {
+function updateFunctionArgs(
+  expr: string,
+  node: SyntaxNode | null,
+  context: Context,
+  op: PromVisualQueryOperation
+) {
   if (!node) {
     return;
   }
@@ -226,7 +250,7 @@ function updateFunctionArgs(expr: string, node: SyntaxNode | null, context: Cont
     }
 
     case StringLiteral: {
-      op.params.push(getString(expr, node).replace(/"/g, ''));
+      op.params.push(getString(expr, node).replace(/"/g, ""));
       break;
     }
 
@@ -257,11 +281,15 @@ function handleBinary(expr: string, node: SyntaxNode, context: Context) {
   }
 
   if (rightNumber) {
-    visQuery.operations.push(makeBinOp(op, opDef, expr, right, !!binModifier?.isBool));
+    visQuery.operations.push(
+      makeBinOp(op, opDef, expr, right, !!binModifier?.isBool)
+    );
   } else if (rightBinary) {
     const leftMostChild = getLeftMostChild(right);
     if (leftMostChild?.type.id === NumberLiteral) {
-      visQuery.operations.push(makeBinOp(op, opDef, expr, leftMostChild, !!binModifier?.isBool));
+      visQuery.operations.push(
+        makeBinOp(op, opDef, expr, leftMostChild, !!binModifier?.isBool)
+      );
     }
 
     handleExpression(expr, right, context);
@@ -270,7 +298,7 @@ function handleBinary(expr: string, node: SyntaxNode, context: Context) {
     const binQuery: PromVisualQueryBinary<PromVisualQuery> = {
       operator: op,
       query: {
-        metric: '',
+        metric: "",
         labels: [],
         operations: [],
       },
@@ -289,30 +317,45 @@ function handleBinary(expr: string, node: SyntaxNode, context: Context) {
 
 function getBinaryModifier(
   expr: string,
-  node: SyntaxNode | null,
-): { isBool: true; isMatcher: false } | { isBool: false; isMatcher: true; matches: string; matchType: 'ignoring' | 'on' } | undefined {
+  node: SyntaxNode | null
+):
+  | { isBool: true; isMatcher: false }
+  | {
+      isBool: false;
+      isMatcher: true;
+      matches: string;
+      matchType: "ignoring" | "on";
+    }
+  | undefined {
   if (!node) {
     return undefined;
   }
-  if (node.getChild('Bool')) {
+  if (node.getChild("Bool")) {
     return { isBool: true, isMatcher: false };
   } else {
     const matcher = node.getChild(OnOrIgnoring);
     if (!matcher) {
       return undefined;
     }
-    const labels = getString(expr, matcher.getChild(GroupingLabels)?.getChild(GroupingLabelList));
+    const labels = getString(
+      expr,
+      matcher.getChild(GroupingLabels)?.getChild(GroupingLabelList)
+    );
     return {
       isMatcher: true,
       isBool: false,
       matches: labels,
-      matchType: matcher.getChild(On) ? 'on' : 'ignoring',
+      matchType: matcher.getChild(On) ? "on" : "ignoring",
     };
   }
 }
 
 function isEmptyQuery(query: PromVisualQuery) {
-  if (query.labels.length === 0 && query.operations.length === 0 && !query.metric) {
+  if (
+    query.labels.length === 0 &&
+    query.operations.length === 0 &&
+    !query.metric
+  ) {
     return true;
   }
   return false;
@@ -333,23 +376,42 @@ function makeError(expr: string, node: SyntaxNode) {
   };
 }
 
-function getString(expr: string, node: SyntaxNode | TreeCursor | null | undefined) {
+function getString(
+  expr: string,
+  node: SyntaxNode | TreeCursor | null | undefined
+) {
   if (!node) {
-    return '';
+    return "";
   }
   return returnVariables(expr.substring(node.from, node.to));
 }
 
-const varTypeFunc = [(v: string, f?: string) => `\$${v}`, (v: string, f?: string) => `[[${v}${f ? `:${f}` : ''}]]`, (v: string, f?: string) => `\$\{${v}${f ? `:${f}` : ''}\}`];
+const varTypeFunc = [
+  (v: string, f?: string) => `\$${v}`,
+  (v: string, f?: string) => `[[${v}${f ? `:${f}` : ""}]]`,
+  (v: string, f?: string) => `\$\{${v}${f ? `:${f}` : ""}\}`,
+];
 
 function returnVariables(expr: string) {
-  return expr.replace(/__V_(\d)__(.+?)__V__(?:__F__(\w+)__F__)?/g, (match, type, v, f) => {
-    return varTypeFunc[parseInt(type, 10)](v, f);
-  });
+  return expr.replace(
+    /__V_(\d)__(.+?)__V__(?:__F__(\w+)__F__)?/g,
+    (match, type, v, f) => {
+      return varTypeFunc[parseInt(type, 10)](v, f);
+    }
+  );
 }
 
-function makeBinOp(op: string, opDef: { id: string; comparison?: boolean }, expr: string, numberNode: SyntaxNode, hasBool: boolean): PromVisualQueryOperation {
-  const params: VisualQueryOperationParamValue[] = [op, parseFloat(getString(expr, numberNode))];
+function makeBinOp(
+  op: string,
+  opDef: { id: string; comparison?: boolean },
+  expr: string,
+  numberNode: SyntaxNode,
+  hasBool: boolean
+): PromVisualQueryOperation {
+  const params: VisualQueryOperationParamValue[] = [
+    op,
+    parseFloat(getString(expr, numberNode)),
+  ];
   if (opDef.comparison) {
     params.push(hasBool);
   }
@@ -359,7 +421,11 @@ function makeBinOp(op: string, opDef: { id: string; comparison?: boolean }, expr
   };
 }
 
-function getAllByType(expr: string, cur: SyntaxNode, type: number | string): string[] {
+function getAllByType(
+  expr: string,
+  cur: SyntaxNode,
+  type: number | string
+): string[] {
   if (cur.type.id === type || cur.name === type) {
     return [getString(expr, cur)];
   }

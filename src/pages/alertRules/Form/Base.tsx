@@ -124,10 +124,11 @@ export default function Base({ type, form, assetId, onAssetChange }) {
     }
 
     rule_config.queries.forEach((e) => {
-      const metric = buildPromVisualQueryFromPromQL(e.prom_ql, []).query.metric;
-      e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query);
+      debugger
+      const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
+      const metric = result.metric;
+      e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query,false,result.operations);
     });
-
     form.setFieldsValue({
       rule_config: { ...rule_config },
     });
