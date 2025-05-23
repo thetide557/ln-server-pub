@@ -282,7 +282,7 @@ export default function Content() {
         <Route exact path='/autoInspect' component={autoInspect} />
         <Route exact path='/healthReport' component={healthReport} />
         <Route exact path='/workOrder' component={workOrder} />
-        <Route exact path='/productionPlan' component={productionPlan} />
+        <Route exact path='/productionplan' component={productionPlan} />
         {/* <Route path='/serverVideoAsset' component={serverVideoAsset} exact /> */}
         {/* <Route path='/serverVideoAlarm' component={serverVideoAlarm} exact /> */}
 
