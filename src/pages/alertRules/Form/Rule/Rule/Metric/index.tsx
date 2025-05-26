@@ -32,6 +32,10 @@ import PlusAlertRule from 'plus:/parcels/AlertRule';
 export default function index({ form, type, assets }) {
   const { t } = useTranslation('alertRules');
   const { groupedDatasourceList } = useContext(CommonStateContext);
+  if (form.getFieldValue('datasource_ids')?.length == 0) {
+    form.setFieldsValue({datasource_ids: [0]});
+  }
+  
   return (
     <div>
       <Row gutter={16}>
