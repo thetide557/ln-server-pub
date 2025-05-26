@@ -394,11 +394,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('自动化检测'),
         },
-        {
-          key: '/safety/certification',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('安全认证'),
-        },
+        // {
+        //   key: '/safety/certification',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('安全认证'),
+        // },
       ],
     },
 
