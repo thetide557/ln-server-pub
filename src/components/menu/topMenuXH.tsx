@@ -2,7 +2,7 @@ import { CommonStateContext, initTheme } from '@/App';
 import { getMenuPerm } from '@/services/common';
 import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
-import { Dropdown, Menu, Space, Image } from 'antd';
+import { Dropdown, Menu, Space, Image, message } from 'antd';
 import _ from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import { Logout } from '@/services/login';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen } from '@/services/sxxc/bigScreen';
+import { getDictDataListByType } from '@/services/system/dict';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -362,6 +363,10 @@ const getMenuList = (t) => {
               key: '/types/dictype',
               label: t('数据字典'),
             },
+            {
+              key: '/help/sso',
+              label: t('单点登录管理'),
+            },
             // {
             //   key: '/system/upgrade',
             //   label: t('系统升级'),
@@ -389,6 +394,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('自动化检测'),
         },
+        // {
+        //   key: '/safety/certification',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('安全认证'),
+        // },
       ],
     },
 
@@ -423,6 +433,7 @@ export default function () {//{ selectMenu?:any }
   const { profile } = useContext(CommonStateContext);
   const [home] = useLocalStorageState('HOME_URL');
   const [imageUrl, setImageUrl] = useState<string>();
+  const [safeUrl, setSafeUrl] = useState<string>();
 
   const [theme, setTheme] = useLocalStorage<any>("platform_theme", initTheme);
 
@@ -436,6 +447,12 @@ export default function () {//{ selectMenu?:any }
         if (res.dat != null && res.dat != "") {
           setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
         }
+      })
+      getDictDataListByType('safety_certification').then((res) => {
+        // console.log(res);
+        if (res.dat?.length > 0) {
+          setSafeUrl(res.dat[0].dict_value);
+        }  
       })
     }
   }, []);
@@ -532,6 +549,10 @@ export default function () {//{ selectMenu?:any }
   };
 
   const handleClick = (item) => {
+    if ((item.key as string) === "/safety/certification") {
+      if (!safeUrl) return message.error(t('请先在数据字典中配置安全认证'))
+      return window.open(safeUrl)
+    }
 
     if ((item.key as string) === "home") {
       window.location.href = '/prod-api/'

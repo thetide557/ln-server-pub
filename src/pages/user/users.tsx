@@ -242,7 +242,7 @@ const Resource: React.FC = () => {
           {
             (profile.roles?.includes("Admin") || (permList.includes("/users/status") && record.id != '1')) && <PoweroffOutlined className='oper-name'
               title={record.status === 1 ? ('已启用') : ('已禁用')}
-              style={{ color: record.status === 1 ? ('green') : ('gray') }}
+              style={{ color: record.status === 1 ? ('green') : ('red') }}
               onClick={e => {
                 if ("" + record.id == "1") {
                   message.error("默认超管账号，禁止在此操作！");

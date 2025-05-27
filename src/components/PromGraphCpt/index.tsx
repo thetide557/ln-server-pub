@@ -31,7 +31,7 @@ import Graph from './Graph';
 import QueryStatsView, { QueryStats } from './components/QueryStatsView';
 import MetricsExplorer from './components/MetricsExplorer';
 import { CommonStateContext } from '@/App';
-import {cn_name,en_name} from "../PromQueryBuilder/components/metrics_translation"
+import { cn_name, en_name } from "../PromQueryBuilder/components/metrics_translation"
 import './locale';
 import './style.less';
 
@@ -90,6 +90,7 @@ export default function index(props: IProps) {
   const [metricsExplorerVisible, setMetricsExplorerVisible] = useState(false);
   const [completeEnabled, setCompleteEnabled] = useState(true);
   const promQLInputRef = useRef<any>(null);
+  const [keydes, setKeydes] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -103,6 +104,21 @@ export default function index(props: IProps) {
       }
     }
   }, [defaultTime]);
+
+  useEffect(() => {
+    const names = {
+      ...cn_name,
+      ...en_name
+    }
+    for (const key in names) {
+      if (value?.includes(key)) {
+        setKeydes(cn_name[key]);
+        break;
+      } else {
+        setKeydes('');
+      }
+    }
+  }, [value]);
 
   // useEffect(() => {
   //   setTabActiveKey(type);
@@ -224,7 +240,8 @@ export default function index(props: IProps) {
           </span>
         </Input.Group>
       </div>
-      <div className='key-des'><span className='key-title'>指标关键词说明：</span> {cn_name[value] ? cn_name[value] : en_name[value] ? en_name[value] : ''}</div>
+      {/* <div className='key-des'><span className='key-title'>指标关键词说明：</span> {cn_name[value] ? cn_name[value] : en_name[value] ? en_name[value] : ''}</div> */}
+      <div className='key-des'><span className='key-title'>指标关键词说明：</span> {keydes}</div>
       {errorContent && <Alert style={{ marginBottom: 16 }} message={errorContent} type='error' />}
       <div style={{ minHeight: 0, height: '100%' }}>
         <Tabs
@@ -291,7 +308,6 @@ export default function index(props: IProps) {
             // console.log('from',from);
             // console.log('to',to);
             // console.log(promQLInputRef.current);
-            
             promQLInputRef.current.dispatch(
               promQLInputRef.current.state.update({
                 changes: { from, to, insert: val },
