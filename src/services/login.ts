@@ -30,6 +30,20 @@ export const authLogin = function (
   });
 };
 
+// ldap登录
+export const authLoginLdap = function (
+  username: string,
+  password: string,
+  captchaid?: string,
+  verifyvalue?: string
+) {
+  return request(`/api/n9e/auth/login/ldap`, {
+    method: RequestMethod.Post,
+    data: { username, password, captchaid, verifyvalue },
+  });
+};
+
+
 export const getCaptcha = function () {
   return request("/api/n9e/auth/captcha", {
     method: RequestMethod.Post,
