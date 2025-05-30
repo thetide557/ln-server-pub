@@ -93,14 +93,35 @@ export const ruleTypeOptions = [
 ];
 
 export const selectTypeOptions = [
+  // {
+  //   label: 'Metric',
+  //   value: 1,
+  //   pro: false,
+  // },
   {
     label: 'Metric',
-    value: 1,
+    value: 'metric',
     pro: false,
-  }
+  },
+  {
+    label: 'Log',
+    value: 'logging',
+    pro: false,
+  },
   // {
   //   label: '资产类型',
   //   value: 2,
   //   pro: false,
   // },
 ];
+
+export const datasourceDefaultValue = {
+  datasource_queries: [
+    {
+      match_type: 0,
+      op: 'in',
+      values: [],
+    },
+  ],
+  datasource_value: undefined,
+};

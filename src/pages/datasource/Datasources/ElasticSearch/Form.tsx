@@ -70,9 +70,10 @@ export default function FormCpt({ data, onFinish, submitLoading }: any) {
           </Form.Item>
         </Col>
       </Row>
-      <AdvancedWrap var='VITE_IS_PRO,VITE_IS_ENT'>
+       {/* TODO:关联告警引擎集群是否显示，根据环境变量名VITE_IS_PRO、VITE_IS_ENT判断，是否为true */}
+      {/* <AdvancedWrap var='VITE_IS_PRO,VITE_IS_ENT'> */}
         <Cluster form={form} clusterRef={clusterRef} />
-      </AdvancedWrap>
+      {/* </AdvancedWrap> */}
       <Description />
       <div className='mt16'>
         <Footer id={data?.id} submitLoading={submitLoading} />

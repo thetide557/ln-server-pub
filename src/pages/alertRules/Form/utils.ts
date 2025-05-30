@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { defaultRuleConfig, defaultValues } from './constants';
+import { defaultRuleConfig, defaultValues ,datasourceDefaultValue} from './constants';
 import { DATASOURCE_ALL, alphabet } from '../constants';
 import { mapOptionToRelativeTimeRange, mapRelativeTimeRangeToOption } from '@/components/TimeRangePicker';
 
@@ -216,6 +216,7 @@ export function getDefaultValuesByProd(prod, defaultBrainParams) {
       cate: 'prometheus',
       datasource_ids: [DATASOURCE_ALL],
       rule_config: defaultRuleConfig.metric,
+      ...datasourceDefaultValue
     };
   }
   if (prod === 'logging') {
@@ -224,6 +225,7 @@ export function getDefaultValuesByProd(prod, defaultBrainParams) {
       cate: 'elasticsearch',
       datasource_ids: undefined,
       rule_config: defaultRuleConfig.logging,
+      ...datasourceDefaultValue
     };
   }
 }
@@ -233,8 +235,18 @@ export function getDefaultValuesByCate(prod, cate) {
     return {
       prod,
       cate,
-      datasource_ids: [DATASOURCE_ALL],
+      // datasource_ids: [DATASOURCE_ALL],
       rule_config: defaultRuleConfig.metric,
+      ...datasourceDefaultValue,
+    };
+  }
+  if (cate === 'elasticsearch') {
+    return {
+      prod,
+      cate,
+      // datasource_value: undefined,
+      rule_config: defaultRuleConfig.logging,
+      ...datasourceDefaultValue,
     };
   }
   if (cate === 'ck' || cate === 'influxdb') {

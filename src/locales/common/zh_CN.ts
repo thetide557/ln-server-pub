@@ -55,6 +55,17 @@ const zh_CN = {
       btn1: '前往配置',
       btn2: '知道了',
     },
+    queries: {
+      label: '数据源筛选',
+      match_type_0: '精确匹配',
+      match_type_1: '模糊匹配',
+      match_type_1_tip: `支持两种通配符<br>* 可以匹配 0 个或多个任意字符<br>? 只能匹配一个任意字符`,
+      match_type_2: '全部数据源',
+      op_in: '包含',
+      op_not_in: '不包含',
+      preview: '数据源预览',
+    },
+    managePageLink: '数据源管理',
   },
   confirm: {
     delete: '确认删除吗？',
@@ -171,5 +182,8 @@ const zh_CN = {
   'msg.clone.success': '克隆成功',
   'msg.clone.error': '克隆失败',
   'msg.sort.success': '排序成功',
+
+  page_help: '使用说明',
+  and: '且',
 };
 export default zh_CN;

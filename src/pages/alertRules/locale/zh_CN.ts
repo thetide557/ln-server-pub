@@ -137,5 +137,49 @@ const zh_CN = {
     },
   },
   brain_result_btn: '训练结果',
+
+  invalid_datasource_tip_1: '数据源',
+  invalid_datasource_tip_2: '未配置关联告警引擎集群',
+  invalid_datasource_reload: '刷新数据源',
+  advanced_settings: '辅助配置',
+  trigger: {
+    title: '阈值判断',
+    builder: '简单模式',
+    code: '表达式模式',
+    label: '关联 Label',
+    exp_trigger_disable: '启用阈值判断',
+    advanced_settings: {
+      label: '高级设置',
+    },
+    recover_config: {
+      label: '恢复条件',
+      judge_type: {
+        0: '查不到数据就恢复',
+        1: '查不到数据不算恢复',
+        2: '结果满足条件才算恢复',
+      },
+      recover_exp_placeholder: 'e.g. $A < 50',
+    },
+    joins: {
+      label: '集合操作',
+      join_type: {
+        original: '不合并',
+        none: '直接拼接',
+        inner_join: '内联',
+        left_join: '左联',
+        right_join: '右联',
+        left_exclude: '左斥',
+        right_exclude: '右斥',
+      },
+      join_type_placeholder: '请选择集合操作',
+      on: '标签名',
+    },
+  },
+  nodata_trigger: {
+    title: '数据缺失',
+    enable: '之前查到过数据，现在查不到就告警；重新查到数据就恢复',
+    resolve_after: '无数据超过多久之后自动恢复',
+    resolve_after_unit: '秒',
+  },
 };
 export default zh_CN;

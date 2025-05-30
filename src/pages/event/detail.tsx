@@ -35,6 +35,7 @@ import PlusPreview from 'plus:/parcels/Event/Preview';
 // @ts-ignore
 import PlusLogsDetail from 'plus:/parcels/Event/LogsDetail';
 import PrometheusDetail from './Detail/Prometheus';
+import ElasticsearchDetail  from '@/plugins/elasticsearch/Event';
 import Host from './Detail/Host';
 import './detail.less';
 import { getStrategiesByRuleIds } from '@/services/warning';
@@ -57,6 +58,10 @@ const EventDetailPage: React.FC = () => {
   const [eventDetail, setEventDetail] = useState<any>();
   if (eventDetail) eventDetail.cate = eventDetail.cate || 'prometheus'; // TODO: 兼容历史的告警事件
   const parsedEventDetail = parseValues(eventDetail);
+
+  const [esDetailVisible, setEsDetailVisible] = useState(false); // ES日志详情
+  const [selectedQuery, setSelectedQuery] = useState([]);
+
   const descriptionInfo = [
     {
       label: '告警规则名称',
@@ -67,7 +72,7 @@ const EventDetailPage: React.FC = () => {
         }}>{content}</div>;
       },
     },
-    {
+    ...(eventDetail?.cate !== 'elasticsearch' ? [{
       label: '资产名称',
       key: 'asset_name',
       align: 'center',
@@ -86,7 +91,8 @@ const EventDetailPage: React.FC = () => {
           history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
         }}>{asset_ip}</div>;
       },
-    },
+    },]:[]),
+    
     {
       label: t('detail.group_name'),
       key: 'group_name',
@@ -134,16 +140,38 @@ const EventDetailPage: React.FC = () => {
     //   },
     // },
     {
+      // 触发时值
       label: t('detail.trigger_value'),
       key: 'trigger_value',
       render(val) {
         return (
           <span>
             {val}
-            <PlusLogsDetail data={eventDetail} />
           </span>
         );
       },
+      // render(val, record) {
+      //   // ES日志详情，当前告警页面显示
+      //   return (
+      //     <span>
+      //       {val}
+      //       {!isHistory && record.cate === "elasticsearch" && (
+      //         <Button type="link" size="small" onClick={() => setVisible(true)}>
+      //           日志详情
+      //         </Button>
+      //       )}
+      //       {/* {
+      //         EventLogs({
+      //           id: record.id,
+      //           datasource_id: record.datasource_id,
+      //           queries:record.rule_config?.queries || [],
+      //           visible,
+      //           destroy: () => setVisible(false),
+      //         })} */}
+      //         <EventLogs visible={visible} id={record.id} datasource_id={record.datasource_id}  queries={record.rule_config?.queries || []} destroy={() => setVisible(false)} />
+      //     </span>
+      //   );
+      // },
     },
     {
       label: t('detail.recover_time'),
@@ -172,6 +200,7 @@ const EventDetailPage: React.FC = () => {
         history,
       })
       : [false]),
+      ...(eventDetail?.cate === 'elasticsearch' ? ElasticsearchDetail({eventDetail,isHistory,esDetailVisible,setEsDetailVisible,selectedQuery,setSelectedQuery}) : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
@@ -260,7 +289,7 @@ const EventDetailPage: React.FC = () => {
   return (
     <PageLayout title={t('detail.title')} showBack backPath={isHistory ? '/alert-his-events' : '/alert-cur-events'}>
       <div className='event-detail-container'>
-
+        {/* 告警事件详情 */}
         <Spin spinning={!eventDetail}>
           <Card
             size='small'
@@ -269,6 +298,7 @@ const EventDetailPage: React.FC = () => {
             actions={[
               <div className='alert_detail_action-btns'>
                 <Space>
+                  {/* 屏蔽按钮 */}
                   <Button
                     type='primary'
                     onClick={() => {

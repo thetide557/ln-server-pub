@@ -68,3 +68,5 @@ export const DatasourceCateEnum = { ...BaseDatasourceCateEnum, ...AdvancedDataso
 export type DatasourceCateEnum = BaseDatasourceCateEnum | AdvancedDatasourceCateEnum;
 
 export const WebSocketURL =`ws://${location.host}/alert/ws/`;
+
+export const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');

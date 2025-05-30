@@ -23,6 +23,7 @@ import { QuestionCircleFilled, MinusCircleOutlined, PlusCircleOutlined, CaretDow
 import { useTranslation } from 'react-i18next';
 import { getTeamInfoList, getNotifiesList } from '@/services/manage';
 import DatasourceValueSelect from '@/pages/alertRules/Form/components/DatasourceValueSelect';
+import DatasourceValueSelectV2 from '@/pages/alertRules/Form/components/DatasourceValueSelect/V2';
 import { CommonStateContext } from '@/App';
 import { defaultValues } from '../Form/constants';
 
@@ -136,12 +137,14 @@ function isTagValid(tag) {
 interface Props {
   isModalVisible: boolean;
   editModalFinish: Function;
+  selectedRows: any[];
 }
 
-const editModal: React.FC<Props> = ({ isModalVisible, editModalFinish }) => {
+const editModal: React.FC<Props> = ({ isModalVisible, editModalFinish ,selectedRows}) => {
   const { t, i18n } = useTranslation('alertRules');
   const [form] = Form.useForm();
   const { datasourceList } = useContext(CommonStateContext);
+  const { groupedDatasourceList, reloadGroupedDatasourceList } = useContext(CommonStateContext);
   const [contactList, setInitContactList] = useState([]);
   const [notifyGroups, setNotifyGroups] = useState([]);
   const [field, setField] = useState<string>('datasource_ids');
@@ -351,7 +354,15 @@ const editModal: React.FC<Props> = ({ isModalVisible, editModalFinish }) => {
               case 'datasource_ids':
                 return (
                   <>
-                    <DatasourceValueSelect mode='multiple' setFieldsValue={form.setFieldsValue} cate='prometheus' datasourceList={datasourceList || []} />
+                    {/* <DatasourceValueSelect mode='multiple' setFieldsValue={form.setFieldsValue} cate='prometheus' datasourceList={datasourceList || []} /> */}
+                    <Form.Item label={changetoText} >
+                      <DatasourceValueSelectV2
+                        names={['datasource_queries']}
+                        datasourceCate={selectedRows[0]?.cate}
+                        datasourceList={groupedDatasourceList?.[selectedRows[0]?.cate] || []}
+                        reloadGroupedDatasourceList={reloadGroupedDatasourceList}
+                      />
+                    </Form.Item>
                   </>
                 );
               case 'severity':

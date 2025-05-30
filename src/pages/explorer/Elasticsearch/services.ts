@@ -68,6 +68,7 @@ export function getFields(datasourceValue: number, index?: string, type?: string
   }).then((res) => {
     return {
       allFields: mappingsToFields(res),
+      fullFields: mappingsToFullFields(res),
       fields: type ? mappingsToFields(res, type) : [],
     };
   });
@@ -107,11 +108,13 @@ export function getLogsQuery(datasourceValue: number, requestBody) {
       'Content-Type': 'application/json',
     },
   }).then((res) => {
+    const aggres = _.get(res, 'responses[0].aggregations')
     const dat = _.get(res, 'responses[0].hits');
     const { docs } = flattenHits(dat.hits);
     return {
       total: dat.total.value,
       list: docs,
+      aggres: aggres
     };
   });
 }

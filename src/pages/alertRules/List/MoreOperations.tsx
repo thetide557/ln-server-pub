@@ -158,6 +158,7 @@ export default function MoreOperations(props: MoreOperationsProps) {
 
           }
         }}
+        selectedRows={selectedRows}
       />
     </>
   );

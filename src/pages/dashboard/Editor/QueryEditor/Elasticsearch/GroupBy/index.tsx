@@ -25,10 +25,23 @@ export default function index({ prefixField = {}, prefixFieldNames = [], parentN
   const { run } = useDebounceFn(
     () => {
       getFields(datasourceValue, index).then((res) => {
+        console.log('res.allFields', res);
+        // setFieldsOptions(
+        //   _.map(res.allFields, (item) => {
+        //     return {
+        //       value: item,
+        //     };
+        //   }),
+        // );
+        const result = res.fullFields.filter(item => 
+          item.type === "text" && 
+          item.fields && 
+          item.fields.keyword
+        ).map(item => item.name);
         setFieldsOptions(
-          _.map(res.allFields, (item) => {
+          _.map(result, (item) => {
             return {
-              value: item,
+              value: item + '.keyword',
             };
           }),
         );

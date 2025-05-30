@@ -180,6 +180,7 @@ export function mappingsToFullFields(mappings: Mappings, type?: string) {
   return _.sortBy(_.union(fields));
 }
 
+const PERCENTILE_FUNCS = ["p90", "p95", "p99"];
 export function normalizeLogsQueryRequestBody(params: any) {
   const header = {
     search_type: 'query_then_fetch',
@@ -222,6 +223,111 @@ export function normalizeLogsQueryRequestBody(params: any) {
       },
     });
   }
+  if (params.termsKey && params.termsValue) {
+    body.query.bool.filter.push({
+      term: {
+        [params.termsKey]: params.termsValue,
+      },
+    });
+  }
+  
+  const isPercentile = PERCENTILE_FUNCS.includes(params.func);
+  const aggType = isPercentile ? 'percentiles' : params.func;
+  const getPercents = () => {
+    if (params.func === 'p90') return [90];
+    if (params.func === 'p95') return [95];
+    if (params.func === 'p99') return [99];
+  };
+
+  if (params.groupBy) {
+    params.groupBy.forEach((item) => {
+      body.aggs[`terms_${item.field}`] = {
+        terms: {
+          // TODO:field、order参数怎么传递的
+          field: `${item.field}`,
+          size: item.size,
+          min_doc_count: item.min_value,
+          order: item.orderBy && item.order ? { [item.orderBy]: item.order } : { _count: 'desc' },
+        },
+        aggs: {},
+      };
+      // 动态构建聚合操作
+      if (params.func !== "count" && params.funcField) {
+        body.aggs[`terms_${item.field}`].aggs = {
+          [params.func + "_" + params.funcField]: {
+            [aggType]: {
+              field: params.funcField,
+              ...(isPercentile ? { percents: getPercents() } : {}),
+              ...(isPercentile ? { tdigest: { compression: 200 } } : {}),
+            },
+          },
+        };
+      }
+      // 添加告警条件
+      console.log('告警条件', params.alertCondition);
+      if (
+        params.alertCondition &&
+        Array.isArray(params.alertCondition) &&
+        params.alertCondition.length > 0
+      ) {
+        let alertScript = params.alertCondition
+          .map((condition, index) => {
+            // 拼接每个条件
+            let operator = condition.comparisonOperator || "";
+            let value = condition.value || "";
+            return `params.value ${operator} ${value}`;
+          })
+          .join(` ${params.alertCondition[0].logicalOperator} `); // 使用第一个条件的逻辑操作符连接所有条件
+          console.log('告警条件22222', alertScript);  
+        body.aggs[`terms_${item.field}`].aggs[
+          `${params.func + "_" + params.funcField}_filter`
+        ] = {
+          bucket_selector: {
+            buckets_path: {
+              value: `${params.func + "_" + params.funcField}`, // 假设每个聚合都有一个.value 属性
+            },
+            script: alertScript,
+          },
+        };
+      }
+    });
+  } else if (params.func !== "count" && params.funcField) {
+      body.aggs = {
+        ...body.aggs,
+        [params.func + "_" + params.funcField]: {
+          [aggType]: {
+            field: params.funcField,
+            ...(isPercentile ? { percents: getPercents() } : {}),
+          },
+        },
+      };
+      // if (
+      //   params.alertCondition &&
+      //   Array.isArray(params.alertCondition) &&
+      //   params.alertCondition.length > 0
+      // ) {
+      //   let alertScript = params.alertCondition
+      //     .map((condition, index) => {
+      //       // 拼接每个条件
+      //       let operator = condition.comparisonOperator || "";
+      //       let value = condition.value || "";
+      //       return `params.value ${operator} ${value}`;
+      //     })
+      //     .join(` ${params.alertCondition[0].logicalOperator} `); // 使用第一个条件的逻辑操作符连接所有条件
+      //     console.log('告警条件22222', alertScript);  
+      //   body.aggs[
+      //     `${params.func + "_" + params.funcField}_filter`
+      //   ] = {
+      //     bucket_selector: {
+      //       buckets_path: {
+      //         value: `${params.func + "_" + params.funcField}`, 
+      //       },
+      //       script: alertScript,
+      //     },
+      //   };
+      // }
+    }
+  
   return `${JSON.stringify(header)}\n${JSON.stringify(body)}\n`;
 }
 

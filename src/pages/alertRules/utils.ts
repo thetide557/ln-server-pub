@@ -61,46 +61,56 @@ export const parseValues = (values: any = {}) => {
   const cloned = _.cloneDeep(values);
   const cate = cloned.cate || 'prometheus';
   if (cate === 'elasticsearch') {
-    const queryString = cloned.prom_ql;
-    let query: any = {};
-    try {
-      query = JSON.parse(queryString);
-    } catch (e) {
-      console.error(e);
-    }
-    if (query?.interval !== undefined) {
-      // 第一版的结构，未来会废弃
-      query.interval = parseTimeToValueAndUnit(query.interval).value;
-      query.interval_unit = parseTimeToValueAndUnit(query.interval).unit;
-      query.rules = _.map(query.rules, (rule: any) => {
-        return {
-          ...rule,
-          rule: _.map(rule.rule, (item: any) => {
-            return {
-              ...item,
-              compare_time: parseTimeToValueAndUnit(item.compare_time).value,
-              compare_time_unit: parseTimeToValueAndUnit(item.compare_time).unit,
-            };
-          }),
-        };
+    const rule_config = cloned.rule_config;
+    if (rule_config) {
+      rule_config.queries = _.map(rule_config.queries, (item,index) => {
+        if(item.value?.func !== 'count'){
+          item.trigger_value = rule_config.triggers[index].expressions;
+        }
+        return item
       });
-      cloned.query = query;
-    } else if (query?.queries && query?.triggers) {
-      /**
-       * 新版本结构跟 SLS 一致 Query {
-       *   queries: any[],
-       *   triggers: any[],
-       * }
-       */
-      cloned.queries = _.map(query.queries, (item) => {
-        return {
-          ...item,
-          interval: parseTimeToValueAndUnit(item.interval).value,
-          interval_unit: parseTimeToValueAndUnit(item.interval).unit,
-        };
-      });
-      cloned.triggers = query.triggers;
+      cloned.rule_config = rule_config;
     }
+    // const queryString = cloned.prom_ql;
+    // let query: any = {};
+    // try {
+    //   query = JSON.parse(queryString);
+    // } catch (e) {
+    //   console.error(e);
+    // }
+    // if (query?.interval !== undefined) {
+    //   // 第一版的结构，未来会废弃
+    //   query.interval = parseTimeToValueAndUnit(query.interval).value;
+    //   query.interval_unit = parseTimeToValueAndUnit(query.interval).unit;
+    //   query.rules = _.map(query.rules, (rule: any) => {
+    //     return {
+    //       ...rule,
+    //       rule: _.map(rule.rule, (item: any) => {
+    //         return {
+    //           ...item,
+    //           compare_time: parseTimeToValueAndUnit(item.compare_time).value,
+    //           compare_time_unit: parseTimeToValueAndUnit(item.compare_time).unit,
+    //         };
+    //       }),
+    //     };
+    //   });
+    //   cloned.query = query;
+    // } else if (query?.queries && query?.triggers) {
+    //   /**
+    //    * 新版本结构跟 SLS 一致 Query {
+    //    *   queries: any[],
+    //    *   triggers: any[],
+    //    * }
+    //    */
+    //   cloned.queries = _.map(query.queries, (item) => {
+    //     return {
+    //       ...item,
+    //       interval: parseTimeToValueAndUnit(item.interval).value,
+    //       interval_unit: parseTimeToValueAndUnit(item.interval).unit,
+    //     };
+    //   });
+    //   cloned.triggers = query.triggers;
+    // }
   } else if (cate === 'aliyun-sls') {
     const queryString = cloned.prom_ql;
     let query: any = {};
