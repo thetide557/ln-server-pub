@@ -108,7 +108,7 @@ import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import healthReport from '@/pages/sxxc/healthReport'
-import workOrder from '@/pages/sxxc/workorder'
+import workOrder from '@/pages/sxxc/workOrder'
 import productionPlan from '@/pages/sxxc/productionPlan'
 // import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
 // import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";
@@ -167,7 +167,7 @@ export default function Content() {
         <Route path='/log/syslog' component={LogSystem} exact />
         <Route path='/xh/assetmgt' component={XhAssetMgt} exact />
         <Route path='/xh/assetmgt/add' component={XhAssetAdd} exact />
-        <Route path='/xh/iotassetmgt' component={IotAssetMgt} exact /> // 物联网资产管理
+        {/* <Route path='/xh/iotassetmgt' component={IotAssetMgt} exact /> // 物联网资产管理 */}
         <Route path='/xh/iotassetmgt/view' component={IotAssetMgtView} exact /> // 物联网资产管理查看操作
 
         <Route path='/xh/monitor' component={XhMonitor} exact />
@@ -282,7 +282,7 @@ export default function Content() {
         <Route exact path='/autoInspect' component={autoInspect} />
         <Route exact path='/healthReport' component={healthReport} />
         <Route exact path='/workOrder' component={workOrder} />
-        <Route exact path='/productionPlan' component={productionPlan} />
+        {/* <Route exact path='/productionPlan' component={productionPlan} /> */}
         {/* <Route path='/serverVideoAsset' component={serverVideoAsset} exact /> */}
         {/* <Route path='/serverVideoAlarm' component={serverVideoAlarm} exact /> */}
 
