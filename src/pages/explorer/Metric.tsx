@@ -15,6 +15,8 @@
  *
  */
 import React from 'react';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
 import { LineChartOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -24,8 +26,12 @@ import './index.less';
 
 const MetricExplorerPage = () => {
   const { t } = useTranslation('explorer');
+  const { search } = useLocation();
+  const { prom_ql } = queryString.parse(search);
+  // console.log(queryString.parse(search));
+  
   return (
-    <PageLayout title={t('title')} icon={<LineChartOutlined />} showBack>
+    <PageLayout title={t('title')} icon={<LineChartOutlined />} showBack={prom_ql ? true : false}>
       <div className='prometheus-page'>
         <Explorer type='metric' defaultCate='prometheus' />
       </div>

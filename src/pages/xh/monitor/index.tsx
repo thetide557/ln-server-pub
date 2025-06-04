@@ -567,7 +567,7 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack>
+    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack={assetId ? true : false}>
       <div style={{ display: 'flex' }} className='monitor_list_view'>
         <Resizable
           style={{
