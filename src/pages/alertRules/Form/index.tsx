@@ -15,7 +15,7 @@
  *
  */
 import React, { useContext, useEffect, createContext, useState } from 'react';
-import { Form, Space, Button, notification, message } from 'antd';
+import { Form, Space, Button, notification, message,Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useParams, Link, useLocation } from 'react-router-dom';
 import _ from 'lodash';
@@ -120,6 +120,11 @@ export default function index(props: IProps) {
           <Rule form={form} type={0} assets={assets} />
           <Effective />
           <Notify disabled={disabled} />
+          {/* 教育项目：添加推荐方案 */}
+          <Form.Item name="handle_tip" label="推荐方案">
+            <Input.TextArea placeholder="请输入推荐方案" maxLength={200}/>
+          </Form.Item>
+
           {!disabled && (
             <Space>
               <Button
