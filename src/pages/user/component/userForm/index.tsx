@@ -245,6 +245,11 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
 
           </Form.Item>
         </Col> */}
+        {/* <Col span={12} key={"item-" + 9}>
+          <Form.Item label={'门户用户名'} name='mh_username'>
+              <Input />
+          </Form.Item>
+        </Col> */}
       </Row>
 
       <Form.Item
