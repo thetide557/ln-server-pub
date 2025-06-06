@@ -146,6 +146,13 @@ const EventDetailPage: React.FC = () => {
       },
     },
     {
+      label: t('detail.trigger_time'),
+      key: 'trigger_time',
+      render(time) {
+        return moment((time || 0) * 1000).format('YYYY-MM-DD HH:mm:ss');
+      },
+    },
+    {
       label: t('detail.recover_time'),
       key: 'recover_time',
       render(time) {
