@@ -43,6 +43,14 @@ export const authLoginLdap = function (
   });
 };
 
+// 门户登录
+export const authLoginMh = function (data: any) {
+  return request(`/api/n9e/auth/mhlogin`, {
+    method: RequestMethod.Post,
+    data,
+  });
+};
+
 
 export const getCaptcha = function () {
   return request("/api/n9e/auth/captcha", {
