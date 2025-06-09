@@ -24,6 +24,7 @@ import { Logout } from '@/services/login';
 import AdvancedWrap, { License } from '@/components/AdvancedWrap';
 import { CommonStateContext } from '@/App';
 import Version from './Version';
+import Cookies from 'js-cookie';
 import './index.less';
 import './locale';
 
@@ -56,8 +57,8 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('refresh_token');
+            Cookies.remove('access_token');
+            Cookies.remove('refresh_token');
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');

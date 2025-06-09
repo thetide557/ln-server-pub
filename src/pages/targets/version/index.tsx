@@ -8,6 +8,7 @@ import { getAllVersion, } from '@/services/version';
 import type { UploadProps } from 'antd';
 import { exportTempletZip } from '@/pages/historyEvents/services';
 import { RcFile } from 'antd/es/upload';
+import Cookies from 'js-cookie';
 const { Dragger } = Upload;
 
 
@@ -104,7 +105,7 @@ export default function () {
         fetch(`/api/n9e/target/version/delete-gz?filename=${filenameToDelete}`, {
           method: 'DELETE',
           headers: {
-            Authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}`,
+            Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
           },
         })
           .then(response => {
@@ -141,7 +142,7 @@ export default function () {
     multiple: false,
     action: '/api/n9e/target/version',
     
-    headers: { Authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}` },
+    headers: { Authorization: `Bearer ${Cookies.get('access_token') || ''}` },
     
     onChange(info) {
       const { status, response } = info.file;

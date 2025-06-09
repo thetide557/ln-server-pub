@@ -26,6 +26,7 @@ import { UpdateProfile } from '@/services/account';
 import type { UploadChangeParam } from 'antd/es/upload';
 import { getMyPortrait } from '@/services/log_set';
 import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
+import Cookies from 'js-cookie';
 const { confirm } = Modal;
 const { Option } = Select;
 export default function Info() {
@@ -66,7 +67,7 @@ export default function Info() {
     name: 'photo',
     action: '/api/n9e/xh/users/photo',
     headers: {
-      authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}`,
+      authorization: `Bearer ${Cookies.get('access_token') || ''}`,
     },
 
   };

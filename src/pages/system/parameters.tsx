@@ -79,6 +79,7 @@ export default function () {
   const submitForm = async (values) => {
     console.log('submitForm', values);
     values["http_port"] = parseInt(values["http_port"]);
+    values["access_expired"] = parseInt(values["access_expired"]);
 
 
 

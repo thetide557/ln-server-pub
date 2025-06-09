@@ -23,6 +23,7 @@ import pkgJson from '../../../../package.json';
 import './locale';
 import { Divider, message, Upload, UploadProps } from 'antd';
 import { CommonStateContext } from '@/App';
+import Cookies from 'js-cookie';
 
 const { Dragger } = Upload;
 
@@ -31,7 +32,7 @@ const props: UploadProps = {
   multiple: false,
   maxCount: 1,
   action: '/api/n9e/server/update',
-  headers: { Authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}` },
+  headers: { Authorization: `Bearer ${Cookies.get('access_token') || ''}` },
   onChange(info) {
     const { status } = info.file;
     if (status !== 'uploading') {
