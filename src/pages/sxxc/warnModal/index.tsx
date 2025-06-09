@@ -591,8 +591,11 @@ const WarnModal = (props) => {
               </div>
               <div className="col">
                 <img className="dian" src="/image/alarm/dian.png" alt="" />
-                <span>
+                {/* <span>
                   触发时间：{convertTime(curWarn.trigger_time, "year")}
+                </span> */}
+                <span>
+                  发生时间：{convertTime(curWarn.trigger_time, "year")}
                 </span>
               </div>
             </div>

@@ -29,6 +29,7 @@ import { RsaEncry } from '@/utils/rsa';
 import _ from 'lodash';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen } from '@/services/sxxc/bigScreen';
+import Cookies from 'js-cookie';
 
 export interface DisplayName {
   oidc: string;
@@ -92,8 +93,8 @@ export default function Login() {
        authLoginMh(parmas).then((res) => {
         const { dat, err } = res;
         const { access_token, refresh_token } = dat;
-        sessionStorage.setItem('access_token', access_token);
-        sessionStorage.setItem('refresh_token', refresh_token);
+        Cookies.set('access_token', access_token);
+        Cookies.set('refresh_token', refresh_token);
         // 嵌入的子项目之前用的local
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
@@ -190,8 +191,8 @@ export default function Login() {
       .then((res) => {
         const { dat, err } = res;
         const { access_token, refresh_token } = dat;
-        sessionStorage.setItem('access_token', access_token);
-        sessionStorage.setItem('refresh_token', refresh_token);
+        Cookies.set('access_token', access_token);
+        Cookies.set('refresh_token', refresh_token);
         // 嵌入的子项目之前用的local
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);

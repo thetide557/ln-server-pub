@@ -16,6 +16,7 @@
  */
 import request from "@/utils/request";
 import { RequestMethod } from "@/store/common";
+import Cookies from 'js-cookie';
 
 // 登录
 export const authLogin = function (
@@ -76,7 +77,7 @@ export const UpdateAccessToken = function () {
   return request(`/api/n9e/auth/refresh`, {
     method: RequestMethod.Post,
     data: {
-      refresh_token: sessionStorage.getItem("refresh_token"),
+      refresh_token: Cookies.get("refresh_token"),
     },
   });
 };

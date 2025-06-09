@@ -200,9 +200,22 @@ const Event: React.FC = () => {
         return a.severity - b.severity;
       },
     },
+    // {
+    //   title: '触发时间',
+    //   dataIndex: 'last_eval_time',
+    //   // fixed:  'right',
+    //   align: 'center',
+    //   width: 100,
+    //   render(value) {
+    //     return moment((value ? value : 0) * 1000).format('YYYY-MM-DD HH:mm:ss');
+    //   },
+    //   sorter: (a, b) => {
+    //     return a.last_eval_time > b.last_eval_time ? 1 : -1;
+    //   },
+    // },
     {
-      title: '触发时间',
-      dataIndex: 'last_eval_time',
+      title: '发生时间',
+      dataIndex: 'trigger_time',
       // fixed:  'right',
       align: 'center',
       width: 100,
@@ -210,7 +223,20 @@ const Event: React.FC = () => {
         return moment((value ? value : 0) * 1000).format('YYYY-MM-DD HH:mm:ss');
       },
       sorter: (a, b) => {
-        return a.last_eval_time > b.last_eval_time ? 1 : -1;
+        return a.trigger_time > b.trigger_time ? 1 : -1;
+      },
+    },
+    {
+      title: '恢复时间',
+      dataIndex: 'recover_time',
+      // fixed:  'right',
+      align: 'center',
+      width: 100,
+      render(value) {
+        return moment((value ? value : 0) * 1000).format('YYYY-MM-DD HH:mm:ss');
+      },
+      sorter: (a, b) => {
+        return a.recover_time > b.recover_time ? 1 : -1;
       },
     },
     {

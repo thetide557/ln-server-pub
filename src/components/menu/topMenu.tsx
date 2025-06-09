@@ -8,7 +8,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import IconFont from '../IconFont';
 import { useHistory, useLocation } from 'react-router-dom';
-
+import Cookies from 'js-cookie';
 import './topMenu.less';
 import './locale';
 import { Logout } from '@/services/login';
@@ -465,8 +465,8 @@ export default function () {
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('refresh_token');
+            Cookies.remove('access_token');
+            Cookies.remove('refresh_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');

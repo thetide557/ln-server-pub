@@ -1,9 +1,10 @@
 import React, { useRef, useEffect } from 'react';
+import Cookies from 'js-cookie';
 // import PageLayout from '@/components/pageLayout';
 // import { DeleteOutlined, DownOutlined, EditOutlined, PlusSquareOutlined, PoweroffOutlined, SearchOutlined, UndoOutlined, UserOutlined } from '@ant-design/icons';
 
 const healthReport = function () {
-  const token = sessionStorage.getItem('access_token')
+  const token = Cookies.get('access_token')
   // const iframeRef = useRef(null);
   // const handleload = () => {
   //   const domElement:any = iframeRef?.current;

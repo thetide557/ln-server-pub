@@ -12,6 +12,7 @@ import type { RcFile, UploadProps } from 'antd/es/upload';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { saveLog, getLogInfo } from '@/services/log_set';
 import { useLocalStorage } from 'react-use';
+import Cookies from 'js-cookie';
 
 const getBase64 = (img: RcFile, callback: (url: string) => void) => {
   const reader = new FileReader();
@@ -178,7 +179,7 @@ export default function () {
     name: 'file',
     action: '/api/n9e/user-config/picture?logoName=' + logoName,
     headers: {
-      authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}`,
+      authorization: `Bearer ${Cookies.get('access_token') || ''}`,
     },
 
   };

@@ -16,6 +16,7 @@ import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen } from '@/services/sxxc/bigScreen';
 import { getDictDataListByType } from '@/services/system/dict';
+import Cookies from 'js-cookie';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -582,8 +583,8 @@ export default function () {//{ selectMenu?:any }
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('refresh_token');
+            Cookies.remove('access_token');
+            Cookies.remove('refresh_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');

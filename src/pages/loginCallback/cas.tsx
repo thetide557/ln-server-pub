@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import queryString from 'query-string';
 import { authCallbackCAS } from '@/services/login';
+import Cookies from 'js-cookie';
 
 export default function index() {
   const location = useLocation();
@@ -33,8 +34,8 @@ export default function index() {
       .then((res) => {
         if (res.err === '') {
           if (res.dat && res.dat.access_token && res.dat.refresh_token) {
-            sessionStorage.setItem('access_token', res.dat.access_token);
-            sessionStorage.setItem('refresh_token', res.dat.refresh_token);
+            Cookies.set('access_token', res.dat.access_token);
+            Cookies.set('refresh_token', res.dat.refresh_token);
             // 嵌入的子项目之前用的local
             localStorage.setItem('access_token', res.dat.refresh_token);
             localStorage.setItem('refresh_token', res.dat.refresh_token);

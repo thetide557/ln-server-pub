@@ -3,6 +3,7 @@ import { extend } from "umi-request";
 import { message, notification } from "antd";
 import _ from "lodash";
 import { UpdateAccessToken } from "@/services/login";
+import Cookies from 'js-cookie';
 
 /** 异常处理程序，所有的error都被这里处理，页面无法感知具体error */
 const errorHandler = (error: Error): Response => {
@@ -55,7 +56,8 @@ const processError = (res: any): string => {
 /** 配置request请求时的默认参数 */
 const request = extend({
   errorHandler,
-  credentials: "include",
+  // credentials: "include",
+  credentials: "omit",  // 无论是否跨域，都不携带 Cookie。
 });
 
 request.interceptors.request.use((url, options) => {
@@ -63,7 +65,7 @@ request.interceptors.request.use((url, options) => {
     ...options.headers,
   };
   headers["Authorization"] = `Bearer ${
-    sessionStorage.getItem("access_token") || ""
+    Cookies.get("access_token") || ""
   }`;
   headers["X-Language"] =
     localStorage.getItem("language") === "en_US" ? "en" : "zh";
@@ -151,7 +153,7 @@ request.interceptors.response.use(
             : ""
         }`;
       } else {
-        sessionStorage.getItem("refresh_token")
+        Cookies.get("refresh_token")
           ? UpdateAccessToken().then((res) => {
               console.log("401 err", res);
               if (res.err) {
@@ -162,8 +164,8 @@ request.interceptors.response.use(
                 }`;
               } else {
                 const { access_token, refresh_token } = res.dat;
-                sessionStorage.setItem("access_token", access_token);
-                sessionStorage.setItem("refresh_token", refresh_token);
+                Cookies.set("access_token", access_token);
+                Cookies.set("refresh_token", refresh_token);
                 // 嵌入的子项目之前用的local
                 localStorage.setItem('access_token', res.dat.refresh_token);
                 localStorage.setItem('refresh_token', res.dat.refresh_token);

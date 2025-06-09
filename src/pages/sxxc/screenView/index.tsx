@@ -18,6 +18,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { CommonStateContext } from '@/App';
 import { useHistory } from 'react-router-dom';
 import _ from 'lodash';
+import Cookies from 'js-cookie';
 import { getBigScreen, getDashboards, getNav2 } from '@/services/sxxc/bigScreen';
 import { Dropdown, Menu, message, Select } from 'antd';
 import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
@@ -36,7 +37,7 @@ export default function ScreenView() {
   const baseUrl = '/dataroom/#/bigscreen/preview'
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
-  const token = sessionStorage.getItem('access_token')
+  const token = Cookies.get('access_token')
 
   const sendToken = window.onload = function () {
     var iframe: any = document.getElementById('logFrame');
