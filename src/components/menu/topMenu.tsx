@@ -467,6 +467,8 @@ export default function () {
           Logout().then(() => {
             Cookies.remove('access_token');
             Cookies.remove('refresh_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('access_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');
