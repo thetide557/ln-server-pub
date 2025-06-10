@@ -623,10 +623,12 @@ export default function () {//{ selectMenu?:any }
 
   return hideSideMenu() ? null : (
     <div className='top-menu1'>
-      <div className='logoImg' onClick={goScreen}>
-        <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>
-        {theme?.title}</div>
-      <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
+      <div className='top_left'>
+        <div className='logoImg' onClick={goScreen}>
+          <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>
+          {theme?.title}</div>
+          <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
+      </div>
       <div className='top_right'>
         <span
           className='language'
