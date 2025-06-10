@@ -550,6 +550,24 @@ export default function () {//{ selectMenu?:any }
   };
 
   const handleClick = (item) => {
+     // 新增: 判断 access_token 与 refresh_token 是否存在
+    if (!Cookies.get('access_token') && !Cookies.get('refresh_token')) {
+      Logout().then(() => {
+        Cookies.remove('access_token');
+        Cookies.remove('refresh_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('curBusiId');
+        localStorage.removeItem('card5Data');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('left_tissueId');
+        localStorage.removeItem('left_parId');
+        localStorage.removeItem('left_asset_type');
+        window.location.href = '/login';
+      });
+      return;
+    }
+    
     if ((item.key as string) === "/safety/certification") {
       if (!safeUrl) return message.error(t('请先在数据字典中配置安全认证'))
       return window.open(safeUrl)
@@ -585,6 +603,8 @@ export default function () {//{ selectMenu?:any }
           Logout().then(() => {
             Cookies.remove('access_token');
             Cookies.remove('refresh_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('access_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
             localStorage.removeItem('userId');
