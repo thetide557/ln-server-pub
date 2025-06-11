@@ -78,12 +78,12 @@ export default function Login() {
 
   useEffect(() => {
     // 外部跳转登录
+    console.log('location', location);
     if (queryParams.get('token') && queryParams.get('publicKey') && queryParams.get('type')) {
-       console.log(location.search);
        console.log('queryParams', queryParams);
-       console.log(queryParams.get('token'));
-       console.log(queryParams.get('publicKey'));
-       console.log(queryParams.get('type'));
+       console.log('token', queryParams.get('token'));
+       console.log('publicKey', queryParams.get('publicKey'));
+       console.log('type', queryParams.get('type'));
        setPageLoading(true)
        const parmas = {
          token: queryParams.get('token'),
