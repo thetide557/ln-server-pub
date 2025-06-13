@@ -27,18 +27,45 @@ interface IProps {
   mode?: 'multiple';
   required?: boolean;
   disabled?: boolean;
+  field?: any;
+  getFieldValue?: any;
 }
 
-export default function index({ setFieldsValue, cate, datasourceList, mode, required = true, disabled }: IProps) {
+export default function index({ setFieldsValue, cate, datasourceList, mode, required = true, disabled, field, getFieldValue }: IProps) {
   const { t } = useTranslation();
   const handleClusterChange = (v: number[] | number) => {
     if (_.isArray(v)) {
       const curVal = _.last(v);
-      if (curVal === DATASOURCE_ALL) {
-        setFieldsValue({ datasource_ids: [DATASOURCE_ALL] });
-      } else if (typeof v !== 'number' && v.includes(DATASOURCE_ALL)) {
-        setFieldsValue({ datasource_ids: _.without(v, DATASOURCE_ALL) });
+      if(field){
+        if (curVal === DATASOURCE_ALL) {
+          const strategies = getFieldValue("strategies") || [];
+          const newStrategies = [...strategies];
+          newStrategies[field.name] = {
+            ...newStrategies[field.name],
+            datasource_ids: [DATASOURCE_ALL],
+          };
+          setFieldsValue({
+            strategies: newStrategies,
+          });
+        } else if (typeof v !== "number" && v.includes(DATASOURCE_ALL)){
+          const strategies = getFieldValue("strategies") || [];
+          const newStrategies = [...strategies];
+          newStrategies[field.name] = {
+            ...newStrategies[field.name],
+            datasource_ids: _.without(v, DATASOURCE_ALL),
+          };
+          setFieldsValue({
+            strategies: newStrategies,
+          });
+        }
+      }else{
+        if (curVal === DATASOURCE_ALL) {
+          setFieldsValue({ datasource_ids: [DATASOURCE_ALL] });
+        } else if (typeof v !== 'number' && v.includes(DATASOURCE_ALL)) {
+          setFieldsValue({ datasource_ids: _.without(v, DATASOURCE_ALL) });
+        }  
       }
+
     }
   };
 
@@ -55,7 +82,9 @@ export default function index({ setFieldsValue, cate, datasourceList, mode, requ
   return (
     <Form.Item
       label={t('common:datasource.id')}
-      name='datasource_ids'
+      // name='datasource_ids'
+      {...field}
+      name={field ? [field.name, 'datasource_ids'] : 'datasource_ids'}
       rules={[
         {
           required,

@@ -261,3 +261,65 @@ export function getDefaultValuesByCate(prod, cate) {
     };
   }
 }
+
+
+// 告警规则数据转换
+export function transformAlertRules(originalData) {
+  if (!originalData || originalData.length === 0) return null;
+
+  // 基础配置字段列表
+  const baseFields = [
+    "strategy_id",
+    "name",
+    "asset_id",
+    "excludes",
+    "append_tags",
+    "note",
+  ];
+
+  // 创建结果对象
+  const result: any = {};
+  baseFields.forEach((field) => {
+    result[field] = originalData[0][field];
+  });
+
+  // 添加策略数组
+  result.strategies = originalData.map((item) => {
+    const strategyItem = { ...item };
+
+    baseFields.forEach((field) => {
+      delete strategyItem[field];
+    });
+
+    return strategyItem;
+  });
+
+  return result;
+}
+
+export function transformStrategyData(transformedData) {
+  if (!transformedData || !transformedData.strategies) return [];
+
+  const baseFields = [
+    "strategy_id",
+    "name",
+    "asset_id",
+    "excludes",
+    "append_tags",
+    "note",
+  ];
+
+  // 创建基础配置对象
+  const baseData = {};
+  baseFields.forEach((field) => {
+    baseData[field] = transformedData[field];
+  });
+
+  // 为每个策略项合并基础配置
+  return transformedData.strategies.map((strategyItem) => {
+    return {
+      ...baseData,
+      ...strategyItem,
+    };
+  });
+}

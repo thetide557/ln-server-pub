@@ -26,30 +26,51 @@ import ProdSelect from '../components/ProdSelect';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
 
-export default function Rule({ form, type, assets }) {
+export default function Rule({ form, type, assets,field }) {
   const { t } = useTranslation('alertRules');
-
+  // console.log('rule form', form);
   return (
     <Card {...panelBaseProps} className='rule-card' title={t('rule_configs')}>
       <ProdSelect
+        field={field}
         onChange={(e) => {
           const val = e.target.value;
           if (val === 'anomaly') {
             // 获取默认 brain 参数，用于初始化智能告警的设置
             getBrainParams().then((res) => {
-              form.setFieldsValue(getDefaultValuesByProd(val, res));
+              // form.setFieldsValue(getDefaultValuesByProd(val, res));
+              const strategies = form.getFieldValue("strategies") || [];
+              const newStrategies = [...strategies];
+              newStrategies[field.name] = {
+                ...newStrategies[field.name],
+                ...getDefaultValuesByProd(val, res),
+              };
+              form.setFieldsValue({
+                strategies: newStrategies,
+              });
             });
           } else {
-            form.setFieldsValue(getDefaultValuesByProd(val, {}));
+            // form.setFieldsValue(getDefaultValuesByProd(val, {}));
+            const strategies = form.getFieldValue("strategies") || [];
+              const newStrategies = [...strategies];
+              newStrategies[field.name] = {
+                ...newStrategies[field.name],
+                ...getDefaultValuesByProd(val, {}),
+              };
+              form.setFieldsValue({
+                strategies: newStrategies,
+              });
           }
         }}
       />
-      <Form.Item isListField={false} name={['rule_config', 'inhibit']} valuePropName='checked' noStyle hidden>
+      {/* <Form.Item isListField={false} name={['rule_config', 'inhibit']} valuePropName='checked' noStyle hidden> */}
+      <Form.Item isListField={false} {...field} name={[field.name, 'rule_config', 'inhibit']} valuePropName='checked' noStyle hidden>
         <div />
       </Form.Item>
-      <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.prod !== currentValues.prod}>
+      {/* <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.prod !== currentValues.prod}> */}
+      <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues?.strategies[field.name]?.prod !== currentValues?.strategies[field.name]?.prod}>
         {() => {
-          return <Metric form={form} type={type} assets={assets} />;
+          return <Metric form={form} type={type} assets={assets} field={field} />;
         }}
       </Form.Item>
     </Card>

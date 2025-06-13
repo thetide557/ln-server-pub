@@ -23,7 +23,7 @@ import moment from 'moment';
 import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select, Tooltip, Input } from 'antd';
 import RefreshIcon from '@/components/RefreshIcon';
 import usePagination from '@/components/usePagination';
-import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/services/warning';
+import { getStrategyGroupSubList, updateAlertRules, deleteStrategy,deleteAlertRules } from '@/services/warning';
 import { CommonStateContext } from '@/App';
 import { getAssetstypes } from '@/services/assets';
 import Tags from '@/components/Tags';
@@ -88,21 +88,44 @@ export default function List(props: ListProps) {
       title: '告警规则名称',
       dataIndex: 'name',
       width: 250,
+      // render(name, record, index) {
+      //   return (
+      //     <Link
+      //       className='table-text'
+      //       to={{
+      //         pathname: `/alert-rules/edit/${record.id}`,
+      //       }}
+      //     >
+      //       {name}
+      //     </Link>
+      //   );
+      // },
       render(name, record, index) {
-        return (
-          <Link
-            className='table-text'
-            to={{
-              pathname: `/alert-rules/edit/${record.id}`,
-            }}
-          >
-            {name}
-          </Link>
-        );
+        return {
+          children:(
+            <Link
+              className='table-text'
+              to={{
+                pathname: `/alert-rules/edit/${record.strategy_id}`,
+              }}
+            >
+              {name}
+            </Link>
+          ),
+          props: {
+            rowSpan: record.rowSpan
+          }
+        }
       },
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
+    },
+    {
+      title: '策略名称',
+      dataIndex: 'strategy_name',
+      width:100,
+      align:'center',
     },
     {
       title: t('告警级别'),
@@ -242,8 +265,11 @@ export default function List(props: ListProps) {
               (profile.roles?.includes("Admin") || permList.includes("/alert-rules/copy")) && <Link
                 title='克隆'
                 className='table-operator-area-normal'
+                // to={{
+                //   pathname: `/alert-rules/edit/${record.id}?mode=clone`,
+                // }}
                 to={{
-                  pathname: `/alert-rules/edit/${record.id}?mode=clone`,
+                  pathname: `/alert-rules/edit/${record.strategy_id}?mode=clone`,
                 }}
                 target='_self'
               >
@@ -253,8 +279,11 @@ export default function List(props: ListProps) {
             {
               (profile.roles?.includes("Admin") || permList.includes("/alert-rules/detail")) && <FileSearchOutlined
                 title='查看'
+                // onClick={() => {
+                //   history.push(`alert-rules/edit/${record.id}?mode=view`);
+                // }}
                 onClick={() => {
-                  history.push(`alert-rules/edit/${record.id}?mode=view`);
+                  history.push(`alert-rules/edit/${record.strategy_id}?mode=view`);
                 }}
                 rev={undefined}
               />
@@ -262,8 +291,11 @@ export default function List(props: ListProps) {
             {
               (profile.roles?.includes("Admin") || permList.includes("/alert-rules/put")) && <EditOutlined
                 title='编辑'
+                // onClick={() => {
+                //   history.push(`alert-rules/edit/${record.id}`);
+                // }}
                 onClick={() => {
-                  history.push(`alert-rules/edit/${record.id}`);
+                  history.push(`alert-rules/edit/${record.strategy_id}`);
                 }}
                 rev={undefined}
               />
@@ -277,9 +309,19 @@ export default function List(props: ListProps) {
                     title: '确认要删除',
                     okText: '确认',
                     cancelText: '取消',
+                    // onOk: () => {
+                    //   // 删除策略
+                    //   bgid &&
+                    //     deleteStrategy([record.id], bgid).then(() => {
+                    //       message.success('删除成功');
+                    //       getAlertRules(params);
+                    //       setSelectRowKeys([]);
+                    //     });
+                    // },
                     onOk: () => {
+                      // 删除告警规则
                       bgid &&
-                        deleteStrategy([record.id], bgid).then(() => {
+                      deleteAlertRules(record.strategy_id, bgid).then(() => {
                           message.success('删除成功');
                           getAlertRules(params);
                           setSelectRowKeys([]);
@@ -312,6 +354,31 @@ export default function List(props: ListProps) {
     },
   });
 
+  // 合并相同的告警规则名称单元格
+  const processData = (data) => {
+    // 1. 按 strategy_id 分组
+    const grouped = data.reduce((acc, item) => {
+      if (!acc[item.strategy_id]) {
+        acc[item.strategy_id] = [];
+      }
+      acc[item.strategy_id].push(item);
+      return acc;
+    }, {});
+  
+    // 2. 为每个组的第一项设置 rowSpan
+    const processedData = [];
+    Object.values(grouped).forEach(group => {
+      group.forEach((item, index) => {
+        processedData.push({
+          ...item,
+          rowSpan: index === 0 ? group.length : 0
+        });
+      });
+    });
+    
+    return processedData;
+  };
+  
 
   const getAlertRules = async (params) => {
     if (!bgid) {
@@ -322,9 +389,10 @@ export default function List(props: ListProps) {
       setLoading(false);
       setTotal(dat.total)
       let lists = dat.list;
-      setListTableData(lists);
+      // setListTableData(lists);
       console.log("是否-数据----", lists);
-
+      const processedData = processData(lists);
+      setListTableData(processedData);
     })
   };
   useEffect(() => {
