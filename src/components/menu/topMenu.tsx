@@ -471,6 +471,7 @@ export default function () {
             localStorage.removeItem('access_token');
             localStorage.removeItem('curBusiId');
             localStorage.removeItem('card5Data');
+            localStorage.removeItem('card7Data');
             localStorage.removeItem('userId');
             history.push('/login');
           });
