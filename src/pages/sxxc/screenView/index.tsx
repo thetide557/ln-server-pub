@@ -72,47 +72,53 @@ export default function ScreenView() {
     })
   }
   // 下拉切换
-  const changeScreen = ({ key }) => {
-    // console.log(`selected ${key}`);
-    let code = screenList.find(item => item.id == key).config
-    // console.log(code);
-    if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
-      if (code.includes('?')) {
-        let code1 = code + `&token=${token}`
-        setUrl(code1)
-      } else {
-        let code1 = code + `?token=${token}`
-        setUrl(code1)
-      }
-      sendToken()
-    } else {
-      const screenUrl = `${baseUrl}?code=${code}`
-      setUrl(screenUrl)
-      // sendToken()
-    }
-  }
+  // const changeScreen = ({ key }) => {
+  //   // console.log(`selected ${key}`);
+  //   let code = screenList.find(item => item.id == key).config
+  //   // console.log(code);
+  //   if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
+  //     if (code.includes('?')) {
+  //       let code1 = code + `&token=${token}`
+  //       setUrl(code1)
+  //     } else {
+  //       let code1 = code + `?token=${token}`
+  //       setUrl(code1)
+  //     }
+  //     sendToken()
+  //   } else {
+  //     const screenUrl = `${baseUrl}?code=${code}`
+  //     setUrl(screenUrl)
+  //     // sendToken()
+  //   }
+  // }
   // tab切换
   const handleClick = (item) => {
-    setActiveColor(item.id)
-    // console.log(`selected ${key}`);
     let code = item.config
-    // console.log(code);
-    if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
-      if (code.includes('?')) {
-        let code1 = code + `&token=${token}`
-        setUrl(code1)
+    // 跳转新窗口
+    if (item.displayType && item.displayType == '2') {
+      if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
+        window.open(code, '_blank');
       } else {
-        let code1 = code + `?token=${token}`
-        setUrl(code1)
+        window.open(`${baseUrl}?code=${code}`, '_blank');
       }
-      sendToken()
     } else {
-      const screenUrl = `${baseUrl}?code=${code}`
-      setUrl(screenUrl)
-      // sendToken()
+      setActiveColor(item.id)
+      if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
+        if (code.includes('?')) {
+          let code1 = code + `&token=${token}`
+          setUrl(code1)
+        } else {
+          let code1 = code + `?token=${token}`
+          setUrl(code1)
+        }
+        sendToken()
+      } else {
+        const screenUrl = `${baseUrl}?code=${code}`
+        setUrl(screenUrl)
+        // sendToken()
+      }
     }
   }
-
   const MyStyle = (styleString) => {
     // 将样式字符串转换为样式对象
     const styleObject = styleString.split(';').reduce((style, declaration) => {
@@ -135,17 +141,17 @@ export default function ScreenView() {
     </Menu>
   );
 
-  const menu1 = (
-    <Menu
-      selectable
-      onClick={changeScreen}
-      defaultSelectedKeys={[first]}
-    >
-      {_.map(screenList, (item) => {
-        return <Menu.Item key={item.id}>{item.title}</Menu.Item>;
-      })}
-    </Menu>
-  );
+  // const menu1 = (
+  //   <Menu
+  //     selectable
+  //     onClick={changeScreen}
+  //     defaultSelectedKeys={[first]}
+  //   >
+  //     {_.map(screenList, (item) => {
+  //       return <Menu.Item key={item.id}>{item.title}</Menu.Item>;
+  //     })}
+  //   </Menu>
+  // );
 
 
   const goBack = () => {
