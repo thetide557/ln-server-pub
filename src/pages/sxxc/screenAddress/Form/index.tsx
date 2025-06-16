@@ -66,6 +66,16 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
   const [businessGroupOption, setBusinessGroupOption] = useState<Option[]>([]);
   const layout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
   const hiddenLayout = { span: 0 };
+  const displayOption = [
+    {
+      name: '当前页面',
+      id: 1
+    },
+     {
+      name: '新页面',
+      id: 2
+    },
+  ]
 
   useEffect(() => {
     form.setFieldsValue(initialValues);
@@ -75,6 +85,9 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
   useEffect(() => {
     getBusiGroupsData()
     getBigScreenData()
+    form.setFieldsValue({
+      displayType: 1
+    })
   }, []);
 
   // 获取业务组otions
@@ -178,6 +191,15 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                       <Col span={12}>
                         <Form.Item name='desc' label='简介'>
                           <Input.TextArea placeholder='请输入简介' />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item name='displayType' label='跳转方式' required>
+                          <Select
+                            options={displayOption}
+                            fieldNames={{ label: 'name', value: 'id' }}
+                            placeholder='请选择跳转方式'
+                          />
                         </Form.Item>
                       </Col>
                     </Row>
