@@ -33,6 +33,8 @@ import Notify from './Notify';
 import { getFirstDatasourceId, processFormValues, processInitialValues ,transformAlertRules,transformStrategyData} from './utils';
 import { defaultValues } from './constants';
 import { useSearchParam } from 'react-use';
+import { buildPromVisualQueryFromPromQL, renderQuery } from '@/components/PromQueryBuilder';
+import { PromVisualQueryLabelFilter } from '@/components/PromQueryBuilder/types';
 
 interface IProps {
   type?: number; // 空: 新增 1:编辑 2:克隆 3:查看
@@ -183,6 +185,7 @@ export default function index(props: IProps) {
 
           <Form.List name="strategies">
             {(fields, { add, remove }) => {
+              console.log("fields",fields)
               if (fields.length && !fields.some(f => `${f.key}` === activeTabKey)) {
                 setActiveTabKey(`${fields[0].key}`);
               }
@@ -200,11 +203,46 @@ export default function index(props: IProps) {
                         message.warning("最多只能添加5个策略");
                         return;
                       }
-                      add({
-                        // temp_strategy_id:_.uniqueId("strategy_"),
+                      // add({
+                      //   strategy_name: `策略${fields.length + 1}`,
+                      //   ...defaultValues,
+                      // });
+                      const newStrategy = {
                         strategy_name: `策略${fields.length + 1}`,
                         ...defaultValues,
+                      };
+                      // 如果有资产设置，为新策略的PromQL设置默认值
+                      const { asset_id, excludes } = form.getFieldsValue();
+                      const labels: PromVisualQueryLabelFilter[] = [];
+                      if (asset_id && asset_id !== 0) {
+                        labels.push({
+                          label: "asset_id",
+                          op: "=",
+                          value: asset_id,
+                        });
+                      } else if (excludes) {
+                        excludes.forEach((v) => {
+                          labels.push({
+                            label: "asset_id",
+                            op: "!=",
+                            value: v,
+                          });
+                        });
+                      }
+                      newStrategy.rule_config.queries.forEach((query) => {
+                        const result = buildPromVisualQueryFromPromQL(
+                          query.prom_ql,
+                          []
+                        ).query;
+                        const metric = result.metric;
+                        query.prom_ql = renderQuery(
+                          buildPromVisualQueryFromPromQL(metric || "", labels)
+                            .query,
+                          false,
+                          result.operations
+                        );
                       });
+                      add(newStrategy);
                     }
                   }}
                   addIcon={

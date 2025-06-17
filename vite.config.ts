@@ -69,19 +69,19 @@ export default defineConfig({
       },
       '/api/n9e/proxy': {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://7.59.10.16:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e/datasource': {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://7.59.10.16:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       '/api/n9e': {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://7.59.10.16:17000/',
+        target: 'http://10.250.250.9:17000/',
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
