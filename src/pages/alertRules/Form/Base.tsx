@@ -124,7 +124,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
     }
 
     rule_config.queries.forEach((e) => {
-      debugger
+      // debugger
       const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
       const metric = result.metric;
       e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query,false,result.operations);
