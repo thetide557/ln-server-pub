@@ -35,11 +35,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('运维资产清单'),
         },
-        {
-          key: '/xh/iotassetmgt',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('物联网资产管理'),
-        },
+        // {
+        //   key: '/xh/iotassetmgt',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('物联网资产管理'),
+        // },
         // {
         //   key: '/serverVideoAsset',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
@@ -122,11 +122,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('巡检管理'),
         },
-        {
-          key: '/productionplan',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('作业计划管理'),
-        },
+        // {
+        //   key: '/productionplan',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('作业计划管理'),
+        // },
       ],
     },
     {
