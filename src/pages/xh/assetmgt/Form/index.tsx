@@ -1,6 +1,6 @@
 // @ts-nocheck
 import './style.less';
-import React, { Fragment, useContext, useEffect, useState, useCallback, useMemo,useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs, DatePicker, Modal, InputNumber, Timeline, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _, { forEach } from 'lodash';
@@ -15,7 +15,7 @@ import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import { factories, serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
-import { timestamp, timestampToCST,isSameDay,getPreviousWeekTimestamp } from '@/utils/day';
+import { timestamp, timestampToCST, isSameDay, getPreviousWeekTimestamp } from '@/utils/day';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
@@ -111,6 +111,27 @@ export default function () {
     const assetType: any = assetTypes.find((v) => v.name === currentType);
     if (assetType) {
       setParams(assetType.form || []); // 显示form表单
+      // http服务鉴权字段处理
+      if (currentType == 'HTTP服务') {
+        let formData = form.getFieldsValue(true);
+        let httpform = assetType.form;
+        // console.log(formData);
+        // console.log(httpform);
+        if (formData?.params?.use_auth) {
+          let form1 = []
+          if (formData.params.auth_type == 'oauth2' && formData.params.oauth2_use_refresh) {
+            form1 = httpform
+          } else if (formData.params.auth_type == 'oauth2') {
+            form1 = httpform.filter((v) => !v.depends_on || !v.depends_on[0].oauth2_use_refresh);
+          } else {
+            form1 = httpform.filter((v) => !v.depends_on || !v.depends_on[0].auth_type);
+          }
+          setParams(form1 || []);
+        } else {
+          httpform = httpform.filter((v) => !v.depends_on);
+          setParams(httpform || []);
+        }
+      }
       if (!id) {
         // 新增时不显示扩展选项卡
         return;
@@ -332,15 +353,71 @@ export default function () {
 
   const renderFormItem = (v) => {
     if (v.type === 'select') {
-      return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options}></Select>;
+      return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options} onChange={onSelectChange}></Select>;
     }
     if (v.type === 'password') {
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
     }
     if (v.type === 'checkbox') {
-      return <Checkbox></Checkbox>;
+      return <Checkbox onChange={onCheckChange}></Checkbox>;
     }
     return <Input key={'v' + v.name} placeholder={`请填写${v.label}`} name={v.name} />;
+  };
+
+  const onCheckChange = (e) => {
+    // console.log(e);
+    // http服务鉴权字段处理
+    if (currentType == 'HTTP服务') {
+      const assetType: any = assetTypes.find((v) => v.name === currentType);
+      let httpform = assetType.form;
+      let formData = form.getFieldsValue(true);
+      let form1 = []
+      // 点击复选框是否使用鉴权
+      if (e.target.id == 'asset_params_use_auth') {
+        // console.log(formData);
+        if (assetType) {
+          if (e.target.checked) {
+            if (formData.params.auth_type == 'oauth2' && formData.params.oauth2_use_refresh) {
+              form1 = httpform
+            } else if (formData.params.auth_type == 'oauth2') {
+              form1 = httpform.filter((v) => !v.depends_on || !v.depends_on[0].oauth2_use_refresh);
+            } else {
+              form1 = httpform.filter((v) => !v.depends_on || !v.depends_on[0].auth_type);
+            }
+          } else {
+            form1 = httpform.filter((v) => !v.depends_on);
+          }
+          setParams(form1 || []);
+        }
+      }
+      // 点击复选框启用refresh token
+      if (e.target.id == 'asset_params_oauth2_use_refresh') {
+        if (assetType) {
+          if (e.target.checked) {
+            form1 = httpform
+          } else {
+            form1 = httpform.filter((v) => !v.depends_on || !v.depends_on[0].oauth2_use_refresh);
+          }
+          setParams(form1 || []);
+        }
+      }
+    }
+  };
+
+  const onSelectChange = (e) => {
+    // console.log(e);
+    // 点击选择框鉴权类型
+    if (currentType == 'HTTP服务') {
+      const assetType: any = assetTypes.find((v) => v.name === currentType);
+      // http服务鉴权字段处理
+      if (e == 'oauth2') {
+        if (assetType) {
+          let httpform = assetType.form;
+          let form1 = httpform.filter((v) => !v.depends_on || !v.depends_on[0].auth_type || !v.depends_on[0].oauth2_use_refresh);
+          setParams(form1 || []);
+        }
+      }
+    }
   };
 
   const updateData = (changedValues, values) => {
@@ -384,20 +461,20 @@ export default function () {
         if (mode === 'edit') {
           // var dateToCheck = moment(timestampToCST(res.dat.next_maintenace_date));
           // var today = moment().startOf('day');
-          if (res.dat.maintenance_status==1) {
-            let opts = maintenanceStatusOpt.filter(x=>x.value==1)
+          if (res.dat.maintenance_status == 1) {
+            let opts = maintenanceStatusOpt.filter(x => x.value == 1)
             setMaintenanceStatusOption(opts)
-          }else{
-            let opts = maintenanceStatusOpt.filter(x=>x.value!=1)
+          } else {
+            let opts = maintenanceStatusOpt.filter(x => x.value != 1)
             setMaintenanceStatusOption(opts)
           }
           setMaintenanceStatusNum(res.dat.maintenance_status.toString());
         }
         form.setFieldsValue(formattedData);
-        if(isNull.current){
+        if (isNull.current) {
           form.setFieldsValue({ next_maintenace_date: null });
         }
-        
+
         // 计划维保日期option
         let dataStr = timestampToCST(res.dat.next_maintenace_date).toString()
         setScheduleMaintenanceDateOption([
@@ -453,22 +530,22 @@ export default function () {
     return current && current < moment().startOf('day');
   };
   // 下次维保时间选择关联维保状态选择
-  const nextMaintenaceDate = (date,dateString) =>{
-    form.setFieldsValue({'maintenance_status':''})
+  const nextMaintenaceDate = (date, dateString) => {
+    form.setFieldsValue({ 'maintenance_status': '' })
     setMaintenanceStatus(dateString)
   }
   // 根据维保时间设置维保状态option及默认值
-  const setMaintenanceStatus = (dateString) =>{
+  const setMaintenanceStatus = (dateString) => {
     var dateToCheck = moment(dateString);
     var today = moment().startOf('day');
     if (dateToCheck.isSame(today, 'day')) {
-      let opts = maintenanceStatusOpt.filter(x=>x.value!=1)
+      let opts = maintenanceStatusOpt.filter(x => x.value != 1)
       setMaintenanceStatusOption(opts)
-      form.setFieldsValue({maintenance_status:2})
+      form.setFieldsValue({ maintenance_status: 2 })
     } else {
-      let opts = maintenanceStatusOpt.filter(x=>x.value==1)
+      let opts = maintenanceStatusOpt.filter(x => x.value == 1)
       setMaintenanceStatusOption(opts)
-      form.setFieldsValue({maintenance_status:1})
+      form.setFieldsValue({ maintenance_status: 1 })
     }
   }
   // 维保记录新增
@@ -482,14 +559,14 @@ export default function () {
         }).then(() => {
           setMaintenanceRecordModalOpen(false);
           setMaintenanceStatusOption(maintenanceStatusOpt)
-          if(values.schedule_maintenance_date !=-1){
-            setNextMaintenaceDateNull(abs=>{
-              isNull.current =true;
+          if (values.schedule_maintenance_date != -1) {
+            setNextMaintenaceDateNull(abs => {
+              isNull.current = true;
               return isNull.current;
             })
             message.success('操作成功,注意：请更新下次维保时间并且需点击保存按钮进行提交！若未保存则视为新增维保记录失败');
             getMaintenanceInfo()
-          }else{
+          } else {
             message.success('操作成功');
           }
         }).catch(err => {
@@ -865,7 +942,7 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
-                  {/* disabled={maintenanceStatusNum && maintenanceStatusNum != '2'} */}
+                    {/* disabled={maintenanceStatusNum && maintenanceStatusNum != '2'} */}
                     <Select
                       style={{ width: '100%' }}
                       options={maintenanceStatusOption}
@@ -986,7 +1063,7 @@ export default function () {
                   },
                 ]}
               >
-                <DatePicker format='YYYY-MM-DD'  style={{ width: '100%' }} placeholder='请选择维保日期' />
+                <DatePicker format='YYYY-MM-DD' style={{ width: '100%' }} placeholder='请选择维保日期' />
               </Form.Item>
             </Col>
           </Row>
