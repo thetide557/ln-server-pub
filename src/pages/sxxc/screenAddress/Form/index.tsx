@@ -71,7 +71,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
       name: '当前页面',
       id: 1
     },
-     {
+    {
       name: '新页面',
       id: 2
     },
@@ -172,18 +172,23 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                       </Col>
                     )
                   }
-                  {
-                    bigScreenType == '2' && (
-                      <Col span={12}>
-                        <Form.Item name='busi_group' label='业务组' rules={[{ required: true }]}>
-                          <Select
-                            options={businessGroupOption}
-                            placeholder='请选择业务组'
-                          />
-                        </Form.Item>
-                      </Col>
-                    )
-                  }
+                  <Col span={12}>
+                    <Form.Item name='busi_group' label='业务组' rules={[{ required: true }]}>
+                      <Select
+                        options={businessGroupOption}
+                        placeholder='请选择业务组'
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item name='displayType' label='跳转方式' required>
+                      <Select
+                        options={displayOption}
+                        fieldNames={{ label: 'name', value: 'id' }}
+                        placeholder='请选择跳转方式'
+                      />
+                    </Form.Item>
+                  </Col>
                 </Row>
                 {
                   bigScreenType == '1' && (
@@ -193,15 +198,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                           <Input.TextArea placeholder='请输入简介' />
                         </Form.Item>
                       </Col>
-                      <Col span={12}>
-                        <Form.Item name='displayType' label='跳转方式' required>
-                          <Select
-                            options={displayOption}
-                            fieldNames={{ label: 'name', value: 'id' }}
-                            placeholder='请选择跳转方式'
-                          />
-                        </Form.Item>
-                      </Col>
+
                     </Row>
                   )
                 }

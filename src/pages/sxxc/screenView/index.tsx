@@ -19,7 +19,7 @@ import { CommonStateContext } from '@/App';
 import { useHistory } from 'react-router-dom';
 import _ from 'lodash';
 import Cookies from 'js-cookie';
-import { getBigScreen, getDashboards, getNav2 } from '@/services/sxxc/bigScreen';
+import { getBigScreen2, getDashboards, getNav2 } from '@/services/sxxc/bigScreen';
 import { Dropdown, Menu, message, Select } from 'antd';
 import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import './index.less'
@@ -163,9 +163,11 @@ export default function ScreenView() {
   }
 
   useEffect(() => {
-    getBigScreen().then(res => {
+    let busiGroup = localStorage.getItem('groupIds') || '';
+    getBigScreen2(busiGroup).then(res => {
       if (res.dat.list.length > 0) {
         setScreenList(res.dat.list)
+        setNav2(res.dat.list.filter(x=>x.type==2&&x.busi_group!=0))
         const id = res.dat.list[0].id.toString()
         // 切换
         setFirst(id)
@@ -191,11 +193,11 @@ export default function ScreenView() {
       }
     })
     // 获取二级导航
-    getNav2().then(res => {
-      if (res.dat.length) {
-        setNav2(res.dat)
-      }
-    })
+    // getNav2().then(res => {
+    //   if (res.dat.length) {
+    //     setNav2(res.dat)
+    //   }
+    // })
   }, []);
   return (
     <div className='screen-view'>
