@@ -498,7 +498,6 @@ export default function () {//{ selectMenu?:any }
               },
             )
           }
-          console.log(newMenus);
           setMenus(newMenus);
         });
       } else {

@@ -167,7 +167,7 @@ export default function ScreenView() {
     getBigScreen2(busiGroup).then(res => {
       if (res.dat.list.length > 0) {
         setScreenList(res.dat.list)
-        setNav2(res.dat.list.filter(x=>x.type==2&&x.busi_group!=0))
+        setNav2(res.dat.list.filter(x => x.type == 2 && x.busi_group != 0))
         const id = res.dat.list[0].id.toString()
         // 切换
         setFirst(id)
@@ -190,6 +190,9 @@ export default function ScreenView() {
           setUrl(screenUrl)
           // sendToken()
         }
+      } 
+      else {
+        history.push(`/home`)
       }
     })
     // 获取二级导航
@@ -203,16 +206,18 @@ export default function ScreenView() {
     <div className='screen-view'>
       <div className='screen1'>
         <div className='screen1-cont'>
-          {/* tab标签 */}
-          <div className='screen-tab'>
-            {_.map(screenList.filter(x => x.type == 1), (item, index) => {
-              return (
-                <div className={['c-tab', activeColor == item.id ? 'active' : null].join(" ")} style={{ width: item.bg_width / 18 + 'vw', height: item.bg_height / 18 + 'vw', background: item.bg_color, ...MyStyle(item.nav_template) }} key={item.id} onClick={() => handleClick(item)}>
-                  <span className='title' style={{ fontSize: item.font_size / 18 + 'vw', color: item.font_color, ...MyStyle(item.nav_template) }}>{item.nav_name}</span>
-                </div>
-              )
-            })}
-          </div>
+          {
+            screenList.length >0 &&
+            <div className='screen-tab'>
+              {_.map(screenList.filter(x => x.type == 1), (item, index) => {
+                return (
+                  <div className={['c-tab', activeColor == item.id ? 'active' : null].join(" ")} style={{ width: item.bg_width / 18 + 'vw', height: item.bg_height / 18 + 'vw', background: item.bg_color, ...MyStyle(item.nav_template) }} key={item.id} onClick={() => handleClick(item)}>
+                    <span className='title' style={{ fontSize: item.font_size / 18 + 'vw', color: item.font_color, ...MyStyle(item.nav_template) }}>{item.nav_name}</span>
+                  </div>
+                )
+              })}
+            </div>
+          }
 
           {/* 下拉切换 */}
           {/* <div className='screen-groups'>
@@ -223,14 +228,17 @@ export default function ScreenView() {
               </div>
             </Dropdown>
           </div> */}
-          <div className='screen-groups'>
-            <Dropdown overlay={menu} arrow overlayClassName='screen-drop'>
-              <div className='screen-icon icon2'>
-                <span>项目组</span>
-                <DownOutlined style={{ fontSize: '0.52vw', marginLeft: '0.1vw' }} />
-              </div>
-            </Dropdown>
-          </div>
+          {
+            nav2.length >0 &&
+            <div className='screen-groups'>
+              <Dropdown overlay={menu} arrow overlayClassName='screen-drop'>
+                <div className='screen-icon icon2'>
+                  <span>项目组</span>
+                  <DownOutlined style={{ fontSize: '0.52vw', marginLeft: '0.1vw' }} />
+                </div>
+              </Dropdown>
+            </div>
+          }
           <div className='back1' onClick={goBack} title='返回'>
             <div className='back-icon'></div>
             <img src="/image/screenview/back.png" alt="" />
