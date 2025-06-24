@@ -497,11 +497,11 @@ const WarnModal = (props) => {
     }
   }, [visible]);
 
-  useEffect(() => {
-    if (curWarn.rule_id) {
-      getSolutions();
-    }
-  }, [curWarn.rule_id]);
+  // useEffect(() => {
+  //   if (curWarn.rule_id) {
+  //     getSolutions();
+  //   }
+  // }, [curWarn.rule_id]);
 
   useEffect(() => {
     // 清理函数，确保在组件卸载时取消请求
@@ -666,7 +666,7 @@ const WarnModal = (props) => {
           </div>
 
           {/* 解决方案 */}
-          <div className="warn-solution asset1">
+          {/* <div className="warn-solution asset1">
             <div className="line"></div>
             <div className="row t-row solution-title">
               <div className="col col1">
@@ -846,7 +846,7 @@ const WarnModal = (props) => {
               )
             }
 
-          </div>
+          </div> */}
         </div>
 
 
