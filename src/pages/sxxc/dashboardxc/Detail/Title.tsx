@@ -32,7 +32,7 @@ import { GetAssetType } from '@/services/metric';
 import { getDashboardTemplate, putDashboardTemplte, setDashboardAssetType } from '@/services/dashboardV2';
 import { updateSelfBoard } from '@/services/account';
 import { CommonStateContext } from '@/App';
-import { getBigScreen, getDashboards,getNav2 } from '@/services/sxxc/bigScreen';
+import { getBigScreen2, getDashboards,getNav2 } from '@/services/sxxc/bigScreen';
 import { useTimeout, useTimeoutFn } from 'react-use';
 import './titleStyle.less'
 
@@ -194,9 +194,11 @@ export default function Title(props: IProps) {
       );
     });
     // 获取二级导航
-    getNav2().then(res => {
-      if (res.dat.length) {
-        setNav2(res.dat)
+    let busiGroup = localStorage.getItem('groupIds') || '';
+    getBigScreen2(busiGroup).then(res => {
+      if (res.dat.list.length > 0) {
+        // setNav2(res.dat)
+        setNav2(res.dat.list.filter(x => x.type == 2 && x.busi_group != 0))
       }
     })
     
