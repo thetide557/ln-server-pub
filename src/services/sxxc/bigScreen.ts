@@ -103,6 +103,12 @@ export const getBigScreen = function () {
         method: RequestMethod.Get
     })
 }
+export const getBigScreen2 = function (busiGroup) {
+    return request(`/api/n9e/bigscreen?busiGroup=${busiGroup}`, {
+        method: RequestMethod.Get
+    })
+}
+
 
 // 新增大屏
 export const addBigScreen = function (data: any) {
