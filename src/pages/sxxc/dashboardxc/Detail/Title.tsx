@@ -148,7 +148,7 @@ export default function Title(props: IProps) {
       selectedKeys={[selectGroup]}
     >
       {_.map(nav2, (item) => {
-        return <Menu.Item key={item.id}>{item.title}</Menu.Item>;
+        return <Menu.Item key={item.busi_group}>{item.title}</Menu.Item>;
       })}
     </Menu>
   );
