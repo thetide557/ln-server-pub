@@ -43,8 +43,8 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [assetIp, setAssetIp] = useState<string>('');
-  const [showExcludes, setShowExcludes] = useState(true);
-  const { asset_id } = form.getFieldsValue();
+  const [showExcludes, setShowExcludes] = useState(false);
+  const { asset_id,excludes } = form.getFieldsValue();
   const [ruleConfigNew, setruleConfigNew] = useState<any>({});
 
 
@@ -58,7 +58,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
         if (e && typeof e === 'object' && e.prom_ql) {
           e.prom_ql = insertAssetIdTag(
             e.prom_ql,
-            asset_id
+            asset_id>0?asset_id:excludes,
           );
         }
       });
@@ -66,7 +66,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
         rule_config: { ...ruleConfigNews },
       });
     }
-  }, [asset_id])
+  }, [asset_id,excludes])
 
 
 
@@ -171,14 +171,19 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   }
   function insertAssetIdTag(
     promql: string,
-    assetId: string,
+    assetId: any,
     specificMetrics?: string[]
   ): string {
     const tree = parser.parse(promql);
     const cursor = tree.cursor();
     const modifications: Modification[] = [];
-    const newLabel = `{asset_id="${assetId}"}`;
-    const assetIdRegex = /(^|,)asset_id=("[^"]+"|\w+)/;
+    const isExclude = Array.isArray(assetId);
+    let newLabel = '';
+    if (!isExclude) {
+      newLabel = `asset_id="${assetId}"`;
+    } else if (assetId.length > 0) {
+      newLabel = assetId.map((v) => `asset_id!="${v}"`).join(',');
+    }
     // 遍历语法树
     do {
       if (cursor.name === "MetricIdentifier") {
@@ -189,22 +194,22 @@ export default function Base({ type, form, assetId, onAssetChange }) {
         }
         let labelsStart = cursor.to;
         let labelsEnd = cursor.to;
+        let hasLabelMatchers = false;
         let hasAssetId = false;
         let existingLabels = "";
-        // 检查指标后的标签
+        // 检查 MetricIdentifier 后是否有 LabelMatchers
         const savedFrom = cursor.from;
         const savedTo = cursor.to;
         // 记录当前深度
         while (cursor.next() && cursor.from === labelsEnd) {
           if (cursor.node.name === "LabelMatchers") {
+            hasLabelMatchers = true;
             existingLabels = promql.slice(cursor.from, cursor.to);
-            if (assetIdRegex.test(existingLabels)) {
-              hasAssetId = true;
-              labelsStart = cursor.from;
-              labelsEnd = cursor.to;
-              break;
-            }
+            labelsStart = cursor.from;
             labelsEnd = cursor.to;
+            const assetIdPattern = /asset_id\s*(!?=)\s*("[^"]+"|\w+)/g;
+            hasAssetId = assetIdPattern.test(existingLabels);
+            break;
           } else if (!["[", "("].includes(promql[cursor.from])) {
             break; 
           }
@@ -214,26 +219,42 @@ export default function Base({ type, form, assetId, onAssetChange }) {
         while (cursor.from !== savedFrom || cursor.to !== savedTo) {
           if (!cursor.next()) break;
         }
-        if (hasAssetId) {
-          const updatedLabels = existingLabels.replace(
-            assetIdRegex,
-            `$1asset_id="${assetId}"`
-          );
-          modifications.push({
-            start: labelsStart,
-            end: labelsEnd,
-            replacement: updatedLabels
-          });
+        if (hasLabelMatchers) {
+          if (hasAssetId) {
+            let replacedLabels = existingLabels.replace(/asset_id\s*(!?=)\s*("[^"]+"|\w+)/g, () => {
+              return newLabel;
+            });
+            if (isExclude && assetId.length > 1) {
+              replacedLabels = replacedLabels.replace(/(,)?asset_id!=("[^"]+"|\w+)/g, '');
+              replacedLabels = replacedLabels.replace(/^{|}$/g, '');
+              replacedLabels = replacedLabels.split(',').filter(Boolean).concat(assetId.map(v => `asset_id!="${v}"`)).join(',');
+              replacedLabels = `{${replacedLabels}}`;
+            }
+            modifications.push({
+              start: labelsStart,
+              end: labelsEnd,
+              replacement: replacedLabels
+            });
+          } else {
+            let insertPos = labelsEnd - 1; 
+            let labelContent = existingLabels.replace(/^{|}$/g, '');
+            let newLabelStr = labelContent ? `${labelContent},${newLabel}` : newLabel;
+            modifications.push({
+              start: labelsStart,
+              end: labelsEnd,
+              replacement: `{${newLabelStr}}`
+            });
+          }
         } else {
-          // 插入新标签
           modifications.push({
             start: cursor.to,
             end: cursor.to,
-            replacement: newLabel
+            replacement: `{${newLabel}}`
           });
         }
       }
     } while (cursor.next());
+
     if (modifications.length === 0) return promql;
     modifications.sort((a, b) => b.start - a.start);
     // 构建最终查询
@@ -292,6 +313,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
           <Col span={8}>
             <Form.Item label={t('关联资产')} name='asset_id' rules={[{ required: true }]} initialValue={0}>
               <Select
+                disabled={showExcludes}
                 showSearch
                 options={[{ label: '全部', value: 0 }].concat(assetOptions)}
                 filterOption={(input, option) =>
@@ -303,7 +325,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
                     excludes: form.getFieldValue('excludes'),
                   });
                   buildPromqlWithAsset({});
-                  setShowExcludes(v === 0);
+                  setShowExcludes(false as any);
                 }}
               />
             </Form.Item>
@@ -311,7 +333,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
           <Col span={8}>
             <Form.Item label={t('排除资产')} name='excludes' initialValue={[]}>
               <Select
-                disabled={!showExcludes || asset_id > 0}
+                disabled={ asset_id > 0}
                 allowClear
                 showSearch
                 mode='multiple'
@@ -320,11 +342,18 @@ export default function Base({ type, form, assetId, onAssetChange }) {
                   (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
                 onChange={(v) => {
+                  console.log(v);
+                  
                   onAssetChange({
                     includes: [form.getFieldValue('asset_id')],
                     excludes: v,
                   });
                   buildPromqlWithAsset({});
+                  if(v.length){
+                    setShowExcludes(true as any);
+                  }else{
+                    setShowExcludes(false as any);
+                  }
                 }}
               />
             </Form.Item>
