@@ -25,6 +25,7 @@ import { useLocation } from 'react-router-dom';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import _ from 'lodash';
 import { buildPromVisualQueryFromPromQL, renderQuery } from '@/components/PromQueryBuilder';
+import { parser } from "lezer-promql";
 import { PromVisualQueryLabelFilter } from '@/components/PromQueryBuilder/types';
 // 校验单个标签格式是否正确
 function isTagValid(tag) {
@@ -44,7 +45,30 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   const [assetIp, setAssetIp] = useState<string>('');
   const [showExcludes, setShowExcludes] = useState(true);
   const { asset_id } = form.getFieldsValue();
-  
+  const [ruleConfigNew, setruleConfigNew] = useState<any>({});
+
+
+
+
+
+  useEffect(() => {
+    let ruleConfigNews = _.cloneDeep(ruleConfigNew)
+    if (ruleConfigNews?.queries && Array.isArray(ruleConfigNews.queries)) {
+      ruleConfigNews.queries.forEach((e) => {
+        if (e && typeof e === 'object' && e.prom_ql) {
+          e.prom_ql = insertAssetIdTag(
+            e.prom_ql,
+            asset_id
+          );
+        }
+      });
+      form.setFieldsValue({
+        rule_config: { ...ruleConfigNews },
+      });
+    }
+  }, [asset_id])
+
+
 
   useEffect(() => {
     let param = {};
@@ -105,36 +129,126 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   function buildPromqlWithAsset(assets) {
     // console.log('form.getFieldsValue()', form.getFieldsValue());
     const { rule_config, asset_id, excludes } = form.getFieldsValue();
-
-    const labels: PromVisualQueryLabelFilter[] = [];
-    if (asset_id && asset_id !== 0) {
-      labels.push({
-        label: 'asset_id',
-        op: '=',
-        value: asset_id,
-      });
-    } else if (excludes) {
-      excludes.forEach((v) => {
-        labels.push({
-          label: 'asset_id',
-          op: '!=',
-          value: v,
-        });
-      });
+    if (!ruleConfigNew?.queries) {
+      setruleConfigNew(rule_config)
     }
 
-    rule_config.queries.forEach((e) => {
-      // debugger
-      const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
-      const metric = result.metric;
-      e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query,false,result.operations);
-    });
-    form.setFieldsValue({
-      rule_config: { ...rule_config },
-    });
+    // const labels: PromVisualQueryLabelFilter[] = [];
+    // if (asset_id && asset_id !== 0) {
+    //   labels.push({
+    //     label: 'asset_id',
+    //     op: '=',
+    //     value: asset_id,
+    //   });
+    // } else if (excludes) {
+    //   excludes.forEach((v) => {
+    //     labels.push({
+    //       label: 'asset_id',
+    //       op: '!=',
+    //       value: v,
+    //     });
+    //   });
+    // }
+
+    // rule_config.queries.forEach((e) => {
+    //   // debugger
+    //   const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
+    //   const metric = result.metric;
+    //   e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query, false, result.operations);
+    // });
+    // form.setFieldsValue({
+    //   rule_config: { ...rule_config },
+    // });
   }
 
-  // 渲染标签
+
+
+
+  interface Modification {
+    start: number;
+    end: number;
+    replacement: string;
+  }
+  function insertAssetIdTag(
+    promql: string,
+    assetId: string,
+    specificMetrics?: string[]
+  ): string {
+    const tree = parser.parse(promql);
+    const cursor = tree.cursor();
+    const modifications: Modification[] = [];
+    const newLabel = `{asset_id="${assetId}"}`;
+    const assetIdRegex = /(^|,)asset_id=("[^"]+"|\w+)/;
+    // 遍历语法树
+    do {
+      if (cursor.name === "MetricIdentifier") {
+        const metricName = promql.slice(cursor.from, cursor.to);
+        if (specificMetrics && specificMetrics.length > 0 &&
+          !specificMetrics.includes(metricName)) {
+          continue;
+        }
+        let labelsStart = cursor.to;
+        let labelsEnd = cursor.to;
+        let hasAssetId = false;
+        let existingLabels = "";
+        // 检查指标后的标签
+        const savedFrom = cursor.from;
+        const savedTo = cursor.to;
+        // 记录当前深度
+        while (cursor.next() && cursor.from === labelsEnd) {
+          if (cursor.node.name === "LabelMatchers") {
+            existingLabels = promql.slice(cursor.from, cursor.to);
+            if (assetIdRegex.test(existingLabels)) {
+              hasAssetId = true;
+              labelsStart = cursor.from;
+              labelsEnd = cursor.to;
+              break;
+            }
+            labelsEnd = cursor.to;
+          } else if (!["[", "("].includes(promql[cursor.from])) {
+            break; 
+          }
+        }
+        // 恢复游标位置
+        cursor.parent();
+        while (cursor.from !== savedFrom || cursor.to !== savedTo) {
+          if (!cursor.next()) break;
+        }
+        if (hasAssetId) {
+          const updatedLabels = existingLabels.replace(
+            assetIdRegex,
+            `$1asset_id="${assetId}"`
+          );
+          modifications.push({
+            start: labelsStart,
+            end: labelsEnd,
+            replacement: updatedLabels
+          });
+        } else {
+          // 插入新标签
+          modifications.push({
+            start: cursor.to,
+            end: cursor.to,
+            replacement: newLabel
+          });
+        }
+      }
+    } while (cursor.next());
+    if (modifications.length === 0) return promql;
+    modifications.sort((a, b) => b.start - a.start);
+    // 构建最终查询
+    let lastPos = promql.length;
+    const output: string[] = [];
+    for (const mod of modifications) {
+      output.unshift(promql.slice(mod.end, lastPos));
+      output.unshift(mod.replacement);
+      lastPos = mod.start;
+    }
+    output.unshift(promql.slice(0, lastPos));
+    return output.join('');
+  }
+
+
   function tagRender(content) {
     const { isCorrectFormat, isLengthAllowed } = isTagValid(content.value);
     return isCorrectFormat && isLengthAllowed ? (
