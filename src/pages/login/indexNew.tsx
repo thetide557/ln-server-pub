@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
-import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, authLoginLdap, getRSAConfig, getDeepseektoken } from '@/services/login';
+import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, authLoginLdap, getRSAConfig, getDeepseektoken, getRedirectURLCAS } from '@/services/login';
 import './login.less';
 // import cookie from "react-cookies";
 // @ts-ignore
@@ -26,7 +26,7 @@ import useSsoWay from 'plus:/parcels/SSOConfigs/useSsoWay';
 
 import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen } from '@/services/sxxc/bigScreen';
 import Cookies from 'js-cookie';
@@ -66,6 +66,19 @@ export default function Login() {
   const [loadingLdap, setLoadingLdap] = useState(false)
   // 切换登录方式
   const [toggle, setToggle] = useState(true);
+  // 其他登录方式列表
+  const [otherLogin, setOtherLogin] = useState<any>([
+    {
+      key: 'LDAP',
+      value: 'LDAP登录'
+    },
+    {
+      key: 'CAS',
+      value: 'CAS登录'
+    }
+  ]);
+  const [activeKey, setActiveKey] = useState<string>('LDAP')
+
   const refreshCaptcha = () => {
     getCaptcha().then((res) => {
       if (res.dat && verifyimgRef.current) {
@@ -267,6 +280,18 @@ export default function Login() {
       });
   };
 
+  const handleOtherLogin = (key: any) => {
+    setActiveKey(key)
+    switch (key) {
+      case 'CAS':
+        getRedirectURLCAS().then(res => {
+          localStorage.setItem("CAS_state", res.dat?.state)
+          window.location.href = res.dat?.redirect;
+        })
+        break;
+    }
+  };
+
   return (
     <div className='login-warp'>
       <div className='login-panel'>
@@ -278,7 +303,10 @@ export default function Login() {
           <div className='login-bg'>
             <div className='toggle-title'>
               <div className={`form_title ${toggle ? 'title-active' : ''}`} onClick={() => toggleLogin(true)}>账号登录</div>
-              <div className={`form_title ${!toggle ? 'title-active' : ''}`} onClick={() => toggleLogin(false)}>LDAP登录</div>
+              <div className={`form_title ${!toggle ? 'title-active' : ''}`} onClick={() => {
+                toggleLogin(false);
+                setActiveKey('LDAP');
+              }}>单点登录</div>
             </div>
             {
               toggle ? (
@@ -391,9 +419,9 @@ export default function Login() {
                       alt='点击获取验证码'
                     />
                   </div>
-                  <Form.Item className='form-remeber' name="rememberLdap" valuePropName='checked' wrapperCol={{ offset: 0, span: 24 }}>
+                  {/* <Form.Item className='form-remeber' name="rememberLdap" valuePropName='checked' wrapperCol={{ offset: 0, span: 24 }}>
                     <Checkbox onChange={(event) => handleRememberChange('ldap', event)}>记住密码</Checkbox>
-                  </Form.Item>
+                  </Form.Item> */}
 
                   <Form.Item>
                     <Button loading={loadingLdap} type='primary' className='submit_button' onClick={() => handleSubmit('ldap')} onKeyPress={e => {
@@ -403,6 +431,20 @@ export default function Login() {
                     </Button>
                   </Form.Item>
                 </Form>
+                <div className='login-other'>
+                  <div className='login-other-title'>其他登录方式：</div>
+                  <div className='login-other-content'>
+                    {
+                      otherLogin.map((item: any) => {
+                        return (
+                          <div className={`login-other-item ${activeKey==item.key ? 'active-text' : ''}`} key={item.key} onClick={() => handleOtherLogin(item.key)}>
+                            <div className='login-other-item-text'>{item.value}</div>
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                </div>
               </>
             }
           </div>

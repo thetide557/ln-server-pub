@@ -84,7 +84,7 @@ const AiRobotSse = function () {
   };
 
   useEffect(() => {
-    if (!pathname.startsWith("/login")) {
+    if (!pathname.startsWith("/login") && !pathname.startsWith('/callback')) {
       getShowDeepSeek().then((res) => {
         if (res.dat) {
           setDeepseekShow(res.dat.show);

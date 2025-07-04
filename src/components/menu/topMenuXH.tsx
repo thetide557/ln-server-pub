@@ -443,7 +443,7 @@ export default function () {//{ selectMenu?:any }
   }, [pathname]);
 
   useEffect(() => {
-    if (location.pathname != '/login') {
+    if (location.pathname != '/login' && !pathname.startsWith('/callback')) {
       getMyPortrait().then((res) => {
         if (res.dat != null && res.dat != "") {
           setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
@@ -533,7 +533,7 @@ export default function () {//{ selectMenu?:any }
       location.pathname.startsWith('/chart/') ||
       location.pathname.startsWith('/screenView') ||
       location.pathname.startsWith('/dashboards/share/') ||
-      location.pathname === '/callback' ||
+      location.pathname.startsWith('/callback') ||
       location.pathname.indexOf('/polaris/screen') === 0
     ) {
       return true;
