@@ -640,14 +640,14 @@ const AiRobotSse = function () {
                       />
                     </Form.Item>
                     <div className="ai-send">
-                      <div className="ai-upload">
+                      <div className={
+                        isScreen
+                          ? "upload-dark ai-upload"
+                          : "ai-upload"
+                      }>
                         <Upload {...props} fileList={fileList}>
                           <CloudUploadOutlined
-                            className={
-                              isScreen
-                                ? "upload-dark upload-icon"
-                                : "upload-icon"
-                            }
+                            className="upload-icon"
                           />
                         </Upload>
                       </div>
