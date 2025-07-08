@@ -25,7 +25,9 @@ import { useLocation } from 'react-router-dom';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import _ from 'lodash';
 import { buildPromVisualQueryFromPromQL, renderQuery } from '@/components/PromQueryBuilder';
+// import { parser } from "lezer-promql";
 import { PromVisualQueryLabelFilter } from '@/components/PromQueryBuilder/types';
+import { handleAssetIdTags } from '@/utils/editSql';
 // 校验单个标签格式是否正确
 function isTagValid(tag) {
   const contentRegExp = /^[a-zA-Z_][\w]*={1}[^=]+$/;
@@ -42,9 +44,34 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [assetIp, setAssetIp] = useState<string>('');
-  const [showExcludes, setShowExcludes] = useState(true);
-  const { asset_id } = form.getFieldsValue();
-  
+  const [showExcludes, setShowExcludes] = useState(false);
+  const { asset_id, excludes } = form.getFieldsValue();
+  const [ruleConfigNew, setruleConfigNew] = useState<any>({});
+
+
+
+
+
+  useEffect(() => {
+    let ruleConfigNews = _.cloneDeep(ruleConfigNew)
+    console.log(ruleConfigNews);
+    
+    if (ruleConfigNews?.queries && Array.isArray(ruleConfigNews.queries)) {
+      ruleConfigNews.queries.forEach((e) => {
+        if (e && typeof e === 'object' && e.prom_ql) {
+          e.prom_ql = handleAssetIdTags(
+            e.prom_ql,
+            asset_id>0?asset_id:excludes,
+          );
+        }
+      });
+      form.setFieldsValue({
+        rule_config: { ...ruleConfigNews },
+      });
+    }
+  }, [asset_id, excludes]);
+
+
 
   useEffect(() => {
     let param = {};
@@ -105,36 +132,38 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   function buildPromqlWithAsset(assets) {
     // console.log('form.getFieldsValue()', form.getFieldsValue());
     const { rule_config, asset_id, excludes } = form.getFieldsValue();
-
-    const labels: PromVisualQueryLabelFilter[] = [];
-    if (asset_id && asset_id !== 0) {
-      labels.push({
-        label: 'asset_id',
-        op: '=',
-        value: asset_id,
-      });
-    } else if (excludes) {
-      excludes.forEach((v) => {
-        labels.push({
-          label: 'asset_id',
-          op: '!=',
-          value: v,
-        });
-      });
+    if (!ruleConfigNew?.queries) {
+      setruleConfigNew(rule_config)
     }
 
-    rule_config.queries.forEach((e) => {
-      // debugger
-      const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
-      const metric = result.metric;
-      e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query,false,result.operations);
-    });
-    form.setFieldsValue({
-      rule_config: { ...rule_config },
-    });
+    // const labels: PromVisualQueryLabelFilter[] = [];
+    // if (asset_id && asset_id !== 0) {
+    //   labels.push({
+    //     label: 'asset_id',
+    //     op: '=',
+    //     value: asset_id,
+    //   });
+    // } else if (excludes) {
+    //   excludes.forEach((v) => {
+    //     labels.push({
+    //       label: 'asset_id',
+    //       op: '!=',
+    //       value: v,
+    //     });
+    //   });
+    // }
+
+    // rule_config.queries.forEach((e) => {
+    //   // debugger
+    //   const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
+    //   const metric = result.metric;
+    //   e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query, false, result.operations);
+    // });
+    // form.setFieldsValue({
+    //   rule_config: { ...rule_config },
+    // });
   }
 
-  // 渲染标签
   function tagRender(content) {
     const { isCorrectFormat, isLengthAllowed } = isTagValid(content.value);
     return isCorrectFormat && isLengthAllowed ? (
@@ -178,6 +207,8 @@ export default function Base({ type, form, assetId, onAssetChange }) {
           <Col span={8}>
             <Form.Item label={t('关联资产')} name='asset_id' rules={[{ required: true }]} initialValue={0}>
               <Select
+                disabled={showExcludes || excludes?.length > 0}
+                allowClear
                 showSearch
                 options={[{ label: '全部', value: 0 }].concat(assetOptions)}
                 filterOption={(input, option) =>
@@ -189,7 +220,13 @@ export default function Base({ type, form, assetId, onAssetChange }) {
                     excludes: form.getFieldValue('excludes'),
                   });
                   buildPromqlWithAsset({});
-                  setShowExcludes(v === 0);
+                  setShowExcludes(false as any);
+                  // 关联资产清空时默认选全部
+                  if(!v){
+                    form.setFieldsValue({
+                      asset_id: 0,
+                    });
+                  }
                 }}
               />
             </Form.Item>
@@ -197,7 +234,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
           <Col span={8}>
             <Form.Item label={t('排除资产')} name='excludes' initialValue={[]}>
               <Select
-                disabled={!showExcludes || asset_id > 0}
+                disabled={asset_id > 0}
                 allowClear
                 showSearch
                 mode='multiple'
@@ -211,6 +248,11 @@ export default function Base({ type, form, assetId, onAssetChange }) {
                     excludes: v,
                   });
                   buildPromqlWithAsset({});
+                  if (v.length) {
+                    setShowExcludes(true as any);
+                  } else {
+                    setShowExcludes(false as any);
+                  }
                 }}
               />
             </Form.Item>

@@ -180,15 +180,19 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
-                    <Form.Item name='displayType' label='跳转方式' required>
-                      <Select
-                        options={displayOption}
-                        fieldNames={{ label: 'name', value: 'id' }}
-                        placeholder='请选择跳转方式'
-                      />
-                    </Form.Item>
-                  </Col>
+                  {
+                    bigScreenType == '1' && (
+                      <Col span={12}>
+                        <Form.Item name='displayType' label='跳转方式' required>
+                          <Select
+                            options={displayOption}
+                            fieldNames={{ label: 'name', value: 'id' }}
+                            placeholder='请选择跳转方式'
+                          />
+                        </Form.Item>
+                      </Col>
+                    )
+                  }
                 </Row>
                 {
                   bigScreenType == '1' && (
