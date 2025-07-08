@@ -221,6 +221,12 @@ export default function Base({ type, form, assetId, onAssetChange }) {
                   });
                   buildPromqlWithAsset({});
                   setShowExcludes(false as any);
+                  // 关联资产清空时默认选全部
+                  if(!v){
+                    form.setFieldsValue({
+                      asset_id: 0,
+                    });
+                  }
                 }}
               />
             </Form.Item>
