@@ -2,15 +2,18 @@
 import React, { useRef, useEffect, useState } from "react";
 import Draggable from "react-draggable";
 import { useHistory, useLocation } from "react-router-dom";
-import { Input, Form, Collapse, Divider } from "antd";
+import { Input, Form, Collapse, Divider, Upload, message, Button } from "antd";
+import type { UploadProps } from "antd";
 import {
   CloseOutlined,
   SyncOutlined,
   PauseCircleOutlined,
+  UploadOutlined,
+  CloudUploadOutlined,
 } from "@ant-design/icons";
 import { marked } from "marked";
 import { getShowDeepSeek } from "@/services/common";
-import LoadingDots from '@/pages/sxxc/aiRobot/loading';
+import LoadingDots from "@/pages/sxxc/aiRobot/loading";
 import "./index.less";
 
 const AiRobotSse = function () {
@@ -58,6 +61,9 @@ const AiRobotSse = function () {
   let flag = false;
   // console.log('dsdf', pathname);
   let isScreen = true;
+
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+
   if (pathname.startsWith("/screenView")) {
     isScreen = true;
   } else {
@@ -84,7 +90,7 @@ const AiRobotSse = function () {
   };
 
   useEffect(() => {
-    if (!pathname.startsWith("/login") && !pathname.startsWith('/callback')) {
+    if (!pathname.startsWith("/login") && !pathname.startsWith("/callback")) {
       getShowDeepSeek().then((res) => {
         if (res.dat) {
           setDeepseekShow(res.dat.show);
@@ -147,20 +153,21 @@ const AiRobotSse = function () {
     lines.forEach((line) => {
       if (line.startsWith("data:")) {
         const answer = line.slice(5); // 移除 data: 前缀
+        // console.log("answer", answer);
         try {
           const parsedAnswer = JSON.parse(answer);
-          if (parsedAnswer?.task_id) {
+          // console.log("parsedAnswer", parsedAnswer);
+          if (parsedAnswer?.task_id && !parsedAnswer?.workflow_run_id) {
             setTaskId(parsedAnswer.task_id);
           }
           if (parsedAnswer?.answer) {
             answers = parsedAnswer.answer;
           }
         } catch (error) {
-          console.error("Failed to parse answer:", error);
+          // console.error("Failed to parse answer:", error);
         }
       }
     });
-
     return answers;
   };
 
@@ -177,19 +184,33 @@ const AiRobotSse = function () {
       // 检查用户输入是否有效且当前没有正在进行的请求
       if (values.note?.trim() && !loading) {
         setTaskId(undefined);
+        setFileList([]);
         try {
           let aiStr = "";
-          // 构造请求数据
-          const data = {
-            inputs: { 角色: "羚牛一体化运维平台助手" },
-            query: `${values.note.trim()}`,
-            user: localStorage.getItem("username"),
-            response_mode: "streaming", // 流式响应模式
-          };
+          let data = {};
+          if (fileList.length > 0) {
+            // 构造请求数据
+            data = {
+              inputs: { 角色: "羚牛一体化运维平台助手" },
+              query: `${values.note.trim()}`,
+              user: localStorage.getItem("username"),
+              response_mode: "streaming", // 流式响应模式
+              files: [{ "type": "document", "transfer_method": "local_file", "url": "", "upload_file_id": fileList[0]?.response?.id }]
+            };
+          } else {
+            // 构造请求数据
+            data = {
+              inputs: { 角色: "羚牛一体化运维平台助手" },
+              query: `${values.note.trim()}`,
+              user: localStorage.getItem("username"),
+              response_mode: "streaming", // 流式响应模式
+            };
+          }
+
           // 更新AI消息列表，添加用户输入和空的AI响应
           setAiMessages([
             ...aiMessages,
-            { text: values.note, sender: "user" },
+            { text: values.note, sender: "user", files: fileList[0]?.response?.name },
             { text: "", sender: "ai" },
           ]);
           // 清空输入框并滚动到消息列表底部
@@ -262,7 +283,7 @@ const AiRobotSse = function () {
                 // console.log("think标签后的内容:", afterThinkContent);
                 setAiMessages([
                   ...aiMessages,
-                  { text: values.note, sender: "user" },
+                  { text: values.note, sender: "user", files: fileList[0]?.response?.name },
                   {
                     text: marked(aiStr),
                     sender: "ai",
@@ -275,13 +296,13 @@ const AiRobotSse = function () {
                 // 如果不包含think标签，直接更新AI消息列表
                 setAiMessages([
                   ...aiMessages,
-                  { text: values.note, sender: "user" },
+                  { text: values.note, sender: "user", files: fileList[0]?.response?.name },
                   { text: marked(aiStr), sender: "ai" },
                 ]);
               }
               // 继续读取流式响应
               readStream();
-            } catch (error:any) {
+            } catch (error: any) {
               // 处理流式响应中的错误
               if (error.name === "AbortError") {
                 setAiMessages([
@@ -306,7 +327,7 @@ const AiRobotSse = function () {
               console.log("请求超时");
               setAiMessages([
                 ...aiMessages,
-                { text: values.note, sender: "user" },
+                { text: values.note, sender: "user", files: fileList[0]?.response?.name },
                 { text: "访问超时", sender: "ai" },
               ]);
               setController(new AbortController());
@@ -314,15 +335,15 @@ const AiRobotSse = function () {
               console.log("请求已中止");
               setAiMessages([
                 ...aiMessages,
-                { text: values.note, sender: "user" },
+                { text: values.note, sender: "user", files: fileList[0]?.response?.name },
                 { text: " ", sender: "ai" },
               ]);
             }
           } else {
-            console.log('无法访问');
+            console.log("无法访问");
             setAiMessages([
               ...aiMessages,
-              { text: values.note, sender: "user" },
+              { text: values.note, sender: "user", files: fileList[0]?.response?.name },
               { text: "访问超时", sender: "ai" },
             ]);
             console.error("Error streaming AI text:", error);
@@ -348,7 +369,7 @@ const AiRobotSse = function () {
     // 更新全局状态，停止任务执行
     flag = false;
     setLoading(false);
-    console.log("taskId", taskId);
+    // console.log("taskId", taskId);
 
     // 如果存在 taskId，向服务器发送停止任务的请求
     if (taskId) {
@@ -364,9 +385,10 @@ const AiRobotSse = function () {
           body: JSON.stringify(data),
         },
         60000
-      ).then((response) => {
-        console.log("任务已停止");
-      });
+      )
+        .then((response) => {
+          console.log("任务已停止");
+        })
     } else {
       // 如果不存在 taskId，中止当前请求并重新创建 AbortController
       if (controller) {
@@ -377,6 +399,29 @@ const AiRobotSse = function () {
     }
   };
 
+  const props: UploadProps = {
+    name: "file",
+    action: "/v1/files/upload",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("deepseek_token")}`,
+    },
+    maxCount: 1,
+    onRemove: (file) => {
+      setFileList([]);
+    },
+    onChange(info) {
+      console.log("info", info);
+      let newFileList = [...info.fileList];
+      // newFileList = newFileList.map((file) => {
+      //   if (file.response) {
+      //     // Component will show file.url as link
+      //     file.url = file.response.url;
+      //   }
+      //   return file;
+      // });
+      setFileList(newFileList);
+    },
+  };
   // useEffect(() => {
   //   console.log("aiMessages", aiMessages);
   // }, [aiMessages]);
@@ -491,7 +536,7 @@ const AiRobotSse = function () {
                                     {message.text?.length > 0 ? (
                                       <div className="ai-answer-content">
                                         {message.afterThinkContent?.length >
-                                        0 ? (
+                                          0 ? (
                                           <>
                                             <Collapse
                                               bordered={false}
@@ -519,39 +564,43 @@ const AiRobotSse = function () {
                                             ></div>
                                           </>
                                         ) : // <div
-                                        //   className="ai-think"
-                                        //   dangerouslySetInnerHTML={{
-                                        //     __html: message.text,
-                                        //   }}
-                                        // ></div>
-                                        message.text.length > 1 && success ? (
-                                          <Collapse
-                                            bordered={false}
-                                            defaultActiveKey={[index]}
-                                          >
-                                            <Panel
-                                              header={"深度思考中..."}
-                                              key={index}
+                                          //   className="ai-think"
+                                          //   dangerouslySetInnerHTML={{
+                                          //     __html: message.text,
+                                          //   }}
+                                          // ></div>
+                                          message.text.length > 1 && success ? (
+                                            <Collapse
+                                              bordered={false}
+                                              defaultActiveKey={[index]}
                                             >
-                                              <div
-                                                className="ai-think"
-                                                dangerouslySetInnerHTML={{
-                                                  __html: message.text,
-                                                }}
-                                              ></div>
-                                            </Panel>
-                                          </Collapse>
-                                        ) : (
-                                          <div
-                                            className="ai-think"
-                                            dangerouslySetInnerHTML={{
-                                              __html: message.text,
-                                            }}
-                                          ></div>
-                                        )}
+                                              <Panel
+                                                header={"深度思考中..."}
+                                                key={index}
+                                              >
+                                                <div
+                                                  className="ai-think"
+                                                  dangerouslySetInnerHTML={{
+                                                    __html: message.text,
+                                                  }}
+                                                ></div>
+                                              </Panel>
+                                            </Collapse>
+                                          ) : (
+                                            <div
+                                              className="ai-think"
+                                              dangerouslySetInnerHTML={{
+                                                __html: message.text,
+                                              }}
+                                            ></div>
+                                          )}
                                       </div>
                                     ) : (
-                                      <LoadingDots theme={isScreen ? 'dark' : ''}  />
+                                      loading && (
+                                        <LoadingDots
+                                          theme={isScreen ? "dark" : ""}
+                                        />
+                                      )
                                     )}
                                   </div>
                                 </div>
@@ -581,6 +630,7 @@ const AiRobotSse = function () {
                     onFinish={onFinish}
                     className="ai-form"
                   >
+                    <div style={{ height: fileList.length > 0 ? 'calc((35 / 1920) * 100vw)' : '' }}></div>
                     <Form.Item name="note">
                       <TextArea
                         ref={textAreaRef}
@@ -590,6 +640,17 @@ const AiRobotSse = function () {
                       />
                     </Form.Item>
                     <div className="ai-send">
+                      <div className="ai-upload">
+                        <Upload {...props} fileList={fileList}>
+                          <CloudUploadOutlined
+                            className={
+                              isScreen
+                                ? "upload-dark upload-icon"
+                                : "upload-icon"
+                            }
+                          />
+                        </Upload>
+                      </div>
                       {loading ? (
                         <SyncOutlined spin className="ai-loading" />
                       ) : (

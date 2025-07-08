@@ -17,7 +17,7 @@
     }
     .r-dialog {
       width: calc((500 / 1920) * 100vw);
-      height: calc((620 / 1920) * 100vw);
+      min-height: calc((620 / 1920) * 100vw);
       background: #FFFFFF;
       box-shadow: 0px 2px 6px 0px rgba(0,0,0,0.3);
       border-radius: calc((11 / 1920) * 100vw);
@@ -193,14 +193,41 @@
         }
       }
       .ai-bottom {
+        position: relative;
+        margin-top: calc((3 / 1920) * 100vw);
         padding-bottom: calc((3 / 1920) * 100vw);
+        border-top: 1px solid #d9d9d9;
+        .ai-upload {
+          margin-right: 5px;
+          // text-align: right;
+          .ant-upload-list {
+            // margin-top: -110px;
+            // text-align: left;
+            position: absolute;
+            left: 5px;
+            top: 0;
+            .ant-upload-list-item {
+              font-size: calc((16 / 1920) * 100vw);
+            }
+            .anticon-paper-clip{
+              font-size: calc((16 / 1920) * 100vw)!important;
+            }
+            // margin-bottom: 20px;
+          }
+          .upload-icon {
+            cursor: pointer;
+            font-size: calc((24 / 1920) * 100vw);
+          }
+          .upload-dark {
+            color: #fff;
+          }
+        }
         .ai-form {
           .ant-form-item {
             margin-bottom: 0;
           }
           .ai-note {
             border: 0;
-            border-top: 1px solid #d9d9d9;
             resize: none;
             outline: none;
             font-size: calc((17 / 1920) * 100vw);
@@ -213,7 +240,7 @@
           /* 覆盖antd TextArea获得焦点时的边框样式 */
           .ai-note:focus {
             border: 0;
-            border-top: 1px solid #d9d9d9;
+            // border-top: 1px solid #d9d9d9;
             box-shadow: none !important; /* 移除焦点时的阴影 */
             outline: none !important; /* 移除可能的轮廓线 */
           }
@@ -225,6 +252,7 @@
           .ai-send {
             display: flex;
             justify-content: flex-end;
+            align-items: center;
             .ai-icon {
               width: calc((36 / 1920) * 100vw);
               height: calc((24 / 1920) * 100vw);
