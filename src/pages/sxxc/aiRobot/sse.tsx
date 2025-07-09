@@ -181,6 +181,7 @@ const AiRobotSse = function () {
     // 验证表单字段并获取用户输入
     form.validateFields().then(async (values) => {
       console.log(values);
+      if (!values.note) return message.error("提问内容不能为空");
       // 检查用户输入是否有效且当前没有正在进行的请求
       if (values.note?.trim() && !loading) {
         setTaskId(undefined);
