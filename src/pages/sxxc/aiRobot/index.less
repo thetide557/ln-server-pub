@@ -110,6 +110,13 @@
           border-radius: 3px;
           color: #fff;
           padding: 2px 8px;
+          .user-files {
+            padding-bottom: calc((5 / 1920) * 100vw);
+            // border-bottom: 1px solid #ccc;
+          }
+          .user-file-name {
+             padding: 0 calc((5 / 1920) * 100vw);
+          }
         }
       }
       .ai-ai {
@@ -206,23 +213,20 @@
       margin-top: calc((3 / 1920) * 100vw);
       padding-bottom: calc((3 / 1920) * 100vw);
       border-top: 1px solid #d9d9d9;
+      .ai-file {
+        padding: calc((10 / 1920) * 100vw) calc((5 / 1920) * 100vw) 0 calc((10 / 1920) * 100vw);
+        // line-height: calc((50 / 1920) * 100vw);
+        font-size: calc((16 / 1920) * 100vw);
+        // background: rgba(241, 242, 250, .7);
+        .ai-file-name {
+          padding: 0 calc((5 / 1920) * 100vw);
+        }
+      }
+      .dark-file {
+        color: #fff;
+      }
       .ai-upload {
         margin-right: 5px;
-        // text-align: right;
-        .ant-upload-list {
-          // margin-top: -110px;
-          // text-align: left;
-          position: absolute;
-          left: 5px;
-          top: 0;
-          .ant-upload-list-item {
-            font-size: calc((16 / 1920) * 100vw);
-          }
-          .anticon-paper-clip {
-            font-size: calc((16 / 1920) * 100vw) !important;
-          }
-          // margin-bottom: 20px;
-        }
         .upload-icon {
           cursor: pointer;
           font-size: calc((24 / 1920) * 100vw);

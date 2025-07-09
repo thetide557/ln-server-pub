@@ -3,13 +3,20 @@ import React, { useRef, useEffect, useState } from "react";
 import Draggable from "react-draggable";
 import { useHistory, useLocation } from "react-router-dom";
 import { Input, Form, Collapse, Divider, Upload, message, Button } from "antd";
-import type { UploadProps } from "antd";
+import type { UploadProps } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
 import {
   CloseOutlined,
   SyncOutlined,
   PauseCircleOutlined,
   UploadOutlined,
   CloudUploadOutlined,
+  DeleteOutlined,
+  FileWordTwoTone,
+  FilePptTwoTone,
+  FileImageTwoTone,
+  FileExcelTwoTone,
+  FileTextTwoTone
 } from "@ant-design/icons";
 import { marked } from "marked";
 import { getShowDeepSeek } from "@/services/common";
@@ -211,7 +218,7 @@ const AiRobotSse = function () {
           // 更新AI消息列表，添加用户输入和空的AI响应
           setAiMessages([
             ...aiMessages,
-            { text: values.note, sender: "user", files: fileList[0]?.response?.name },
+            { text: values.note, sender: "user", files: { name: fileList[0]?.response?.name, type: fileList[0]?.type } },
             { text: "", sender: "ai" },
           ]);
           // 清空输入框并滚动到消息列表底部
@@ -284,7 +291,7 @@ const AiRobotSse = function () {
                 // console.log("think标签后的内容:", afterThinkContent);
                 setAiMessages([
                   ...aiMessages,
-                  { text: values.note, sender: "user", files: fileList[0]?.response?.name },
+                  { text: values.note, sender: "user", files: { name: fileList[0]?.response?.name, type: fileList[0]?.type } },
                   {
                     text: marked(aiStr),
                     sender: "ai",
@@ -297,7 +304,7 @@ const AiRobotSse = function () {
                 // 如果不包含think标签，直接更新AI消息列表
                 setAiMessages([
                   ...aiMessages,
-                  { text: values.note, sender: "user", files: fileList[0]?.response?.name },
+                  { text: values.note, sender: "user", files: { name: fileList[0]?.response?.name, type: fileList[0]?.type } },
                   { text: marked(aiStr), sender: "ai" },
                 ]);
               }
@@ -308,7 +315,7 @@ const AiRobotSse = function () {
               if (error.name === "AbortError") {
                 setAiMessages([
                   ...aiMessages,
-                  { text: values.note, sender: "user" },
+                  { text: values.note, sender: "user", files: { name: fileList[0]?.response?.name, type: fileList[0]?.type } },
                   { text: " ", sender: "ai" },
                 ]);
                 console.log("流式请求已中止");
@@ -328,7 +335,7 @@ const AiRobotSse = function () {
               console.log("请求超时");
               setAiMessages([
                 ...aiMessages,
-                { text: values.note, sender: "user", files: fileList[0]?.response?.name },
+                { text: values.note, sender: "user", files: { name: fileList[0]?.response?.name, type: fileList[0]?.type } },
                 { text: "访问超时", sender: "ai" },
               ]);
               setController(new AbortController());
@@ -336,7 +343,7 @@ const AiRobotSse = function () {
               console.log("请求已中止");
               setAiMessages([
                 ...aiMessages,
-                { text: values.note, sender: "user", files: fileList[0]?.response?.name },
+                { text: values.note, sender: "user", files: { name: fileList[0]?.response?.name, type: fileList[0]?.type } },
                 { text: " ", sender: "ai" },
               ]);
             }
@@ -344,7 +351,7 @@ const AiRobotSse = function () {
             console.log("无法访问");
             setAiMessages([
               ...aiMessages,
-              { text: values.note, sender: "user", files: fileList[0]?.response?.name },
+              { text: values.note, sender: "user", files: { name: fileList[0]?.response?.name, type: fileList[0]?.type } },
               { text: "访问超时", sender: "ai" },
             ]);
             console.error("Error streaming AI text:", error);
@@ -407,6 +414,8 @@ const AiRobotSse = function () {
       Authorization: `Bearer ${localStorage.getItem("deepseek_token")}`,
     },
     maxCount: 1,
+    fileList,
+    showUploadList: false,
     onRemove: (file) => {
       setFileList([]);
     },
@@ -518,7 +527,18 @@ const AiRobotSse = function () {
                               {message.sender == "user" ? (
                                 <div className="ai-user">
                                   <span className="user-text">
-                                    {message.text}
+                                    {
+                                      message?.files?.name && <span className="user-files">
+                                        <span className="user-icon1">
+                                          {
+                                            message.files?.type.includes('.document') ? <FileWordTwoTone /> : message.files?.type.includes('.sheet') ? <FileExcelTwoTone /> : message.files?.type.includes('image') ? <FileImageTwoTone /> : message.files?.type.includes('.presentation') ? <FilePptTwoTone /> : <FileTextTwoTone />
+                                          }
+                                        </span>
+                                        <span className="user-file-name">{message.files?.name}</span>
+                                        <br></br>
+                                      </span>
+                                    }
+                                    <span>{message.text}</span>
                                   </span>
                                 </div>
                               ) : (
@@ -625,13 +645,26 @@ const AiRobotSse = function () {
                   )}
                 </div>
                 <div className="ai-bottom">
+                  {fileList.map((file: any) => (
+                    <div key={file.uid} className={isScreen ? "ai-file dark-file" : "ai-file"}>
+                      {/* <img src={file.url} alt={file.name} style={{ width: 100, marginRight: 10 }} /> */}
+                      <span className="upload-icon1">
+                        {
+                          file?.type.includes('.document') ? <FileWordTwoTone /> : file?.type.includes('.sheet') ? <FileExcelTwoTone /> : file?.type.includes('image') ? <FileImageTwoTone /> : file?.type.includes('.presentation') ? <FilePptTwoTone /> : <FileTextTwoTone />
+                        }
+                      </span>
+                      <span className="ai-file-name">{file?.name}</span>
+                      <DeleteOutlined className="ai-file-close"
+                        onClick={() => setFileList(fileList.filter((item) => item.uid !== file.uid))} />
+                    </div>
+                  ))}
                   <Form
                     form={form}
                     name="control-hooks"
                     onFinish={onFinish}
                     className="ai-form"
                   >
-                    <div style={{ height: fileList.length > 0 ? 'calc((35 / 1920) * 100vw)' : '' }}></div>
+                    {/* <div style={{ height: fileList.length > 0 ? 'calc((35 / 1920) * 100vw)' : '' }}></div> */}
                     <Form.Item name="note">
                       <TextArea
                         ref={textAreaRef}
@@ -646,7 +679,7 @@ const AiRobotSse = function () {
                           ? "upload-dark ai-upload"
                           : "ai-upload"
                       }>
-                        <Upload {...props} fileList={fileList}>
+                        <Upload {...props}>
                           <CloudUploadOutlined
                             className="upload-icon"
                           />
