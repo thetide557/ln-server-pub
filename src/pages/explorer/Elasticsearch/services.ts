@@ -107,10 +107,14 @@ export function getLogsQuery(datasourceValue: number, requestBody) {
       'Content-Type': 'application/json',
     },
   }).then((res) => {
-    const dat = _.get(res, 'responses[0].hits');
-    const { docs } = flattenHits(dat.hits);
+    const dat = _.get(res, 'responses[0].hits', { hits: [], total: 0 });
+    const { docs } = flattenHits(dat.hits || []);
+    let total = 0;
+    if (typeof dat.total === 'object' && dat.total !== null) {
+      total = dat.total.value || 0;
+    }
     return {
-      total: dat.total.value,
+      total,
       list: docs,
     };
   });
