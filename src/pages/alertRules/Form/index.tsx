@@ -162,6 +162,16 @@ export default function index(props: IProps) {
     });
   };
 
+  // 1. 策略名称
+  const [tempStrategyName, setTempStrategyName] = useState("");
+
+  // 打开弹窗时，设置策略名称值
+  const onEditStrategyName = (index) => {
+    setEditingStrategyIndex(index);
+    setTempStrategyName(form.getFieldValue(["strategies", index, "strategy_name"]));
+    setEditStrategyNameVisible(true);
+  };
+
 
   return (
     <FormStateContext.Provider
@@ -289,10 +299,7 @@ export default function index(props: IProps) {
                                           onClick={({ key, domEvent }) => {
                                             domEvent.stopPropagation();
                                             if (key === "edit") {
-                                              setEditStrategyNameVisible(true);
-                                              setEditingStrategyIndex(
-                                                field.name
-                                              );
+                                              onEditStrategyName(field.name);
                                             } else if (key === "del") {
                                               fields.length > 1 &&
                                                 Modal.confirm({
@@ -380,14 +387,24 @@ export default function index(props: IProps) {
               title="修改名称"
               visible={editStrategyNameVisible}
               onOk={() => {
-                form
-                  .validateFields([
-                    ["strategies", editingStrategyIndex, "strategy_name"],
-                  ])
-                  .then(() => {
-                    setEditStrategyNameVisible(false);
-                    setEditingStrategyIndex(null);
-                  });
+                // 校验重复
+                const strategies = form.getFieldValue("strategies") || [];
+                const hasDuplicate = strategies.some(
+                  (strategy, idx) =>
+                    idx !== editingStrategyIndex && strategy.strategy_name === tempStrategyName
+                );
+                if (hasDuplicate) {
+                  message.error("策略名称不能重复");
+                  return;
+                }
+                form.setFields([
+                  {
+                    name: ["strategies", editingStrategyIndex, "strategy_name"],
+                    value: tempStrategyName,
+                  },
+                ]);
+                setEditStrategyNameVisible(false);
+                setEditingStrategyIndex(null);
               }}
               onCancel={() => {
                 setEditStrategyNameVisible(false);
@@ -395,27 +412,19 @@ export default function index(props: IProps) {
               }}
             >
               <Form.Item
-                name={["strategies", editingStrategyIndex, "strategy_name"]}
                 label="策略名称"
+                // name={["strategies", editingStrategyIndex, "strategy_name"]}
                 rules={[
                   { required: true, message: "请输入策略名称" },
-                  {
-                    validator: (_, value) => {
-                      const strategies = form.getFieldValue("strategies") || [];
-                      const hasDuplicate = strategies.some(
-                        (strategy, index) =>
-                          index !== editingStrategyIndex &&
-                          strategy.strategy_name === value
-                      );
-                      if (hasDuplicate) {
-                        return Promise.reject(new Error("策略名称不能重复"));
-                      }
-                      return Promise.resolve();
-                    },
-                  },
+                  // 校验逻辑已在 onOk 处理
                 ]}
               >
-                <Input placeholder="请输入策略名称" maxLength={10} />
+                <Input
+                  placeholder="请输入策略名称"
+                  maxLength={10}
+                  value={tempStrategyName}
+                  onChange={e => setTempStrategyName(e.target.value)}
+                />
               </Form.Item>
             </Modal>
           )}
