@@ -25,7 +25,7 @@ import { panelBaseProps } from '../../constants';
 // @ts-ignore
 import NotifyExtra from 'plus:/parcels/AlertRule/NotifyExtra';
 
-export default function index({ disabled }) {
+export default function index({ disabled ,field}) {
   const { t } = useTranslation('alertRules');
   const [contactList, setContactList] = useState<{ key: string; label: string }[]>([]);
   const [notifyGroups, setNotifyGroups] = useState<any[]>([]);
@@ -48,7 +48,8 @@ export default function index({ disabled }) {
   return (
     <>
       <Card {...panelBaseProps} className='rule-card' title={t('notify_configs')}>
-        <Form.Item label={t('notify_channels')} name='notify_channels'>
+        {/* <Form.Item label={t('notify_channels')} name='notify_channels'> */}
+        <Form.Item label={t('notify_channels')} {...field} name={[field.name, 'notify_channels']}>
           <Checkbox.Group disabled={disabled}>
             {contactList.map((item) => {
               return (
@@ -59,7 +60,8 @@ export default function index({ disabled }) {
             })}
           </Checkbox.Group>
         </Form.Item>
-        <Form.Item label={t('notify_groups')} name='notify_groups'>
+        {/* <Form.Item label={t('notify_groups')} name='notify_groups'> */}
+        <Form.Item label={t('notify_groups')} {...field} name={[field.name, 'notify_groups']}>
           <Select mode='multiple' showSearch optionFilterProp='children'>
             {_.map(notifyGroups, (item) => {
               // id to string 兼容 v5
@@ -73,7 +75,8 @@ export default function index({ disabled }) {
         </Form.Item>
         <Form.Item label={t('notify_recovered')}>
           <Space>
-            <Form.Item name='notify_recovered' valuePropName='checked' style={{ marginBottom: 0 }}>
+            {/* <Form.Item name='notify_recovered' valuePropName='checked' style={{ marginBottom: 0 }}> */}
+            <Form.Item {...field} name={[field.name, 'notify_recovered']} valuePropName='checked' style={{ marginBottom: 0 }}>
               <Switch />
             </Form.Item>
             <Tooltip title={t(`notify_recovered_tip`)}>
@@ -86,14 +89,16 @@ export default function index({ disabled }) {
             return (
               <Row gutter={16}>
                 <Col span={8}>
-                  <Form.Item label={t('recover_duration')} name='recover_duration' tooltip={t('recover_duration_tip', { num: getFieldValue('recover_duration') })}>
+                  {/* <Form.Item label={t('recover_duration')} name='recover_duration' tooltip={t('recover_duration_tip', { num: getFieldValue('recover_duration') })}> */}
+                  <Form.Item label={t('recover_duration')} {...field} name={[field.name, 'recover_duration']} tooltip={t('recover_duration_tip', { num: getFieldValue('recover_duration') })}>
                     <InputNumber min={0} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col span={8}>
                   <Form.Item
                     label={t('notify_repeat_step')}
-                    name='notify_repeat_step'
+                    // name='notify_repeat_step'
+                    {...field} name={[field.name, 'notify_repeat_step']}
                     rules={[
                       {
                         required: true,
@@ -107,7 +112,8 @@ export default function index({ disabled }) {
                 <Col span={8}>
                   <Form.Item
                     label={t('notify_max_number')}
-                    name='notify_max_number'
+                    // name='notify_max_number'
+                    {...field} name={[field.name, 'notify_max_number']}
                     rules={[
                       {
                         required: true,
@@ -122,7 +128,8 @@ export default function index({ disabled }) {
             );
           }}
         </Form.Item>
-        <Form.List name='callbacks'>
+        {/* <Form.List name='callbacks'> */}
+        <Form.List {...field} name={[field.name, 'callbacks']}>
           {(fields, { add, remove }) => (
             <div>
               <Space align='baseline'>
@@ -145,7 +152,8 @@ export default function index({ disabled }) {
           )}
         </Form.List>
 
-        <Form.List name='annotations'>
+        {/* <Form.List name='annotations'> */}
+        <Form.List {...field} name={[field.name, 'annotations']}>
           {(fields, { add, remove }) => (
             <div>
               <Space align='baseline'>

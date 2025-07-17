@@ -129,6 +129,40 @@ export default function Base({ type, form, assetId, onAssetChange }) {
     }
   }, []);
 
+  // function buildPromqlWithAsset(assets) {
+  //   // console.log('form.getFieldsValue()', form.getFieldsValue());
+  //   const { rule_config, asset_id, excludes } = form.getFieldsValue();
+
+  //   const labels: PromVisualQueryLabelFilter[] = [];
+  //   if (asset_id && asset_id !== 0) {
+  //     labels.push({
+  //       label: 'asset_id',
+  //       op: '=',
+  //       value: asset_id,
+  //     });
+  //   } else if (excludes) {
+  //     excludes.forEach((v) => {
+  //       labels.push({
+  //         label: 'asset_id',
+  //         op: '!=',
+  //         value: v,
+  //       });
+  //     });
+  //   }
+
+  //   rule_config.queries.forEach((e) => {
+  //     debugger
+  //     const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
+  //     const metric = result.metric;
+  //     e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query,false,result.operations);
+  //   });
+  //   form.setFieldsValue({
+  //     rule_config: { ...rule_config },
+  //   });
+  // }
+
+  // 渲染标签
+
   function buildPromqlWithAsset(assets) {
     // console.log('form.getFieldsValue()', form.getFieldsValue());
     const { rule_config, asset_id, excludes } = form.getFieldsValue();

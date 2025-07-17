@@ -33,8 +33,8 @@ function getFirstDatasourceId(datasourceIds: number[] = [], datasourceList: { id
   return _.isEqual(datasourceIds, [DATASOURCE_ALL]) && datasourceList.length > 0 ? datasourceList[0]?.id : datasourceIds[0];
 }
 
-export default function index(props: { datasourceCate: string; datasourceValue: number[]; includes: string[]; excludes: string[] }) {
-  const { datasourceCate, datasourceValue, includes, excludes } = props;
+export default function index(props: { datasourceCate: string; datasourceValue: number[]; includes: string[]; excludes: string[] ;field:any }) {
+  const { datasourceCate, datasourceValue, includes, excludes, field } = props;
   const { t } = useTranslation('alertRules');
   const { groupedDatasourceList } = useContext(CommonStateContext);
   const { disabled } = useContext(FormStateContext);
@@ -42,7 +42,8 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
   const datasourceId = getFirstDatasourceId(datasourceValue, curDatasourceList);
 
   return (
-    <Form.List name={['rule_config', 'queries']}>
+    // <Form.List name={['rule_config', 'queries']}>
+    <Form.List {...field} name={[field.name, 'rule_config', 'queries']}>
       {(fields, { add, remove }) => (
         <Card
           title={

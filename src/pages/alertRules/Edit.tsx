@@ -26,8 +26,10 @@ import { useSearchParam } from 'react-use';
 export default function Edit() {
   const { t } = useTranslation('alertRules');
   const { id } = useParams<{ id: string }>();
-  const alertRuleId = Number(id.split("?")[0]);
-  const [values, setValues] = useState<any>({});
+  // const alertRuleId = Number(id.split("?")[0]);
+  const alertRuleId = id;
+  // const [values, setValues] = useState<any>({});
+  const [values, setValues] = useState<any>([]);
   const mode = useSearchParam("mode");
 
   useEffect(() => {
@@ -36,15 +38,26 @@ export default function Edit() {
     if (alertRuleId) {      
       getWarningStrategy(alertRuleId).then((res) => {
         // res.dat.rule_config =JSON.parse(res.dat["rule_config_fe"]);
-        // console.log('res.dat', res.dat)
-        if(!res.dat.excludes){
-          delete res.dat.excludes
-        }
-        setValues(res.dat || {});
-        if(res.dat && res.dat.asset_id){
-          window.localStorage.setItem('select_monitor_asset_id',res.dat.asset_id);
-          window.localStorage.setItem('select_monitor_asset_ip',res.dat.asset_ip);
-        }
+        const data = res.dat.data.map((item)=>{
+          if(!item.excludes){
+            delete item.excludes
+          }
+          if(item && item.asset_id){
+            window.localStorage.setItem('select_monitor_asset_id',item.asset_id);
+            window.localStorage.setItem('select_monitor_asset_ip',item.asset_ip);
+          }
+          return item
+        })
+        setValues(data || []);
+
+        // if(!res.dat.excludes){
+        //   delete res.dat.excludes
+        // }
+        // setValues(res.dat || {});
+        // if(res.dat && res.dat.asset_id){
+        //   window.localStorage.setItem('select_monitor_asset_id',res.dat.asset_id);
+        //   window.localStorage.setItem('select_monitor_asset_ip',res.dat.asset_ip);
+        // }
 
       });
     }
