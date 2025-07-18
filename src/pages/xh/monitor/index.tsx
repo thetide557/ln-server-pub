@@ -27,7 +27,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import { getAssetstypes,getAssetstypesByParams, getAssetsByCondition, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor,getAssetstypesNew,delXhAssetstypesNew } from '@/services/assets';
+import { getAssetstypes,getAssetstypesByParams, getAssetsByCondition, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor,getAssetstypesNew,delXhAssetstypesNew,getMonitortree } from '@/services/assets';
 import { getMonitorInfoList, deleteXhMonitor, deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
@@ -431,11 +431,12 @@ export default function () {
       console.log('left_asset_type', localStorage.getItem('left_asset_type'));
       
       // console.log('treeQuery', treeQuery);
-      treeQuery['status'] = 0
-      treeQuery['groupIds'] = groupIds?.toString()
-      treeQuery['query'] = searchVal?searchVal:undefined;
-      treeQuery['filter'] = filterParam?filterParam:undefined;
-      getAssetstypesNew(treeQuery).then(res => {
+      // treeQuery['status'] = 0
+      // treeQuery['groupIds'] = groupIds?.toString()
+      // treeQuery['query'] = searchVal?searchVal:undefined;
+      // treeQuery['filter'] = filterParam?filterParam:undefined;
+      getMonitortree(treeQuery).then(res => {
+      // getAssetstypesNew(treeQuery).then(res => {
         const { dat } = res
         // dat.forEach(item => {
         //   item['type_list'] = item['type_list'].map((v) => {
@@ -465,7 +466,8 @@ export default function () {
           return new Set();
         }
       });
-  
+      
+    
       useEffect(() => {
         localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
       }, [expandedIds]);
@@ -668,10 +670,8 @@ export default function () {
     return sortedNodes;
   }
   const handleClickTree = (item: any, par: any,isAllAssets:boolean) => {
-    // console.log('isAllAssets', isAllAssets)
       // 是否是全部资产下的节点点击
     setIsAllAssets(isAllAssets)
-    
     if (par) {
       setParId(par.id)
       setTypeId(item.id);
@@ -737,6 +737,7 @@ export default function () {
       setAssetTypes(items);
       // loadingGroupColumns(items);
       setTreeData(_.cloneDeep(treeData));
+      // getAssetTree()
     });
   }, []);
 
