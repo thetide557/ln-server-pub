@@ -113,54 +113,54 @@ export default function index(props: IProps) {
   const [editStrategyNameVisible, setEditStrategyNameVisible] = useState(false); // 策略名称修改模态框
   const [editingStrategyIndex, setEditingStrategyIndex] = useState<number | null>(null);
   // 新增告警策略
-  const handleAddStrategy = () => {
-    const strategies = form.getFieldValue('strategies') || [];
-    if (strategies.length >= 5) {
-      message.warning("最多只能添加5个策略");
-      return;
-    }
-    // const newKey = (strategies.length + 1).toString();
-    const newStrategy = {
-      id: undefined,
-      // temp_strategy_id:_.uniqueId("strategy_"),
-      strategy_name: `策略${strategies.length + 1}`,
-      ...defaultValues
-    };
+  // const handleAddStrategy = () => {
+  //   const strategies = form.getFieldValue('strategies') || [];
+  //   if (strategies.length >= 5) {
+  //     message.warning("最多只能添加5个策略");
+  //     return;
+  //   }
+  //   // const newKey = (strategies.length + 1).toString();
+  //   const newStrategy = {
+  //     id: undefined,
+  //     // temp_strategy_id:_.uniqueId("strategy_"),
+  //     strategy_name: `策略${strategies.length + 1}`,
+  //     ...defaultValues
+  //   };
     
-    form.setFieldsValue({
-      strategies: [...strategies, newStrategy],
-    });
+  //   form.setFieldsValue({
+  //     strategies: [...strategies, newStrategy],
+  //   });
     
-    setActiveTabKey(`${strategies.length}`);
-  };
+  //   setActiveTabKey(`${strategies.length}`);
+  // };
   // 删除告警策略
-  const handleRemoveStrategy = (targetKey) => {
-    const strategies = form.getFieldValue('strategies') || [];
-    if (strategies.length <= 1) {
-      message.warning("至少保留一个策略");
-      return;
-    }
-    Modal.confirm({
-      title: "删除策略",
-      content: "删除后不可恢复，是否删除该策略？",
-      okText: "确认",
-      cancelText: "取消",
-      onOk() {
-        const newStrategies = strategies.filter((_, i) => i !== targetKey);
-        form.setFieldsValue({
-          strategies: newStrategies,
-        });
-        console.log("删除策略field",activeTabKey,targetKey);
-        // 更新活动标签
-        if (activeTabKey == targetKey) {
+  // const handleRemoveStrategy = (targetKey) => {
+  //   const strategies = form.getFieldValue('strategies') || [];
+  //   if (strategies.length <= 1) {
+  //     message.warning("至少保留一个策略");
+  //     return;
+  //   }
+  //   Modal.confirm({
+  //     title: "删除策略",
+  //     content: "删除后不可恢复，是否删除该策略？",
+  //     okText: "确认",
+  //     cancelText: "取消",
+  //     onOk() {
+  //       const newStrategies = strategies.filter((_, i) => i !== targetKey);
+  //       form.setFieldsValue({
+  //         strategies: newStrategies,
+  //       });
+  //       console.log("删除策略field",activeTabKey,targetKey);
+  //       // 更新活动标签
+  //       if (activeTabKey == targetKey) {
           
-          setActiveTabKey('0');
-        }
+  //         setActiveTabKey('0');
+  //       }
         
-      },
-      onCancel() {},
-    });
-  };
+  //     },
+  //     onCancel() {},
+  //   });
+  // };
 
   // 1. 策略名称
   const [tempStrategyName, setTempStrategyName] = useState("");
@@ -221,37 +221,6 @@ export default function index(props: IProps) {
                         strategy_name: `策略${fields.length + 1}`,
                         ...defaultValues,
                       };
-                      // 如果有资产设置，为新策略的PromQL设置默认值
-                      const { asset_id, excludes } = form.getFieldsValue();
-                      const labels: PromVisualQueryLabelFilter[] = [];
-                      if (asset_id && asset_id !== 0) {
-                        labels.push({
-                          label: "asset_id",
-                          op: "=",
-                          value: asset_id,
-                        });
-                      } else if (excludes) {
-                        excludes.forEach((v) => {
-                          labels.push({
-                            label: "asset_id",
-                            op: "!=",
-                            value: v,
-                          });
-                        });
-                      }
-                      newStrategy.rule_config.queries.forEach((query) => {
-                        const result = buildPromVisualQueryFromPromQL(
-                          query.prom_ql,
-                          []
-                        ).query;
-                        const metric = result.metric;
-                        query.prom_ql = renderQuery(
-                          buildPromVisualQueryFromPromQL(metric || "", labels)
-                            .query,
-                          false,
-                          result.operations
-                        );
-                      });
                       add(newStrategy);
                     }
                   }}

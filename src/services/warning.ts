@@ -137,6 +137,12 @@ export const getWarningStrategy = function (id): Promise<any> {
     method: RequestMethod.Get,
   });
 };
+// 获取告警规则
+export const getWarningRule = function (strategyid): Promise<any> {
+  return request(`/api/n9e/alert-rule/strategy/${strategyid}`, {
+    method: RequestMethod.Get,
+  });
+};
 
 // export const addStrategy = function (data: any[], busiId: number) {
 //   return request(`/api/n9e/busi-group/${busiId}/alert-rules`, {
@@ -207,7 +213,20 @@ export const prometheusQuery = function (data, datasourceValue): Promise<any> {
     params: data,
   });
 };
-
+// 关闭/启动告警规则
+export const updateAlertRulesStatus = function (
+  data: {
+    strategyids: React.Key[];
+    fields: any;
+    action?: string;
+  },
+  busiId: number,
+) {
+  return request(`/api/n9e/busi-group/${busiId}/alert-rules/strategy/fields`, {
+    method: RequestMethod.Put,
+    data: data,
+  });
+};
 /**
  * 批量更新规则
  */

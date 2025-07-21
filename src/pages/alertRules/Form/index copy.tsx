@@ -117,9 +117,10 @@ export default function index(props: IProps) {
             <div />
           </Form.Item>
           <Base type={1} form={form} assetId={assetid?parseInt(""+assetid):0} onAssetChange={setAssets}/>
-          <Rule form={form} type={0} assets={assets} />
+          {/* 解决打包时的报错 */}
+          {/* <Rule form={form} type={0} assets={assets} />
           <Effective />
-          <Notify disabled={disabled} />
+          <Notify disabled={disabled} /> */}
           {!disabled && (
             <Space>
               <Button

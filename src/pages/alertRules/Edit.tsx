@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import PageLayout from '@/components/pageLayout';
-import { getWarningStrategy } from '@/services/warning';
+import { getWarningStrategy ,getWarningRule} from '@/services/warning';
 import Form from './Form';
 import { useSearchParam } from 'react-use';
 
@@ -36,7 +36,8 @@ export default function Edit() {
     window.localStorage.removeItem('select_monitor_asset_id');
     console.log('alertRuleId',alertRuleId);
     if (alertRuleId) {      
-      getWarningStrategy(alertRuleId).then((res) => {
+      // getWarningStrategy(alertRuleId).then((res) => {
+      getWarningRule(alertRuleId).then((res) => {
         // res.dat.rule_config =JSON.parse(res.dat["rule_config_fe"]);
         const data = res.dat.data.map((item)=>{
           if(!item.excludes){

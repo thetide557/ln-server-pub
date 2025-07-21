@@ -46,30 +46,58 @@ export default function Base({ type, form, assetId, onAssetChange }) {
   const [assetIp, setAssetIp] = useState<string>('');
   const [showExcludes, setShowExcludes] = useState(false);
   const { asset_id, excludes } = form.getFieldsValue();
-  const [ruleConfigNew, setruleConfigNew] = useState<any>({});
+  // const [ruleConfigNew, setruleConfigNew] = useState<any>({});
 
 
 
 
 
-  useEffect(() => {
-    let ruleConfigNews = _.cloneDeep(ruleConfigNew)
-    console.log(ruleConfigNews);
+  // useEffect(() => {
+  //   let ruleConfigNews = _.cloneDeep(ruleConfigNew)
+  //   console.log(ruleConfigNews);
     
-    if (ruleConfigNews?.queries && Array.isArray(ruleConfigNews.queries)) {
-      ruleConfigNews.queries.forEach((e) => {
-        if (e && typeof e === 'object' && e.prom_ql) {
-          e.prom_ql = handleAssetIdTags(
-            e.prom_ql,
-            asset_id>0?asset_id:excludes,
-          );
+  //   if (ruleConfigNews?.queries && Array.isArray(ruleConfigNews.queries)) {
+  //     ruleConfigNews.queries.forEach((e) => {
+  //       if (e && typeof e === 'object' && e.prom_ql) {
+  //         e.prom_ql = handleAssetIdTags(
+  //           e.prom_ql,
+  //           asset_id>0?asset_id:excludes,
+  //         );
+  //       }
+  //     });
+  //     form.setFieldsValue({
+  //       rule_config: { ...ruleConfigNews },
+  //     });
+  //   }
+  // }, [asset_id, excludes]);
+
+  const [strategiesNew, setStrategiesNew] = useState<any[]>([]);
+  useEffect(() => {
+    let strategiesNews = _.cloneDeep(strategiesNew)
+    console.log('strategiesNews', strategiesNews);
+    if(strategiesNews.length){
+      strategiesNews.forEach(item => {
+        if (item?.rule_config?.queries && Array.isArray(item.rule_config.queries)) {
+          item.rule_config.queries.forEach((e) => {
+            if (e && typeof e === 'object' && e.prom_ql) {
+              e.prom_ql = handleAssetIdTags(
+                e.prom_ql,
+                asset_id>0?asset_id:excludes,
+              );
+            }
+          });
         }
       });
       form.setFieldsValue({
-        rule_config: { ...ruleConfigNews },
+        strategies: [...strategiesNews],
       });
     }
   }, [asset_id, excludes]);
+  function buildPromqlWithAsset(assets) {
+    const { strategies } = form.getFieldsValue();
+    setStrategiesNew(strategies);
+  }
+  
 
 
 
@@ -163,40 +191,40 @@ export default function Base({ type, form, assetId, onAssetChange }) {
 
   // 渲染标签
 
-  function buildPromqlWithAsset(assets) {
-    // console.log('form.getFieldsValue()', form.getFieldsValue());
-    const { rule_config, asset_id, excludes } = form.getFieldsValue();
-    if (!ruleConfigNew?.queries) {
-      setruleConfigNew(rule_config)
-    }
+  // function buildPromqlWithAsset(assets) {
+  //   // console.log('form.getFieldsValue()', form.getFieldsValue());
+  //   const { rule_config, asset_id, excludes } = form.getFieldsValue();
+  //   if (!ruleConfigNew?.queries) {
+  //     setruleConfigNew(rule_config)
+  //   }
 
-    // const labels: PromVisualQueryLabelFilter[] = [];
-    // if (asset_id && asset_id !== 0) {
-    //   labels.push({
-    //     label: 'asset_id',
-    //     op: '=',
-    //     value: asset_id,
-    //   });
-    // } else if (excludes) {
-    //   excludes.forEach((v) => {
-    //     labels.push({
-    //       label: 'asset_id',
-    //       op: '!=',
-    //       value: v,
-    //     });
-    //   });
-    // }
+  //   // const labels: PromVisualQueryLabelFilter[] = [];
+  //   // if (asset_id && asset_id !== 0) {
+  //   //   labels.push({
+  //   //     label: 'asset_id',
+  //   //     op: '=',
+  //   //     value: asset_id,
+  //   //   });
+  //   // } else if (excludes) {
+  //   //   excludes.forEach((v) => {
+  //   //     labels.push({
+  //   //       label: 'asset_id',
+  //   //       op: '!=',
+  //   //       value: v,
+  //   //     });
+  //   //   });
+  //   // }
 
-    // rule_config.queries.forEach((e) => {
-    //   // debugger
-    //   const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
-    //   const metric = result.metric;
-    //   e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query, false, result.operations);
-    // });
-    // form.setFieldsValue({
-    //   rule_config: { ...rule_config },
-    // });
-  }
+  //   // rule_config.queries.forEach((e) => {
+  //   //   // debugger
+  //   //   const result = buildPromVisualQueryFromPromQL(e.prom_ql, []).query
+  //   //   const metric = result.metric;
+  //   //   e.prom_ql = renderQuery(buildPromVisualQueryFromPromQL(metric || '', labels).query, false, result.operations);
+  //   // });
+  //   // form.setFieldsValue({
+  //   //   rule_config: { ...rule_config },
+  //   // });
+  // }
 
   function tagRender(content) {
     const { isCorrectFormat, isLengthAllowed } = isTagValid(content.value);

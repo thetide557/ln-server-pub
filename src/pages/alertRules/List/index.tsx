@@ -23,7 +23,7 @@ import moment from 'moment';
 import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select, Tooltip, Input } from 'antd';
 import RefreshIcon from '@/components/RefreshIcon';
 import usePagination from '@/components/usePagination';
-import { getStrategyGroupSubList, updateAlertRules, deleteStrategy,deleteAlertRules } from '@/services/warning';
+import { getStrategyGroupSubList, updateAlertRules,updateAlertRulesStatus, deleteStrategy,deleteAlertRules } from '@/services/warning';
 import { CommonStateContext } from '@/App';
 import { getAssetstypes } from '@/services/assets';
 import Tags from '@/components/Tags';
@@ -248,7 +248,8 @@ export default function List(props: ListProps) {
                         : "red",
                   }}
                   onClick={(e) => {
-                    const { id, disabled } = record;
+                    // const { id, disabled } = record;
+                    const { strategy_id, disabled } = record;
 
                     Modal.confirm({
                       title: `确认要修改状态为：${
@@ -256,11 +257,25 @@ export default function List(props: ListProps) {
                           ? "关闭"
                           : "启动"
                       }`,
+                      // onOk: () => {
+                      //   bgid &&
+                      //     updateAlertRules(
+                      //       {
+                      //         ids: [id],
+                      //         fields: {
+                      //           disabled: !disabled ? 1 : 0,
+                      //         },
+                      //       },
+                      //       bgid
+                      //     ).then(() => {
+                      //       getAlertRules(params);
+                      //     });
+                      // },
                       onOk: () => {
                         bgid &&
-                          updateAlertRules(
+                        updateAlertRulesStatus(
                             {
-                              ids: [id],
+                              strategyids: [strategy_id],
                               fields: {
                                 disabled: !disabled ? 1 : 0,
                               },
