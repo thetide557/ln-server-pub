@@ -167,8 +167,8 @@ request.interceptors.response.use(
                 Cookies.set("access_token", access_token);
                 Cookies.set("refresh_token", refresh_token);
                 // 嵌入的子项目之前用的local
-                localStorage.setItem('access_token', res.dat.refresh_token);
-                localStorage.setItem('refresh_token', res.dat.refresh_token);
+                localStorage.setItem('access_token', access_token);
+                localStorage.setItem('refresh_token', refresh_token);
                 location.href = `${location.pathname}${location.search}`;
               }
             })
