@@ -205,7 +205,7 @@ export default function ScreenView() {
     <div className='screen-view'>
       <div className='screen1'>
         <div className='screen1-cont'>
-          {
+          {/* {
             screenList.length > 0 &&
             <div className='screen-tab'>
               {_.map(screenList.filter(x => x.type == 1), (item, index) => {
@@ -216,7 +216,7 @@ export default function ScreenView() {
                 )
               })}
             </div>
-          }
+          } */}
 
 
           {/* 下拉切换 */}
