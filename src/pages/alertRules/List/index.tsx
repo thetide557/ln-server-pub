@@ -101,22 +101,20 @@ export default function List(props: ListProps) {
       //   );
       // },
       render(name, record, index) {
-        return {
-          children:(
-            <Link
-              className='table-text'
-              to={{
-                pathname: `/alert-rules/edit/${record.strategy_id}`,
-              }}
-            >
-              {name}
-            </Link>
-          ),
-          props: {
-            rowSpan: record.rowSpan
-          }
-        }
+        return (
+          <Link
+            className='table-text'
+            to={{
+              pathname: `/alert-rules/edit/${record.strategy_id}`,
+            }}
+          >
+            {name}
+          </Link>
+        );
       },
+      onCell: (record) => ({
+        rowSpan: record.rowSpan
+      }),
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
@@ -230,163 +228,160 @@ export default function List(props: ListProps) {
       width: 120,
       fixed: 'right',
       render: (val, record: any) => {
-        return {
-          children: (
-            <Space>
-              {(profile.roles?.includes("Admin") ||
-                permList.includes("/alert-rules/status")) && (
-                <PoweroffOutlined
-                  title={
+        return (
+          <Space>
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/status")) && (
+              <PoweroffOutlined
+                title={
+                  record["disabled"] === AlertRuleStatus.Enable
+                    ? "已启动"
+                    : "未启动"
+                }
+                style={{
+                  color:
                     record["disabled"] === AlertRuleStatus.Enable
-                      ? "已启动"
-                      : "未启动"
-                  }
-                  style={{
-                    color:
-                      record["disabled"] === AlertRuleStatus.Enable
-                        ? "green"
-                        : "red",
-                  }}
-                  onClick={(e) => {
-                    // const { id, disabled } = record;
-                    const { strategy_id, disabled } = record;
+                      ? "green"
+                      : "red",
+                }}
+                onClick={(e) => {
+                  // const { id, disabled } = record;
+                  const { strategy_id, disabled } = record;
 
-                    Modal.confirm({
-                      title: `确认要修改状态为：${
-                        record["disabled"] === AlertRuleStatus.Enable
-                          ? "关闭"
-                          : "启动"
-                      }`,
-                      // onOk: () => {
-                      //   bgid &&
-                      //     updateAlertRules(
-                      //       {
-                      //         ids: [id],
-                      //         fields: {
-                      //           disabled: !disabled ? 1 : 0,
-                      //         },
-                      //       },
-                      //       bgid
-                      //     ).then(() => {
-                      //       getAlertRules(params);
-                      //     });
-                      // },
-                      onOk: () => {
-                        bgid &&
+                  Modal.confirm({
+                    title: `确认要修改状态为：${
+                      record["disabled"] === AlertRuleStatus.Enable
+                        ? "关闭"
+                        : "启动"
+                    }`,
+                    // onOk: () => {
+                    //   bgid &&
+                    //     updateAlertRules(
+                    //       {
+                    //         ids: [id],
+                    //         fields: {
+                    //           disabled: !disabled ? 1 : 0,
+                    //         },
+                    //       },
+                    //       bgid
+                    //     ).then(() => {
+                    //       getAlertRules(params);
+                    //     });
+                    // },
+                    onOk: () => {
+                      bgid &&
                         updateAlertRulesStatus(
-                            {
-                              strategyids: [strategy_id],
-                              fields: {
-                                disabled: !disabled ? 1 : 0,
-                              },
+                          {
+                            strategyids: [strategy_id],
+                            fields: {
+                              disabled: !disabled ? 1 : 0,
                             },
-                            bgid
-                          ).then(() => {
-                            getAlertRules(params);
-                          });
-                      },
-                      onCancel() {},
-                    });
-                  }}
-                  rev={undefined}
-                />
-              )}
-              {(profile.roles?.includes("Admin") ||
-                permList.includes("/alert-rules/copy")) && (
-                <Link
-                  title="克隆"
-                  className="table-operator-area-normal"
+                          },
+                          bgid
+                        ).then(() => {
+                          getAlertRules(params);
+                        });
+                    },
+                    onCancel() {},
+                  });
+                }}
+                rev={undefined}
+              />
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/copy")) && (
+              <Link
+                title="克隆"
+                className="table-operator-area-normal"
                   // to={{
                   //   pathname: `/alert-rules/edit/${record.id}?mode=clone`,
                   // }}
-                  to={{
-                    pathname: `/alert-rules/edit/${record.strategy_id}?mode=clone`,
-                  }}
-                  target="_self"
-                >
-                  <CopyTwoTone rev={undefined} />
-                </Link>
-              )}
-              {(profile.roles?.includes("Admin") ||
-                permList.includes("/alert-rules/detail")) && (
-                <FileSearchOutlined
-                  title="查看"
+                to={{
+                  pathname: `/alert-rules/edit/${record.strategy_id}?mode=clone`,
+                }}
+                target="_self"
+              >
+                <CopyTwoTone rev={undefined} />
+              </Link>
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/detail")) && (
+              <FileSearchOutlined
+                title="查看"
                   // onClick={() => {
                   //   history.push(`alert-rules/edit/${record.id}?mode=view`);
                   // }}
-                  onClick={() => {
-                    history.push(
-                      `alert-rules/edit/${record.strategy_id}?mode=view`
-                    );
-                  }}
-                  rev={undefined}
-                />
-              )}
-              {(profile.roles?.includes("Admin") ||
-                permList.includes("/alert-rules/put")) && (
-                <EditOutlined
-                  title="编辑"
+                onClick={() => {
+                  history.push(
+                    `alert-rules/edit/${record.strategy_id}?mode=view`
+                  );
+                }}
+                rev={undefined}
+              />
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/put")) && (
+              <EditOutlined
+                title="编辑"
                   // onClick={() => {
                   //   history.push(`alert-rules/edit/${record.id}`);
                   // }}
-                  onClick={() => {
-                    history.push(`alert-rules/edit/${record.strategy_id}`);
-                  }}
-                  rev={undefined}
-                />
-              )}
-              {(profile.roles?.includes("Admin") ||
-                permList.includes("/alert-rules/del")) && (
-                <div
-                  title="删除"
-                  className="table-operator-area-warning"
-                  onClick={() => {
-                    Modal.confirm({
-                      title: "确认要删除",
-                      okText: "确认",
-                      cancelText: "取消",
-                      // onOk: () => {
-                      //   // 删除策略
-                      //   bgid &&
-                      //     deleteStrategy([record.id], bgid).then(() => {
-                      //       message.success('删除成功');
-                      //       getAlertRules(params);
-                      //       setSelectRowKeys([]);
-                      //     });
-                      // },
-                      onOk: () => {
-                        // 删除告警规则
-                        bgid &&
-                          deleteAlertRules(record.strategy_id, bgid).then(
-                            () => {
-                              message.success("删除成功");
-                              getAlertRules(params);
-                              setSelectRowKeys([]);
-                            }
-                          );
-                      },
-
-                      onCancel() {},
-                    });
-                  }}
-                >
-                  <DeleteOutlined rev={undefined} />
-                </div>
-              )}
-              {record.prod === "anomaly" && (
-                <div>
-                  <Link to={{ pathname: `/alert-rules/brain/${record.id}` }}>
-                    {t("brain_result_btn")}
-                  </Link>
-                </div>
-              )}
-            </Space>
-          ),
-          props: {
-            rowSpan: record.rowSpan,
-          },
-        };
+                onClick={() => {
+                  history.push(`alert-rules/edit/${record.strategy_id}`);
+                }}
+                rev={undefined}
+              />
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/del")) && (
+              <div
+                title="删除"
+                className="table-operator-area-warning"
+                onClick={() => {
+                  Modal.confirm({
+                    title: "确认要删除",
+                    okText: "确认",
+                    cancelText: "取消",
+                    // onOk: () => {
+                    //   // 删除策略
+                    //   bgid &&
+                    //     deleteStrategy([record.id], bgid).then(() => {
+                    //       message.success('删除成功');
+                    //       getAlertRules(params);
+                    //       setSelectRowKeys([]);
+                    //     });
+                    // },
+                    onOk: () => {
+                      // 删除告警规则
+                      bgid &&
+                        deleteAlertRules(record.strategy_id, bgid).then(
+                          () => {
+                            message.success("删除成功");
+                            getAlertRules(params);
+                            setSelectRowKeys([]);
+                          }
+                        );
+                    },
+                    onCancel() {},
+                  });
+                }}
+              >
+                <DeleteOutlined rev={undefined} />
+              </div>
+            )}
+            {record.prod === "anomaly" && (
+              <div>
+                <Link to={{ pathname: `/alert-rules/brain/${record.id}` }}>
+                  {t("brain_result_btn")}
+                </Link>
+              </div>
+            )}
+          </Space>
+        );
       },
+      onCell: (record) => ({
+        rowSpan: record.rowSpan
+      }),
     },
   ];
 
@@ -398,7 +393,7 @@ export default function List(props: ListProps) {
     },
   });
 
-  // 合并相同的告警规则名称单元格、操作列合并单元格
+  // 合并相同的告警规则名称单元格、操作列、选择列 合并单元格
   const processData = (data) => {
     // 1. 按 strategy_id 分组
     const grouped = data.reduce((acc, item) => {
@@ -409,6 +404,14 @@ export default function List(props: ListProps) {
       return acc;
     }, {});
   
+    // 生成 strategy_id 到 ids 的映射
+    const strategyIdToIds = {};
+    Object.values(grouped).forEach(group => {
+      if (group.length > 0) {
+        strategyIdToIds[group[0].strategy_id] = group.map(item => item.id);
+      }
+    });
+
     // 2. 为每个组的第一项设置 rowSpan
     const processedData = [];
     Object.values(grouped).forEach(group => {
@@ -419,10 +422,52 @@ export default function List(props: ListProps) {
         });
       });
     });
-    
-    return processedData;
+    return { processedData, strategyIdToIds };
   };
   
+  // 新增 state 保存 strategyIdToIds
+  const [strategyIdToIds, setStrategyIdToIds] = useState({});
+
+  // rowSelection 相关逻辑单独提取
+  const rowSelection = {
+    selectedRowKeys: selectRowKeys,
+    renderCell: (checked, record, index, originNode) => {
+      if (record.rowSpan === 0) return { children: null, props: { rowSpan: 0 } };
+      return { children: originNode, props: { rowSpan: record.rowSpan } };
+    },
+    onSelect: (record, selected) => {
+      const groupIds = strategyIdToIds[record.strategy_id];
+      let newSelectedRowKeys = [...selectRowKeys];
+      if (selected) {
+        newSelectedRowKeys = Array.from(new Set([...newSelectedRowKeys, ...groupIds]));
+      } else {
+        newSelectedRowKeys = newSelectedRowKeys.filter(id => !groupIds.includes(id));
+      }
+      setSelectRowKeys(newSelectedRowKeys);
+      const newSelectedRows = listTableData.filter(item => newSelectedRowKeys.includes(item.id));
+      setSelectedRows(newSelectedRows);
+    },
+    onSelectAll: (selected) => {
+      let newSelectedRowKeys;
+      if (selected) {
+        newSelectedRowKeys = listTableData.map(item => item.id);
+      } else {
+        newSelectedRowKeys = [];
+      }
+      setSelectRowKeys(newSelectedRowKeys);
+      const newSelectedRows = listTableData.filter(item => newSelectedRowKeys.includes(item.id));
+      setSelectedRows(newSelectedRows);
+    }
+  };
+  useEffect(() => {
+    const validIds = listTableData.map(item => item.id);
+    const filteredSelectRowKeys = selectRowKeys.filter(id => validIds.includes(id));
+    if (filteredSelectRowKeys.length !== selectRowKeys.length) {
+      setSelectRowKeys(filteredSelectRowKeys);
+    }
+    const newSelectedRows = listTableData.filter(item => filteredSelectRowKeys.includes(item.id));
+    setSelectedRows(newSelectedRows);
+  }, [listTableData, selectRowKeys]);
 
   const getAlertRules = async (params) => {
     if (!bgid) {
@@ -435,8 +480,9 @@ export default function List(props: ListProps) {
       let lists = dat.list;
       // setListTableData(lists);
       console.log("是否-数据----", lists);
-      const processedData = processData(lists);
+      const { processedData, strategyIdToIds } = processData(lists);
       setListTableData(processedData);
+      setStrategyIdToIds(strategyIdToIds);
     })
   };
   useEffect(() => {
@@ -614,13 +660,14 @@ export default function List(props: ListProps) {
             bordered
             dataSource={listTableData}
             className='ruler-table_columns'
-            rowSelection={{
-              selectedRowKeys: selectedRows.map((item) => item.id),
-              onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-                setSelectRowKeys(selectedRowKeys);
-                setSelectedRows(selectedRows);
-              },
-            }}
+            // rowSelection={{
+            //   selectedRowKeys: selectedRows.map((item) => item.id),
+            //   onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+            //     setSelectRowKeys(selectedRowKeys);
+            //     setSelectedRows(selectedRows);
+            //   },
+            // }}
+            rowSelection={rowSelection}
             scroll={{ x: tableWidth }}
             components={components}
             columns={resizableColumns}
