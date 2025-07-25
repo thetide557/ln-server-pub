@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Tabs, Button, Card, message } from 'antd';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { EditorView } from '@codemirror/view';
 import PageLayout from '@/components/pageLayout';
 import { getSSOConfigs, putSSOConfig } from './services';
+import { CommonStateContext } from '@/App';
 import { SSOConfigType } from './types';
 import './locale';
 //@ts-ignore
@@ -14,6 +15,7 @@ import Global from 'plus:/parcels/SSOConfigs/Global';
 export default function index() {
   const { t } = useTranslation('SSOConfigs');
   const [data, setData] = useState<SSOConfigType[]>([]);
+  const { profile, permList } = useContext(CommonStateContext);
 
   useEffect(() => {
     getSSOConfigs().then((res) => {
@@ -67,7 +69,8 @@ export default function index() {
                         }),
                       ]}
                     />
-                    <Button 
+                    {
+                      (profile.roles?.includes("Admin") || permList.includes("/help/sso/save")) && <Button 
                       type='primary'
                       style={{ marginTop: 16 }}
                       onClick={() => {
@@ -81,6 +84,7 @@ export default function index() {
                     >
                       {t('common:btn.save')}
                     </Button>
+                    }
                   </div>
                 </Tabs.TabPane>
               );

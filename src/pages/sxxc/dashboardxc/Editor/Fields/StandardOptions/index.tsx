@@ -57,6 +57,8 @@ export default function index(props: IProps) {
                               <div>Data(IEC): 基数为 1024, 单位为 B、KiB、MiB、GiB、TiB、PiB、EiB、ZiB、YiB</div>
                               <div>bits: b</div>
                               <div>bytes: B</div>
+                              <div>Percent: percent(0-100), percent(0.0-1.0)</div>
+                              <div>Time: seconds、milliseconds、humanize(seconds)、humanize(milliseconds)、datetime(seconds)、datetime(milliseconds)</div>
                             </Trans>
                           }
                         >

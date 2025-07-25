@@ -122,11 +122,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('巡检管理'),
         },
-        {
-          key: '/productionplan',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('作业计划管理'),
-        },
+        // {
+        //   key: '/productionplan',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('作业计划管理'),
+        // },
       ],
     },
     {
