@@ -128,7 +128,10 @@ const AiRobotSse = function () {
     }, 100);
   };
 
-  const handleAiClick = () => {
+  const handleAiClick = (e: React.MouseEvent | React.TouchEvent) => {
+    // 阻止事件冒泡与默认行为
+    e.stopPropagation();
+    e.preventDefault();
     if (!isDragging) {
       // 执行点击事件逻辑
       setAiShow(!aiShow);
@@ -702,7 +705,7 @@ const AiRobotSse = function () {
             )}
             <div className="r-robot">
               <div></div>
-              <div className="robot" onClick={handleAiClick}></div>
+              <div className="robot" onClick={handleAiClick} onTouchEnd={handleAiClick}></div>
             </div>
           </div>
         </Draggable>
