@@ -14,7 +14,7 @@ import './locale';
 import { Logout } from '@/services/login';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
-import { getBigScreen } from '@/services/sxxc/bigScreen';
+import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getDictDataListByType } from '@/services/system/dict';
 import Cookies from 'js-cookie';
 
@@ -582,8 +582,10 @@ export default function () {//{ selectMenu?:any }
   };
 
   const goScreen = () => {
-    getBigScreen().then(res => {
-      if (res.dat.list.length > 0) {
+    let busiGroup = localStorage.getItem('groupIds') || '';
+    getBigScreen2(busiGroup).then(res => {
+      const list = res.dat?.list?.filter((item:any) => item.type == 1) || [];
+      if (list.length > 0) {
         history.push('/screenView')
       }
     })

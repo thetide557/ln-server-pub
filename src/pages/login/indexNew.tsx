@@ -28,7 +28,8 @@ import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
 import _, { set } from 'lodash';
 import { useLocalStorage } from 'react-use';
-import { getBigScreen } from '@/services/sxxc/bigScreen';
+import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
+import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
 
 export interface DisplayName {
@@ -213,12 +214,22 @@ export default function Login() {
           localStorage.setItem('deepseek_token', res.dat.deepseek_token);
         })
         if (!err) {
-          getBigScreen().then(res => {
-            if (res.dat.list.length > 0) {
-              window.location.href = '/screenView'
-            } else {
-              window.location.href = '/home';
+          getBusiGroups().then(res => {
+            let busiGroups = res.dat;
+            let groupIds = ''
+            if (busiGroups.length > 0) {
+              groupIds = busiGroups.map(item => item.id).toString()
             }
+            getBigScreen2(groupIds).then(res => {
+              const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
+              if (list.length > 0) {
+                window.location.href = '/screenView'
+              } else {
+                window.location.href = '/home';
+              }
+            }).catch(_ => {
+              window.location.href = '/home';
+            })
           }).catch(_ => {
             window.location.href = '/home';
           })
@@ -261,12 +272,22 @@ export default function Login() {
           localStorage.setItem('deepseek_token', res.dat.deepseek_token);
         })
         if (!err) {
-          getBigScreen().then(res => {
-            if (res.dat.list.length > 0) {
-              window.location.href = '/screenView'
-            } else {
-              window.location.href = '/home';
+          getBusiGroups().then(res => {
+            let busiGroups = res.dat;
+            let groupIds = ''
+            if (busiGroups.length > 0) {
+              groupIds = busiGroups.map(item => item.id).toString()
             }
+            getBigScreen2(groupIds).then(res => {
+              const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
+              if (list.length > 0) {
+                window.location.href = '/screenView'
+              } else {
+                window.location.href = '/home';
+              }
+            }).catch(_ => {
+              window.location.href = '/home';
+            })
           }).catch(_ => {
             window.location.href = '/home';
           })
@@ -437,7 +458,7 @@ export default function Login() {
                     {
                       otherLogin.map((item: any) => {
                         return (
-                          <div className={`login-other-item ${activeKey==item.key ? 'active-text' : ''}`} key={item.key} onClick={() => handleOtherLogin(item.key)}>
+                          <div className={`login-other-item ${activeKey == item.key ? 'active-text' : ''}`} key={item.key} onClick={() => handleOtherLogin(item.key)}>
                             <div className='login-other-item-text'>{item.value}</div>
                           </div>
                         )

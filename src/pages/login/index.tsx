@@ -28,7 +28,8 @@ import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
 import _ from 'lodash';
 import { useLocalStorage } from 'react-use';
-import { getBigScreen } from '@/services/sxxc/bigScreen';
+import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
+import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
 
 export interface DisplayName {
@@ -42,7 +43,7 @@ export default function Login() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const location = useLocation();
-  
+
   const redirect = location.search && new URLSearchParams(location.search).get('redirect');
   const [displayName, setDisplayName] = useState<DisplayName>({
     oidc: 'OIDC',
@@ -50,7 +51,7 @@ export default function Login() {
     oauth: 'OAuth',
   });
 
-  const [theme, setTheme] = useLocalStorage("platform_theme",{
+  const [theme, setTheme] = useLocalStorage("platform_theme", {
     title: '工控网运维系统',
     logo: '/image/topmenu/logo.png',
     icon: '/image/plticon.png',
@@ -73,29 +74,29 @@ export default function Login() {
     });
   };
   useSsoWay();
-  
+
   useEffect(() => {
     // 从 localStorage 中读取用户的登录信息
     const username = localStorage.getItem('username');
     const password = localStorage.getItem('password');
     const remember = localStorage.getItem('remember') === 'true';
 
-    
-    
-    if(username){
+
+
+    if (username) {
       form.setFieldsValue({
         username,
-    });
-  }
+      });
+    }
     // 如果记住密码，则填充表单
-    if (remember  && password) {
+    if (remember && password) {
       form.setFieldsValue({
         // username,
         password,
         remember
       });
     }
-     // 更新记住密码的状态
+    // 更新记住密码的状态
     setRemember(remember);
     getSsoConfig().then((res) => {
       if (res.dat) {
@@ -107,7 +108,7 @@ export default function Login() {
       }
     });
 
-    
+
 
 
     ifShowCaptcha().then((res) => {
@@ -134,15 +135,15 @@ export default function Login() {
       login();
     });
   };
-  
+
 
   const login = async () => {
     setLoading(true)
     let { username, password, verifyvalue } = form.getFieldsValue();
-     // 将用户的登录信息存储到 localStorage 中
-     localStorage.setItem('username', username);
-     localStorage.setItem('password', password);
-     localStorage.setItem('remember', remember ? 'true' : 'false');
+    // 将用户的登录信息存储到 localStorage 中
+    localStorage.setItem('username', username);
+    localStorage.setItem('password', password);
+    localStorage.setItem('remember', remember ? 'true' : 'false');
     // const rsaConf = await getRSAConfig();
     // const {
     //   dat: { OpenRSA, RSAPublicKey },
@@ -164,12 +165,22 @@ export default function Login() {
           localStorage.setItem('deepseek_token', res.dat.deepseek_token);
         })
         if (!err) {
-          getBigScreen().then(res => {
-            if (res.dat.list.length > 0) {
-              window.location.href = '/screenView'
-            } else {
-              window.location.href = '/home';
+          getBusiGroups().then(res => {
+            let busiGroups = res.dat;
+            let groupIds = ''
+            if (busiGroups.length > 0) {
+              groupIds = busiGroups.map(item => item.id).toString()
             }
+            getBigScreen2(groupIds).then(res => {
+              const list = res.dat?.list?.filter((item:any) => item.type == 1) || [];
+              if (list.length > 0) {
+                window.location.href = '/screenView'
+              } else {
+                window.location.href = '/home';
+              }
+            }).catch(_ => {
+              window.location.href = '/home';
+            })
           }).catch(_ => {
             window.location.href = '/home';
           })
@@ -202,7 +213,7 @@ export default function Login() {
                 },
               ]}
             >
-              <Input placeholder={t('请输入用户名')} prefix={<IdcardTwoTone  />} />
+              <Input placeholder={t('请输入用户名')} prefix={<IdcardTwoTone />} />
             </Form.Item>
             <Form.Item
               name='password'
@@ -213,7 +224,7 @@ export default function Login() {
                 },
               ]}
             >
-              <Input type='password' placeholder={t('请输入密码')} onPressEnter={handleSubmit} prefix={<LockTwoTone  className='site-form-item-icon' />} />
+              <Input type='password' placeholder={t('请输入密码')} onPressEnter={handleSubmit} prefix={<LockTwoTone className='site-form-item-icon' />} />
             </Form.Item>
 
             <div className='verifyimg-div'>
@@ -235,24 +246,24 @@ export default function Login() {
                 style={{
                   display: showcaptcha ? 'inline-block' : 'none',
                   float: 'right',
-                  width:'110px',
+                  width: '110px',
                   height: '36px',
                 }}
                 onClick={refreshCaptcha}
                 alt='点击获取验证码'
               />
             </div>
-            <Form.Item name="remember" valuePropName='checked'   wrapperCol={{offset:0,span:24}}>
-               <Checkbox onChange={handleRememberChange}>记住密码</Checkbox>
+            <Form.Item name="remember" valuePropName='checked' wrapperCol={{ offset: 0, span: 24 }}>
+              <Checkbox onChange={handleRememberChange}>记住密码</Checkbox>
             </Form.Item>
 
             <Form.Item>
-              <Button loading={loading} type='primary' className='submit_button' onClick={handleSubmit} onKeyPress={e=>{
-                 handleSubmit
+              <Button loading={loading} type='primary' className='submit_button' onClick={handleSubmit} onKeyPress={e => {
+                handleSubmit
               }}>
                 {t('登录')}
               </Button>
-            </Form.Item>            
+            </Form.Item>
           </Form>
         </div>
       </div>
