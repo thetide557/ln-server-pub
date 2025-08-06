@@ -55,9 +55,9 @@ export enum OperateType {
 }
 let queryFilter = [
   { name: 'monitoring_name', label: '监控名称', type: 'input' },
-  { name: 'asset_name', label: '资产名称', type: 'input' },
+  { name: 'name', label: '资产名称', type: 'input' },
   { name: 'status', label: '监控状态', type: 'select' },
-  { name: 'asset_ip', label: 'IP地址', type: 'input' },
+  { name: 'ip', label: 'IP地址', type: 'input' },
 ];
 export default function () {
   const { t } = useTranslation('assets');
@@ -92,7 +92,8 @@ export default function () {
   const [width, setWidth] = useLocalStorage<any>('left_monitor_width', 200);
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [typeId, setTypeId] = useLocalStorage<any>('monitors_type_id', 0);
-  const [filterParam, setFilterParam] = useLocalStorage<any>('monitors_filter_param', 'asset_ip');
+  const [filterParam, setFilterParam] = useLocalStorage<any>('monitors_filter_param', 'ip');
+  const [filterParam2, setFilterParam2] = useLocalStorage<any>('monitors_filter_param2', 'asset_ip');
   const [searchVal, setSearchVal] = useLocalStorage<any>('monitors_filter_value', null);
   const [filterType, setFilterType] = useLocalStorage<any>('monitors_filter_type', "input");
   const history = useHistory();
@@ -763,9 +764,9 @@ export default function () {
         param['query'] = searchVal;
         treeQuery['query'] = searchVal
       }
-      if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
-        param['filter'] = filterParam;
-        treeQuery['filter'] = filterParam;
+      if (filterParam2 != null && filterParam2.length > 0 && searchVal != null && searchVal.length > 0) {
+        param['filter'] = filterParam2;
+        treeQuery['filter'] = filterParam2;
       }
       if (currentAssetId <= 0 && typeId != null && typeId + '' != '0') {
         param['assetType'] = typeId;
@@ -787,7 +788,7 @@ export default function () {
       if (currentAssetId > 0) {
         getXhAsset('' + currentAssetId).then(({ dat }) => {
           setTypeId(dat.type);
-          setFilterParam('asset_ip');
+          setFilterParam('ip');
           setFilterType('input');
           setSearchVal(dat.ip);
         });
@@ -958,6 +959,13 @@ export default function () {
                       }
                     });
                     setFilterParam(value);
+                    if(value == 'ip'){
+                      setFilterParam2('asset_ip');
+                    }
+                    if(value == 'name'){
+                      setFilterParam2('asset_name');
+                    }
+                    setFilterParam2(value);
                     setSearchVal(null);
                     setCurrentAssetId(0);
                     setCurrent(1);
