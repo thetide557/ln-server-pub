@@ -26,7 +26,6 @@ import Overview from '@/pages/login/overview';
 import LoginCallback from '@/pages/loginCallback';
 import LoginCallbackCAS from '@/pages/loginCallback/cas';
 import LoginCallbackOAuth from '@/pages/loginCallback/oauth';
-import LoginCallbackOIDC from '@/pages/loginCallback/oidc';
 import LicenseBase from '@/pages/license/base';
 import LicenseBaseLic from '@/pages/license/base/license';
 import LicenseDevice from '@/pages/license/device';
@@ -162,7 +161,6 @@ export default function Content() {
         <Route path='/callback' component={LoginCallback} exact />
         <Route path='/callback/cas' component={LoginCallbackCAS} exact />
         <Route path='/callback/oauth' component={LoginCallbackOAuth} exact />
-        <Route path='/callback/oidc' component={LoginCallbackOIDC} exact />
         <Route path='/metric/explorer' component={MetricExplore} exact />
         <Route path='/log/explorer' component={LogExplore} exact />
         <Route path='/log/operlog' component={LogOperate} exact />

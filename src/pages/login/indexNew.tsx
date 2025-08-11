@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
-import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, authLoginLdap, getRSAConfig, getDeepseektoken, getRedirectURLCAS } from '@/services/login';
+import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, authLoginLdap, getRSAConfig, getDeepseektoken, getRedirectURLCAS, getRedirectURL } from '@/services/login';
 import './login.less';
 // import cookie from "react-cookies";
 // @ts-ignore
@@ -76,6 +76,10 @@ export default function Login() {
     {
       key: 'CAS',
       value: 'CAS登录'
+    },
+    {
+      key: 'OIDC',
+      value: 'OIDC登录'
     }
   ]);
   const [activeKey, setActiveKey] = useState<string>('LDAP')
@@ -310,6 +314,10 @@ export default function Login() {
           window.location.href = res.dat?.redirect;
         })
         break;
+      case 'OIDC':
+        getRedirectURL().then(res => {
+          window.location.href = res.dat;
+        })
     }
   };
 
