@@ -400,6 +400,17 @@ const getMenuList = (t) => {
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
         //   label: t('安全认证'),
         // },
+        {
+          key: '/sxxc/deploymentManagement',
+          icon: <ProfileOutlined />,
+          label: t('管理后台'),
+          children: [
+            {
+              key: '/sxxc/deploymentManagement',
+              label: '部署管理',
+            },
+          ],
+        },
       ],
     },
 
