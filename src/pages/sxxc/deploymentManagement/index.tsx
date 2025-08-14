@@ -69,13 +69,11 @@ export default function () {
       dataIndex: "project_name",
       Ced: "left",
       ellipsis: true,
-      width: 120,
     },
     {
       title: "所属区域",
       dataIndex: "region",
       Ced: "left",
-      width: 120,
       align: "center",
       ellipsis: true,
     },
@@ -90,7 +88,7 @@ export default function () {
       title: "部署版本",
       dataIndex: "deployment_version",
       align: "center",
-      width: 120,
+      width: 100,
       ellipsis: true,
     },
     {
@@ -98,34 +96,34 @@ export default function () {
       dataIndex: "asset_count",
       align: "center",
       ellipsis: true,
-      width: 120,
+      width: 100,
     },
     {
       title: "联系人",
       dataIndex: "contact_person",
       align: "center",
       ellipsis: true,
-      width: 120,
+      width: 100,
     },
     {
       title: "创建时间",
       dataIndex: "created_at",
       align: "center",
-      width: 120,
       ellipsis: true,
+      width: 200,
     },
     {
       title: "更新时间",
       dataIndex: "updated_at",
       align: "center",
-      width: 120,
+      width: 200,
       ellipsis: true,
     },
     {
       title: "更新人",
       dataIndex: "updated_by",
       align: "center",
-      width: 120,
+      width: 100,
       ellipsis: true,
     },
   ];
@@ -133,7 +131,7 @@ export default function () {
   const fixColumns: any[] = [
     {
       title: "操作",
-      width: 50,
+      width: 150,
       align: "center",
       fixed: "right",
       render: (text: string, record: assetsType) => (
