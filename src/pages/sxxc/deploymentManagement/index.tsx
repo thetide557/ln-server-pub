@@ -28,11 +28,10 @@ import { assetsType, metricsUnitEnum } from "@/store/assetsInterfaces";
 import { CommonStateContext } from "@/App";
 import {
   getDeploymentsList,
-  getDeploymentsDetails,
   delDeployments,
+  batchDelDeployment,
 } from "@/services/sxxc/deploymentManagement";
 import RefreshIcon from "@/components/RefreshIcon";
-import { Link, useHistory } from "react-router-dom";
 import type { DataNode, TreeProps } from "antd/es/tree";
 import { useInterval, useLocalStorage } from "react-use";
 export enum OperateType {
@@ -50,10 +49,8 @@ export enum OperateType {
 
 export default function () {
   const { t } = useTranslation("assets");
-  const history = useHistory();
   const [list, setList] = useState<any[]>([]);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
-  const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
   const [current, setCurrent] = useLocalStorage("asset_current_from", 1);
   const [pageSize, setPageSize] = useLocalStorage("asset_current_page", 10);
   const [searchVal, setSearchVal] = useLocalStorage<any>(
@@ -61,19 +58,11 @@ export default function () {
     null
   );
   const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
-  const [metricUnits, setMetricUnits] = useState<any>({});
   const [total, setTotal] = useState<number>(0);
   const { busiGroups, profile, permList } = useContext(CommonStateContext);
-  const [typeId, setTypeId] = useLocalStorage("monitor_current_type_id", "0");
-  const [modifyType, setModifyType] = useState<boolean>(true);
   const [title, setTitle] = useState<any>("");
-  const groupIds = busiGroups?.map((item) => item.id);
-  // console.log(groupIds);
-
-  // 资产分组
-  let treeQuery = {};
   const [open, setOpen] = useState<boolean>(false);
-  const [itemForm, setTtemForm] =  useState<Object>({});
+  const [itemForm, setTtemForm] = useState<Object>({});
   const baseColumns: any[] = [
     {
       title: "项目名称",
@@ -167,7 +156,7 @@ export default function () {
                 Modal.confirm({
                   title: "项目将在平台中移除，确认删除？",
                   onOk: async () => {
-                    await delDeployments( record.id);
+                    await delDeployments(record.id);
                     message.success(t("common:success.delete"));
                     setRefreshKey(_.uniqueId("refreshKey_"));
                     setSelectedAssets([]);
@@ -196,20 +185,17 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [searchVal, typeId, refreshKey]);
+  }, [searchVal, refreshKey]);
 
   const getTableData = () => {
     const param = {
       page: current,
       limit: pageSize,
     };
-
     if (searchVal != null && searchVal.length > 0) {
       param["query"] = searchVal;
     }
-
     getDeploymentsList(param).then(({ dat }) => {
-      console.log(dat);
       setList(dat.list || []);
       setTotal(dat.total);
     });
@@ -217,13 +203,11 @@ export default function () {
 
   const showModal = (action: string, formData: any) => {
     if (action == "add") {
-      setTtemForm({})
+      setTtemForm({});
       setOpen(true);
     } else if (action == "update") {
-      setTtemForm(formData)
+      setTtemForm(formData);
       setOpen(true);
-      
-      // history.push("/xh/assetmgt/add?mode=edit&id=" + formData.id);
     }
     setTitle(action == "add" ? "新增部署" : "编辑部署");
   };
@@ -236,7 +220,7 @@ export default function () {
 
   const handleClose = (value: any) => {
     if (value == "sure") {
-      getTableData()
+      getTableData();
     }
     setOpen(false);
   };
@@ -305,10 +289,7 @@ export default function () {
                                 Modal.confirm({
                                   title: "项目将在平台中移除，确认删除？",
                                   onOk: async () => {
-                                    let rows = selectedAssets?.map(
-                                      (item) => "" + item
-                                    );
-                                    deleteXhAssets({ ids: rows }).then(
+                                    batchDelDeployment(selectedAssets).then(
                                       (res) => {
                                         message.success("删除成功！");
                                         setRefreshKey(
@@ -350,9 +331,6 @@ export default function () {
                 rowSelection={{
                   onChange: (_, rows) => {
                     setSelectedAssets(rows ? rows.map(({ id }) => id) : []);
-                    setSelectedAssetsName(
-                      rows ? rows.map(({ name }) => name) : []
-                    );
                   },
                 }}
                 pagination={{

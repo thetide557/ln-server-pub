@@ -27,3 +27,17 @@ export function addDeployment (data: any) {
       data,
     });
 };
+// 更新部署记录
+export function putDeployment (data: any) {
+    return request(`/api/n9e/deployment`, {
+      method: RequestMethod.Put,
+      data,
+    });
+};
+// 批量删除部署记录
+export function batchDelDeployment (data: any) {
+    return request(`/api/n9e/deployment/batch-del`, {
+      method: RequestMethod.Post,
+      data,
+    });
+};

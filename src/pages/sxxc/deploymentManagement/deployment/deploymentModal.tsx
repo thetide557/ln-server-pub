@@ -12,10 +12,13 @@ import {
   message,
 } from "antd";
 import city from "./city.js";
-import { addDeployment } from "@/services/sxxc/deploymentManagement";
+import {
+  addDeployment,
+  putDeployment,
+} from "@/services/sxxc/deploymentManagement";
 import _ from "lodash";
 import moment, { Moment } from "moment";
-import dayjs from 'dayjs';
+const dateFormat = "YYYY-MM-DD";
 const formItemLayout = {
   labelCol: {
     span: 5,
@@ -33,15 +36,11 @@ const tailLayout = {
 const AccordionModal = (props: any) => {
   const [form] = Form.useForm();
   const { title, open, closeOpen, itemForm } = props;
-  const [deptoymentDate, setDeptoymentDate] = useState<string>();
-  const [provinceData, setProvinceData] = useState([] as any);
   useEffect(() => {
-    console.log(itemForm);
     if (itemForm.id) {
       form.setFieldsValue({
         ...itemForm,
         deployment_date: moment(itemForm.deployment_date),
-        province: itemForm.region.split(","),
       });
     }
   }, []);
@@ -50,27 +49,22 @@ const AccordionModal = (props: any) => {
     form
       .validateFields()
       .then((data) => {
-        let formParam = form.getFieldsValue();
-        console.log(formParam);
-      
-      console.log(dayjs(formParam.deployment_date));
-       
         let params = {
           ...data,
-          deployment_date: moment(formParam.deployment_date),
-          province: formParam.province[0],
-          city: formParam.province[1],
+          deployment_date: data.deployment_date._i,
+          province: data.region[0],
+          city: data.region[1],
         };
         if (itemForm.id) {
-          // editXhAssetstypesNew({ ...params }, curGroup.id).then((res) => {
-          //   message.success("修改成功");
-          //   closeOpen("sure");
-          // });
+          putDeployment({ ...params, id: itemForm.id }).then((res) => {
+            message.success("修改成功");
+            closeOpen("sure");
+          });
         } else {
-          // addDeployment(params).then((res) => {
-          //   message.success("新增成功");
-          //   closeOpen("sure");
-          // });
+          addDeployment(params).then((res) => {
+            message.success("新增成功");
+            closeOpen("sure");
+          });
         }
       })
       .catch((err) => {
@@ -81,14 +75,8 @@ const AccordionModal = (props: any) => {
   const handleCancel = () => {
     closeOpen("cancel");
   };
-
-  const provinceChange = (value, selectedOptions) => {
-    setProvinceData(selectedOptions.map((x) => x.label));
-  };
-  const dateChange = (value,dateString) => {
-    console.log(value);
-    form.setFieldsValue({ deployment_date: dateString });
-    // setDeptoymentDate(value);
+  const dateChange = (value, dateString) => {
+    form.setFieldsValue({ deployment_date: moment(dateString) });
   };
 
   return (
@@ -112,27 +100,29 @@ const AccordionModal = (props: any) => {
             </Form.Item>
           </Col>
         </Row>
-
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
-              name="province"
+              name="region"
               label="所属区域"
               rules={[{ required: true }]}
             >
               <Cascader
                 options={city}
-                defaultValue={[]}
-                onChange={provinceChange}
+                fieldNames={{
+                  label: "label",
+                  value: "label",
+                  children: "children",
+                }}
                 placeholder="请选择所属区域"
               />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="deployment_date" label="部署日期" getValueFromEvent={(...[, dateString]) => dateString} getValueProps={(value) => ({value: value ? dayjs(value, 'YYYY-MM-DD') : undefined})}>
+            <Form.Item name="deployment_date" label="部署日期">
               <DatePicker
                 style={{ width: "100%" }}
-                format = 'YYYY-MM-DD'
+                format={dateFormat}
                 onChange={dateChange}
               />
             </Form.Item>
