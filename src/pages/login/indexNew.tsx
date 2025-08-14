@@ -322,10 +322,12 @@ export default function Login() {
         getRedirectURL().then(res => {
           window.location.href = res.dat;
         })
+        break;
       case 'OAuth2':
         getRedirectURLOAuth().then(res => {
           window.location.href = res.dat;
         })
+        break;
     }
   };
 
