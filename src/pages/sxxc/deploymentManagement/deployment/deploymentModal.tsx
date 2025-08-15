@@ -2,9 +2,9 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Cascader,
   Col,
-  DatePicker,
   Form,
   Input,
+  DatePicker,
   InputNumber,
   Modal,
   Row,
@@ -41,6 +41,7 @@ const AccordionModal = (props: any) => {
       form.setFieldsValue({
         ...itemForm,
         deployment_date: moment(itemForm.deployment_date),
+        region:itemForm?.region.split(',')
       });
     }
   }, []);
@@ -51,7 +52,7 @@ const AccordionModal = (props: any) => {
       .then((data) => {
         let params = {
           ...data,
-          deployment_date: data.deployment_date._i,
+          deployment_date: data.deployment_date.format(dateFormat),
           province: data.region[0],
           city: data.region[1],
         };
@@ -74,9 +75,6 @@ const AccordionModal = (props: any) => {
 
   const handleCancel = () => {
     closeOpen("cancel");
-  };
-  const dateChange = (value, dateString) => {
-    form.setFieldsValue({ deployment_date: moment(dateString) });
   };
 
   return (
@@ -123,7 +121,6 @@ const AccordionModal = (props: any) => {
               <DatePicker
                 style={{ width: "100%" }}
                 format={dateFormat}
-                onChange={dateChange}
               />
             </Form.Item>
           </Col>
