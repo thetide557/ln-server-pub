@@ -92,7 +92,7 @@ export const getScheduleList = function (params) {
 
 // 删除排班
 export const deleteSchedule = function (id) {
-  return request(`/api/n9e/busi-group/schedule/del/${id}`, {
+  return request(`/api/n9e/xh/schedule/delete/${id}`, {
     method: RequestMethod.Delete,
   });
 };
