@@ -123,6 +123,7 @@ import InspectionLog from '@/pages/sxxc/inspectionList/log'
 import InspectionReport from '@/pages/sxxc/inspectionReport'
 import DutyManage from '@/pages/sxxc/dutyManage'
 
+import DeploymentManagement from '@/pages/sxxc/deploymentManagement'
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -296,8 +297,9 @@ export default function Content() {
         <Route exact path='/inspection/inspectionLog/:inspectionId?' component={InspectionLog} />
         <Route exact path='/inspection/inspectionReport/:inspectionId?' component={InspectionReport} />
         <Route exact path='/taskManage/strategy' component={TaskStrategy} />
-        <Route exact path='/dutyManage' component={DutyManage} />
+        <Route exact path='/sxxc/dutyManage' component={DutyManage} />
 
+        <Route exact path='/sxxc/deploymentManagement' component={DeploymentManagement} />
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />
         ))}

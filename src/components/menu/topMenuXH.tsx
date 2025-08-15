@@ -21,19 +21,19 @@ import Cookies from 'js-cookie';
 const getMenuList = (t) => {
   const menuList = [
     {
-      key: '/home',
-      icon: <IconFont type='icon-Menu_Infrastructure' />,
-      label: t('首页'),
+      key: "/home",
+      icon: <IconFont type="icon-Menu_Infrastructure" />,
+      label: t("首页"),
     },
     {
-      key: '/xh/targets',
-      icon: <IconFont type='icon-Menu_Infrastructure' />,
-      label: t('资产管理'),
+      key: "/xh/targets",
+      icon: <IconFont type="icon-Menu_Infrastructure" />,
+      label: t("资产管理"),
       children: [
         {
-          key: '/xh/assetmgt',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('运维资产清单'),
+          key: "/xh/assetmgt",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("运维资产清单"),
         },
         // {
         //   key: '/xh/iotassetmgt',
@@ -48,14 +48,14 @@ const getMenuList = (t) => {
       ],
     },
     {
-      key: 'dashboard',
-      icon: <IconFont type='icon-Menu_Dashboard' />,
-      label: t('监控管理'),
+      key: "dashboard",
+      icon: <IconFont type="icon-Menu_Dashboard" />,
+      label: t("监控管理"),
       children: [
         {
-          key: '/xh/monitor',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('监控指标'),
+          key: "/xh/monitor",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("监控指标"),
         },
         // {
         //   key: '/dashboards-built-in',
@@ -63,36 +63,36 @@ const getMenuList = (t) => {
         //   label: t('仪表盘'),
         // },
         {
-          key: '/metric/explorer',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('即时查询'),
-        }
+          key: "/metric/explorer",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("即时查询"),
+        },
       ],
     },
     {
-      key: 'alarm',
-      icon: <IconFont type='icon-Menu_AlarmManagement' />,
-      label: t('告警管理'),
+      key: "alarm",
+      icon: <IconFont type="icon-Menu_AlarmManagement" />,
+      label: t("告警管理"),
       children: [
         {
-          key: '/alert-rules?id=-1',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('告警规则'),
+          key: "/alert-rules?id=-1",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("告警规则"),
         },
         {
-          key: '/alert-cur-events',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('当前告警'),
+          key: "/alert-cur-events",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("当前告警"),
         },
         {
-          key: '/alert-his-events',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('历史告警'),
+          key: "/alert-his-events",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("历史告警"),
         },
         {
-          key: '/alert-mutes',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('屏蔽规则'),
+          key: "/alert-mutes",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("屏蔽规则"),
         },
         // {
         //   key: '/help/notification-settings',
@@ -100,27 +100,26 @@ const getMenuList = (t) => {
         //   label: t('通知设置'),
         // },
         {
-          key: '/help/notification-tpls',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('通知模板'),
+          key: "/help/notification-tpls",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("通知模板"),
         },
         // {
         //   key: '/serverVideoAlarm',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
         //   label: t('视频类项目历史告警'),
         // },
-
       ],
     },
     {
-      key: 'inspection',
+      key: "inspection",
       icon: <ProjectOutlined />,
-      label: t('巡检中心'),
+      label: t("巡检中心"),
       children: [
         {
-          key: '/inspection/inspectionList',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('巡检管理'),
+          key: "/inspection/inspectionList",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("巡检管理"),
         },
         // {
         //   key: '/productionplan',
@@ -130,9 +129,9 @@ const getMenuList = (t) => {
       ],
     },
     {
-      key: 'task',
+      key: "task",
       icon: <ProjectOutlined />,
-      label: t('任务中心'),
+      label: t("任务中心"),
       children: [
         // {
         //   key: '/inspection/inspectionList',
@@ -150,9 +149,9 @@ const getMenuList = (t) => {
         //   label: t('巡检日志'),
         // },
         {
-          key: '/taskManage/taskManage',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('任务管理'),
+          key: "/taskManage/taskManage",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("任务管理"),
         },
         // {
         //   key: '/taskManage/strategy',
@@ -160,23 +159,23 @@ const getMenuList = (t) => {
         //   label: t('任务策略'),
         // },
         {
-          key: '/taskManage/taskInstance',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('任务实例'),
+          key: "/taskManage/taskInstance",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("任务实例"),
         },
         {
-          key: 'job',
-          icon: <IconFont type='icon-Menu_AlarmSelfhealing' />,
+          key: "job",
+          icon: <IconFont type="icon-Menu_AlarmSelfhealing" />,
           // activeIcon: <Icon component={menuIcon.AlarmSelfhealing as any} />,
-          label: t('告警自愈'),
+          label: t("告警自愈"),
           children: [
             {
-              key: '/job-tpls',
-              label: t('自愈脚本'),
+              key: "/job-tpls",
+              label: t("自愈脚本"),
             },
             {
-              key: '/job-tasks',
-              label: t('执行历史'),
+              key: "/job-tasks",
+              label: t("执行历史"),
             },
             // {
             //   key: '/ibex-settings',
@@ -187,90 +186,89 @@ const getMenuList = (t) => {
       ],
     },
     {
-      key: 'healthReport',
+      key: "healthReport",
       icon: <ProjectOutlined />,
-      label: t('健康报告'),
+      label: t("健康报告"),
       children: [
         {
-          key: '/healthReport',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('健康报告'),
+          key: "/healthReport",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("健康报告"),
         },
-      ]
-    },
-    {
-      key: 'workOrder',
-      icon: <IconFont type='icon-Menu_Infrastructure' />,
-      label: t('运维工单'),
-      children: [
-        {
-          key: '/workOrder',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('运维工单'),
-        },
-      ]
-    },
-    {
-      key: 'bigscreen',
-      icon: <ProjectOutlined />,
-      label: t('大屏管理'),
-      children: [
-        {
-          key: '/bigscreen',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('大屏设计'),
-        },
-        {
-          key: '/bigscreen/topology',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('拓扑管理'),
-        },
-        {
-          key: '/bigscreen/api-service',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('接口管理'),
-        },
-        {
-          key: '/bigscreen/address',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('大屏配置'),
-        }
       ],
     },
     {
-      key: 'help',
-      icon: <IconFont type='icon-Menu_SystemInformation' />,
-      label: t('系统配置'),
+      key: "workOrder",
+      icon: <IconFont type="icon-Menu_Infrastructure" />,
+      label: t("运维工单"),
+      children: [
+        {
+          key: "/workOrder",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("运维工单"),
+        },
+      ],
+    },
+    {
+      key: "bigscreen",
+      icon: <ProjectOutlined />,
+      label: t("大屏管理"),
+      children: [
+        {
+          key: "/bigscreen",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("大屏设计"),
+        },
+        {
+          key: "/bigscreen/topology",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("拓扑管理"),
+        },
+        {
+          key: "/bigscreen/api-service",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("接口管理"),
+        },
+        {
+          key: "/bigscreen/address",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("大屏配置"),
+        },
+      ],
+    },
+    {
+      key: "help",
+      icon: <IconFont type="icon-Menu_SystemInformation" />,
+      label: t("系统配置"),
       children: [
         {
           // key: 'manage',
-          key: '/users',
-          icon: <IconFont type='icon-Menu_PersonnelOrganization' />,
-          label: t('人员组织'),
+          key: "/users",
+          icon: <IconFont type="icon-Menu_PersonnelOrganization" />,
+          label: t("人员组织"),
           children: [
             {
-              key: '/users',
-              label: t('用户管理'),
+              key: "/users",
+              label: t("用户管理"),
             },
             {
-              key: '/user-groups',
-              label: t('团队管理'),
+              key: "/user-groups",
+              label: t("团队管理"),
             },
             {
-              key: '/busi-groups',
-              label: t('业务组管理'),
+              key: "/busi-groups",
+              label: t("业务组管理"),
             },
             {
-              key: '/permissions',
-              label: t('角色管理'),
+              key: "/permissions",
+              label: t("角色管理"),
             },
-
           ],
         },
         {
-          key: '/help/version',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('系统版本'),
+          key: "/help/version",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("系统版本"),
         },
         // {
         //   key: '/target/version',
@@ -278,44 +276,44 @@ const getMenuList = (t) => {
         //   label: t('客户端版本'),
         // },
         {
-          key: '/targets',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('探针管理'),
+          key: "/targets",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("探针管理"),
         },
         {
           // key: 'log',
-          key: '/log/operlog',
-          icon: <IconFont type='icon-Menu_LogAnalysis' />,
-          label: t('日志分析'),
+          key: "/log/operlog",
+          icon: <IconFont type="icon-Menu_LogAnalysis" />,
+          label: t("日志分析"),
           children: [
             // {
             //   key: '/log/debug/switch',
             //   label: '日志调试启动开关',
             // },
             {
-              key: '/log/operlog',
-              label: t('操作日志'),
+              key: "/log/operlog",
+              label: t("操作日志"),
             },
             {
-              key: '/log/syslog',
-              label: t('系统日志'),
+              key: "/log/syslog",
+              label: t("系统日志"),
             },
           ],
         },
         {
           // key: 'monitorLog',
-          key: '/log/explorer',
-          icon: <IconFont type='icon-Menu_LogAnalysis' />,
+          key: "/log/explorer",
+          icon: <IconFont type="icon-Menu_LogAnalysis" />,
           // activeIcon: <Icon component={menuIcon.LogAnalysis as any} />,
-          label: t('监控日志'),
+          label: t("监控日志"),
           children: [
             {
-              key: '/log/explorer',
-              label: t('即时查询'),
+              key: "/log/explorer",
+              label: t("即时查询"),
             },
             {
-              key: '/log/index-patterns',
-              label: t('索引模式'),
+              key: "/log/index-patterns",
+              label: t("索引模式"),
             },
           ],
         },
@@ -336,37 +334,37 @@ const getMenuList = (t) => {
         // },
         {
           // key: '/help/other',
-          key: '/help/source',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('其它设置'),
+          key: "/help/source",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("其它设置"),
           children: [
             {
-              key: '/help/source',
-              label: t('数据源'),
+              key: "/help/source",
+              label: t("数据源"),
             },
             {
-              key: '/help/servers',
-              label: t('告警引擎'),
+              key: "/help/servers",
+              label: t("告警引擎"),
             },
             {
-              key: '/system/logo',
-              label: t('LOGO设置'),
+              key: "/system/logo",
+              label: t("LOGO设置"),
             },
             {
-              key: '/system/parameters',
-              label: '系统参数设置',
+              key: "/system/parameters",
+              label: "系统参数设置",
             },
             // {
             //   key: '/system/interface',
             //   label: '接口访问设置',
             // },
             {
-              key: '/types/dictype',
-              label: t('数据字典'),
+              key: "/types/dictype",
+              label: t("数据字典"),
             },
             {
-              key: '/help/sso',
-              label: t('单点登录管理'),
+              key: "/help/sso",
+              label: t("单点登录管理"),
             },
             // {
             //   key: '/system/upgrade',
@@ -376,38 +374,49 @@ const getMenuList = (t) => {
         },
         {
           // key: '/license/management',
-          key: '/license/base',
+          key: "/license/base",
           icon: <ProfileOutlined />,
-          label: t('许可管理'),
+          label: t("许可管理"),
           children: [
             {
-              key: '/license/base',
-              label: '许可信息',
+              key: "/license/base",
+              label: "许可信息",
             },
             {
-              key: '/license/device',
-              label: '设备License',
+              key: "/license/device",
+              label: "设备License",
             },
           ],
         },
         {
-          key: '/autoInspect',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('自动化检测'),
+          key: "/autoInspect",
+          icon: <IconFont type="icon-Menu_Infrastructure" />,
+          label: t("自动化检测"),
         },
         // {
         //   key: '/safety/certification',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
         //   label: t('安全认证'),
         // },
+
         {
-          key: '/dutyManage',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('值班管理'),
+          key: "/sxxc/deploymentManagement",
+          icon: <ProfileOutlined />,
+          label: t("管理后台"),
+          children: [
+            {
+              key: "/sxxc/deploymentManagement",
+              label: "部署管理",
+            },
+            {
+              key: "/sxxc/dutyManage",
+              icon: <IconFont type="icon-Menu_Infrastructure" />,
+              label: t("值班管理"),
+            },
+          ],
         },
       ],
     },
-
   ];
   if (import.meta.env['VITE_IS_COLLECT']) {
     const targets: any = _.find(menuList, (item) => item.key === 'targets');
