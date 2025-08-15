@@ -1,0 +1,33 @@
+import React, { useState } from "react";
+import { Tabs } from "antd";
+import PageLayout from "@/components/pageLayout";
+import { ContainerOutlined } from "@ant-design/icons";
+
+import "./style.less";
+import _ from "lodash";
+
+import DutyList from "./DutyList";
+import ScheduleList from "./ScheduleList";
+const { TabPane } = Tabs;
+
+export default function () {
+  const [tab, setTab] = useState("duty");
+  const handleChange = (tab) => {
+    setTab(tab);
+  };
+
+  return (
+    <PageLayout icon={<ContainerOutlined />} title={"值班管理"}>
+      <div>
+        <Tabs activeKey={tab} className="duty_manage" onChange={handleChange}>
+          <TabPane tab="值班人员管理" key="duty">
+            <DutyList />
+          </TabPane>
+          <TabPane tab="排班管理" key="schedule">
+            <ScheduleList />
+          </TabPane>
+        </Tabs>
+      </div>
+    </PageLayout>
+  );
+}

@@ -108,7 +108,7 @@ import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import healthReport from '@/pages/sxxc/healthReport'
-import workOrder from '@/pages/sxxc/workorder'
+import workOrder from '@/pages/sxxc/workOrder'
 import productionPlan from '@/pages/sxxc/productionPlan'
 // import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
 // import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";
@@ -121,6 +121,8 @@ import TaskInstance from '@/pages/sxxc/taskInstance'
 import InspectionList from '@/pages/sxxc/inspectionList'
 import InspectionLog from '@/pages/sxxc/inspectionList/log'
 import InspectionReport from '@/pages/sxxc/inspectionReport'
+import DutyManage from '@/pages/sxxc/dutyManage'
+
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -294,6 +296,7 @@ export default function Content() {
         <Route exact path='/inspection/inspectionLog/:inspectionId?' component={InspectionLog} />
         <Route exact path='/inspection/inspectionReport/:inspectionId?' component={InspectionReport} />
         <Route exact path='/taskManage/strategy' component={TaskStrategy} />
+        <Route exact path='/dutyManage' component={DutyManage} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

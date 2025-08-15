@@ -400,6 +400,11 @@ const getMenuList = (t) => {
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
         //   label: t('安全认证'),
         // },
+        {
+          key: '/dutyManage',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('值班管理'),
+        },
       ],
     },
 
