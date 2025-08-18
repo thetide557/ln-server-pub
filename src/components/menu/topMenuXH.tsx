@@ -410,7 +410,7 @@ const getMenuList = (t) => {
             },
             {
               key: "/sxxc/dutyManage",
-              icon: <IconFont type="icon-Menu_Infrastructure" />,
+              // icon: <IconFont type="icon-Menu_Infrastructure" />,
               label: t("值班管理"),
             },
           ],

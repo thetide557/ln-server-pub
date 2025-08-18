@@ -118,6 +118,7 @@ const AccordionModal = (props: any) => {
           </Col>
           <Col span={12}>
             <Form.Item name="deployment_date" label="部署日期">
+              {/* @ts-ignore */}
               <DatePicker
                 style={{ width: "100%" }}
                 format={dateFormat}
