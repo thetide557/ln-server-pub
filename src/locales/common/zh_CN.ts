@@ -186,5 +186,11 @@ const zh_CN = {
   ignore: "忽视",
   redo: "重新执行",
   kill: "终止",
+  successed: "成功",
+  cancelled: "取消",
+  ignored: "忽略",
+  failed: "失败",
+  killfailed: "终止失败",
+  timeout: "超时",
 };
 export default zh_CN;

@@ -114,11 +114,11 @@ const index = (props: any) => {
       },
       render: (text) => {
         if (text === 'success') {
-          return <Tag color='#87d068'>{text}</Tag>;
+          return <Tag color='#87d068'>{t('successed')}</Tag>;
         } else if (text === 'cancelled' || text === 'ignored') {
-          return <Tag color='#ec971f'>{text}</Tag>;
+          return <Tag color='#ec971f'>{t(text)}</Tag>;
         } else if (text === 'failed' || text === 'killfailed' || text === 'timeout') {
-          return <Tag color='#f50'>{text}</Tag>;
+          return <Tag color='#f50'>{t(text)}</Tag>;
         }
         return <Tag>{text}</Tag>;
       },
