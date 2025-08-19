@@ -198,7 +198,7 @@ export default function () {
       render: (val, record: any) => (
         <Space>
           {(profile.roles?.includes("Admin") ||
-            permList.includes("/xh/monitor/status")) && (
+            permList.includes("/sxxc/duty_list/status")) && (
             <PoweroffOutlined
               title={record.Status == "启用" ? "启用" : "禁用"}
               style={{ color: record.Status == "启用" ? "green" : "red" }}
@@ -243,7 +243,7 @@ export default function () {
             />
           )}
           {(profile.roles?.includes("Admin") ||
-            permList.includes("/xh/monitor/put")) && (
+            permList.includes("/sxxc/duty_list/put")) && (
             <EditOutlined
               title="编辑值班人员信息"
               onClick={() => {
@@ -252,7 +252,7 @@ export default function () {
             />
           )}
           {(profile.roles?.includes("Admin") ||
-            permList.includes("/xh/monitor/del")) && (
+            permList.includes("/sxxc/duty_list/del")) && (
             <DeleteOutlined
               title="删除值班人员信息"
               onClick={async () => {
@@ -471,7 +471,7 @@ export default function () {
           </Space>
           <div className="tool_right">
             {(profile.roles?.includes("Admin") ||
-              permList.includes("/xh/monitor/add")) && (
+              permList.includes("/sxxc/duty_list/add")) && (
               <div>
                 <Button
                   className="tool_rightbtn"
@@ -487,7 +487,8 @@ export default function () {
               </div>
             )}
             {(profile.roles?.includes("Admin") ||
-              permList.includes("/xh/monitor/ops")) && (
+              permList.includes("/sxxc/duty_list/ops")) && (
+
               <div>
                 <Dropdown
                   trigger={["click"]}

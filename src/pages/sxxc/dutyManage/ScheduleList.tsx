@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Calendar,
   Card,
@@ -37,6 +37,7 @@ import {
 } from "@/services/sxxc/dutyManage";
 import { exportTemplet } from "@/services/assets/asset";
 import "./ScheduleList.less";
+import { CommonStateContext } from "@/App";
 
 // 定义排班数据接口
 interface ScheduleItem {
@@ -84,6 +85,7 @@ const ScheduleList: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<"add" | "edit">("add");
   const [initData, setInitData] = useState({});
+  const { profile, permList } = useContext(CommonStateContext);
   // 只可选登录当天及以后日期
   const disableDate = (current: Moment) => {
     const today = moment().startOf("day");
@@ -346,10 +348,13 @@ const ScheduleList: React.FC = () => {
         <div className="no-schedule">
           <div className="schedule-header">
             <div className="text">排班表</div>
-            <PlusSquareFilled
-              onClick={() => showModal("add")}
-              style={{ fontSize: 13, color: "#2888f7" }}
-            />
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/sxxc/schedule_list/add")) && (
+              <PlusSquareFilled
+                onClick={() => showModal("add")}
+                style={{ fontSize: 13, color: "#2888f7" }}
+              />
+            )}
           </div>
           <div>{selectedDate.format("YYYY-MM-DD")}</div>
 
@@ -365,18 +370,24 @@ const ScheduleList: React.FC = () => {
           <div className="schedule-actions">
             {isFuture && (
               <>
-                <EditOutlined
-                  style={{ color: "#2888f7" }}
-                  title="编辑"
-                  onClick={() => {
-                    showModal("edit", currentSchedule.id);
-                  }}
-                />
-                <DeleteOutlined
-                  style={{ color: "#f5222d" }}
-                  title="删除"
-                  onClick={() => handleDeleteSchedule(currentSchedule.id)}
-                />
+                {(profile.roles?.includes("Admin") ||
+                  permList.includes("/sxxc/schedule_list/edit")) && (
+                  <EditOutlined
+                    style={{ color: "#2888f7" }}
+                    title="编辑"
+                    onClick={() => {
+                      showModal("edit", currentSchedule.id);
+                    }}
+                  />
+                )}
+                {(profile.roles?.includes("Admin") ||
+                  permList.includes("/sxxc/schedule_list/del")) && (
+                  <DeleteOutlined
+                    style={{ color: "#f5222d" }}
+                    title="删除"
+                    onClick={() => handleDeleteSchedule(currentSchedule.id)}
+                  />
+                )}
               </>
             )}
           </div>
@@ -472,7 +483,6 @@ const ScheduleList: React.FC = () => {
                     <div className="calendar-header">
                       <div className="calendar-header-left">
                         {/* <LeftCircleFilled  /> */}
-
                         <LeftCircleFilled
                           onClick={() => {
                             const newMonth = value.clone().subtract(1, "month");
@@ -493,14 +503,17 @@ const ScheduleList: React.FC = () => {
                         </Button>
                       </div>
                       <div>
-                        <Button
-                          icon={<UploadOutlined />}
-                          onClick={handleExport}
-                          loading={isExporting}
-                          size="small"
-                        >
-                          导出
-                        </Button>
+                        {(profile.roles?.includes("Admin") ||
+                          permList.includes("/sxxc/schedule_list/export")) && (
+                          <Button
+                            icon={<UploadOutlined />}
+                            onClick={handleExport}
+                            loading={isExporting}
+                            size="small"
+                          >
+                            导出
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );
