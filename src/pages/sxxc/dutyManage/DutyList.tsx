@@ -179,10 +179,10 @@ export default function () {
       dataIndex: "updated_at",
       width: 150,
       align: "center",
-      render: (text: string) => {
+      render: (text: number) => {
         return (
           <div className="table-text">
-            {moment(text).format("YYYY-MM-DD HH:mm:ss")}
+            {moment.unix(text).format("YYYY-MM-DD HH:mm:ss")}
           </div>
         );
       },
@@ -339,8 +339,8 @@ export default function () {
       try {
         setConfirmLoading(true);
         const res = await getDutyDetail(id);
-        if (res?.dat.data) {
-          const { Name, Role, Phone, Email } = res.dat.data;
+        if (res?.dat.personnel) {
+          const { Name, Role, Phone, Email } = res.dat.personnel;
           const formData = {
             name: Name,
             role: Role,
@@ -348,7 +348,7 @@ export default function () {
             email: Email,
           };
           form.setFieldsValue(formData);
-          setInitData(res.dat.data);
+          setInitData(res.dat.personnel);
         }
       } catch (error) {
         message.error("获取数据失败");
@@ -697,7 +697,7 @@ export default function () {
                       label="姓名"
                       rules={[{ required: true, message: "请输入姓名" }]}
                     >
-                      <Input placeholder="请输入姓名" />
+                      <Input placeholder="请输入姓名" disabled={modalType === "edit"} />
                     </Form.Item>
                   </Col>
                   <Col span={12}>

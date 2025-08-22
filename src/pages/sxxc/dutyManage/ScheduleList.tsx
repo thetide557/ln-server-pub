@@ -42,7 +42,7 @@ import { CommonStateContext } from "@/App";
 // 定义排班数据接口
 interface ScheduleItem {
   id?: string;
-  duty_date?: string;
+  duty_date?: number;
   director_id?: string;
   first_line_ids?: string[];
   second_line_ids?: string[];
@@ -95,7 +95,7 @@ const ScheduleList: React.FC = () => {
 
   useEffect(() => {
     getDutyPersonnelList();
-    getData();
+    // getData();
   }, []);
   useEffect(() => {
     getCurrentSchedule();
@@ -172,7 +172,7 @@ const ScheduleList: React.FC = () => {
     setModalType(type);
     setModalVisible(true);
     form.resetFields();
-
+    getDutyPersonnelList();
     if (type === "edit") {
       try {
         setConfirmLoading(true);
@@ -189,7 +189,7 @@ const ScheduleList: React.FC = () => {
             first_line_ids,
             second_line_ids,
             third_line_ids,
-            duty_date: moment(duty_date),
+            duty_date: duty_date ? moment.unix(duty_date) : moment(),
           };
           form.setFieldsValue(formData);
           setInitData(currentSchedule);
@@ -302,7 +302,7 @@ const ScheduleList: React.FC = () => {
     const isToday = moment().isSame(date, "day");
     const hasSch =
       scheduleData &&
-      scheduleData.some((item) => moment(item.duty_date).isSame(date, "day"));
+      scheduleData.some((item) => item.duty_date && moment.unix(item.duty_date).isSame(date, "day"));
     // console.log("是否有排班", date.format("YYYY-MM-DD"),hasSch);
     // 获取农历日期
     const d = Lunar.fromDate(date.toDate());
@@ -498,7 +498,13 @@ const ScheduleList: React.FC = () => {
                             setSelectedMonth(newMonth);
                           }}
                         />
-                        <Button onClick={() => onChange(moment())} size="small">
+                        <Button
+                          onClick={() => {
+                            onChange(moment());
+                            setSelectedMonth(moment());
+                          }}
+                          size="small"
+                        >
                           今天
                         </Button>
                       </div>
