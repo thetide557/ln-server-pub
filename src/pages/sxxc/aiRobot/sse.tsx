@@ -479,7 +479,7 @@ const AiRobotSse = function () {
                           className="ai-title"
                           style={{ color: isScreen ? "#fff" : "#333" }}
                         >
-                          欢迎使用LingNiu，有什么可以帮助您？
+                          欢迎使用LingNiu，有什么可以帮助您？1111
                         </div>
                       </div>
                       <div className="ai-random">
