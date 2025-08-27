@@ -1045,6 +1045,7 @@ export default function () {
             <Dropdown
               // trigger={['click']}
               overlay={
+                // @ts-ignore
                 <Menu
                   style={{ width: "100px" }}
                   onClick={({ key }) => {
@@ -1085,7 +1086,7 @@ export default function () {
                     }
                   }}
                   items={[
-                    ...(item.group_level < 3 && !item.type_list?.length
+                    ...((profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && item.group_level < 3 && !item.type_list?.length
                       ? [
                           {
                             key: "add-sub",
@@ -1094,8 +1095,8 @@ export default function () {
                           },
                         ]
                       : []),
-                    { key: "edit", label: "编辑", icon: <EditOutlined /> },
-                    { key: "del", label: "删除", icon: <DeleteOutlined /> },
+                    (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/editGroup")) && { key: "edit", label: "编辑", icon: <EditOutlined /> },
+                    (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/delGroup")) && { key: "del", label: "删除", icon: <DeleteOutlined /> },
                   ]}
                 ></Menu>
               }
@@ -1222,7 +1223,8 @@ export default function () {
             <div className='left_tree' style={{ display: 'inline-block' }}>
               <div className='asset_organize_cls'>
                 <span>组织树列表</span>
-                <span
+                {
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && <span
                   className="add_group"
                   onClick={() => {
                     setOpen(true);
@@ -1234,6 +1236,7 @@ export default function () {
                 >
                   新增分组
                 </span>
+                }
               </div>
               <div className='tree-list'>
                 <AssetTree data={treeList} />	

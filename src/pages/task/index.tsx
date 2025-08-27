@@ -72,9 +72,13 @@ const index = (_props: any) => {
       render: (_text, record) => {
         return (
           <span>
-            <Link to={{ pathname: '/job-tasks/add', search: `task=${record.id}` }}>{t('task.clone')}</Link>
-            <Divider type='vertical' />
-            <Link to={{ pathname: `/job-tasks/${record.id}/detail` }}>{t('task.meta')}</Link>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/job-tasks/clone")) && <><Link to={{ pathname: '/job-tasks/add', search: `task=${record.id}` }}>{t('task.clone')}</Link><Divider type='vertical' /></>
+            }
+
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/job-tasks/meta")) && <Link to={{ pathname: `/job-tasks/${record.id}/detail` }}>{t('task.meta')}</Link>
+            }
           </span>
         );
       },
@@ -146,13 +150,13 @@ const index = (_props: any) => {
               <Col span={8} style={{ textAlign: 'right' }}>
                 {
                   (profile.roles?.includes("Admin") || permList.includes("/job-tasks/add")) && <Button
-                   type='primary'
-                   onClick={() => {
-                     history.push('/job-tasks/add');
-                   }}
-                 >
-                   {t('task.temporary.create')}
-                 </Button>
+                    type='primary'
+                    onClick={() => {
+                      history.push('/job-tasks/add');
+                    }}
+                  >
+                    {t('task.temporary.create')}
+                  </Button>
                 }
               </Col>
             </Row>
