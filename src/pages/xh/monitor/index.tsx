@@ -768,8 +768,36 @@ export default function () {
         param['filter'] = filterParam2;
         treeQuery['filter'] = filterParam2;
       }
-      if (currentAssetId <= 0 && typeId != null && typeId + '' != '0') {
-        param['assetType'] = typeId;
+      // if (currentAssetId <= 0 && typeId != null && typeId + '' != '0') {
+      //   param['assetType'] = typeId;
+      // }
+    }
+
+
+    const parentId = localStorage.getItem('left_parId')    
+    if (currentAssetId <= 0 && typeId != null && typeId + '' != '0' && parentId) {
+      param['assetType'] = typeId;
+    }
+    if (tissueId != null && !parentId) {
+      param['group_id'] = tissueId;
+    }
+    // 点击全部资产下的查询时，group_id传-1
+    if (isAllAssets) {
+      param["group_id"] = -1;
+      // 根据tissueId的值 查找对应的type_list
+      if (tissueId != null && !parentId) {
+        const treeItem = treeList
+          .find((item) => item.id === -1)
+          ?.sub_groups?.find((item) => item.id === tissueId);
+          // console.log('treeItem', treeItem);
+        const typeListNames = treeItem?.type_list
+          ?.map((item) => item.name)
+          .join(",");
+        if (typeListNames) {
+          param["types"] = typeListNames;
+        } else {
+          param["types"] = "";
+        }
       }
     }
 
