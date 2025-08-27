@@ -133,7 +133,7 @@ const ScheduleList: React.FC = () => {
   // 处理日期选择
   const onDateSelect = (date: Moment) => {
     setSelectedDate(date);
-    console.log("选中日期", date.format("YYYY-MM-DD"));
+    // console.log("选中日期", date.format("YYYY-MM-DD"));
   };
 
   // 获取当日排班数据
@@ -226,8 +226,8 @@ const ScheduleList: React.FC = () => {
       }
       setModalVisible(false);
       getData();
-    } catch (error) {
-      message.error("操作失败，请重试");
+    } catch (error:any) {
+      message.error(error?.message || "操作失败，请重试");
     } finally {
       setConfirmLoading(false);
     }
@@ -342,7 +342,7 @@ const ScheduleList: React.FC = () => {
     const isFuture =
       selectedDate.isAfter(moment(), "day") ||
       selectedDate.isSame(moment(), "day");
-    console.log("currentSchedule", currentSchedule);
+    // console.log("currentSchedule", currentSchedule);
     if (!currentSchedule || JSON.stringify(currentSchedule) === "{}") {
       return (
         <div className="no-schedule">

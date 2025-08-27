@@ -403,8 +403,9 @@ export default function () {
       }
       setModalVisible(false);
       getTableData();
-    } catch (error) {
-      message.error("操作失败，请重试");
+    } catch (error:any) {
+      // console.log(error);
+      message.error(error?.message || "操作失败，请重试");
     } finally {
       setConfirmLoading(false);
     }
