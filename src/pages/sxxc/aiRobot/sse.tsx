@@ -63,6 +63,7 @@ const AiRobotSse = function () {
   const [controller, setController] = useState(new AbortController());
   const [deepseekShow, setDeepseekShow] = useState(true);
   const [taskId, setTaskId] = useState<any>(undefined);
+  const myRef = useRef(null);
   // 请求成功与失败状态
   const [success, setSuccess] = useState(false);
   let flag = false;
@@ -95,7 +96,55 @@ const AiRobotSse = function () {
 
     return result;
   };
+  const [dialogPosition, setDialogPosition] = useState({ left: 20, top: 70 });
+// 计算弹框尺寸的函数
+const calculateDialogSize = () => {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  
+  // 根据vw计算弹框尺寸（与CSS中相同的计算方式）
+  const width = (500 / 1920) * vw;
+  const minHeight = (620 / 1920) * vw;
+  
+  return { width, minHeight };
+};
+    // 添加位置调整函数
+    const adjustDialogPosition = () => {
+      const { width, minHeight } = calculateDialogSize();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // 默认位置（右下角）
+    let newRight = myRef.current.getBoundingClientRect().x;
+    let newBottom = myRef.current.getBoundingClientRect().y;
+    // 检查左边界
+    if (newRight - width < 0) {
+      newRight = myRef.current.getBoundingClientRect().width
+    }else{
+      newRight = -width
+    }
+    
+    // 检查上边界
+    if (newBottom - minHeight < 0) {
+      newBottom =  myRef.current.getBoundingClientRect().height
+    }else{
+      newBottom = -minHeight
+    }
+    
+    setDialogPosition({ left: newRight, top: newBottom });
+  };
 
+  // 添加useEffect处理弹框位置
+  useEffect(() => {
+    if (aiShow) {
+      adjustDialogPosition();
+      window.addEventListener('resize', adjustDialogPosition);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', adjustDialogPosition);
+    };
+  }, [aiShow]);
   useEffect(() => {
     if (!pathname.startsWith("/login") && !pathname.startsWith("/callback")) {
       getShowDeepSeek().then((res) => {
@@ -442,7 +491,19 @@ const AiRobotSse = function () {
   // useEffect(() => {
   //   console.log("taskId", taskId);
   // }, [taskId]);
-
+  useEffect(() => {
+    if (aiShow) {
+      // 立即调整位置
+      adjustDialogPosition();
+      
+      // 添加窗口大小改变监听
+      window.addEventListener('resize', adjustDialogPosition);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', adjustDialogPosition);
+    };
+  }, [aiShow]);
   return (
     <>
       {!pathname.startsWith("/login") && deepseekShow && (
@@ -450,13 +511,21 @@ const AiRobotSse = function () {
           bounds="parent"
           handle=".robot"
           onDrag={handleDrag}
-          onStop={handleStop}
+          onStop={() => {
+    handleStop();
+    setTimeout(adjustDialogPosition, 10);
+  } }
         >
           <div className="nav-bar">
             {aiShow && (
               <div
                 className="r-dialog"
-                style={{ background: isScreen ? "#35649E" : "#fff" }}
+                style={{ 
+          background: isScreen ? "#35649E" : "#fff",
+          left: `${dialogPosition.left}px`,
+          top: `${dialogPosition.top}px`,
+          position:'absolute'
+        }}
               >
                 <div className="ai-all">
                   {aiMessages.length == 0 ? (
@@ -703,9 +772,9 @@ const AiRobotSse = function () {
                 </div>
               </div>
             )}
-            <div className="r-robot">
+            <div className="r-robot" ref={myRef}>
               <div></div>
-              <div className="robot" onClick={handleAiClick} onTouchEnd={handleAiClick}></div>
+              <div className="robot"  onClick={handleAiClick} onTouchEnd={handleAiClick}></div>
             </div>
           </div>
         </Draggable>

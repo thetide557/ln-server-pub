@@ -177,16 +177,16 @@ export default function () {
       render: (text, record) => (
         <Space>
           {(profile.roles?.includes('Admin') ||
-            permList.includes('/sxxc/iotassetmgt/detail')) && (
-            <span
-              onClick={(e) => {
-                showModal('view', record);
-              }}
-            >
-              <EyeOutlined style={{ color: '#1890FF' }} />
-              <span style={{ marginLeft: 4 }}>查看</span>
-            </span>
-          )}
+            permList.includes('/xh/iotassetmgt/detail')) && (
+              <span
+                onClick={(e) => {
+                  showModal('view', record);
+                }}
+              >
+                <EyeOutlined style={{ color: '#1890FF' }} />
+                <span style={{ marginLeft: 4 }}>查看</span>
+              </span>
+            )}
         </Space>
       ),
     },
@@ -205,7 +205,7 @@ export default function () {
   // 根据选择资产类型生成显示列
   useEffect(() => {
     // if (typeId != 0) {
-      getPagesByType(typeId);
+    getPagesByType(typeId);
     // }
   }, [typeId]);
 
@@ -245,7 +245,7 @@ export default function () {
     if (typeId == 0) {
       return;
     }
-    getIotAttributeList({ typeId ,showDisplayed:true}).then((res) => {
+    getIotAttributeList({ typeId, showDisplayed: true }).then((res) => {
       const { dat } = res;
       const { selectedColumn, filterArr } = processDataAndFilter(dat);
       // 显示列
@@ -256,7 +256,7 @@ export default function () {
             fixColumns.filter((column) => column.title !== '请配置')
           )
         );
-      }else{
+      } else {
         setSelectColumns(fixColumns);
       }
 
@@ -267,7 +267,7 @@ export default function () {
     });
   };
 
-  const findDeviceType = (nodes: any[], parentIds: number[] = []): { firstTypeId: number ; expand: number[],firstParentId: number} => {
+  const findDeviceType = (nodes: any[], parentIds: number[] = []): { firstTypeId: number; expand: number[], firstParentId: number } => {
     for (const node of nodes) {
       if (node.TypeIds === "") {
         // 若当前节点符合条件，返回节点 ID、展开路径和父节点 ID
@@ -281,7 +281,7 @@ export default function () {
         }
       }
     }
-    return { firstTypeId: 0, expand: [], firstParentId: -1};
+    return { firstTypeId: 0, expand: [], firstParentId: -1 };
   };
 
   // 获取资产分组树列表
@@ -326,7 +326,7 @@ export default function () {
           return newSet;
         });
         // console.log("firstParentId", firstTypeId, expand, firstParentId);
-      }else{
+      } else {
         setTreeList([]);
       }
     });
@@ -334,7 +334,7 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [typeId, refreshKey, filterParam,searchVal]);
+  }, [typeId, refreshKey, filterParam, searchVal]);
 
   useEffect(() => {
     getAssetTree();
@@ -402,7 +402,7 @@ export default function () {
   };
 
   // 左侧资产组织树点击
-  const handleClickTree = (node: any,parentId) => {
+  const handleClickTree = (node: any, parentId) => {
     // console.log('handleClickTree', node,"父节点",parentId);
     setTypeId(node.nodeId);
     setParId(parentId)
@@ -461,6 +461,7 @@ export default function () {
                 <Dropdown
                   // trigger={['click']}
                   overlay={
+                    // @ts-ignore
                     <Menu
                       style={{ width: '100px' }}
                       // TODO:新增、编辑、删除分组
@@ -513,7 +514,7 @@ export default function () {
                                 }
                               );
                             },
-                            onCancel() {},
+                            onCancel() { },
                           });
                         } else if (key === 'add-sub') {
                           setTitle('新增分组');
@@ -524,17 +525,20 @@ export default function () {
                         }
                       }}
                       items={[
-                        ...(canAddGroup
+                        ...((profile.roles?.includes('Admin') ||
+                          permList.includes('/xh/iotassetmgt/addGroup')) && canAddGroup
                           ? [
-                              {
-                                key: 'add-sub',
-                                label: '新增分组',
-                                icon: <PlusOutlined />,
-                              },
-                            ]
+                            {
+                              key: 'add-sub',
+                              label: '新增分组',
+                              icon: <PlusOutlined />,
+                            },
+                          ]
                           : []),
-                        { key: 'edit', label: '编辑', icon: <EditOutlined /> },
-                        { key: 'del', label: '删除', icon: <DeleteOutlined /> },
+                        (profile.roles?.includes('Admin') ||
+                          permList.includes('/xh/iotassetmgt/editGroup')) && { key: 'edit', label: '编辑', icon: <EditOutlined /> },
+                        (profile.roles?.includes('Admin') ||
+                          permList.includes('/xh/iotassetmgt/delGroup')) && { key: 'del', label: '删除', icon: <DeleteOutlined /> },
                       ]}
                     ></Menu>
                   }
@@ -556,12 +560,12 @@ export default function () {
               <div
                 style={{
                   backgroundColor:
-                    node.nodeId  == typeId && parentId == parId
+                    node.nodeId == typeId && parentId == parId
                       ? '#92b7d1'
                       : '',
                 }}
                 className="asset-name"
-                onClick={() => handleClickTree(node,parentId)} 
+                onClick={() => handleClickTree(node, parentId)}
               >
                 <span>{node.nodeName}</span>
                 {/* <span>{node.number}</span> */}
@@ -679,9 +683,9 @@ export default function () {
             <div className="left_tree" style={{ display: 'inline-block' }}>
               <div className="asset_organize_cls">
                 <span>组织树列表</span>
-                
+
                 {(profile.roles?.includes('Admin') ||
-                    permList.includes('/sxxc/iotassetmgt/addgroup')) && (
+                  permList.includes('/xh/iotassetmgt/addGroup')) && (
                     <span
                       className="add_group"
                       onClick={() => {
@@ -694,8 +698,8 @@ export default function () {
                     >
                       新增分组
                     </span>
-                )}
-                
+                  )}
+
               </div>
               <div className="tree-list">
                 <AssetTree data={treeList} />
@@ -740,7 +744,7 @@ export default function () {
                       onChange={(e) => {
                         if (e != undefined) {
                           setSearchVal(e.target.value);
-                          if(!filterParam){
+                          if (!filterParam) {
                             message.warning('提示：暂无筛选项');
                           }
                         } else {
@@ -758,46 +762,46 @@ export default function () {
             <div className="tool_right">
               <Space>
                 {(profile.roles?.includes('Admin') ||
-                  permList.includes('/sxxc/iotassetmgt/config')) && (
-                  <div>
-                    <Button
-                      onClick={() => {
-                        setConfigOpen(true);
-                      }}
-                      type="primary"
-                    >
-                      字段配置
-                    </Button>
-                  </div>
-                )}
-                {(profile.roles?.includes('Admin') ||
-                  permList.includes('/sxxc/iotassetmgt/batchops')) && (
-                  <div>
-                    <Dropdown
-                      trigger={['click']}
-                      overlay={
-                        <Menu
-                          style={{ width: '100px' }}
-                          onClick={({ key }) => {
-                            if (key == OperateType.AssetBatchExport) {
-                              setOperateType(key as OperateType);
-                            }
-                          }}
-                          items={[
-                            {
-                              key: OperateType.AssetBatchExport,
-                              label: '导出设备',
-                            },
-                          ]}
-                        ></Menu>
-                      }
-                    >
-                      <Button>
-                        {t('common:btn.batch_operations')} <DownOutlined />
+                  permList.includes('/xh/iotassetmgt/config')) && (
+                    <div>
+                      <Button
+                        onClick={() => {
+                          setConfigOpen(true);
+                        }}
+                        type="primary"
+                      >
+                        字段配置
                       </Button>
-                    </Dropdown>
-                  </div>
-                )}
+                    </div>
+                  )}
+                {(profile.roles?.includes('Admin') ||
+                  permList.includes('/xh/iotassetmgt/batchops')) && (
+                    <div>
+                      <Dropdown
+                        trigger={['click']}
+                        overlay={
+                          <Menu
+                            style={{ width: '100px' }}
+                            onClick={({ key }) => {
+                              if (key == OperateType.AssetBatchExport) {
+                                setOperateType(key as OperateType);
+                              }
+                            }}
+                            items={[
+                              {
+                                key: OperateType.AssetBatchExport,
+                                label: '导出设备',
+                              },
+                            ]}
+                          ></Menu>
+                        }
+                      >
+                        <Button>
+                          {t('common:btn.batch_operations')} <DownOutlined />
+                        </Button>
+                      </Dropdown>
+                    </div>
+                  )}
               </Space>
             </div>
           </div>
