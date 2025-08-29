@@ -78,6 +78,13 @@ export default function () {
       ellipsis: true,
     },
     {
+      title: "所属行业",
+      dataIndex: "industry",
+      Ced: "left",
+      align: "center",
+      ellipsis: true,
+    },
+    {
       title: "部署日期",
       dataIndex: "deployment_date",
       align: "center",

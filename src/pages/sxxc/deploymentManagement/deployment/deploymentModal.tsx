@@ -117,6 +117,11 @@ const AccordionModal = (props: any) => {
             </Form.Item>
           </Col>
           <Col span={12}>
+            <Form.Item name="industry" label="所属行业" rules={[{ required: true }]}>
+              <Input placeholder="请输入所属行业" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
             <Form.Item name="deployment_date" label="部署日期">
               {/* @ts-ignore */}
               <DatePicker
@@ -125,8 +130,8 @@ const AccordionModal = (props: any) => {
               />
             </Form.Item>
           </Col>
-        </Row>
-        <Row gutter={16}>
+        {/* </Row> */}
+        {/* <Row gutter={16}> */}
           <Col span={12}>
             <Form.Item name="deployment_version" label="部署版本">
               <Input placeholder="请输入部署版本" />
@@ -140,8 +145,8 @@ const AccordionModal = (props: any) => {
               />
             </Form.Item>
           </Col>
-        </Row>
-        <Row gutter={16}>
+        {/* </Row> */}
+        {/* <Row gutter={16}> */}
           <Col span={12}>
             <Form.Item name="contact_person" label="联系人">
               <Input placeholder="请输入联系人" />
