@@ -206,8 +206,8 @@ export default function ScreenView() {
     <div className='screen-view'>
       <div className='screen1'>
         <div className='screen1-cont'>
-          {/* TODO:内部信息化部署时注掉 */}
-          {
+          {/* 内部信息化部署时注掉 */}
+          {/* {
             screenList.length >0 &&
             <div className='screen-tab'>
               {_.map(screenList.filter(x => x.type == 1), (item, index) => {
@@ -218,7 +218,7 @@ export default function ScreenView() {
                 )
               })}
             </div>
-          }
+          } */}
 
           {/* 下拉切换 */}
           {/* <div className='screen-groups'>

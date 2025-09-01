@@ -35,12 +35,12 @@ const getMenuList = (t) => {
           icon: <IconFont type="icon-Menu_Infrastructure" />,
           label: t("运维资产清单"),
         },
-        // TODO:内部智能化部署时注掉
-        {
-          key: '/xh/iotassetmgt',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('物联网资产管理'),
-        },
+        // 内部信息化部署时注掉
+        // {
+        //   key: '/xh/iotassetmgt',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('物联网资产管理'),
+        // },
         // {
         //   key: '/serverVideoAsset',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
