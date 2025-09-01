@@ -134,6 +134,10 @@ const ScheduleList: React.FC = () => {
   const onDateSelect = (date: Moment) => {
     setSelectedDate(date);
     // console.log("选中日期", date.format("YYYY-MM-DD"));
+     // 检查月份是否发生变化，如果是则更新selectedMonth
+    if (!selectedMonth.isSame(date, 'month')) {
+      setSelectedMonth(date);
+    }
   };
 
   // 获取当日排班数据
