@@ -40,7 +40,7 @@ const AccordionModal = (props: any) => {
     if (itemForm.id) {
       form.setFieldsValue({
         ...itemForm,
-        deployment_date: moment(itemForm.deployment_date),
+        deployment_date: itemForm.deployment_date? moment(itemForm.deployment_date) : '',
         region:itemForm?.region.split(',')
       });
     }
@@ -52,7 +52,7 @@ const AccordionModal = (props: any) => {
       .then((data) => {
         let params = {
           ...data,
-          deployment_date: data.deployment_date.format(dateFormat),
+          deployment_date: data.deployment_date? data.deployment_date.format(dateFormat) : '',
           province: data.region[0],
           city: data.region[1],
         };
