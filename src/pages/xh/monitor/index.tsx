@@ -19,7 +19,7 @@ import {
 } from '@ant-design/icons';
 import CommonModal from '@/components/CustomForm/CommonModal';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';
-
+import { PlusSquareOutlined, MinusSquareOutlined, FileOutlined, PlusOutlined } from '@ant-design/icons';
 import './locale';
 import './style.less';
 import _ from 'lodash';
@@ -27,7 +27,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import { getAssetstypes, getAssetsByCondition, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor } from '@/services/assets';
+import { getAssetstypes,getAssetstypesByParams, getAssetsByCondition, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor,getAssetstypesNew,delXhAssetstypesNew,getMonitortree } from '@/services/assets';
 import { getMonitorInfoList, deleteXhMonitor, deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
@@ -38,7 +38,7 @@ import { useLocalStorage } from 'react-use';
 import { renderQuery } from '@/components/PromQueryBuilder/RawQuery';
 import { PromVisualQuery } from '@/components/PromQueryBuilder/types';
 import { CommonStateContext } from '@/App';
-
+import AccordionModal from './Accordion/accordionModal';
 export enum OperateType {
   BindTag = 'bindTag',
   UnbindTag = 'unbindTag',
@@ -55,9 +55,9 @@ export enum OperateType {
 }
 let queryFilter = [
   { name: 'monitoring_name', label: '监控名称', type: 'input' },
-  { name: 'asset_name', label: '资产名称', type: 'input' },
+  { name: 'name', label: '资产名称', type: 'input' },
   { name: 'status', label: '监控状态', type: 'select' },
-  { name: 'asset_ip', label: 'IP地址', type: 'input' },
+  { name: 'ip', label: 'IP地址', type: 'input' },
 ];
 export default function () {
   const { t } = useTranslation('assets');
@@ -67,9 +67,10 @@ export default function () {
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
   const [treeData, setTreeData] = React.useState<DataNode[]>();
+  const [treeList, setTreeList] = useState<any>([])
   const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
   const [optionColumns, setOptionColumns] = useState<any[]>([]);
-
+  const [parId, setParId] = useLocalStorage('left_parId')
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [current, setCurrent] = useLocalStorage<any>('monitors_list_current', 1);
   const [pageSize, setPageSize] = useLocalStorage<any>('monitors_list_page', 10);
@@ -91,7 +92,8 @@ export default function () {
   const [width, setWidth] = useLocalStorage<any>('left_monitor_width', 200);
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [typeId, setTypeId] = useLocalStorage<any>('monitors_type_id', 0);
-  const [filterParam, setFilterParam] = useLocalStorage<any>('monitors_filter_param', 'asset_ip');
+  const [filterParam, setFilterParam] = useLocalStorage<any>('monitors_filter_param', 'ip');
+  const [filterParam2, setFilterParam2] = useLocalStorage<any>('monitors_filter_param2', 'asset_ip');
   const [searchVal, setSearchVal] = useLocalStorage<any>('monitors_filter_value', null);
   const [filterType, setFilterType] = useLocalStorage<any>('monitors_filter_type', "input");
   const history = useHistory();
@@ -99,6 +101,13 @@ export default function () {
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
 
   const { busiGroups, profile, permList } = useContext(CommonStateContext);
+  const [open, setOpen] = useState<boolean>(false)
+  const [curGroup, setCurGroup] = useState<any>({})
+  const [title, setTitle] = useState<any>('');
+  const [level, setLevel] = useState<number | undefined>(undefined);  // 资产组织树新增分组层级
+  const [parentId, setParentId] = useState(null);  // 资产组织树新增分组父级id
+  const [isAllAssets, setIsAllAssets] = useLocalStorage('left_asset_isallassets', false); // 资产组织树点击的是否是全部资产下的节点
+  const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1))
   const groupIds = busiGroups?.map(item => item.id)
   let treeQuery ={}
 
@@ -375,48 +384,313 @@ export default function () {
     setSelectColum(showColumns.concat(fixColumns));
   }
 
-  const getAssetTree = () => {
-    getMonitorAssetstypes(treeQuery).then((res) => {
-      filterOptions['asset_type'] = res.dat.map((v) => {
-        return {
-          value: v.name,
-          label: v.name,
-        };
-      });
-      setFilterOptions({ ...filterOptions });
+  // const getAssetTree = () => {
+  //   getMonitorAssetstypes(treeQuery).then((res) => {
+  //     filterOptions['asset_type'] = res.dat.map((v) => {
+  //       return {
+  //         value: v.name,
+  //         label: v.name,
+  //       };
+  //     });
+  //     setFilterOptions({ ...filterOptions });
 
-      const items = res.dat.map((v) => {
-        return {
-          id: v.name,
-          name: v.name,
-          ...v,
-        };
+  //     const items = res.dat.map((v) => {
+  //       return {
+  //         id: v.name,
+  //         name: v.name,
+  //         ...v,
+  //       };
+  //     });
+  //     let treeData: any[] = [
+  //       {
+  //         id: 0,
+  //         name: '全部资产',
+  //         count: 0,
+  //         children: items,
+  //       },
+  //     ];
+  //     const types = items.map((v) => {
+  //       return {
+  //         value: v.name,
+  //         label: v.name,
+  //         ...v,
+  //       };
+  //     });
+  //     setAssetTypes(types);
+  //     let arr = ['0'];
+  //     items.map((item, index) => {
+  //       arr.push(item.id);
+  //     });
+  //     setExpandedKeys(arr);
+  //     setTreeData(_.cloneDeep(treeData));
+  //   });
+  // }
+
+   const getAssetTree = () => {
+      // console.log('ac', activeColor);
+      console.log('parId', parId);
+      console.log('left_asset_type', localStorage.getItem('left_asset_type'));
+      
+      // console.log('treeQuery', treeQuery);
+      // treeQuery['status'] = 0
+      // treeQuery['groupIds'] = groupIds?.toString()
+      // treeQuery['query'] = searchVal?searchVal:undefined;
+      // treeQuery['filter'] = filterParam?filterParam:undefined;
+      getMonitortree(treeQuery).then(res => {
+      // getAssetstypesNew(treeQuery).then(res => {
+        const { dat } = res
+        // dat.forEach(item => {
+        //   item['type_list'] = item['type_list'].map((v) => {
+        //     return {
+        //       id: v.name,
+        //       name: v.name,
+        //       ...v,
+        //       parentId: item.id
+        //     };
+        //   });
+        // })
+        // console.log('dat', dat);
+        // setTreeList(dat)
+        const processDat = sortAndProcessTypeList(dat)
+        console.log('dat', processDat);
+        setTreeList(processDat)
+      })
+    }
+    // 资产组织树
+    const AssetTree = ({ data }) => {
+      //  展开的节点列表
+      const [expandedIds, setExpandedIds] = useState(() => {
+        try {
+          const saved = localStorage.getItem("expandedIds");
+          return new Set(JSON.parse(saved || "[]"));
+        } catch {
+          return new Set();
+        }
       });
-      let treeData: any[] = [
-        {
-          id: 0,
-          name: '全部资产',
-          count: 0,
-          children: items,
-        },
-      ];
-      const types = items.map((v) => {
-        return {
-          value: v.name,
-          label: v.name,
-          ...v,
-        };
-      });
-      setAssetTypes(types);
-      let arr = ['0'];
-      items.map((item, index) => {
-        arr.push(item.id);
-      });
-      setExpandedKeys(arr);
-      setTreeData(_.cloneDeep(treeData));
+      
+    
+      useEffect(() => {
+        localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
+      }, [expandedIds]);
+  
+      const handleToggle = (nodeId) => {
+        setExpandedIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.has(nodeId) ? newSet.delete(nodeId) : newSet.add(nodeId);
+          return newSet;
+        });
+      };
+  
+      return (
+        <div>
+          {data.map((node) => (
+            <TreeNode
+              key={node.id}
+              item={node}
+              expandedIds={expandedIds}
+              onToggle={handleToggle}
+            />
+          ))}
+        </div>
+      );
+    };
+    /** 资产树组件 */
+      // isAllAssets：一个布尔值，用于标记当前节点是否是"全部资产"的子节点。
+    const TreeNode = ({ item, expandedIds, onToggle ,isAllAssets = false }) => {
+      const isExpanded = expandedIds.has(item.id);
+      return (
+        <div key={item.name} className="tree-row">
+          <div
+            className="tree-group"
+            style={{ marginLeft: `${(item.group_level - 1) * 20}px` }}
+          >
+            <span
+              onClick={() => {
+                onToggle(item.id);
+              }}
+            >
+              {isExpanded ? (
+                <MinusSquareOutlined style={{ fontSize: 13 }} />
+              ) : (
+                <PlusSquareOutlined style={{ fontSize: 13 }} />
+              )}
+            </span>
+            <span
+              className="g-name"
+              // onClick={() => handleClickTree(item, null)}
+              onClick={() => handleClickTree(item, null,isAllAssets)}
+              style={{
+                backgroundColor:
+                  item.id == localStorage.getItem("left_asset_type") &&
+                  !localStorage.getItem("left_parId")
+                    ? "#92b7d1"
+                    : "",
+              }}
+            >
+              {item.name}
+            </span>
+            {item.id != -1 &&!isAllAssets && (
+              <Dropdown
+                // trigger={['click']}
+                overlay={
+                  // @ts-ignore
+                  <Menu
+                    style={{ width: "100px" }}
+                    onClick={({ key }) => {
+                      // console.log(key);
+                      if (key === "edit") {
+                        setTitle("编辑分组");
+                        setCurGroup(item);
+                        setOpen(true);
+                        setLevel(item.group_level);
+                      } else if (key === "del") {
+                        Modal.confirm({
+                          title: "是否确认删除该分组？",
+                          onOk: async () => {
+                            // delAssetstypesNew({ ids: item.id }).then((res) => {
+                            delXhAssetstypesNew( item.id ).then((res) => {
+                              message.success("删除成功");
+                              // 删除自己则返回默认
+                              if (item.id == tissueId) {
+                                localStorage.setItem("left_tissueId", "-1");
+                                localStorage.setItem("left_asset_type", "-1");
+                                localStorage.removeItem("left_parId");
+                                setTissueId(-1);
+                                // setActiveColor(-1)
+                              }
+                              getAssetTree();
+                              setRefreshKey(_.uniqueId("refreshKey_"));
+                              // setSelectedAssets([]);
+                            });
+                          },
+                          onCancel() {},
+                        });
+                      } else if (key === "add-sub") {
+                        setTitle("新增分组");
+                        setOpen(true);
+                        setCurGroup({});
+                        setLevel(item.group_level + 1); // 分组层级
+                        setParentId(item.id);
+                      }
+                    }}
+                    items={[
+                      ...((profile.roles?.includes('Admin') || permList.includes('/xh/monitor/addGroup')) && item.group_level < 3 && !item.type_list?.length
+                        ? [
+                            {
+                              key: "add-sub",
+                              label: "新增分组",
+                              icon: <PlusOutlined />,
+                            },
+                          ]
+                        : []),
+                      (profile.roles?.includes('Admin') || permList.includes('/xh/monitor/editGroup')) && { key: "edit", label: "编辑", icon: <EditOutlined /> },
+                      (profile.roles?.includes('Admin') || permList.includes('/xh/monitor/delGroup')) && { key: "del", label: "删除", icon: <DeleteOutlined /> },
+                    ]}
+                  ></Menu>
+                }
+              >
+                <span className="more">...</span>
+              </Dropdown>
+            )}
+          </div>
+          {isExpanded && item.type_list?.length > 0 && (
+            <div
+              className="tree-content"
+              style={{ marginLeft: `${item.group_level * 24}px` }}
+            >
+              {_.map(item.type_list, (item1) => {
+                return (
+                  <div key={item1.id} className="tree-asset">
+                    <FileOutlined style={{ fontSize: 13 }} />
+                    <div
+                      style={{
+                        backgroundColor:
+                          item1.id == localStorage.getItem("left_asset_type") &&
+                          parId == item.id
+                            ? "#92b7d1"
+                            : "",
+                      }}
+                      className="asset-name"
+                      // onClick={() => handleClickTree(item1, item)}
+  
+                      onClick={() => handleClickTree(item1, item,isAllAssets)}
+                    >
+                      <span>{item1.name}</span>
+                      <span>{item1.number}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {isExpanded &&
+            item.sub_groups?.length > 0 &&
+            item.sub_groups.map((child) => {
+              return (
+                <TreeNode
+                  key={child.id}
+                  item={child}
+                  expandedIds={expandedIds}
+                  onToggle={onToggle}
+                  isAllAssets={item.id === -1 || isAllAssets}
+                />
+              );
+            })}
+        </div>
+      );
+    };
+     // 递归处理树形结构，排序、处理type_list
+  function sortAndProcessTypeList(nodes) {
+    if (!nodes || nodes.length === 0) {
+      return [];
+    }
+    // 对当前层节点按 id 升序排序
+    const sortedNodes = nodes.sort((a, b) => {
+      if (typeof a.id === "string" && typeof b.id === "string") {
+        return a.id.localeCompare(b.id);
+      }
+      return a.id - b.id;
     });
+    // 处理当前层节点的 type_list 并递归处理子节点
+    sortedNodes.forEach((node) => {
+      // 处理当前节点的 type_list
+      if (node.type_list?.length) {
+        node["type_list"] = node["type_list"].map((v) => {
+          return {
+            id: v.name,
+            name: v.name,
+            ...v,
+            parentId: node.id,
+          };
+        });
+      }
+      // 如果有子节点，递归处理子节点
+      if (node.sub_groups?.length) {
+        node.sub_groups = sortAndProcessTypeList(node.sub_groups);
+      }
+    })
+    return sortedNodes;
   }
-
+  const handleClickTree = (item: any, par: any,isAllAssets:boolean) => {
+      // 是否是全部资产下的节点点击
+    setIsAllAssets(isAllAssets)
+    if (par) {
+      setParId(par.id)
+      setTypeId(item.id);
+      setTissueId(undefined)
+    } else {
+      setTissueId(item.id)
+      setTypeId(undefined)
+      localStorage.removeItem('left_parId')
+      setParId(undefined)
+    }
+    // console.log(item);
+    // setActiveColor(item.id)
+    //资产类型操作
+    setCurrent(1);
+    localStorage.setItem('left_asset_type', item.id);
+    setRefreshKey(_.uniqueId('refreshKey_'));
+  }
   useEffect(() => {
     setSecondAddButton(false);
     setOptionColumns(baseColumns.concat(choooseColumns));
@@ -440,6 +714,33 @@ export default function () {
       { value: '0', label: '未启用' },
     ];
     setFilterOptions({ ...filterOptions });
+    //来源数据字典
+    getAssetstypesByParams(treeQuery).then((res) => {
+      let arr = ['0'];
+      const items = res.dat.map((v) => {
+        return {
+          id: v.name,
+          name: v.name,
+          ...v,
+        };
+      });
+      let treeData: any[] = [
+        {
+          id: '0',
+          name: '全部资产',
+          count: 0,
+          children: items,
+        },
+      ];
+      items.map((item, index) => {
+        arr.push(item.id);
+      });
+      setExpandedKeys(arr);
+      setAssetTypes(items);
+      // loadingGroupColumns(items);
+      setTreeData(_.cloneDeep(treeData));
+      // getAssetTree()
+    });
   }, []);
 
   useEffect(() => {
@@ -464,12 +765,40 @@ export default function () {
         param['query'] = searchVal;
         treeQuery['query'] = searchVal
       }
-      if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
-        param['filter'] = filterParam;
-        treeQuery['filter'] = filterParam;
+      if (filterParam2 != null && filterParam2.length > 0 && searchVal != null && searchVal.length > 0) {
+        param['filter'] = filterParam2;
+        treeQuery['filter'] = filterParam2;
       }
-      if (currentAssetId <= 0 && typeId != null && typeId + '' != '0') {
-        param['assetType'] = typeId;
+      // if (currentAssetId <= 0 && typeId != null && typeId + '' != '0') {
+      //   param['assetType'] = typeId;
+      // }
+    }
+
+
+    const parentId = localStorage.getItem('left_parId')    
+    if (currentAssetId <= 0 && typeId != null && typeId + '' != '0' && parentId) {
+      param['assetType'] = typeId;
+    }
+    if (tissueId != null && !parentId) {
+      param['group_id'] = tissueId;
+    }
+    // 点击全部资产下的查询时，group_id传-1
+    if (isAllAssets) {
+      param["group_id"] = -1;
+      // 根据tissueId的值 查找对应的type_list
+      if (tissueId != null && !parentId) {
+        const treeItem = treeList
+          .find((item) => item.id === -1)
+          ?.sub_groups?.find((item) => item.id === tissueId);
+          // console.log('treeItem', treeItem);
+        const typeListNames = treeItem?.type_list
+          ?.map((item) => item.name)
+          .join(",");
+        if (typeListNames) {
+          param["types"] = typeListNames;
+        } else {
+          param["types"] = "";
+        }
       }
     }
 
@@ -488,14 +817,19 @@ export default function () {
       if (currentAssetId > 0) {
         getXhAsset('' + currentAssetId).then(({ dat }) => {
           setTypeId(dat.type);
-          setFilterParam('asset_ip');
+          setFilterParam('ip');
           setFilterType('input');
           setSearchVal(dat.ip);
         });
       }
     });
   };
-
+  const handleClose = (value: any) => {
+    if (value == 'sure') {
+      getAssetTree()
+    }
+    setOpen(false)
+  }
   const pupupContent = (
     <div>
       <Checkbox.Group defaultValue={defaultValues} style={{ width: '100%' }} onChange={handelShowColumn}>
@@ -596,24 +930,41 @@ export default function () {
               {!collapse ? <LeftOutlined /> : <RightOutlined />}
             </div>
             <div className='left_tree' style={{ display: 'inline-block' }}>
-              <div className='asset_organize_cls'>组织树列表</div>
-              <div style={{ display: 'table', height: '100%', width: '100%' }}>
-                {expandedKeys && treeData && (
-                  <Tree
-                    showLine={true}
-                    showIcon={true}
-                    style={{ marginTop: 0 }}
-                    titleRender={titleRender}
-                    defaultExpandedKeys={expandedKeys}
-                    treeData={treeData}
-                    defaultExpandAll={true}
-                    defaultSelectedKeys={[typeId]}
-                    selectedKeys={[typeId]}
-                    autoExpandParent={true}
-                    checkStrictly
-                    fieldNames={{ key: 'id', title: 'name' }}
-                    onSelect={onSelect}
-                  />
+              <div className='asset_organize_cls'>
+                <span>组织树列表</span>
+                {
+                  (profile.roles?.includes('Admin') || permList.includes('/xh/monitor/addGroup')) && <span
+                  className="add_group"
+                  onClick={() => {
+                    setOpen(true);
+                    setCurGroup({});
+                    setTitle("新增分组");
+                    setLevel(1);
+                    setParentId(null);
+                  }}
+                >
+                  新增分组
+                </span>
+                }
+              </div>
+              <div className='tree-list'>
+                {expandedKeys && treeList && (
+                  <AssetTree data={treeList} />
+                  // <Tree
+                  //   showLine={true}
+                  //   showIcon={true}
+                  //   style={{ marginTop: 0 }}
+                  //   titleRender={titleRender}
+                  //   defaultExpandedKeys={expandedKeys}
+                  //   treeData={treeData}
+                  //   defaultExpandAll={true}
+                  //   defaultSelectedKeys={[typeId]}
+                  //   selectedKeys={[typeId]}
+                  //   autoExpandParent={true}
+                  //   checkStrictly
+                  //   fieldNames={{ key: 'id', title: 'name' }}
+                  //   onSelect={onSelect}
+                  // />
                 )}
               </div>
             </div>
@@ -640,6 +991,13 @@ export default function () {
                       }
                     });
                     setFilterParam(value);
+                    if(value == 'ip'){
+                      setFilterParam2('asset_ip');
+                    }
+                    if(value == 'name'){
+                      setFilterParam2('asset_name');
+                    }
+                    setFilterParam2(value);
                     setSearchVal(null);
                     setCurrentAssetId(0);
                     setCurrent(1);
@@ -847,6 +1205,18 @@ export default function () {
             </div>
           </div>
         </div>
+         {/* 分组弹窗 */}
+          {open && (
+            <AccordionModal
+              title={title}
+              open={open}
+              curGroup={curGroup}
+              closeOpen={handleClose}
+              treeData={treeData}
+              level={level}
+              parentId={parentId}
+            />
+          )}
       </div>
     </PageLayout>
   );

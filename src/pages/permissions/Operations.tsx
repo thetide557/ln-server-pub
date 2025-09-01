@@ -75,6 +75,8 @@ export default function Operations(props: IProps) {
               onClick={() => {
                 Modal.confirm({
                   title: t('common:confirm.save'),
+                  okText: "确认",
+                  cancelText :"取消",
                   onOk: () => {
                     putOperationsByRole(
                       roleId,

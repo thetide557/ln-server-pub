@@ -8,6 +8,7 @@ import { ruleTypeOptions,selectTypeOptions } from '../constants';
 interface IProps {
   label?: string;
   onChange?: (e: any) => void;
+  field?: any;
 }
 
 export const getProdOptions = (feats) => {
@@ -15,16 +16,18 @@ export const getProdOptions = (feats) => {
   return prodOptions;
 };
 
-export default function ProdSelect({ label, onChange = () => {} }: IProps) {
+export default function ProdSelect({ field, label, onChange = () => {} }: IProps) {
   const { feats } = useContext(CommonStateContext);
   const prodOptions = getProdOptions(feats);
 
   return (
-    <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.prod !== currentValues.prod} noStyle>
+    <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues?.strategies[field.name]?.prod !== currentValues?.strategies[field.name]?.prod} noStyle>
       {({ getFieldValue }) => {
-        const prod = getFieldValue('prod');
+        // const prod = getFieldValue('prod');
+        const prod = getFieldValue(['strategies', field.name, 'prod'])
         return (
-          <Form.Item name='prod' label={label}>
+          // <Form.Item name='prod' label={label}>
+          <Form.Item {...field} name={[field.name, 'prod']} label={label}>
             <Radio.Group onChange={onChange} optionType='button' buttonStyle='solid'>
               {_.map(prodOptions, (item) => {
                 return (

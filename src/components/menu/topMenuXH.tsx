@@ -14,7 +14,7 @@ import './locale';
 import { Logout } from '@/services/login';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
-import { getBigScreen } from '@/services/sxxc/bigScreen';
+import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getDictDataListByType } from '@/services/system/dict';
 import Cookies from 'js-cookie';
 
@@ -35,11 +35,12 @@ const getMenuList = (t) => {
           icon: <IconFont type="icon-Menu_Infrastructure" />,
           label: t("运维资产清单"),
         },
-        // {
-        //   key: '/xh/iotassetmgt',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('物联网资产管理'),
-        // },
+        // TODO:内部智能化部署时注掉
+        {
+          key: '/xh/iotassetmgt',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('物联网资产管理'),
+        },
         // {
         //   key: '/serverVideoAsset',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
@@ -117,9 +118,9 @@ const getMenuList = (t) => {
       label: t("巡检中心"),
       children: [
         {
-          key: "/inspection/inspectionList",
-          icon: <IconFont type="icon-Menu_Infrastructure" />,
-          label: t("巡检管理"),
+          key: '/inspection/inspectionList',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('巡检管理'),
         },
         // {
         //   key: '/productionplan',
@@ -457,7 +458,7 @@ export default function () {//{ selectMenu?:any }
   }, [pathname]);
 
   useEffect(() => {
-    if (location.pathname != '/login') {
+    if (location.pathname != '/login' && !pathname.startsWith('/callback')) {
       getMyPortrait().then((res) => {
         if (res.dat != null && res.dat != "") {
           setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
@@ -512,7 +513,6 @@ export default function () {//{ selectMenu?:any }
               },
             )
           }
-          // console.log(newMenus);
           setMenus(newMenus);
         });
       } else {
@@ -547,7 +547,7 @@ export default function () {//{ selectMenu?:any }
       location.pathname.startsWith('/chart/') ||
       location.pathname.startsWith('/screenView') ||
       location.pathname.startsWith('/dashboards/share/') ||
-      location.pathname === '/callback' ||
+      location.pathname.startsWith('/callback') ||
       location.pathname.indexOf('/polaris/screen') === 0
     ) {
       return true;
@@ -597,8 +597,10 @@ export default function () {//{ selectMenu?:any }
   };
 
   const goScreen = () => {
-    getBigScreen().then(res => {
-      if (res.dat.list.length > 0) {
+    let busiGroup = localStorage.getItem('groupIds') || '';
+    getBigScreen2(busiGroup).then(res => {
+      const list = res.dat?.list?.filter((item:any) => item.type == 1) || [];
+      if (list.length > 0) {
         history.push('/screenView')
       }
     })

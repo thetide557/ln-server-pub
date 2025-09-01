@@ -6,7 +6,7 @@ import { useHistory } from 'react-router-dom';
 import { CommonStateContext } from '@/App';
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
-import { deleteScreenById, getBigScreen } from '@/services/sxxc/bigScreen';
+import { deleteScreenById, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import Add from './Add';
 import Edit from './Edit';
 import Detail from './Detail';
@@ -30,7 +30,8 @@ const ApiService = () => {
   const history = useHistory();
 
   useEffect(() => {
-    getBigScreen().then(res => {
+    let busiGroup = localStorage.getItem('groupIds') || '';
+    getBigScreen2(busiGroup).then(res => {
       setItems(res.dat.list)
     })
   }, [searchVal, refreshKey]);

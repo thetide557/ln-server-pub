@@ -51,6 +51,7 @@ const index = (props: any) => {
           ...data.dat.meta,
           action: data.dat.action,
         });
+        console.log('data.dat.hosts',data.dat.hosts)
         setHosts(data.dat.hosts);
       })
       .finally(() => {
@@ -113,11 +114,11 @@ const index = (props: any) => {
       },
       render: (text) => {
         if (text === 'success') {
-          return <Tag color='#87d068'>{text}</Tag>;
+          return <Tag color='#87d068'>{t('successed')}</Tag>;
         } else if (text === 'cancelled' || text === 'ignored') {
-          return <Tag color='#ec971f'>{text}</Tag>;
+          return <Tag color='#ec971f'>{t(text)}</Tag>;
         } else if (text === 'failed' || text === 'killfailed' || text === 'timeout') {
-          return <Tag color='#f50'>{text}</Tag>;
+          return <Tag color='#f50'>{t(text)}</Tag>;
         }
         return <Tag>{text}</Tag>;
       },
@@ -128,11 +129,11 @@ const index = (props: any) => {
         return (
           <span>
             <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${params.id}/${record.host}/stdout`)}}>
-              stdout
+              {t('stdout')}
             </span>
             <Divider type='vertical' />
             <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${params.id}/${record.host}/stderr`)}}>
-              stderr
+              {t('stderr')}
             </span>
           </span>
         );
@@ -145,11 +146,11 @@ const index = (props: any) => {
       render: (_text, record) => {
         return (
           <span>
-            <a onClick={() => handleHostAction(record.host, 'ignore')}>ignore</a>
+            <a onClick={() => handleHostAction(record.host, 'ignore')}>{t('ignore')}</a>
             <Divider type='vertical' />
-            <a onClick={() => handleHostAction(record.host, 'redo')}>redo</a>
+            <a onClick={() => handleHostAction(record.host, 'redo')}>{t('redo')}</a>
             <Divider type='vertical' />
-            <a onClick={() => handleHostAction(record.host, 'kill')}>kill</a>
+            <a onClick={() => handleHostAction(record.host, 'kill')}>{t('kill')}</a>
           </span>
         );
       },
@@ -182,11 +183,11 @@ const index = (props: any) => {
             <Col span={18}>
               <div>
                 <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${taskId}/stdout`)}}>
-                  stdouts
+                  {t('stdouts')}
                 </span>
                 <Divider type='vertical' />
                 <span style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open(`/job-task/${curBusiId}/output/${taskId}/stderr`)}}>
-                  stderrs
+                  {t('stderrs')}
                 </span>
                 <Divider type='vertical' />
                 <Link to={{ pathname: `/job-tasks/${taskId}/detail` }}>{t('task.meta')}</Link>
@@ -199,18 +200,18 @@ const index = (props: any) => {
                 <span>
                   {data.action === 'start' ? (
                     <Button className='success-btn' onClick={() => handleTaskAction('pause')}>
-                      Pause
+                      {t('Pause')}
                     </Button>
                   ) : (
                     <Button className='success-btn' onClick={() => handleTaskAction('start')}>
-                      Start
+                      {t('Start')}
                     </Button>
                   )}
                   <Button className='ml10 warning-btn' onClick={() => handleTaskAction('cancel')}>
-                    Cancel
+                    {t('Cancel')}
                   </Button>
                   <Button className='ml10 danger-btn' onClick={() => handleTaskAction('kill')}>
-                    Kill
+                    {t('Kill')}
                   </Button>
                 </span>
               ) : null}

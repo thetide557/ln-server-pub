@@ -11,7 +11,7 @@ const serverVideoAlarm = function () {
   // }
   return (
     <iframe
-      src={`/servervideo/alarm-management`}
+      src={`/servervideo/#/alarm-management`}
       style={{ width: "100%", height: "100%" }}
     ></iframe>
   );

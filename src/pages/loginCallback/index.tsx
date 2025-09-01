@@ -17,7 +17,9 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import queryString from 'query-string';
-import { authCallback } from '@/services/login';
+import { authCallback, getDeepseektoken } from '@/services/login';
+import { getBigScreen2 } from '@/services/sxxc/bigScreen';
+import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
 
 export default function index() {
@@ -37,9 +39,34 @@ export default function index() {
             Cookies.set('access_token', res.dat.access_token);
             Cookies.set('refresh_token', res.dat.refresh_token);
             // 嵌入的子项目之前用的local
-            localStorage.setItem('access_token', res.dat.refresh_token);
+            localStorage.setItem('access_token', res.dat.access_token);
             localStorage.setItem('refresh_token', res.dat.refresh_token);
-            window.location.href = res.dat.redirect;
+            // 资产管理默认左侧树
+            localStorage.setItem('left_asset_type', '-1');
+            // window.location.href = res.dat.redirect;
+            getBusiGroups().then(res => {
+              let busiGroups = res.dat;
+              let groupIds = ''
+              if (busiGroups.length > 0) {
+                groupIds = busiGroups.map(item => item.id).toString()
+              }
+              getBigScreen2(groupIds).then(res => {
+                const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
+                if (list.length > 0) {
+                  window.location.href = '/screenView'
+                } else {
+                  window.location.href = '/home';
+                }
+              }).catch(_ => {
+                window.location.href = '/home';
+              })
+            }).catch(_ => {
+              window.location.href = '/home';
+            })
+            // 获取deepseek的toekn
+            getDeepseektoken().then(res => {
+              localStorage.setItem('deepseek_token', res.dat.deepseek_token);
+            })
           } else {
             console.log(res.dat);
           }

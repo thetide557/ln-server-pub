@@ -87,7 +87,7 @@ export default function version() {
               <p className='ant-upload-drag-icon'>
                 <InboxOutlined />
               </p>
-              <p className='ant-upload-text'>点击或拖放系统升级包到这个区域上传</p>
+              <p className='ant-upload-text'>点击或拖放系统升级包（ln-server.gz）到这个区域上传</p>
             </Dragger>
           </div>
         }

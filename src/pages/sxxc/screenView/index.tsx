@@ -190,7 +190,8 @@ export default function ScreenView() {
           setUrl(screenUrl)
           // sendToken()
         }
-      } else {
+      } 
+      else {
         history.push(`/home`)
       }
     })
@@ -205,8 +206,9 @@ export default function ScreenView() {
     <div className='screen-view'>
       <div className='screen1'>
         <div className='screen1-cont'>
-          {/* {
-            screenList.length > 0 &&
+          {/* TODO:内部信息化部署时注掉 */}
+          {
+            screenList.length >0 &&
             <div className='screen-tab'>
               {_.map(screenList.filter(x => x.type == 1), (item, index) => {
                 return (
@@ -216,8 +218,7 @@ export default function ScreenView() {
                 )
               })}
             </div>
-          } */}
-
+          }
 
           {/* 下拉切换 */}
           {/* <div className='screen-groups'>
@@ -228,9 +229,8 @@ export default function ScreenView() {
               </div>
             </Dropdown>
           </div> */}
-
           {
-            nav2.length > 0 &&
+            nav2.length >0 &&
             <div className='screen-groups'>
               <Dropdown overlay={menu} arrow overlayClassName='screen-drop'>
                 <div className='screen-icon icon2'>
@@ -240,7 +240,6 @@ export default function ScreenView() {
               </Dropdown>
             </div>
           }
-
           <div className='back1' onClick={goBack} title='返回'>
             <div className='back-icon'></div>
             <img src="/image/screenview/back.png" alt="" />

@@ -137,9 +137,22 @@ export const getWarningStrategy = function (id): Promise<any> {
     method: RequestMethod.Get,
   });
 };
+// 获取告警规则
+export const getWarningRule = function (strategyid): Promise<any> {
+  return request(`/api/n9e/alert-rule/strategy/${strategyid}`, {
+    method: RequestMethod.Get,
+  });
+};
 
+// export const addStrategy = function (data: any[], busiId: number) {
+//   return request(`/api/n9e/busi-group/${busiId}/alert-rules`, {
+//     method: 'POST',
+//     data: data,
+//   });
+// };
+// 新增告警规则
 export const addStrategy = function (data: any[], busiId: number) {
-  return request(`/api/n9e/busi-group/${busiId}/alert-rules`, {
+  return request(`/api/n9e/busi-group/${busiId}/strategy`, {
     method: 'POST',
     data: data,
   });
@@ -165,11 +178,25 @@ export const EditStrategy = function (data: any[], busiId: number, strategyId: n
     data: data,
   });
 };
+// 编辑告警规则
+export const EditAlertRule = function (data: any[], busiId: number, strategyId: number) {
+  return request(`/api/n9e/busi-group/${busiId}/strategy/${strategyId}`, {
+    method: RequestMethod.Put,
+    data: data,
+  });
+};
 
 export const deleteStrategy = function (ids: number[], strategyId: number) {
   return request(`/api/n9e/busi-group/${strategyId}/alert-rules`, {
     method: RequestMethod.Delete,
     data: { ids },
+  });
+};
+// 删除告警规则
+export const deleteAlertRules = function (strategyid: string, strategyId: number) {
+  return request(`/api/n9e/busi-group/${strategyId}/strategy`, {
+    method: RequestMethod.Delete,
+    data: { strategyid },
   });
 };
 
@@ -186,7 +213,20 @@ export const prometheusQuery = function (data, datasourceValue): Promise<any> {
     params: data,
   });
 };
-
+// 关闭/启动告警规则
+export const updateAlertRulesStatus = function (
+  data: {
+    strategyids: React.Key[];
+    fields: any;
+    action?: string;
+  },
+  busiId: number,
+) {
+  return request(`/api/n9e/busi-group/${busiId}/alert-rules/strategy/fields`, {
+    method: RequestMethod.Put,
+    data: data,
+  });
+};
 /**
  * 批量更新规则
  */

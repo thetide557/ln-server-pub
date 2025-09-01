@@ -32,7 +32,7 @@ import { GetAssetType } from '@/services/metric';
 import { getDashboardTemplate, putDashboardTemplte, setDashboardAssetType } from '@/services/dashboardV2';
 import { updateSelfBoard } from '@/services/account';
 import { CommonStateContext } from '@/App';
-import { getBigScreen2, getDashboards,getNav2 } from '@/services/sxxc/bigScreen';
+import { getBigScreen2, getDashboards, getNav2 } from '@/services/sxxc/bigScreen';
 import { useTimeout, useTimeoutFn } from 'react-use';
 import './titleStyle.less'
 
@@ -161,7 +161,7 @@ export default function Title(props: IProps) {
   const handleEnter = () => {
     setFlag(false)
   }
-  const handleLeave= () => {
+  const handleLeave = () => {
     setFlag(true)
   }
 
@@ -201,7 +201,8 @@ export default function Title(props: IProps) {
         setNav2(res.dat.list.filter(x => x.type == 2 && x.busi_group != 0))
       }
     })
-    
+
+
   }, []);
 
   return (
@@ -352,7 +353,7 @@ export default function Title(props: IProps) {
                 <Dropdown overlay={menu} arrow overlayClassName='screen-drop'>
                   <div className='screen-icon icon2'>
                     <span>项目组</span>
-                    <DownOutlined style={{fontSize: '0.52vw', marginLeft: '0.1vw'}} />
+                    <DownOutlined style={{ fontSize: '0.52vw', marginLeft: '0.1vw' }} />
                   </div>
                 </Dropdown>
               </div>

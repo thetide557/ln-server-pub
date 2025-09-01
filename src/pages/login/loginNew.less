@@ -169,6 +169,7 @@
       // height: 80%;
       margin-top: 10%;
       .login-bg {
+        position: relative;
         width: calc((670 / 1920) * 100vw);
         height: calc((730 / 1920) * 100vw);
         background: url("/image/login/login-card.png") no-repeat;
@@ -184,6 +185,26 @@
           color: #1382DF;
           padding-bottom: calc((10 / 1920) * 100vw);
           border-bottom: calc((2 / 1920) * 100vw) solid #1382DF;
+        }
+        .login-other {
+          display: flex;
+          align-items: center;
+          color: #fff;
+          margin-top: calc((90 / 1920) * 100vw);
+          padding-left: calc((25 / 1920) * 100vw);
+          font-size: calc((16 / 1920) * 100vw);
+          .login-other-content {
+            display: flex;
+            flex-wrap: wrap;
+            .login-other-item {
+              padding-left: calc((8 / 1920) * 100vw);
+              cursor: pointer;
+            }
+            .active-text {
+              color: #1382DF;
+              font-weight: 700;
+            }
+          }
         }
       }
       .form_title {

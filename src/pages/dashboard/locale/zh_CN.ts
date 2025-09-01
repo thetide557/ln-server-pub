@@ -184,6 +184,8 @@ const zh_CN = {
         <2>Data(IEC): 基数为 1024, 单位为 B、KiB、MiB、GiB、TiB、PiB、EiB、ZiB、YiB</2>
         <3>bits: b</3>
         <4>bytes: B</4>
+        <5>Percent: percent(0-100), percent(0.0-1.0)</5>
+        <6>Time: seconds、milliseconds、humanize(seconds)、humanize(milliseconds)、datetime(seconds)、datetime(milliseconds)</6>
       `,
       datetime: '时间格式化',
       min: '最小值',

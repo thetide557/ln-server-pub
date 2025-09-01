@@ -20,19 +20,21 @@ import { Card, Form, Switch, Space, Select, TimePicker } from 'antd';
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { panelBaseProps, daysOfWeek } from '../../constants';
 
-export default function index() {
+export default function index({field}) {
   const { t } = useTranslation('alertRules');
   return (
     <Card {...panelBaseProps} className='rule-card' title={t('effective_configs')}>
       <div style={{ marginBottom: 10 }}>
         <Space>
           <span>{t('enable_status')}</span>
-          <Form.Item name='enable_status' valuePropName='checked' noStyle>
+          {/* <Form.Item name='enable_status' valuePropName='checked' noStyle> */}
+          <Form.Item {...field} name={[field.name, 'enable_status']} valuePropName='checked' noStyle>
             <Switch />
           </Form.Item>
         </Space>
       </div>
-      <Form.List name='effective_time'>
+      {/* <Form.List name='effective_time'> */}
+      <Form.List {...field} name={[field.name, 'effective_time']}>
         {(fields, { add, remove }) => (
           <>
             <Space>
@@ -107,13 +109,16 @@ export default function index() {
           </>
         )}
       </Form.List>
-      <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.cate !== curValues.cate} noStyle>
+      {/* <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.cate !== curValues.cate} noStyle> */}
+      <Form.Item shouldUpdate={(prevValues, curValues) => prevValues?.strategies[field.name]?.cate !== curValues?.strategies[field.name]?.cate} noStyle>
         {({ getFieldValue }) => {
-          if (getFieldValue('cate') === 'prometheus') {
+          // if (getFieldValue('cate') === 'prometheus') {
+          if (getFieldValue(['strategies', field.name, 'cate']) === 'prometheus') {
             return (
               <Form.Item label={t('enable_in_bg')}>
                 <Space align='baseline'>
-                  <Form.Item name='enable_in_bg' valuePropName='checked'>
+                  {/* <Form.Item name='enable_in_bg' valuePropName='checked'> */}
+                  <Form.Item {...field} name={[field.name, 'enable_in_bg']}  valuePropName='checked'>
                     <Switch />
                   </Form.Item>
                   {t('enable_in_bg_tip')}

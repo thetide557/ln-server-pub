@@ -109,7 +109,6 @@ export const getBigScreen2 = function (busiGroup) {
     })
 }
 
-
 // 新增大屏
 export const addBigScreen = function (data: any) {
     return request("/api/n9e/bigscreen", {

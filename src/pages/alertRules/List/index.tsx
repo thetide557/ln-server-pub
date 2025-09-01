@@ -23,7 +23,7 @@ import moment from 'moment';
 import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select, Tooltip, Input } from 'antd';
 import RefreshIcon from '@/components/RefreshIcon';
 import usePagination from '@/components/usePagination';
-import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/services/warning';
+import { getStrategyGroupSubList, updateAlertRules,updateAlertRulesStatus, deleteStrategy,deleteAlertRules } from '@/services/warning';
 import { CommonStateContext } from '@/App';
 import { getAssetstypes } from '@/services/assets';
 import Tags from '@/components/Tags';
@@ -88,21 +88,42 @@ export default function List(props: ListProps) {
       title: '告警规则名称',
       dataIndex: 'name',
       width: 250,
+      // render(name, record, index) {
+      //   return (
+      //     <Link
+      //       className='table-text'
+      //       to={{
+      //         pathname: `/alert-rules/edit/${record.id}`,
+      //       }}
+      //     >
+      //       {name}
+      //     </Link>
+      //   );
+      // },
       render(name, record, index) {
         return (
           <Link
             className='table-text'
             to={{
-              pathname: `/alert-rules/edit/${record.id}`,
+              pathname: `/alert-rules/edit/${record.strategy_id}`,
             }}
           >
             {name}
           </Link>
         );
       },
+      onCell: (record) => ({
+        rowSpan: record.rowSpan
+      }),
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
+    },
+    {
+      title: '策略名称',
+      dataIndex: 'strategy_name',
+      width:100,
+      align:'center',
     },
     {
       title: t('告警级别'),
@@ -209,98 +230,158 @@ export default function List(props: ListProps) {
       render: (val, record: any) => {
         return (
           <Space>
-            {
-              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/status")) && <PoweroffOutlined
-                title={record['disabled'] === AlertRuleStatus.Enable ? '已启动' : '未启动'}
-                style={{ color: record['disabled'] === AlertRuleStatus.Enable ? 'green' : 'red' }}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/status")) && (
+              <PoweroffOutlined
+                title={
+                  record["disabled"] === AlertRuleStatus.Enable
+                    ? "已启动"
+                    : "未启动"
+                }
+                style={{
+                  color:
+                    record["disabled"] === AlertRuleStatus.Enable
+                      ? "green"
+                      : "red",
+                }}
                 onClick={(e) => {
-                  const { id, disabled } = record;
+                  // const { id, disabled } = record;
+                  const { strategy_id, disabled } = record;
 
                   Modal.confirm({
-                    title: `确认要修改状态为：${record['disabled'] === AlertRuleStatus.Enable ? '关闭' : '启动'}`,
+                    title: `确认要修改状态为：${
+                      record["disabled"] === AlertRuleStatus.Enable
+                        ? "关闭"
+                        : "启动"
+                    }`,
+                    // onOk: () => {
+                    //   bgid &&
+                    //     updateAlertRules(
+                    //       {
+                    //         ids: [id],
+                    //         fields: {
+                    //           disabled: !disabled ? 1 : 0,
+                    //         },
+                    //       },
+                    //       bgid
+                    //     ).then(() => {
+                    //       getAlertRules(params);
+                    //     });
+                    // },
                     onOk: () => {
                       bgid &&
-                        updateAlertRules(
+                        updateAlertRulesStatus(
                           {
-                            ids: [id],
+                            strategyids: [strategy_id],
                             fields: {
                               disabled: !disabled ? 1 : 0,
                             },
                           },
-                          bgid,
+                          bgid
                         ).then(() => {
                           getAlertRules(params);
                         });
                     },
-                    onCancel() { },
+                    onCancel() {},
                   });
                 }}
                 rev={undefined}
               />
-            }
-            {
-              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/copy")) && <Link
-                title='克隆'
-                className='table-operator-area-normal'
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/copy")) && (
+              <Link
+                title="克隆"
+                className="table-operator-area-normal"
+                  // to={{
+                  //   pathname: `/alert-rules/edit/${record.id}?mode=clone`,
+                  // }}
                 to={{
-                  pathname: `/alert-rules/edit/${record.id}?mode=clone`,
+                  pathname: `/alert-rules/edit/${record.strategy_id}?mode=clone`,
                 }}
-                target='_self'
+                target="_self"
               >
                 <CopyTwoTone rev={undefined} />
               </Link>
-            }
-            {
-              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/detail")) && <FileSearchOutlined
-                title='查看'
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/detail")) && (
+              <FileSearchOutlined
+                title="查看"
+                  // onClick={() => {
+                  //   history.push(`alert-rules/edit/${record.id}?mode=view`);
+                  // }}
                 onClick={() => {
-                  history.push(`alert-rules/edit/${record.id}?mode=view`);
+                  history.push(
+                    `alert-rules/edit/${record.strategy_id}?mode=view`
+                  );
                 }}
                 rev={undefined}
               />
-            }
-            {
-              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/put")) && <EditOutlined
-                title='编辑'
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/put")) && (
+              <EditOutlined
+                title="编辑"
+                  // onClick={() => {
+                  //   history.push(`alert-rules/edit/${record.id}`);
+                  // }}
                 onClick={() => {
-                  history.push(`alert-rules/edit/${record.id}`);
+                  history.push(`alert-rules/edit/${record.strategy_id}`);
                 }}
                 rev={undefined}
               />
-            }
-            {
-              (profile.roles?.includes("Admin") || permList.includes("/alert-rules/del")) && <div
-                title='删除'
-                className='table-operator-area-warning'
+            )}
+            {(profile.roles?.includes("Admin") ||
+              permList.includes("/alert-rules/del")) && (
+              <div
+                title="删除"
+                className="table-operator-area-warning"
                 onClick={() => {
                   Modal.confirm({
-                    title: '确认要删除',
-                    okText: '确认',
-                    cancelText: '取消',
+                    title: "确认要删除",
+                    okText: "确认",
+                    cancelText: "取消",
+                    // onOk: () => {
+                    //   // 删除策略
+                    //   bgid &&
+                    //     deleteStrategy([record.id], bgid).then(() => {
+                    //       message.success('删除成功');
+                    //       getAlertRules(params);
+                    //       setSelectRowKeys([]);
+                    //     });
+                    // },
                     onOk: () => {
+                      // 删除告警规则
                       bgid &&
-                        deleteStrategy([record.id], bgid).then(() => {
-                          message.success('删除成功');
-                          getAlertRules(params);
-                          setSelectRowKeys([]);
-                        });
+                        deleteAlertRules(record.strategy_id, bgid).then(
+                          () => {
+                            message.success("删除成功");
+                            getAlertRules(params);
+                            setSelectRowKeys([]);
+                          }
+                        );
                     },
-
-                    onCancel() { },
+                    onCancel() {},
                   });
                 }}
               >
                 <DeleteOutlined rev={undefined} />
               </div>
-            }
-            {record.prod === 'anomaly' && (
+            )}
+            {record.prod === "anomaly" && (
               <div>
-                <Link to={{ pathname: `/alert-rules/brain/${record.id}` }}>{t('brain_result_btn')}</Link>
+                <Link to={{ pathname: `/alert-rules/brain/${record.id}` }}>
+                  {t("brain_result_btn")}
+                </Link>
               </div>
             )}
           </Space>
         );
       },
+      onCell: (record) => ({
+        rowSpan: record.rowSpan
+      }),
     },
   ];
 
@@ -312,6 +393,81 @@ export default function List(props: ListProps) {
     },
   });
 
+  // 合并相同的告警规则名称单元格、操作列、选择列 合并单元格
+  const processData = (data) => {
+    // 1. 按 strategy_id 分组
+    const grouped = data.reduce((acc, item) => {
+      if (!acc[item.strategy_id]) {
+        acc[item.strategy_id] = [];
+      }
+      acc[item.strategy_id].push(item);
+      return acc;
+    }, {});
+  
+    // 生成 strategy_id 到 ids 的映射
+    const strategyIdToIds = {};
+    Object.values(grouped).forEach(group => {
+      if (group.length > 0) {
+        strategyIdToIds[group[0].strategy_id] = group.map(item => item.id);
+      }
+    });
+
+    // 2. 为每个组的第一项设置 rowSpan
+    const processedData = [];
+    Object.values(grouped).forEach(group => {
+      group.forEach((item, index) => {
+        processedData.push({
+          ...item,
+          rowSpan: index === 0 ? group.length : 0
+        });
+      });
+    });
+    return { processedData, strategyIdToIds };
+  };
+  
+  // 新增 state 保存 strategyIdToIds
+  const [strategyIdToIds, setStrategyIdToIds] = useState({});
+
+  // rowSelection 相关逻辑单独提取
+  const rowSelection = {
+    selectedRowKeys: selectRowKeys,
+    renderCell: (checked, record, index, originNode) => {
+      if (record.rowSpan === 0) return { children: null, props: { rowSpan: 0 } };
+      return { children: originNode, props: { rowSpan: record.rowSpan } };
+    },
+    onSelect: (record, selected) => {
+      const groupIds = strategyIdToIds[record.strategy_id];
+      let newSelectedRowKeys = [...selectRowKeys];
+      if (selected) {
+        newSelectedRowKeys = Array.from(new Set([...newSelectedRowKeys, ...groupIds]));
+      } else {
+        newSelectedRowKeys = newSelectedRowKeys.filter(id => !groupIds.includes(id));
+      }
+      setSelectRowKeys(newSelectedRowKeys);
+      const newSelectedRows = listTableData.filter(item => newSelectedRowKeys.includes(item.id));
+      setSelectedRows(newSelectedRows);
+    },
+    onSelectAll: (selected) => {
+      let newSelectedRowKeys;
+      if (selected) {
+        newSelectedRowKeys = listTableData.map(item => item.id);
+      } else {
+        newSelectedRowKeys = [];
+      }
+      setSelectRowKeys(newSelectedRowKeys);
+      const newSelectedRows = listTableData.filter(item => newSelectedRowKeys.includes(item.id));
+      setSelectedRows(newSelectedRows);
+    }
+  };
+  useEffect(() => {
+    const validIds = listTableData.map(item => item.id);
+    const filteredSelectRowKeys = selectRowKeys.filter(id => validIds.includes(id));
+    if (filteredSelectRowKeys.length !== selectRowKeys.length) {
+      setSelectRowKeys(filteredSelectRowKeys);
+    }
+    const newSelectedRows = listTableData.filter(item => filteredSelectRowKeys.includes(item.id));
+    setSelectedRows(newSelectedRows);
+  }, [listTableData, selectRowKeys]);
 
   const getAlertRules = async (params) => {
     if (!bgid) {
@@ -322,9 +478,11 @@ export default function List(props: ListProps) {
       setLoading(false);
       setTotal(dat.total)
       let lists = dat.list;
-      setListTableData(lists);
+      // setListTableData(lists);
       console.log("是否-数据----", lists);
-
+      const { processedData, strategyIdToIds } = processData(lists);
+      setListTableData(processedData);
+      setStrategyIdToIds(strategyIdToIds);
     })
   };
   useEffect(() => {
@@ -502,13 +660,14 @@ export default function List(props: ListProps) {
             bordered
             dataSource={listTableData}
             className='ruler-table_columns'
-            rowSelection={{
-              selectedRowKeys: selectedRows.map((item) => item.id),
-              onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-                setSelectRowKeys(selectedRowKeys);
-                setSelectedRows(selectedRows);
-              },
-            }}
+            // rowSelection={{
+            //   selectedRowKeys: selectedRows.map((item) => item.id),
+            //   onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+            //     setSelectRowKeys(selectedRowKeys);
+            //     setSelectedRows(selectedRows);
+            //   },
+            // }}
+            rowSelection={rowSelection}
             scroll={{ x: tableWidth }}
             components={components}
             columns={resizableColumns}

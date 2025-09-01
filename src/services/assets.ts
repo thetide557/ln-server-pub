@@ -309,6 +309,14 @@ export const getAssetstypesNew = function (params: any) {
     params
   });
 };
+// 监控指标组织树列表
+export const getMonitortree = function (params: any) {
+  // return request('/api/n9e/assets/monitortree', {
+  return request('/api/n9e/assetss/monitortrees', {
+    method: RequestMethod.Get,
+    params
+  });
+};
 
 export const addAssetstypesNew = function (data: any) {
   return request('/api/n9e/assets/assettissuetree', {

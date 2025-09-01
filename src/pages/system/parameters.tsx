@@ -80,6 +80,7 @@ export default function () {
     console.log('submitForm', values);
     values["http_port"] = parseInt(values["http_port"]);
     values["access_expired"] = parseInt(values["access_expired"]);
+    values["refresh_expired"] = parseInt(values["refresh_expired"]);
 
 
 
