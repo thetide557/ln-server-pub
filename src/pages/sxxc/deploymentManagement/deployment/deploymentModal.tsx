@@ -21,10 +21,10 @@ import moment, { Moment } from "moment";
 const dateFormat = "YYYY-MM-DD";
 const formItemLayout = {
   labelCol: {
-    span: 5,
+    span: 6,
   },
   wrapperCol: {
-    span: 19,
+    span: 18,
   },
 };
 const tailLayout = {
