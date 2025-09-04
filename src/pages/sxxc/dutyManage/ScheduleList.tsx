@@ -203,6 +203,11 @@ const ScheduleList: React.FC = () => {
       } finally {
         setConfirmLoading(false);
       }
+    } else if (type === "add") {
+      // 新增模式下，设置值班日期默认值为左边日历选择的日期
+      form.setFieldsValue({
+        duty_date: selectedDate,
+      });
     }
   };
   const handleSubmit = async () => {
