@@ -58,10 +58,7 @@ export default function () {
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedDutyIds, setSelectedDutyIds] = useState<number[]>([]);
   const [selectedDutyNames, setSelectedDutyNames] = useState<string[]>([]);
-  const [current, setCurrent] = useLocalStorage<any>(
-    "duty_manage_list_current",
-    1
-  );
+  const [current, setCurrent] = useState<any>(1);
   const [pageSize, setPageSize] = useLocalStorage<any>(
     "duty_manage_list_page",
     10
