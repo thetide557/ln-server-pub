@@ -77,7 +77,8 @@ export default function List(props: ListProps) {
   const [searchVal, setSearchVal] = useState<any>(null);
   const [filterParam, setFilterParam] = useState<string>('ip');
   const [filterOptions, setFilterOptions] = useState<any>({});
-  const [current, setCurrent] = useLocalStorage('rules_current_from', 1);
+  // const [current, setCurrent] = useLocalStorage('rules_current_from', 1);
+  const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useLocalStorage('rules_current_page', 10);
   const [total, setTotal] = useState<number>(0);
   const [typeOptions, setTypeOptions] = useState<any[]>([]);

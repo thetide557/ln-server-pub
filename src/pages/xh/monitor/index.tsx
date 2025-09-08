@@ -72,7 +72,8 @@ export default function () {
   const [optionColumns, setOptionColumns] = useState<any[]>([]);
   const [parId, setParId] = useLocalStorage('left_parId')
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
-  const [current, setCurrent] = useLocalStorage<any>('monitors_list_current', 1);
+  // const [current, setCurrent] = useLocalStorage<any>('monitors_list_current', 1);
+  const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useLocalStorage<any>('monitors_list_page', 10);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [filterOptions, setFilterOptions] = useState<any>({});

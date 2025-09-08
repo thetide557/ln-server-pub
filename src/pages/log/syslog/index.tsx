@@ -40,7 +40,8 @@ export default function () {
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
   const [modifySelectLog, setModifySelectLog] = useState<boolean>(true);
   const [selectLog, setSelectLog] = useLocalStorage<any>('left_logs_type', '0');
-  const [current, setCurrent] = useLocalStorage("log_current", 1);
+  // const [current, setCurrent] = useLocalStorage("log_current", 1);
+  const [current, setCurrent] = useState<number>(1);
   // const [pageSize, setPageSize] = useLocalStorage("log_current_page",10);
   // 列处理
   const [groupedColumns, setGroupedColumns] = useState<any>({});
