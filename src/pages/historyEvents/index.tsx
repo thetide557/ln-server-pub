@@ -76,7 +76,8 @@ const Event: React.FC = () => {
   const [end, setEnd] = useState<number>(0);
   const history = useHistory();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [current, setCurrent] = useLocalStorage('histories_events_from', 1);
+  // const [current, setCurrent] = useLocalStorage('histories_events_from', 1);
+  const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useLocalStorage('histories_events_page', 30);
   const [ftype, setFtype] = useState<number>(1);
   const [filter, setFilter] = useState<{
