@@ -163,6 +163,7 @@ export default function () {
                   onOk: async () => {
                     await delDeployments(record.id);
                     message.success(t("common:success.delete"));
+                    setCurrent(1);
                     setRefreshKey(_.uniqueId("refreshKey_"));
                     setSelectedAssets([]);
                   },
@@ -187,6 +188,19 @@ export default function () {
       persistenceKey: `dashboard-table-resizable-xh-asset-management`,
     },
   });
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      //event.preventDefault(); 
+      setCurrent(1);
+      return ''; 
+    };
+ 
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   useEffect(() => {
     getTableData();
