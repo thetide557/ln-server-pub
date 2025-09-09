@@ -106,11 +106,11 @@ const AccordionModal = (props: any) => {
       .then((data) => {
         addIotType(data).then((res) => {
           message.success("新增成功");
-          closeOpen("sure");
-        });
-        getDeviceTypes();
-        setIsModalOpen(false);
-        addTypeForm.resetFields();
+          // closeOpen("sure");
+          getDeviceTypes();
+          setIsModalOpen(false);
+          addTypeForm.resetFields();
+        })
       })
       .catch((err) => {
         console.log(err);
