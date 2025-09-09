@@ -51,7 +51,7 @@ export default function () {
   const { t } = useTranslation("assets");
   const [list, setList] = useState<any[]>([]);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
-  const [current, setCurrent] = useLocalStorage("asset_current_from", 1);
+  const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useLocalStorage("asset_current_page", 10);
   const [searchVal, setSearchVal] = useLocalStorage<any>(
     "asset_filter_value",
@@ -163,6 +163,7 @@ export default function () {
                   onOk: async () => {
                     await delDeployments(record.id);
                     message.success(t("common:success.delete"));
+                    setCurrent(1);
                     setRefreshKey(_.uniqueId("refreshKey_"));
                     setSelectedAssets([]);
                   },

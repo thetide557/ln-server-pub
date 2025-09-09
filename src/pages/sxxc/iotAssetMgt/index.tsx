@@ -90,7 +90,7 @@ export default function () {
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None); // 批量操作类型
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]); // 选中资产
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
-  const [current, setCurrent] = useLocalStorage('iotasset_current_from', 1); // 当前页码
+  const [current, setCurrent] = useState(1); // 当前页码
   const [pageSize, setPageSize] = useLocalStorage('iotasset_current_page', 10); // 每页条数
   const [queryFilter, setQueryFilter] = useState<any>([]); // 资产清单过滤条件下拉列表
   const [searchVal, setSearchVal] = useLocalStorage<any>(

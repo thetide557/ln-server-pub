@@ -108,7 +108,7 @@ import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import healthReport from '@/pages/sxxc/healthReport'
-import workOrder from '@/pages/sxxc/workOrder'
+import workOrder from '@/pages/sxxc/workorder'
 import productionPlan from '@/pages/sxxc/productionPlan'
 // import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
 // import serverVideoAlarm from "@/pages/sxxc/serverVideoAlarm";

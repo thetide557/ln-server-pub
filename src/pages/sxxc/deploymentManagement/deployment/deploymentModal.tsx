@@ -55,6 +55,7 @@ const AccordionModal = (props: any) => {
           deployment_date: data.deployment_date? data.deployment_date.format(dateFormat) : '',
           province: data.region[0],
           city: data.region[1],
+          county: data.region[2],
         };
         if (itemForm.id) {
           putDeployment({ ...params, id: itemForm.id }).then((res) => {
@@ -108,8 +109,8 @@ const AccordionModal = (props: any) => {
               <Cascader
                 options={city}
                 fieldNames={{
-                  label: "label",
-                  value: "label",
+                  label: "name",
+                  value: "name",
                   children: "children",
                 }}
                 placeholder="请选择所属区域"
@@ -130,8 +131,6 @@ const AccordionModal = (props: any) => {
               />
             </Form.Item>
           </Col>
-        {/* </Row> */}
-        {/* <Row gutter={16}> */}
           <Col span={12}>
             <Form.Item name="deployment_version" label="部署版本">
               <Input placeholder="请输入部署版本" />
@@ -140,13 +139,13 @@ const AccordionModal = (props: any) => {
           <Col span={12}>
             <Form.Item name="asset_count" label="资产总数">
               <InputNumber
+                min={0}
+                precision={0}
                 style={{ width: "100%" }}
                 placeholder="请输入资产总数"
               />
             </Form.Item>
           </Col>
-        {/* </Row> */}
-        {/* <Row gutter={16}> */}
           <Col span={12}>
             <Form.Item name="contact_person" label="联系人">
               <Input placeholder="请输入联系人" />
