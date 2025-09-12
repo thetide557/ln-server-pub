@@ -646,8 +646,8 @@ export default function () {
             <OperationModal
               operateType={operateType}
               setOperateType={setOperateType}
-              assets={selectedDutyIds}
-              names={selectedDutyNames}
+              // assets={selectedDutyIds}
+              // names={selectedDutyNames}
               reloadList={() => {
                 setRefreshKey(_.uniqueId("refreshKey_"));
               }}

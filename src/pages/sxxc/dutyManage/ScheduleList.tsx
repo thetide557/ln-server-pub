@@ -14,6 +14,8 @@ import {
   Form,
   Select,
   DatePicker,
+  Space,
+  Tooltip
 } from "antd";
 import {
   PlusSquareFilled,
@@ -22,6 +24,7 @@ import {
   UploadOutlined,
   LeftCircleFilled,
   RightCircleFilled,
+  ImportOutlined,
 } from "@ant-design/icons";
 import IconFont from "@/components/IconFont";
 import moment, { Moment } from "moment";
@@ -38,6 +41,9 @@ import {
 import { exportTemplet } from "@/services/assets/asset";
 import "./ScheduleList.less";
 import { CommonStateContext } from "@/App";
+import { OperateType } from "./DutyList";
+import { OperationModal } from "./OperationModal";
+import _ from "lodash";
 
 // 定义排班数据接口
 interface ScheduleItem {
@@ -47,7 +53,11 @@ interface ScheduleItem {
   first_line_ids?: string[];
   second_line_ids?: string[];
   third_line_ids?: string[];
-  createTime?: string;
+  createTime?: number;
+  director?: object;
+  first_lines?: Array<{Name: string, id: string}>;
+  second_lines?: Array<{Name: string, id: string}>;
+  third_lines?: Array<{Name: string, id: string}>;
 }
 
 // 定义人员选项接口
@@ -61,6 +71,7 @@ const ScheduleList: React.FC = () => {
   // 状态管理
   const [selectedDate, setSelectedDate] = useState<Moment>(moment());
   const [selectedMonth, setSelectedMonth] = useState<Moment>(moment());
+  const [showScheduleDetail, setShowScheduleDetail] = useState(false);  //控制是否显示排班详情
 
   const [scheduleData, setScheduleData] = useState<ScheduleItem[]>([]);
   const [currentSchedule, setCurrentSchedule] = useState<ScheduleItem>({});
@@ -86,6 +97,8 @@ const ScheduleList: React.FC = () => {
   const [modalType, setModalType] = useState<"add" | "edit">("add");
   const [initData, setInitData] = useState({});
   const { profile, permList } = useContext(CommonStateContext);
+  const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
+  const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
   // 只可选登录当天及以后日期
   const disableDate = (current: Moment) => {
     const today = moment().startOf("day");
@@ -102,7 +115,8 @@ const ScheduleList: React.FC = () => {
   }, [selectedDate]);
   useEffect(() => {
     getData();
-  }, [selectedMonth]);
+  }, [selectedMonth, refreshKey]);
+
   // 获取排班列表数据
   const getData = () => {
     // 当月排班数据
@@ -110,7 +124,15 @@ const ScheduleList: React.FC = () => {
     setLoading(true);
     getScheduleList(param).then(({ dat }) => {
       setLoading(false);
-      setScheduleData(dat);
+      // setScheduleData(dat);
+      // 处理数据格式，确保first_lines和second_lines数组正确解析
+      const processedData = dat.map(item => ({
+        ...item,
+        first_lines: item.first_lines || [],
+        second_lines: item.second_lines || [],
+        third_lines: item.third_lines || []
+      }));
+      setScheduleData(processedData);
     });
   };
 
@@ -259,6 +281,11 @@ const ScheduleList: React.FC = () => {
     });
   };
 
+  // 导入排班
+  const handleImport = () => { 
+    setOperateType(OperateType.Import);
+  };
+
   // 处理导出排班
   const handleExport = () => {
     // 弹框
@@ -309,9 +336,13 @@ const ScheduleList: React.FC = () => {
     date
   ) => {
     const isToday = moment().isSame(date, "day");
-    const hasSch =
-      scheduleData &&
-      scheduleData.some((item) => item.duty_date && moment.unix(item.duty_date).isSame(date, "day"));
+    // const hasSch =
+    //   scheduleData &&
+    //   scheduleData.some((item) => item.duty_date && moment.unix(item.duty_date).isSame(date, "day"));
+    const scheduleItem = scheduleData && scheduleData.find(
+      item => item.duty_date && moment.unix(item.duty_date).isSame(date, "day")
+    );
+    const hasSch = !!scheduleItem;
     // console.log("是否有排班", date.format("YYYY-MM-DD"),hasSch);
     // 获取农历日期
     const d = Lunar.fromDate(date.toDate());
@@ -319,7 +350,8 @@ const ScheduleList: React.FC = () => {
     const lunarDay = d.getDayInChinese();
     // 初一显示完整农历月份和日期，其他日期只显示日期
     const lunar = lunarDay === "初一" ? `${lunarMonth}月${lunarDay}` : lunarDay;
-
+// 如果不是详情模式，显示简单的"已排班"标记
+    if (!showScheduleDetail) {
     return (
       <div className="calendar-cell">
         <div className="top">
@@ -344,6 +376,59 @@ const ScheduleList: React.FC = () => {
         </div>
       </div>
     );
+  } else { 
+    // 详情模式：显示一线和二线运维人员
+      // 获取一线运维人员列表
+      const firstLinePersonnel = scheduleItem?.first_lines || [];
+      // 获取二线运维人员列表
+      const secondLinePersonnel = scheduleItem?.second_lines || [];
+      const firstLineNames = firstLinePersonnel.map(p =>p.Name || '');
+      const secondLineNames = secondLinePersonnel.map(p =>p.Name || '');
+      return (
+        <div className="calendar-cell">
+          <div className="top">
+            <div
+              className="date-number"
+              style={
+                isToday
+                  ? {
+                      borderRadius: "50%",
+                      backgroundColor: "#2888f7",
+                      color: "#fff",
+                    }
+                  : {}
+              }
+            >
+              {date.date()}
+            </div>
+            <div className="lunar-date">{lunar}</div>
+          </div>
+          <div className="bottom">
+            {hasSch && <div className="schedule-detail-info">
+              {/* 一线运维 */}
+              {firstLineNames.length > 0 && (
+                <div className="personnel-line">
+                  <Tooltip title={firstLineNames.join(', ')}>
+                    一线运维：{firstLineNames.join('、')}
+                  </Tooltip>
+                  
+                </div>
+              )}
+              {/* 二线运维 */}
+              {secondLineNames.length > 0 && (
+                <div className="personnel-line">
+                  <Tooltip title={secondLineNames.join(', ')}>
+                    二线运维：{secondLineNames.join('、')}
+                  </Tooltip>
+                </div>
+              )}
+            </div>}
+          </div>
+        </div>
+      );
+    
+
+  }
   };
 
   // 渲染排班详情
@@ -516,8 +601,33 @@ const ScheduleList: React.FC = () => {
                         >
                           今天
                         </Button>
+                        <Button
+                          onClick={() => {
+                            setShowScheduleDetail(!showScheduleDetail);
+                          }}
+                          size="small"
+                          style={{
+                            backgroundColor: '#5eaaf2',
+                            color: 'white',
+                            borderColor: '#5eaaf2'
+                          }}
+                        >
+                          {showScheduleDetail ? "返回" : "排班详情"}
+                        </Button>
+
                       </div>
                       <div>
+                        <Space>
+                        {(profile.roles?.includes("Admin") ||
+                          permList.includes("/sxxc/schedule_list/import")) && (
+                          <Button
+                            icon={<ImportOutlined />}
+                            onClick={handleImport}
+                            size="small"
+                          >
+                            导入
+                          </Button>
+                        )}
                         {(profile.roles?.includes("Admin") ||
                           permList.includes("/sxxc/schedule_list/export")) && (
                           <Button
@@ -529,6 +639,7 @@ const ScheduleList: React.FC = () => {
                             导出
                           </Button>
                         )}
+                        </Space>
                       </div>
                     </div>
                   );
@@ -677,6 +788,20 @@ const ScheduleList: React.FC = () => {
           </Row>
         </Form>
       </Modal>
+
+      {/* 导入排班弹窗 */}
+      <OperationModal
+        operateType={operateType}
+        setOperateType={setOperateType}
+        reloadList={() => {
+          setRefreshKey(_.uniqueId("refreshKey_"));
+        }}
+        importConfig={{
+          templateUrl: "/api/n9e/busi-group/schedule/template",
+          importUrl: "/api/n9e/xh/schedule/import-xls",
+          templateTitle: "排班数据",
+        }}
+      />
     </div>
   );
 };

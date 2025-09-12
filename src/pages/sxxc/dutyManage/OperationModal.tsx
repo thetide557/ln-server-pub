@@ -17,12 +17,24 @@ import Icon from "@ant-design/icons";
 import moment from "moment";
 import { importXhAssetSetData } from '@/services/assets';
 
+// 定义导入配置接口
+export interface ImportConfig {
+  templateUrl: string;
+  importUrl: string;
+  templateTitle: string;
+}
 export const OperationModal = ({
   operateType,
   setOperateType,
-  assets,
-  names,
+  // assets,
+  // names,
   reloadList,
+  // 导入配置参数
+  importConfig = {
+    templateUrl: '/api/n9e/busi-group/duty/template',
+    importUrl: '/api/n9e/xh/duty/import-xls',
+    templateTitle: '值班人员'
+  }
 }) => {
   const { t } = useTranslation("assets");
   const { busiGroups } = useContext(CommonStateContext);
@@ -79,9 +91,13 @@ export const OperationModal = ({
               <Button
                 className="down_load_button"
                 onClick={async (event) => {
-                  let url = "/api/n9e/busi-group/duty/template";
+                  // let url = "/api/n9e/busi-group/duty/template";
+                  // let params = {};
+                  // let exportTitle = "值班人员";
+                  // 使用配置的URL和标题
+                  let url = importConfig.templateUrl;
                   let params = {};
-                  let exportTitle = "值班人员";
+                  let exportTitle = importConfig.templateTitle;
                   exportTemplet(url, params).then((res) => {
                     const url = window.URL.createObjectURL(
                       new Blob(
@@ -161,13 +177,16 @@ export const OperationModal = ({
       }
       let formData = new FormData();
       formData.append("file", fileList[0]);
-      let url = "/api/n9e/xh/duty/import-xls";
+      // let url = "/api/n9e/xh/duty/import-xls";
+      // 使用配置的URL
+      let url = importConfig.importUrl;
       console.log("批量导入", url);
       importXhAssetSetData(url, formData).then((res) => {
         message.success("批量导入成功");
         setFileName("");
         setFileList([]);
         reloadList(null, operateType);
+        setOperateType(OperateType.None); // 关闭导入弹框
       });
     } else {
       form.validateFields().then((data) => {
