@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Cascader,
   Col,
@@ -8,16 +8,16 @@ import {
   InputNumber,
   Modal,
   Row,
-  Select,
   message,
 } from "antd";
 import city from "./city.js";
+import _ from 'lodash';
 import {
   addDeployment,
   putDeployment,
 } from "@/services/sxxc/deploymentManagement";
-import _ from "lodash";
-import moment, { Moment } from "moment";
+import moment from "moment";
+import { MinusSquareOutlined, PlusSquareOutlined } from "@ant-design/icons";
 const dateFormat = "YYYY-MM-DD";
 const formItemLayout = {
   labelCol: {
@@ -33,29 +33,46 @@ const tailLayout = {
   },
   wrapperCol: { span: 21 },
 };
+interface Application {
+  applicationName1: string;
+}
 const AccordionModal = (props: any) => {
   const [form] = Form.useForm();
   const { title, open, closeOpen, itemForm } = props;
+
+  const [applicationList, setApplicationList] = useState<Application[]>([]);
   useEffect(() => {
-    if (itemForm.id) {
+    if (!open) return;
+    setApplicationList([...applicationList, { applicationName1: '' }]);
+    if (itemForm && itemForm.id) {
+      const regionValue = Array.isArray(itemForm.region)
+        ? itemForm.region
+        : typeof itemForm.region === "string" && itemForm.region
+          ? itemForm.region.split(",")
+          : [];
       form.setFieldsValue({
         ...itemForm,
-        deployment_date: itemForm.deployment_date? moment(itemForm.deployment_date) : '',
-        region:itemForm?.region.split(',')
+        deployment_date: itemForm.deployment_date ? moment(itemForm.deployment_date) : null,
+        region: regionValue,
       });
+    } else {
+      form.resetFields();
     }
-  }, []);
+  }, [open, itemForm, form]);
 
   const handleOk = () => {
     form
       .validateFields()
       .then((data) => {
+        console.log(data);
+
+        const regionArr = Array.isArray(data.region) ? data.region : [];
         let params = {
           ...data,
-          deployment_date: data.deployment_date? data.deployment_date.format(dateFormat) : '',
-          province: data.region[0],
-          city: data.region[1],
-          county: data.region[2],
+          deployment_date: data.deployment_date ? data.deployment_date.format(dateFormat) : undefined,
+          province: regionArr[0],
+          city: regionArr[1],
+          county: regionArr[2],
         };
         if (itemForm.id) {
           putDeployment({ ...params, id: itemForm.id }).then((res) => {
@@ -77,7 +94,43 @@ const AccordionModal = (props: any) => {
   const handleCancel = () => {
     closeOpen("cancel");
   };
+  const addIcon = () => {
+    const indexs = applicationList.length
+    const updatedList = [
+      ...applicationList,
+      { [`applicationName${indexs}`]: '' } // 键名按实际需求调整
+    ];
+    console.log(updatedList);
+    setApplicationList(updatedList);
+  };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const removeIcon = (index: number) => {
+    console.log(applicationList);
+    const newArr = applicationList.filter((x, ind) => ind != index)
+    console.log(newArr);
+    setApplicationList(newArr);
+  };
   return (
     <Modal
       visible={open}
@@ -98,8 +151,6 @@ const AccordionModal = (props: any) => {
               <Input placeholder="请输入项目名称" />
             </Form.Item>
           </Col>
-        </Row>
-        <Row gutter={16}>
           <Col span={12}>
             <Form.Item
               name="region"
@@ -123,6 +174,11 @@ const AccordionModal = (props: any) => {
             </Form.Item>
           </Col>
           <Col span={12}>
+            <Form.Item name="deployment_version" label="部署版本">
+              <Input placeholder="请输入部署版本" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
             <Form.Item name="deployment_date" label="部署日期">
               {/* @ts-ignore */}
               <DatePicker
@@ -132,12 +188,22 @@ const AccordionModal = (props: any) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="deployment_version" label="部署版本">
-              <Input placeholder="请输入部署版本" />
+            <Form.Item name="deployment_version" label="部署环境">
+              <Input placeholder="请输入部署环境" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="asset_count" label="资产总数">
+            <Form.Item name="deployment_version" label="URL地址">
+              <Input placeholder="请输入URL地址" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="deployment_version" label="VPN名称">
+              <Input placeholder="请输入VPN名称" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="asset_count" label="资产总数" rules={[{ required: true }]}>
               <InputNumber
                 min={0}
                 precision={0}
@@ -151,6 +217,23 @@ const AccordionModal = (props: any) => {
               <Input placeholder="请输入联系人" />
             </Form.Item>
           </Col>
+          {_.map(applicationList, (item, index) => {
+            return (
+              <Col span={24} key={index}>
+                <Form.Item
+                  labelCol={{ span: 3 }}
+                  wrapperCol={{ span: 21 }}
+                  name={`applicationName${index + 1}`}
+                  label={`纳管应用${index + 1}`}
+                  style={{ display: 'flex', alignItems: 'center' }}
+                >
+                  <Input placeholder="请输入纳管应用名称" style={{ width: "91%" }} />
+                  <PlusSquareOutlined onClick={addIcon} style={{ fontSize: "20px", margin: ".5rem", color: '#1677FF' }} />
+                  <MinusSquareOutlined onClick={() => removeIcon(index)} style={{ fontSize: "20px", color: index === 0 ? '#cccccc' : '#ff1645' }} />
+                </Form.Item>
+              </Col>
+            );
+          })};
         </Row>
       </Form>
     </Modal>
