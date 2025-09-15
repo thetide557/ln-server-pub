@@ -314,18 +314,36 @@ export default function Login() {
     switch (key) {
       case 'CAS':
         getRedirectURLCAS().then(res => {
-          localStorage.setItem("CAS_state", res.dat?.state)
-          window.location.href = res.dat?.redirect;
+          if (res.dat?.valid) {
+            localStorage.setItem("CAS_state", res.dat?.state)
+            window.location.href = res.dat?.redirect;
+          } else {
+            message.error('获取CAS登录地址失败，请检查CAS登录配置')
+          }
+        }).catch(_ => {
+          message.error('获取CAS登录地址失败，请检查CAS登录配置')
         })
         break;
       case 'OIDC':
         getRedirectURL().then(res => {
-          window.location.href = res.dat;
+          if (res.dat?.valid) {
+            window.location.href = res.dat?.redirect;
+          } else {
+            message.error('获取OIDC登录地址失败，请检查OIDC登录配置')
+          }
+        }).catch(_ => {
+          message.error('获取OIDC登录地址失败，请检查OIDC登录配置')
         })
         break;
       case 'OAuth2':
         getRedirectURLOAuth().then(res => {
-          window.location.href = res.dat;
+          if (res.dat?.valid) {
+            window.location.href = res.dat?.redirect;
+          } else {
+            message.error('获取OAuth2登录地址失败，请检查OAuth2登录配置')
+          }
+        }).catch(_ => {
+          message.error('获取OAuth2登录地址失败，请检查OAuth2登录配置')
         })
         break;
     }
