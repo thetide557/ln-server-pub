@@ -66,7 +66,8 @@ import {
   getIotDeviceList,
   getIotTreeList,
   delIotTreeNode,
-  getIotAttributeList
+  getIotAttributeList,
+  getIotTypeList,
 } from '@/services/sxxc/iotAssets';
 
 export enum OperateType {
@@ -129,6 +130,7 @@ export default function () {
   const [parentId, setParentId] = useState(-1);
   const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1)); // ??左侧资产树选中的分组的id
   const [configOpen, setConfigOpen] = useState<boolean>(false); // 字段配置模态框是否显示
+  const [deviceTypes, setDeviceTypes] = useState<any>([]); // 分组内设备类型
 
   // 资产清单表列固定列
   const fixColumns: any[] = [
@@ -333,12 +335,21 @@ export default function () {
     });
   };
 
+   // 获取分组内设备类型选项
+  const getDeviceTypes = () => {
+    getIotTypeList().then((res) => {
+      const { dat } = res;
+      setDeviceTypes(dat)
+    });
+  };
+
   useEffect(() => {
     getTableData();
   }, [typeId, refreshKey, filterParam, searchVal]);
 
   useEffect(() => {
     getAssetTree();
+    getDeviceTypes()
   }, []);
 
   // TODO:定时刷新
@@ -381,10 +392,27 @@ export default function () {
 
   // 资产清单表格操作：查看
   const showModal = (action: string, formData: any) => {
+    console.log('formData', formData);
+    
     if (action == 'view') {
-      history.push(
-        '/xh/iotassetmgt/view?mode=view&id=' + formData.id + '&typeId=' + typeId
-      );
+      // 检查 deviceTypes 是否已加载，如果没有则重新加载
+      if (deviceTypes.length === 0) {
+        getIotTypeList().then(res => {
+          const { dat } = res;
+          const primaryKeys = dat.find((item:any) => item.id == typeId)?.PrimaryKeys
+          const primaryKey = JSON.parse(primaryKeys)[0]
+          history.push(
+            '/xh/iotassetmgt/view?mode=view&id=' + formData[primaryKey] + '&typeId=' + typeId + '&primaryKey=' + primaryKey
+          );
+        });
+      } else {
+        console.log(deviceTypes);
+        const primaryKeys = deviceTypes.find((item:any) => item.id == typeId)?.PrimaryKeys
+        const primaryKey = JSON.parse(primaryKeys)[0]
+        history.push(
+          '/xh/iotassetmgt/view?mode=view&id=' + formData[primaryKey] + '&typeId=' + typeId + '&primaryKey=' + primaryKey
+        );
+      }
     }
   };
   // 资产清单表格分页
@@ -398,6 +426,18 @@ export default function () {
   const handleClose = (value: any) => {
     if (value == 'sure') {
       getAssetTree();
+    }
+    if (value == 'sureDelType') {
+      getIotTypeList().then(res => {
+        const { dat } = res;
+        setDeviceTypes(dat)
+        getAssetTree();
+        const ids = dat.map(item => item.id);
+        if (!ids.includes(typeId)) {
+          setTypeId(0);
+          setParId(-1);
+        }
+      });
     }
     setOpen(false);
   };
