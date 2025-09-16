@@ -59,7 +59,7 @@ export default function () {
   );
   const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
   const [total, setTotal] = useState<number>(0);
-  const { busiGroups, profile, permList } = useContext(CommonStateContext);
+  const {profile, permList } = useContext(CommonStateContext);
   const [title, setTitle] = useState<any>("");
   const [open, setOpen] = useState<boolean>(false);
   const [itemForm, setTtemForm] = useState<Object>({});
