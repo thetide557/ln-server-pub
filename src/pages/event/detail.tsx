@@ -188,6 +188,30 @@ const EventDetailPage: React.FC = () => {
         return `${content} s`;
       },
     },
+    {
+      label: '屏蔽状态',
+      key: 'is_muted',
+      render(mute) {
+        return <Tag color={mute ? 'green' : 'red'}>{mute ? '已屏蔽' : '未屏蔽'}</Tag>;
+      },
+    },
+    // 添加屏蔽开始时间显示，仅在is_muted为1时显示
+    ...(eventDetail?.is_muted === 1 ? [{
+      label: '屏蔽开始时间',
+      key: 'mute_start_time',
+      render(time) {
+        return time;
+      },
+    }] : []),
+    // 添加屏蔽结束时间显示，仅在is_muted为1时显示
+    ...(eventDetail?.is_muted === 1 ? [{
+      label: '屏蔽结束时间',
+      key: 'mute_end_time',
+      render(time) {
+        return time;
+      },
+    }] : []),
+    
     // {
     //   label: t('detail.prom_for_duration'),
     //   key: 'prom_for_duration',

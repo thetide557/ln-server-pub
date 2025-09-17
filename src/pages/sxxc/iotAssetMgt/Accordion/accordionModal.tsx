@@ -1,11 +1,12 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Form, Input, Modal, Select, message } from "antd";
+import { Form, Input, Modal, Select, message, Checkbox } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { CommonStateContext } from "@/App";
 import {
   getIotTypeList,
   addIotType,
   addIotTree,
+  delIotType
 } from "@/services/sxxc/iotAssets";
 import _ from "lodash";
 import "./index.less";
@@ -14,10 +15,13 @@ const AccordionModal = (props: any) => {
   const { busiGroups, profile, permList } = useContext(CommonStateContext);
   const [form] = Form.useForm();
   const [addTypeForm] = Form.useForm(); // 新增设备类型表单
+  const [delTypeForm] = Form.useForm(); // 删除设备类型表单
   const { title, open, closeOpen, curGroup, level, parentId } = props;
   const [checkList, setCheckList] = useState<any>([]);
   const [deviceTypes, setDeviceTypes] = useState<any>([]); // 分组内设备类型
   const [isModalOpen, setIsModalOpen] = useState(false); // 新增设备类型弹窗是否显示
+  const [isDelModalOpen, setIsDelModalOpen] = useState(false); // 删除设备类型弹窗是否显示
+  const [delFlag, setDelFlag] = useState<boolean>(false);
   // const [addDeviceTypes, setAddDeviceTypes] = useState<any>([]); // 新增设备类型
 
   // 获取分组内设备类型选项
@@ -46,12 +50,14 @@ const AccordionModal = (props: any) => {
     if (curGroup.nodeName) {
       const typsList = curGroup.TypeIds!="-1"?JSON.parse(curGroup.TypeIds) : [];
       const selectDeviceList = filterDataByIds(deviceTypes, typsList);
-      // console.log("当前分组设备", selectDeviceList);
+      const typeIds = selectDeviceList.map((item) => item.id);
+      console.log("当前分组设备", selectDeviceList, typsList);
       // 修改
       const obj = {
         id: curGroup.nodeId,
         Name: curGroup.nodeName,
-        TypeIds: typsList,
+        // TypeIds: typsList,
+        TypeIds: typeIds,
       };
       setCheckList(selectDeviceList);
       form.setFieldsValue(obj);
@@ -89,6 +95,7 @@ const AccordionModal = (props: any) => {
   };
 
   const handleCancel = () => {
+    if (delFlag) return closeOpen("sureDelType");
     closeOpen("cancel");
   };
 
@@ -110,6 +117,25 @@ const AccordionModal = (props: any) => {
           getDeviceTypes();
           setIsModalOpen(false);
           addTypeForm.resetFields();
+        })
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  // 删除设备类型
+  const handleDelTypeOK = () => {
+    delTypeForm
+      .validateFields()
+      .then((data) => {
+        console.log(data);
+        delIotType(data).then((res) => { 
+          setDelFlag(true);
+          message.success("删除成功");
+          getDeviceTypes();
+          setIsDelModalOpen(false);
+          delTypeForm.resetFields();
         })
       })
       .catch((err) => {
@@ -168,13 +194,23 @@ const AccordionModal = (props: any) => {
                   {menu}
                   {/* admin账号显示该选项 */}
                   { (profile.roles?.includes('Admin') ||
-                    permList.includes('/sxxc/iotassetmgt/adddevicetype')) && (
+                    permList.includes('/xh/iotassetmgt/adddevicetype')) && (
                     <div
                       className="ant-select-item"
                       style={{ padding: "8px 12px", cursor: "pointer" }}
                       onClick={() => setIsModalOpen(true)}
                     >
                       新增设备类型
+                    </div>
+                  )}
+                   { (profile.roles?.includes('Admin') ||
+                    permList.includes('/xh/iotassetmgt/deldevicetype')) && (
+                    <div
+                      className="ant-select-item"
+                      style={{ padding: "8px 12px", cursor: "pointer" }}
+                      onClick={() => setIsDelModalOpen(true)}
+                    >
+                      删除设备类型
                     </div>
                   )}
                 </>
@@ -247,6 +283,29 @@ const AccordionModal = (props: any) => {
             rules={[{ required: true, message: "请输入设备表名" }]}
           >
             <Input placeholder="请输入设备表名" />
+          </Form.Item>
+        </Form>
+      </Modal>
+      {/* 删除设备类型弹窗 */}
+      <Modal
+        title="删除设备类型"
+        visible={isDelModalOpen}
+        onCancel={() => setIsDelModalOpen(false)}
+        onOk={handleDelTypeOK}
+      >
+        <Form form={delTypeForm}>
+          <Form.Item
+            name="typeIds"
+            label="设备类型"
+            rules={[{ required: true, message: "请选择要删除的设备类型" }]}
+          >
+            <Checkbox.Group style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+              {deviceTypes.map((item) => (
+                <div key={item.id} style={{ lineHeight: '32px', marginLeft: '8px' }}>
+                  <Checkbox value={item.id}>{item.name}</Checkbox>
+                </div>
+              ))}
+            </Checkbox.Group>
           </Form.Item>
         </Form>
       </Modal>
