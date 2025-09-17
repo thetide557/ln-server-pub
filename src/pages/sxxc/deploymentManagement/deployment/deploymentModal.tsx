@@ -23,7 +23,6 @@ import { getNotifiesList } from '@/services/manage';
 import { getDictDataListByType } from '@/services/system/dict';
 import moment from "moment";
 import { MinusSquareOutlined, PlusSquareOutlined } from "@ant-design/icons";
-import TextArea from "antd/lib/input/TextArea.js";
 const dateFormat = "YYYY-MM-DD";
 const formItemLayout = {
   labelCol: {
@@ -39,15 +38,7 @@ const tailLayout = {
   },
   wrapperCol: { span: 21 },
 };
-// const mediumOptions = [
-//   { label: "钉钉", value: "1", className: "label-1" },
-//   { label: "企业微信", value: "2", className: "label-2" },
-//   { label: "飞书", value: "3", className: "label-3" },
-//   { label: "邮件", value: "4", className: "label-3" },
-//   { label: "飞书卡片", value: "5", className: "label-3" },
-//   { label: "外呼", value: "6", className: "label-3" },
-//   { label: "短信", value: "7", className: "label-3" },
-// ];
+
 
 interface Application {
   name: string;
@@ -87,19 +78,30 @@ const DeploymentModal = (props: DeploymentModalProps) => {
     getNotifies()
     if (itemForm && itemForm.id) {
       getDeploymentsDetails(itemForm.id).then((res) => {
-        const { region, deployment_date } = res.dat;
-        const regionValue = Array.isArray(region)
-          ? region
-          : typeof region === "string" && region
-            ? region.split(",")
-            : [];
+        const { deployment_date,province,city,county,applications,operators} = res.dat;
         form.setFieldsValue({
           ...res.dat,
           deployment_date: deployment_date
             ? moment(deployment_date)
             : null,
-          region: regionValue,
+          region: [province,city,county ],
         });
+        const applicationArr = (applications || []).map((item: any) => ({
+          name: item || "",
+        }));
+        setApplicationList(applicationArr.length > 0 ? applicationArr : [{ name: "" }]);
+
+        const normalizedOperators: MaintenanceUser[] = Array.isArray(operators) && operators.length > 0
+          ? operators.map((item: any) => ({
+              name: item?.name ?? "",
+              phone: item?.phone ?? "",
+            }))
+          : [{ name: "", phone: "" }];
+        setMaintenanceUserList(normalizedOperators);
+        form.setFieldsValue({
+          maintenanceUserList: normalizedOperators
+        });
+
       })
 
     } else {
@@ -107,30 +109,10 @@ const DeploymentModal = (props: DeploymentModalProps) => {
     }
   }, [open, itemForm, form]);
 
-  useEffect(() => {
-    if (!open) return;
-    const values: Record<string, any> = {};
-    maintenanceUserList.forEach((user, idx) => {
-      values[`maintenanceUser${idx + 1}`] = user.name;
-      values[`maintenanceUserPhone${idx + 1}`] = user.phone;
-    });
-    const extraCount = form.getFieldsValue();
-    Object.keys(extraCount).forEach((key) => {
-      const match = key.match(/^maintenanceUser(\d+)$/) || key.match(/^maintenanceUserPhone(\d+)$/);
-      if (match) {
-        const num = Number(match[1]);
-        if (num > maintenanceUserList.length) {
-          values[key] = undefined;
-        }
-      }
-    });
-    form.setFieldsValue(values);
-  }, [maintenanceUserList, open]);
-
   const getindustry = () => {
     getDictDataListByType('industry').then((res: any) => {
-      if (res?.data) {
-        setIndustryOption(res.data || []);
+      if (res?.dat) {
+        setIndustryOption(res.dat || []);
       }
     }).catch((error: any) => {
       console.error('获取行业数据失败:', error);
@@ -138,8 +120,8 @@ const DeploymentModal = (props: DeploymentModalProps) => {
   }
   const getNotifies = () => {
     getNotifiesList().then((res: any) => {
-      if (res?.data) {
-        const newArr = res.data.map(x=>{
+      if (res) {
+        const newArr = res.map(x=>{
           return {
             label:x.label,
             value:x.key
@@ -165,12 +147,13 @@ const DeploymentModal = (props: DeploymentModalProps) => {
         province,
         city,
         county,
-        id: itemForm?.id || undefined
+        id: itemForm?.id || undefined,
+        applications:applicationList.length?applicationList.map(x=>x.name):[],
+        operators:maintenanceUserList
       };
       const apiFunction = itemForm?.id ? putDeployment : addDeployment;
       await apiFunction(params);
-      const successMessage = itemForm?.id ? '编辑成功' : '新增成功';
-      message.success(successMessage);
+      message.success( itemForm?.id ? '编辑成功' : '新增成功');
       closeOpen("sure");
     } catch (error) {
       console.error('保存部署信息时发生错误:', error);
@@ -193,9 +176,6 @@ const DeploymentModal = (props: DeploymentModalProps) => {
     }
     const newArr = applicationList.filter((_, ind) => ind !== index);
     setApplicationList(newArr);
-  };
-  const mediumChange = (checkedValues: string[]) => {
-    console.log("告警通知媒介选择:", checkedValues);
   };
   const addMaintenanceUser = () => {
     const updatedList = [...maintenanceUserList, { name: "", phone: "" }];
@@ -305,7 +285,7 @@ const DeploymentModal = (props: DeploymentModalProps) => {
             return (
               <Col span={24} key={index}>
                 <Form.Item
-                  name={`applicationName${index + 1}`}
+                  name={`application${index + 1}`}
                   label={`纳管应用${index + 1}`}
                   labelCol={{ span: 3 }}
                   wrapperCol={{ span: 21 }}
@@ -322,30 +302,30 @@ const DeploymentModal = (props: DeploymentModalProps) => {
                         setApplicationList(newList);
                       }}
                     />
-                    <PlusSquareOutlined
-                      onClick={addIcon}
-                      style={{
-                        fontSize: "20px",
-                        marginLeft: 8,
-                        marginRight: 8,
-                        color: "#1677FF",
-                        verticalAlign: "middle",
-                        cursor: "pointer",
-                      }}
-                    />
-                    <MinusSquareOutlined
-                      onClick={() => removeIcon(index)}
-                      style={{
-                        fontSize: "20px",
-                        color:
-                          applicationList.length <= 1 ? "#cccccc" : "#ff1645",
-                        cursor:
-                          applicationList.length <= 1
-                            ? "not-allowed"
-                            : "pointer",
-                        verticalAlign: "middle",
-                      }}
-                    />
+                    <div style={{ display: "inline-flex", alignItems: "center", height: "32px", verticalAlign: "middle" }}>
+                      <PlusSquareOutlined
+                        onClick={addIcon}
+                        style={{
+                          fontSize: "20px",
+                          marginLeft: 8,
+                          marginRight: 8,
+                          color: "#1677FF",
+                          cursor: "pointer",
+                        }}
+                      />
+                      <MinusSquareOutlined
+                        onClick={() => removeIcon(index)}
+                        style={{
+                          fontSize: "20px",
+                          color:
+                            applicationList.length <= 1 ? "#cccccc" : "#ff1645",
+                          cursor:
+                            applicationList.length <= 1
+                              ? "not-allowed"
+                              : "pointer",
+                        }}
+                      />
+                    </div>
                   </Input.Group>
                 </Form.Item>
               </Col>
@@ -353,25 +333,25 @@ const DeploymentModal = (props: DeploymentModalProps) => {
           })}
           <Col span={24}>
             <Form.Item
-              name="medium"
+              name="notify_channels"
               label="告警通知媒介"
               labelCol={{ span: 3 }}
               wrapperCol={{ span: 21 }}
               style={{ marginBottom: 24 }}
             >
-              <Checkbox.Group options={mediumOption} onChange={mediumChange} />
+              <Checkbox.Group options={mediumOption} />
             </Form.Item>
           </Col>
           <Col span={24}>
             <Form.Item
-              name="description"
+              name="project_desc"
               label="项目描述"
               rules={[{ required: true }]}
               labelCol={{ span: 3 }}
               wrapperCol={{ span: 21 }}
               style={{ marginBottom: 24 }}
             >
-              <TextArea
+              <Input.TextArea
                 allowClear
                 placeholder="请输入项目情况介绍，包含合同及投标文件对于运维相关描述等。"
               />
@@ -389,8 +369,7 @@ const DeploymentModal = (props: DeploymentModalProps) => {
           <Col span={12}>
             <Form.Item
               label="联系人手机号"
-              shouldUpdate={(prevValues, currentValues) => prevValues.personPhone !== currentValues.personPhone}
-              name="personPhone"
+              name="contact_phone"
               rules={[
                 {
                   pattern: /^1[3-9]\d{9}$/,
@@ -409,7 +388,7 @@ const DeploymentModal = (props: DeploymentModalProps) => {
             <React.Fragment key={`maintenance-user-${index}`}>
               <Col span={11}>
                 <Form.Item
-                  name={`maintenanceUser${index + 1}`}
+                  name={['maintenanceUserList', index, 'name']}
                   label={`运维人员${index + 1}`}
                   labelCol={{ span: 7 }}
                   wrapperCol={{ span: 17 }}
@@ -417,20 +396,20 @@ const DeploymentModal = (props: DeploymentModalProps) => {
                 >
                   <Input
                     placeholder="请输入运维人员名称"
-                    value={item.name}
-                    onChange={(e) => {
-                      const newList = [...maintenanceUserList];
-                      newList[index].name = e.target.value;
+                    onChange={e => {
+                      const newList = maintenanceUserList.map((u, i) =>
+                        i === index ? { ...u, name: e.target.value } : u
+                      );
                       setMaintenanceUserList(newList);
+                      form.setFieldsValue({ maintenanceUserList: maintenanceUserList.map((u, i) => i === index ? { ...u, name: e.target.value } : u) });
                     }}
                   />
                 </Form.Item>
               </Col>
               <Col span={11}>
                 <Form.Item
-                  name={`maintenanceUserPhone${index + 1}`}
+                  name={['maintenanceUserList', index, 'phone']}
                   label={`手机号${index + 1}`}
-                  shouldUpdate={(prevValues, currentValues) => prevValues.personPhone !== currentValues.personPhone}
                   labelCol={{ span: 7 }}
                   wrapperCol={{ span: 17 }}
                   style={{ marginBottom: 24 }}
@@ -443,12 +422,18 @@ const DeploymentModal = (props: DeploymentModalProps) => {
                 >
                   <Input
                     placeholder="请输入手机号"
-                    value={item.phone}
                     maxLength={11}
-                    onChange={(e) => {
-                      const newList = [...maintenanceUserList];
-                      newList[index].phone = e.target.value;
+                    inputMode="numeric"
+                    onChange={e => {
+                      const newList = maintenanceUserList.map((u, i) =>
+                        i === index ? { ...u, phone: e.target.value } : u
+                      );
                       setMaintenanceUserList(newList);
+                      form.setFieldsValue({
+                        maintenanceUserList: maintenanceUserList.map((u, i) =>
+                          i === index ? { ...u, phone: e.target.value } : u
+                        )
+                      });
                     }}
                   />
                 </Form.Item>
