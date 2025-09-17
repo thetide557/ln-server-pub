@@ -63,7 +63,7 @@ const EventDetailPage: React.FC = () => {
       key: 'rule_name',
       render(content, { rule_id }) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/alert-rules/edit/" + rule_id + "?mode=view")
+          history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
         }}>{content}</div>;
       },
     },
@@ -282,6 +282,7 @@ const EventDetailPage: React.FC = () => {
         });
         if (rules[detailInfo.rule_id]) {
           detailInfo["rule_config_cn"] = rules[detailInfo.rule_id].rule_config_cn;
+          detailInfo["strategy_id"] = rules[detailInfo.rule_id].strategy_id;
         }
       });
       setEventDetail(detailInfo);
