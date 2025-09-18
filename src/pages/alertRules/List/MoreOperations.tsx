@@ -42,6 +42,8 @@ const exportIgnoreAttrsObj = {
   create_at: undefined,
   update_at: undefined,
   update_by: undefined,
+  notify_channels: undefined,
+  notify_recovered: undefined
 };
 
 export default function MoreOperations(props: MoreOperationsProps) {
