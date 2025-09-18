@@ -256,23 +256,20 @@ export default function () {
   //     setAssetOptions(assetOptions1)
   //   }
   // }
-
-  // 提取重复的异步请求逻辑
-  const fetchAssetTypes = async (id) => {
-    const res = await getAssetstypes();
-    const items = res.dat.map((v) => ({
-      value: v.name,
-      label: v.name,
-      ...v,
-    }));
-    return id ? items : items.filter(item => item.value !== "物理服务器" && item.value !== "虚拟服务器");
-  };
-
+  
   useEffect(() => {
     const loadData = async () => {
-      const assetTypes = await fetchAssetTypes(id);
+      const { dat } = await getAssetstypes();
+      const types = dat.map(item => item.name).toString()
+      let assetTypes = dat.map((v) => ({
+        value: v.name,
+        label: v.name,
+        ...v,
+      }));
+      if (!id) {
+        assetTypes = assetTypes.filter(item => item.value !== "物理服务器" && item.value !== "虚拟服务器")
+      }
       setAssetTypes(assetTypes);
-
       // 资产信息新增时 设置资产类型的默认值
       const asset_type = localStorage.getItem('left_asset_type')
       if (!id && assetTypes.some(item => item.name === asset_type)) {
@@ -282,7 +279,7 @@ export default function () {
         setCurrentType(asset_type)
       }
 
-      const param = { limit: -1 };
+      const param = { limit: -1, types };
       const res = await getAssetsByCondition(param);
       const options = res.dat?.list.map((v) => ({
         key: v.id,
