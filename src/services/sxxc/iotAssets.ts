@@ -79,3 +79,11 @@ export const delIotTreeNode = function (params) {
     params,
   });
 };
+
+// 删除设备类型
+export const delIotType = function (data) {
+  return request('/api/n9e/iot/type/delete', {
+    method: RequestMethod.Post,
+    data,
+  });
+};

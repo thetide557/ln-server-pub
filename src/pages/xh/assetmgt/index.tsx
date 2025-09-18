@@ -77,7 +77,7 @@ export default function () {
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
   const [treeData, setTreeData] = React.useState<DataNode[]>();
   const [filterType, setFilterType] = useLocalStorage<any>('asset_filter_type', 'input');
-  const [current, setCurrent] = useState(1);
+  const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useLocalStorage('asset_current_page', 10);
   const [searchVal, setSearchVal] = useLocalStorage<any>('asset_filter_value', null);
   const [filterParam, setFilterParam] = useLocalStorage<any>('asset_filter_param', 'ip');

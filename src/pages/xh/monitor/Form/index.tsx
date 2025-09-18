@@ -75,11 +75,7 @@ const [operateScript, setOperateScript] = useState<any>({
     if (action == null || 'addeditview'.indexOf(action + '') < 0) {
       history.goBack();
     }
-    const param = {
-      page: 1,
-      limit: 10000,
-    };
-
+    
     getAssetstypes().then((res) => {
       const types = res.dat.map((v) => {
         return {
@@ -89,8 +85,13 @@ const [operateScript, setOperateScript] = useState<any>({
         };
       });
       // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
+      const types1 = res.dat.map(item => item.name).toString()
       setAssetTypes(types);
-      param["limit"] =-1;
+      const param = {
+        page: 1,
+        limit: -1,
+        types: types1,
+      };
       getAssetsByCondition(param).then((assets) => {
         let options = new Array();
         assets.dat.list.map((v) => {

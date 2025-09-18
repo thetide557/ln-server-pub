@@ -63,7 +63,7 @@ const EventDetailPage: React.FC = () => {
       key: 'rule_name',
       render(content, { rule_id }) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/alert-rules/edit/" + rule_id + "?mode=view")
+          history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
         }}>{content}</div>;
       },
     },
@@ -189,6 +189,30 @@ const EventDetailPage: React.FC = () => {
       },
     },
     // {
+    //   label: '屏蔽状态',
+    //   key: 'is_muted',
+    //   render(mute) {
+    //     return <Tag color={mute ? 'green' : 'red'}>{mute ? '已屏蔽' : '未屏蔽'}</Tag>;
+    //   },
+    // },
+    // // 添加屏蔽开始时间显示，仅在is_muted为1时显示
+    // ...(eventDetail?.is_muted === 1 ? [{
+    //   label: '屏蔽开始时间',
+    //   key: 'mute_start_time',
+    //   render(time) {
+    //     return time;
+    //   },
+    // }] : []),
+    // // 添加屏蔽结束时间显示，仅在is_muted为1时显示
+    // ...(eventDetail?.is_muted === 1 ? [{
+    //   label: '屏蔽结束时间',
+    //   key: 'mute_end_time',
+    //   render(time) {
+    //     return time;
+    //   },
+    // }] : []),
+    
+    // {
     //   label: t('detail.prom_for_duration'),
     //   key: 'prom_for_duration',
     //   render(content) {
@@ -258,6 +282,7 @@ const EventDetailPage: React.FC = () => {
         });
         if (rules[detailInfo.rule_id]) {
           detailInfo["rule_config_cn"] = rules[detailInfo.rule_id].rule_config_cn;
+          detailInfo["strategy_id"] = rules[detailInfo.rule_id].strategy_id;
         }
       });
       setEventDetail(detailInfo);

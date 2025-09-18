@@ -591,15 +591,19 @@ const WarnModal = (props) => {
               </div>
               <div className="col">
                 <img className="dian" src="/image/alarm/dian.png" alt="" />
-                {/* <span>
-                  触发时间：{convertTime(curWarn.trigger_time, "year")}
-                </span> */}
                 <span>
-                  发生时间：{convertTime(curWarn.trigger_time, "year")}
+                  触发时间：{convertTime(curWarn.trigger_time, "year")}
                 </span>
+                {/* <span>
+                  发生时间：{convertTime(curWarn.trigger_time, "year")}
+                </span> */}
               </div>
             </div>
             <div className="row">
+              <div className="col">
+                <img className="dian" src="/image/alarm/dian.png" alt="" />
+                <span>首次告警时间：{convertTime(curWarn.first_trigger_time, "year")}</span>
+              </div>
               <div className="col">
                 <img className="dian" src="/image/alarm/dian.png" alt="" />
                 <span>
@@ -609,6 +613,8 @@ const WarnModal = (props) => {
                     : curWarn.trigger_value}
                 </span>
               </div>
+            </div>
+            <div className="row last-row">
               <div className="col">
                 <img className="dian" src="/image/alarm/dian.png" alt="" />
                 <span>
@@ -626,8 +632,6 @@ const WarnModal = (props) => {
                   </span>
                 </span>
               </div>
-            </div>
-            <div className="row last-row">
               <div className="col last-col1">
                 <img className="dian" src="/image/alarm/dian.png" alt="" />
                 <div className="last-title">
@@ -642,7 +646,7 @@ const WarnModal = (props) => {
                   </Tooltip>
                 </div>
               </div>
-              <div className="col">
+              {/* <div className="col">
                 <img className="dian" src="/image/alarm/dian.png" alt="" />
                 <span>
                   处理状态：
@@ -658,7 +662,7 @@ const WarnModal = (props) => {
                         : ""}
                   </span>
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="chart1">

@@ -72,7 +72,8 @@ export default function () {
   const [optionColumns, setOptionColumns] = useState<any[]>([]);
   const [parId, setParId] = useLocalStorage('left_parId')
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
-  const [current, setCurrent] = useState<any>(1);
+
+  const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useLocalStorage<any>('monitors_list_page', 10);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [filterOptions, setFilterOptions] = useState<any>({});
@@ -697,14 +698,16 @@ export default function () {
     let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map((obj) => obj.title)));
     setDefaultValues(modelIds);
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
-    getAssetsByCondition({ limit: -1 }).then(({ dat }) => {
-      dat.list.forEach((v) => {
-        assetInfo[v.id] = v;
+    getAssetstypes().then(({ dat }) => {
+      const types = dat.map(item => item.name).toString()
+      getAssetsByCondition({ limit: -1, types }).then(({ dat }) => {
+        dat.list.forEach((v) => {
+          assetInfo[v.id] = v;
+        });
+        setAssetInfo({ ...assetInfo });
+        getTableData(assetInfo, unitTypes);
       });
-      setAssetInfo({ ...assetInfo });
-      getTableData(assetInfo, unitTypes);
     });
-
     filterOptions['status'] = [
       { value: '0', label: '关闭' },
       { value: '1', label: '正常' },

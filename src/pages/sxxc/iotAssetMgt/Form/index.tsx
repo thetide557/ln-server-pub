@@ -56,7 +56,7 @@ export default function () {
   const [hasSave, setHasSave] = useState<boolean>(true);
 
   const { search } = useLocation();
-  const { mode, id ,typeId} = queryString.parse(search);
+  const { mode, id, typeId, primaryKey } = queryString.parse(search);
 
   const [properties, setProperties] = useState({});
 
@@ -107,10 +107,11 @@ export default function () {
   
   // TODO:获取资产详细信息，表单的回显值设置
   const loadAssetInfo = (id) => {
+    console.log('primaryKey',primaryKey);
     if(id){
       if (!typeId) return;
       const param = {
-        id,
+        [primaryKey]: id,
         typeId
       }
       getIotDeviceDetail(param).then((res) => {
