@@ -151,6 +151,8 @@ const DeploymentModal = (props: DeploymentModalProps) => {
         applications:applicationList.length?applicationList.map(x=>x.name):[],
         operators:maintenanceUserList
       };
+      console.log(params);
+      
       const apiFunction = itemForm?.id ? putDeployment : addDeployment;
       await apiFunction(params);
       message.success( itemForm?.id ? '编辑成功' : '新增成功');
@@ -242,7 +244,7 @@ const DeploymentModal = (props: DeploymentModalProps) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="deployment_version" label="部署版本">
+            <Form.Item name="deployment_version" label="部署版本" rules={[{ required: true }]}>
               <Input placeholder="请输入部署版本" />
             </Form.Item>
           </Col>

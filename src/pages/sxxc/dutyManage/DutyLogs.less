@@ -1,0 +1,183 @@
+// 页面容器样式
+.schedule-management-page {
+  height: 100%;
+  background-color: #fff;
+  padding: 20px 16px;
+
+}
+
+// 内容容器样式
+// .content-container {
+//   height: calc(100vh - 120px);
+// }
+
+// 日历卡片样式
+.calendar-card {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  .custom-calendar {
+    width: 100%;
+    height: 100%;
+    .ant-picker-cell {
+      color: rgba(0, 0, 0, 0.3);
+      &:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+    }
+    .ant-picker-cell-in-view {
+      color: #767676;
+    }
+    .ant-picker-cell-selected {
+      background: #2888f7;
+      color: #fff;
+      &:hover {
+        background: #2888f7;
+        opacity: 0.8;
+      }
+    }
+    .calendar-cell {
+      height: 80px;
+      border: 1px solid #e7e7e7;
+      padding: 5px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      .date-number {
+        display: inline-block;
+        margin-right: 10px;
+        height: 20px;
+        width: 20px;
+        text-align: center;
+      }
+      .lunar-date {
+        display: inline-block;
+      }
+      .schedule-text {
+        color: #118812;
+        text-align: right;
+      }
+      .schedule-detail-info {
+        width: 100%;
+        color: #118812;
+        .personnel-line{
+          cursor: pointer;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        
+      }
+
+    }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      .calendar-header-left {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        font-size: 14px;
+
+        button {
+          background-color: #f2f3f5;
+          border: none;
+        }
+      }
+    }
+  }
+}
+
+// 排班详情卡片样式
+.schedule-detail-card {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  // .ant-card-body {
+  //   height: 100%;
+  //   padding: 20px;
+  //   overflow-y: auto;
+  // }
+
+  .no-schedule {
+    height: 100%;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    .schedule-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .content {
+      font-weight: 400;
+      max-height:500px ;
+      overflow: auto;
+      .dates{
+        margin-bottom: 1rem;
+      }
+       .ant-timeline {
+        .ant-timeline-item {
+          font-size: 14px;
+          .ant-timeline-item-head-blue {
+            background: #ddd;
+            border-color: #ddd;
+          }
+        }
+      }
+      .user-logs{
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        padding:.5rem 1rem;
+        margin: .5rem 1rem 0 0;
+        border-radius: 5px;
+        .heads{
+          display: flex;
+          justify-content:space-between;
+          color: #000;
+          font-weight: 500;
+          .name{
+            margin-right: 1rem;
+          }
+          .icons{
+            .anticon{
+              font-size: 16px;
+              margin: 0 .25rem;
+            } 
+          }
+        }
+        .log-cons{
+          margin-top: 1rem;
+        }
+      }
+      .personnel-list {
+        padding-top: 16px;
+      }
+    }
+  }
+
+  .has-schedule-detail {
+    height: 100%;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    .schedule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      .schedule-actions {
+        display: flex;
+        gap: 8px;
+      }
+    }
+
+  }
+}
