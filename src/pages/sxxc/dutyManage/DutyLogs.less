@@ -117,13 +117,13 @@
       align-items: center;
       margin-bottom: 16px;
     }
+    .dates{
+        margin-bottom: 1rem;
+    }
     .content {
       font-weight: 400;
       max-height:500px ;
       overflow: auto;
-      .dates{
-        margin-bottom: 1rem;
-      }
        .ant-timeline {
         .ant-timeline-item {
           font-size: 14px;
@@ -132,6 +132,12 @@
             border-color: #ddd;
           }
         }
+        .ant-timeline-item-last > .ant-timeline-item-tail {
+          display: block
+        }
+      }
+      .logs-time{
+       padding-top: 2px;
       }
       .user-logs{
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);

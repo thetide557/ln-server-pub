@@ -105,3 +105,46 @@ export const updateSchedule = function (data) {
   });
 };
 
+
+// ============值班日志===================
+
+// 获取当月值班日志
+export const getDutyLogList = function (params) {
+  return request("/api/n9e/busi-group/dutylog/month", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+// 获取当日值班日志详情
+export const getDutyLogDetail = function (params) {
+  return request("/api/n9e/busi-group/dutylog/detail", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+// 新增值班日志
+export const addDutyLog = function (data) {
+  return request("/api/n9e/busi-group/-1/dutylog/add", {
+    method: RequestMethod.Post,
+    data,
+  });
+};
+
+// 编辑值班日志
+export const updateDutyLog = function (data) {
+  return request("/api/n9e/busi-group/-1/dutylog/update", {
+    method: RequestMethod.Post,
+    data,
+  });
+};
+
+// 删除值班日志
+export const deleteDutyLog = function (ids) {
+  return request(`/api/n9e/busi-group/-1/dutylog`, {
+    method: RequestMethod.Delete,
+    data: { ids },
+  });
+};
+
