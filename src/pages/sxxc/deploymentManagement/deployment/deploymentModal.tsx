@@ -23,20 +23,20 @@ import { getNotifiesList } from '@/services/manage';
 import { getDictDataListByType } from '@/services/system/dict';
 import moment from "moment";
 import { MinusSquareOutlined, PlusSquareOutlined } from "@ant-design/icons";
-const dateFormat = "YYYY-MM-DD";
+const dateFormat = "YYYY-MM";
 const formItemLayout = {
   labelCol: {
-    span: 6,
+    span: 8,
   },
   wrapperCol: {
-    span: 18,
+    span: 16,
   },
 };
 const tailLayout = {
   labelCol: {
-    span: 3,
+    span: 4,
   },
-  wrapperCol: { span: 21 },
+  wrapperCol: { span: 20 },
 };
 
 
@@ -251,7 +251,11 @@ const DeploymentModal = (props: DeploymentModalProps) => {
           <Col span={12}>
             <Form.Item name="deployment_date" label="部署日期">
               {/* @ts-ignore */}
-              <DatePicker style={{ width: "100%" }} format={dateFormat} />
+              <DatePicker
+                style={{ width: "100%" }}
+                format={dateFormat}
+                picker="month"
+              />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -289,8 +293,8 @@ const DeploymentModal = (props: DeploymentModalProps) => {
                 <Form.Item
                   name={`application${index + 1}`}
                   label={`纳管应用${index + 1}`}
-                  labelCol={{ span: 3 }}
-                  wrapperCol={{ span: 21 }}
+                  labelCol={{ span: 4 }}
+                  wrapperCol={{ span: 20 }}
                   style={{ marginBottom: 24 }}
                 >
                   <Input.Group compact>
@@ -337,8 +341,8 @@ const DeploymentModal = (props: DeploymentModalProps) => {
             <Form.Item
               name="notify_channels"
               label="告警通知媒介"
-              labelCol={{ span: 3 }}
-              wrapperCol={{ span: 21 }}
+              labelCol={{ span: 4 }}
+              wrapperCol={{ span: 20 }}
               style={{ marginBottom: 24 }}
             >
               <Checkbox.Group options={mediumOption} />
@@ -349,8 +353,8 @@ const DeploymentModal = (props: DeploymentModalProps) => {
               name="project_desc"
               label="项目描述"
               rules={[{ required: true }]}
-              labelCol={{ span: 3 }}
-              wrapperCol={{ span: 21 }}
+              labelCol={{ span: 4 }}
+              wrapperCol={{ span: 20 }}
               style={{ marginBottom: 24 }}
             >
               <Input.TextArea
@@ -362,15 +366,15 @@ const DeploymentModal = (props: DeploymentModalProps) => {
           <Col span={12}>
             <Form.Item
               name="contact_person"
-              label="联系人"
-              rules={[{ required: true }]}
+              label="项目联系人"
+              rules={[{ required: true, message: "请输入项目联系人" }]}
             >
-              <Input placeholder="请输入联系人" />
+              <Input placeholder="请输入项目联系人" />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
-              label="联系人手机号"
+              label="项目联系人手机号"
               name="contact_phone"
               rules={[
                 {
@@ -392,8 +396,8 @@ const DeploymentModal = (props: DeploymentModalProps) => {
                 <Form.Item
                   name={['maintenanceUserList', index, 'name']}
                   label={`运维人员${index + 1}`}
-                  labelCol={{ span: 7 }}
-                  wrapperCol={{ span: 17 }}
+                  labelCol={{ span: 9 }}
+                  wrapperCol={{ span: 15 }}
                   style={{ marginBottom: 24 }}
                 >
                   <Input
@@ -484,6 +488,105 @@ const DeploymentModal = (props: DeploymentModalProps) => {
               </Col>
             </React.Fragment>
           ))}
+          <Col span={12}>
+            <Form.Item
+              name="customer_name"
+              label="客户名称"
+            >
+              <Input placeholder="请输入客户名称" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="business_unit"
+              label="业务单元"
+            >
+              <Input placeholder="请输入业务单元" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="provide_services"
+              label="提供服务"
+            >
+              <Select placeholder="请选择提供服务">
+                <Select.Option value={0}>未开始</Select.Option>
+                <Select.Option value={1}>进行中</Select.Option>
+                <Select.Option value={2}>已完成</Select.Option>
+                <Select.Option value={3}>不涉及</Select.Option>
+                {/* {serviceProviderList.map((service) => (
+                  <Select.Option key={service.value} value={service.value}>
+                    {service.label}
+                  </Select.Option>
+                ))} */}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="bidding_stage"
+              label="招投标阶段"
+            >
+              <Select placeholder="请选择招投标阶段">
+                <Select.Option value={0}>未开始</Select.Option>
+                <Select.Option value={1}>进行中</Select.Option>
+                <Select.Option value={2}>已完成</Select.Option>
+                <Select.Option value={3}>不涉及</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="contract_stage"
+              label="合同阶段"
+            >
+              <Select placeholder="请选择合同阶段">
+                <Select.Option value={0}>未开始</Select.Option>
+                <Select.Option value={1}>进行中</Select.Option>
+                <Select.Option value={2}>已完成</Select.Option>
+                <Select.Option value={3}>不涉及</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="development_stage"
+              label="开发阶段"
+            >
+              <Select placeholder="请选择开发阶段">
+                <Select.Option value={0}>未开始</Select.Option>
+                <Select.Option value={1}>进行中</Select.Option>
+                <Select.Option value={2}>已完成</Select.Option>
+                <Select.Option value={3}>不涉及</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="environment_stage"
+              label="环境准备阶段"
+            >
+              <Select placeholder="请选择环境准备阶段">
+                <Select.Option value={0}>未开始</Select.Option>
+                <Select.Option value={1}>进行中</Select.Option>
+                <Select.Option value={2}>已完成</Select.Option>
+                <Select.Option value={3}>不涉及</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="deployment_phase"
+              label="部署阶段"
+            >
+              <Select placeholder="请选择部署阶段">
+                <Select.Option value={0}>未开始</Select.Option>
+                <Select.Option value={1}>进行中</Select.Option>
+                <Select.Option value={2}>已完成</Select.Option>
+                <Select.Option value={3}>不涉及</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
         </Row>
       </Form>
     </Modal>

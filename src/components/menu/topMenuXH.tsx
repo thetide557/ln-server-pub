@@ -406,7 +406,7 @@ const getMenuList = (t) => {
           children: [
             {
               key: "/sxxc/deploymentManagement",
-              label: "部署管理",
+              label: "项目管理",
             },
             {
               key: "/sxxc/dutyManage",

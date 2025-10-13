@@ -231,7 +231,7 @@ export default function () {
     setOpen(false);
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={"部署管理"}>
+    <PageLayout icon={<GroupOutlined />} title={"项目管理"}>
       <div style={{ display: "inline-flex" }} className="asset_list_view">
         <div className="asset-operate_xh">
           <div className="table-content_xh">
