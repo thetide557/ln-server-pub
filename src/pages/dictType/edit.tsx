@@ -26,6 +26,7 @@ const DictTypeForm: React.FC<DictTypeFormProps> = (props:any) => {
       id: props.values.id,
       dict_name: props.values.dict_name,
       dict_code: props.values.dict_code,
+      type_code:props.values.type_code,
       remark: props.values.remark,
     });
   }, [form, props]);
