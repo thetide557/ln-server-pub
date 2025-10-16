@@ -215,7 +215,7 @@ export default function () {
       setTtemForm(formData);
       setOpen(true);
     }
-    setTitle(action == "add" ? "新增部署" : "编辑部署");
+    setTitle(action == "add" ? "新增项目" : "编辑项目");
   };
 
   const onPageChange = (page: number, pageSize: number) => {
