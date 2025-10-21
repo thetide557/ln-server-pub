@@ -130,7 +130,7 @@ export const getDashboardTemplate = function () {
 
 // 重置看板的默认模板 data : {to: number}
 export const putDashboardTemplte = function (id, data) {
-  return request(`/api/n9e//board/${id}/from`, {
+  return request(`/api/n9e/board/${id}/from`, {
     method: RequestMethod.Put,
     data
   })
