@@ -170,6 +170,10 @@ const ExpressionInput = (
                 if (_.includes(validateTrigger, 'onChange')) {
                   onChange(val);
                 }
+              } else {
+                 if (_.includes(validateTrigger, 'onBlur')) {
+                  onChange(val);
+                }
               }
             }
           }),
