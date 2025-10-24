@@ -5,12 +5,13 @@ import Cookies from 'js-cookie';
 
 const healthReport = function () {
   const token = Cookies.get('access_token')
+  const timestamp = new Date().getTime();
   // const iframeRef = useRef(null);
   // const handleload = () => {
   //   const domElement:any = iframeRef?.current;
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
-  return <iframe src={`/healthreport`} style={{ width: '100%', height: '100%' }}></iframe>;
+  return <iframe src={`/healthreport?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>;
   // return (
   //   <PageLayout title={'健康报告'} icon={<UserOutlined />}>
   //     <iframe src={`http://localhost/health?token=${token}`} style={{ width: '100%', height: '100%', overflow: 'hidden' }} scrolling='no'></iframe>
