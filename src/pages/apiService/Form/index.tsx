@@ -67,20 +67,24 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
             <Button type='primary' htmlType='submit'>
               确定
             </Button>
-            <Button
-              type='default'
-              onClick={() => {
-                const id = form.getFieldValue('id');
-                executeApiService(id).then((res) => {
-                  Modal.info({
-                    title: '测试结果',
-                    content: JSON.stringify(res.dat),
-                  });
-                });
-              }}
-            >
-              测试
-            </Button>
+            {
+              initialValues?.id ? (
+                <Button
+                  type='default'
+                  onClick={() => {
+                    const id = form.getFieldValue('id');
+                    executeApiService(id).then((res) => {
+                      Modal.info({
+                        title: '测试结果',
+                        content: JSON.stringify(res.dat),
+                      });
+                    });
+                  }}
+                >
+                  测试
+                </Button>
+              ) : null
+            }
             <Button
               onClick={() => {
                 history.goBack();
