@@ -7,12 +7,13 @@ import { CommonStateContext } from '@/App';
 const workOrder = function () {
   const token = Cookies.get('access_token')
   const { permList } = useContext(CommonStateContext);
+  const timestamp = new Date().getTime();
   if (!permList.includes('/workorder/order') && !permList.includes('/workorder/ticket/index')) {
-    return <iframe src={`/workorder/#/ticket/space`} style={{ width: '100%', height: '100%' }}></iframe>
+    return <iframe src={`/workorder/#/ticket/space?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>
   } else if (!permList.includes('/workorder/order')) {
-    return <iframe src={`/workorder/#/ticket/index`} style={{ width: '100%', height: '100%' }}></iframe>
+    return <iframe src={`/workorder/#/ticket/index?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>
   } else {
-    return <iframe src={`/workorder`} style={{ width: '100%', height: '100%' }}></iframe>;
+    return <iframe src={`/workorder?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>;
   }
 };
 

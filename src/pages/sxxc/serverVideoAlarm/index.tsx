@@ -9,9 +9,10 @@ const serverVideoAlarm = function () {
   //   const domElement:any = iframeRef?.current;
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
+  const timestamp = new Date().getTime();
   return (
     <iframe
-      src={`/servervideo/#/alarm-management`}
+      src={`/servervideo/#/alarm-management?time=${timestamp}`}
       style={{ width: "100%", height: "100%" }}
     ></iframe>
   );
