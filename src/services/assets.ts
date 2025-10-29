@@ -391,3 +391,12 @@ export const getMaintenanceHistory = function ({id, actual_maintenance_date}) {
     method: RequestMethod.Get,
   });
 };
+
+
+// 查询资产上下架历史
+export const getAssetShelfHistory = function (params) {
+  return request('/api/n9e/xh/assets/query-by-date', {
+    method: RequestMethod.Get,
+    params,
+  });
+};
