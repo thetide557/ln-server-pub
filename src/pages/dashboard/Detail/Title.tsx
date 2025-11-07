@@ -241,7 +241,7 @@ export default function Title(props: IProps) {
                     setdefaultModal(true);
                   }}
                 >
-                  设置默认
+                  设为默认
                 </Button>
                 <Button
                   onClick={() => {
