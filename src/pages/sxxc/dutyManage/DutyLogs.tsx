@@ -345,7 +345,7 @@ const DutyLogs: React.FC = () => {
                             </>
                           </div>
                         </div>
-                        <div className="log-cons">
+                        <div className="log-cons" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                           {x.description || '无'}
                         </div>
                       </div>
@@ -498,6 +498,7 @@ const DutyLogs: React.FC = () => {
                 <Input.TextArea
                   allowClear
                   placeholder="请输入问题及处理过程等"
+                  autoSize={{ minRows: 4, maxRows: 10 }}
                 />
               </Form.Item>
             </Col>
