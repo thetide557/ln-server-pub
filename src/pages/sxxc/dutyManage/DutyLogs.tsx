@@ -36,6 +36,7 @@ import {
   addDutyLog,
   updateDutyLog,
   deleteDutyLog,
+  getScheduleList,
 } from "@/services/sxxc/dutyManage";
 import { exportTemplet } from "@/services/assets/asset";
 import "./DutyLogs.less";
@@ -52,6 +53,19 @@ interface ScheduleItem {
   recorderName: string;
   recordTime: number;
   description: string;
+}
+interface ScheduleListItem {
+  id?: string;
+  duty_date?: number;
+  director_id?: string;
+  first_line_ids?: string[];
+  second_line_ids?: string[];
+  third_line_ids?: string[];
+  createTime?: number;
+  director?: object;
+  first_lines?: Array<{Name: string, id: string}>;
+  second_lines?: Array<{Name: string, id: string}>;
+  third_lines?: Array<{Name: string, id: string}>;
 }
 
 
@@ -71,6 +85,8 @@ const DutyLogs: React.FC = () => {
   const [initData, setInitData] = useState({});
   const { profile, permList } = useContext(CommonStateContext);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
+  const [showScheduleDetail, setShowScheduleDetail] = useState(false);  //控制是否显示排班详情
+  const [scheduleList, setScheduleList] = useState<ScheduleListItem[]>([]); //排班数据
   // 只可选登录当天及以后日期
   const disableDate = (current: Moment) => {
     const today = moment().startOf("day");
@@ -93,6 +109,19 @@ const DutyLogs: React.FC = () => {
       setLoading(true);
       const { dat } = await getDutyLogList(param);
       setScheduleData(dat);
+      // 排班数据
+      getScheduleList(param).then(({ dat }) => {
+      setLoading(false);
+      // setScheduleData(dat);
+      // 处理数据格式，确保first_lines和second_lines数组正确解析
+      const processedData = dat.map(item => ({
+        ...item,
+        first_lines: item.first_lines || [],
+        second_lines: item.second_lines || [],
+        third_lines: item.third_lines || []
+      }));
+      setScheduleList(processedData);
+    });
     } catch (error) {
       message.error("获取值班日志失败");
       setScheduleData([]); 
@@ -253,19 +282,25 @@ const DutyLogs: React.FC = () => {
     date
   ) => {
     const isToday = moment().isSame(date, "day");
-    // const hasSch =
-    //   scheduleData &&
+    // 值班日志
     const scheduleItem = scheduleData && scheduleData.find(
       item => item.logDate && moment.unix(item.logDate).isSame(date, "day")
     );
     const hasSch = !!scheduleItem;
-    // console.log("是否有排班", date.format("YYYY-MM-DD"),hasSch);
+    // 排班详情
+    const scheduleDetailItem = scheduleList && scheduleList.find(
+      item => item.duty_date && moment.unix(item.duty_date).isSame(date, "day")
+    );
+    const hasScheduleDetail = !!scheduleDetailItem;
+
     // 获取农历日期
     const d = Lunar.fromDate(date.toDate());
     const lunarMonth = d.getMonthInChinese();
     const lunarDay = d.getDayInChinese();
     // 初一显示完整农历月份和日期，其他日期只显示日期
     const lunar = lunarDay === "初一" ? `${lunarMonth}月${lunarDay}` : lunarDay;
+    // 如果不是详情模式，显示简单的"已排班"标记
+    if (!showScheduleDetail) {
       return (
         <div className="calendar-cell">
           <div className="top">
@@ -290,6 +325,59 @@ const DutyLogs: React.FC = () => {
           </div>
         </div>
       );
+    } else {
+      // 排班详情模式：显示一线和二线运维人员
+      // 获取一线运维人员列表
+      const firstLinePersonnel = scheduleDetailItem?.first_lines || [];
+      // 获取二线运维人员列表
+      const secondLinePersonnel = scheduleDetailItem?.second_lines || [];
+      const firstLineNames = firstLinePersonnel.map(p =>p.Name || '');
+      const secondLineNames = secondLinePersonnel.map(p =>p.Name || '');
+      return (
+        <div className="calendar-cell">
+          <div className="top">
+            <div
+              className="date-number"
+              style={
+                isToday
+                  ? {
+                      borderRadius: "50%",
+                      backgroundColor: "#2888f7",
+                      color: "#fff",
+                    }
+                  : {}
+              }
+            >
+              {date.date()}
+            </div>
+            <div className="lunar-date">{lunar}</div>
+          </div>
+          <div className="bottom">
+            {hasScheduleDetail && <div className="schedule-detail-info">
+              {/* 一线运维 */}
+              {firstLineNames.length > 0 && (
+                <div className="personnel-line">
+                  <Tooltip title={firstLineNames.join(', ')}>
+                    一线运维：{firstLineNames.join('、')}
+                  </Tooltip>
+                  
+                </div>
+              )}
+              {/* 二线运维 */}
+              {secondLineNames.length > 0 && (
+                <div className="personnel-line">
+                  <Tooltip title={secondLineNames.join(', ')}>
+                    二线运维：{secondLineNames.join('、')}
+                  </Tooltip>
+                </div>
+              )}
+            </div>}
+          </div>
+        </div>
+      );
+
+    }
+
   };
 
   // 渲染右侧值班日志详情
@@ -397,6 +485,19 @@ const DutyLogs: React.FC = () => {
                           size="small"
                         >
                           今天
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setShowScheduleDetail(!showScheduleDetail);
+                          }}
+                          size="small"
+                          style={{
+                            backgroundColor: '#5eaaf2',
+                            color: 'white',
+                            borderColor: '#5eaaf2'
+                          }}
+                        >
+                          {showScheduleDetail ? "返回" : "排班详情"}
                         </Button>
                       </div>
                       <div>
