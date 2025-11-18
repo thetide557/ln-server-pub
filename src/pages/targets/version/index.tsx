@@ -164,7 +164,7 @@ export default function () {
   };
 
   return (
-    <PageLayout title='探针版本上传'>
+    <PageLayout title='探针版本'>
       <div style={{ height: 150, overflow: 'visible' }}>
         <div style={{ padding: 20, marginBottom: 20 }}>
           探针上传需要按规范文件名上传,文件名需要包括版本号,操作系统,架构,并通过gzip压缩后上传.<br></br> 如:categraf-1.0.0-linux-amd64.gz
