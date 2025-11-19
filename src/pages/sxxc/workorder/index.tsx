@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useContext } from 'react';
+import React, { useRef, useEffect, useContext, useState } from 'react';
 import Cookies from 'js-cookie';
 import { CommonStateContext } from '@/App';
 // import PageLayout from '@/components/pageLayout';
@@ -8,13 +8,18 @@ const workOrder = function () {
   const token = Cookies.get('access_token')
   const { permList } = useContext(CommonStateContext);
   const timestamp = new Date().getTime();
-  if (!permList.includes('/workorder/order') && !permList.includes('/workorder/ticket/index')) {
-    return <iframe src={`/workorder/#/ticket/space?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>
-  } else if (!permList.includes('/workorder/order')) {
-    return <iframe src={`/workorder/#/ticket/index?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>
-  } else {
-    return <iframe src={`/workorder?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>;
-  }
+  const [url, setUrl] = useState('');
+  useEffect(() => {
+    if (!permList.includes('/workorder/order') && !permList.includes('/workorder/ticket/index')) {
+      setUrl(`/workorder?time=${timestamp}#/ticket/space`)
+    } else if (!permList.includes('/workorder/order')) {
+      setUrl(`/workorder?time=${timestamp}#/ticket/index`)
+    } else {
+      setUrl(`/workorder?time=${timestamp}`)
+
+    }
+  }, [])
+  return <iframe src={url} style={{ width: '100%', height: '100%' }}></iframe>
 };
 
 export default workOrder;

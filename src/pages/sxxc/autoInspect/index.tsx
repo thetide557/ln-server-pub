@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 // import PageLayout from '@/components/pageLayout';
 // import { DeleteOutlined, DownOutlined, EditOutlined, PlusSquareOutlined, PoweroffOutlined, SearchOutlined, UndoOutlined, UserOutlined } from '@ant-design/icons';
@@ -6,17 +6,13 @@ import Cookies from 'js-cookie';
 const autoInspect = function () {
   const token = Cookies.get('access_token')
   const timestamp = new Date().getTime();
+  const [url, setUrl] = useState(`/autoinspect?time=${timestamp}`);
   // const iframeRef = useRef(null);
   // const handleload = () => {
   //   const domElement:any = iframeRef?.current;
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
-  return <iframe src={`/autoinspect?time=${timestamp}`} style={{ width: '100%', height: '100%' }}></iframe>;
-  // return (
-  //   <PageLayout title={'健康报告'} icon={<UserOutlined />}>
-  //     <iframe src={`http://localhost/health?token=${token}`} style={{ width: '100%', height: '100%', overflow: 'hidden' }} scrolling='no'></iframe>
-  //   </PageLayout>
-  // );
+  return <iframe src={url} style={{ width: '100%', height: '100%' }}></iframe>;
 };
 
 export default autoInspect;
