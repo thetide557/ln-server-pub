@@ -14,108 +14,130 @@
  * limitations under the License.
  *
  */
-import { defineConfig } from 'vite';
-import reactRefresh from '@vitejs/plugin-react-refresh';
-import { md } from './plugins/md';
-import plusResolve from './plugins/plusResolve';
-import { visualizer } from 'rollup-plugin-visualizer';
-const reactSvgPlugin = require('./plugins/svg');
+import { defineConfig } from "vite";
+import reactRefresh from "@vitejs/plugin-react-refresh";
+import { md } from "./plugins/md";
+import plusResolve from "./plugins/plusResolve";
+import { visualizer } from "rollup-plugin-visualizer";
+const reactSvgPlugin = require("./plugins/svg");
 
 const chunk2 = [
-  '@codemirror/autocomplete',
-  '@codemirror/highlight',
-  '@codemirror/lint',
-  '@codemirror/language',
-  '@codemirror/state',
-  '@codemirror/view',
-  'codemirror-promql',
-  '@codemirror/basic-setup',
-  '@codemirror/stream-parser',
-  '@codemirror/legacy-modes/mode/toml',
+  "@codemirror/autocomplete",
+  "@codemirror/highlight",
+  "@codemirror/lint",
+  "@codemirror/language",
+  "@codemirror/state",
+  "@codemirror/view",
+  "codemirror-promql",
+  "@codemirror/basic-setup",
+  "@codemirror/stream-parser",
+  "@codemirror/legacy-modes/mode/toml",
 ];
-const chunk3 = ['react-ace'];
-const chunk1 = ['react', 'react-router-dom', 'react-dom', 'moment', '@ant-design/icons', 'umi-request', 'lodash', 'react-grid-layout', 'd3', 'ahooks', 'color'];
-const antdChunk = ['antd'];
+const chunk3 = ["react-ace"];
+const chunk1 = [
+  "react",
+  "react-router-dom",
+  "react-dom",
+  "moment",
+  "@ant-design/icons",
+  "umi-request",
+  "lodash",
+  "react-grid-layout",
+  "d3",
+  "ahooks",
+  "color",
+];
+const antdChunk = ["antd"];
 const x6Chunk = [
-  '@antv/x6',
-  '@antv/x6-plugin-dnd',
-  '@antv/x6-plugin-history',
-  '@antv/x6-plugin-selection',
-  '@antv/x6-plugin-snapline',
-  '@antv/x6-plugin-clipboard',
-  '@antv/x6-plugin-transform',
+  "@antv/x6",
+  "@antv/x6-plugin-dnd",
+  "@antv/x6-plugin-history",
+  "@antv/x6-plugin-selection",
+  "@antv/x6-plugin-snapline",
+  "@antv/x6-plugin-clipboard",
+  "@antv/x6-plugin-transform",
 ];
-const antvChunk = ['@ant-design/graphs', '@ant-design/plots'];
+const antvChunk = ["@ant-design/graphs", "@ant-design/plots"];
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [md(), reactRefresh(), plusResolve(), reactSvgPlugin({ defaultExport: 'component' })],
+  plugins: [
+    md(),
+    reactRefresh(),
+    plusResolve(),
+    reactSvgPlugin({ defaultExport: "component" }),
+  ],
   define: {},
   resolve: {
     alias: [
       {
-        find: '@',
-        replacement: '/src',
+        find: "@",
+        replacement: "/src",
       },
     ],
   },
   server: {
     proxy: {
-      '/api/n9e-plus': {
+      // "/api/n9e/bigscreen": {
+      //   target: "http://7.59.10.66:17000/",
+      //   // target: 'http://10.0.20.164:17000/',
+      //   changeOrigin: true,
+      // },
+      "/api/n9e-plus": {
         // target: 'http://10.206.16.17:17001/',
-        target: 'http://10.250.250.9:17000/',
+        target: "http://10.250.250.9:17000/",
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      '/api/n9e/proxy': {
+      "/api/n9e/proxy": {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://10.250.250.9:17000/',
+        target: "http://10.250.250.9:17000/",
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      '/api/n9e/datasource': {
+      "/api/n9e/datasource": {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://10.250.250.9:17000/',
+        target: "http://10.250.250.9:17000/",
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      '/api/n9e': {
+      "/api/n9e": {
         //target: 'http://192.168.20.19:17000/',
-        target: 'http://10.250.250.9:17000/',
+        target: "http://10.250.250.9:17000/",
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      '/api/fc-brain': {
+      "/api/fc-brain": {
         // target: 'http://10.206.16.17:28000/',
-        target: 'http://10.250.250.9:17000/',
+        target: "http://10.250.250.9:17000/",
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      '/sxxcTask': {
+      "/sxxcTask": {
         // target: 'http://10.0.20.212:8086/',
-        target: 'http://10.250.250.9:8090/',
+        target: "http://10.250.250.9:8090/",
         // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
         // rewrite: path => path.replace(/^\/sxxcTask/, '')
       },
-      '/chat': {
-        target: 'http://10.250.250.9:17000/',
+      "/chat": {
+        target: "http://10.250.250.9:17000/",
         // target: 'http://10.0.23.134:17000/',
         changeOrigin: true,
       },
-      '/v1': {
+      "/v1": {
         // target: 'http://10.250.250.24:18000/',
-        target: 'http://10.250.250.9:17000/',
+        target: "http://10.250.250.9:17000/",
         changeOrigin: true,
-      }
+      },
     },
   },
   optimizeDeps: {
     exclude: x6Chunk,
   },
   build: {
-    target: 'chrome58',
-    outDir: 'pub',
+    target: "chrome58",
+    outDir: "pub",
     chunkSizeWarningLimit: 650,
     sourcemap: true,
     rollupOptions: {
@@ -127,7 +149,7 @@ export default defineConfig({
           vendor2: chunk3,
           antdChunk: antdChunk,
           x6Chunk: x6Chunk,
-          antvChunk: antvChunk
+          antvChunk: antvChunk,
         },
       },
     },
@@ -138,27 +160,28 @@ export default defineConfig({
         additionalData: `@import "/src/global.variable.less";`,
         javascriptEnabled: true,
         modifyVars: {
-          'primary-color': '#0A4B9D',
-          'primary-background': '#F0ECF9',
-          'disabled-color': 'rgba(0, 0, 0, 0.5)',
-          'tabs-ink-bar-color': 'linear-gradient(to right, #9F4CFC, #0019F4 )',
-          'font-size-base': '12px',
-          'menu-item-font-size': '14px',
-          'radio-button-checked-bg': '#EAE6F3',
-          'form-item-margin-bottom': '18px',
-          'font-family': 'Monda-Regular,PingFangSC-Regular,microsoft yahei ui,microsoft yahei,simsun,"sans-serif"',
-          'text-color': '#767676',
-          'table-row-hover-bg': '#EAE8F2',
-          'table-header-bg': '#f0f0f0',
-          'select-selection-item-bg': '#EAE6F3',
-          'select-selection-item-border-color': '#6C53B1',
-          'menu-item-color': '#8C8C8C',
-          'menu-inline-submenu-bg': '#f0f0f0',
-          'menu-bg': '#f0f0f0',
-          'checkbox-check-bg': '#fff',
-          'checkbox-check-color': '#6C53B1',
-          'checkbox-color': 'fade(@checkbox-check-color, 10)',
-          'btn-padding-horizontal-base': '12px',
+          "primary-color": "#0A4B9D",
+          "primary-background": "#F0ECF9",
+          "disabled-color": "rgba(0, 0, 0, 0.5)",
+          "tabs-ink-bar-color": "linear-gradient(to right, #9F4CFC, #0019F4 )",
+          "font-size-base": "12px",
+          "menu-item-font-size": "14px",
+          "radio-button-checked-bg": "#EAE6F3",
+          "form-item-margin-bottom": "18px",
+          "font-family":
+            'Monda-Regular,PingFangSC-Regular,microsoft yahei ui,microsoft yahei,simsun,"sans-serif"',
+          "text-color": "#767676",
+          "table-row-hover-bg": "#EAE8F2",
+          "table-header-bg": "#f0f0f0",
+          "select-selection-item-bg": "#EAE6F3",
+          "select-selection-item-border-color": "#6C53B1",
+          "menu-item-color": "#8C8C8C",
+          "menu-inline-submenu-bg": "#f0f0f0",
+          "menu-bg": "#f0f0f0",
+          "checkbox-check-bg": "#fff",
+          "checkbox-check-color": "#6C53B1",
+          "checkbox-color": "fade(@checkbox-check-color, 10)",
+          "btn-padding-horizontal-base": "12px",
         },
       },
     },
