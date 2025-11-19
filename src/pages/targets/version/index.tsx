@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import PageLayout from '@/components/pageLayout';
 import { InboxOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getAllVersion, } from '@/services/version';
-
+import RefreshIcon from '@/components/RefreshIcon';
 import type { UploadProps } from 'antd';
 import { exportTempletZip } from '@/pages/historyEvents/services';
 import { RcFile } from 'antd/es/upload';
@@ -17,26 +17,26 @@ export default function () {
   const [tableData, setTableData] = useState<any[]>([]);
 
   const beforeUpload = (file: RcFile) => {
-    const iszip = file.type === 'application/x-gzip';
+    const iszip = file.type === 'application/zip' || file.name.endsWith('.zip');
     if (!iszip) {
-      message.error('只允许上传gz压缩文件');
+      message.error('只允许上传zip压缩文件');
       return false
     }
-    let regExp = /^[a-z]+-(?:\d[.]?)+-(\w+)-(\w+).gz$/g;
+    let regExp = /^[a-z]+-(?:\d[.]?)+-(\w+)-(\w+).zip$/g;
     const isLt = regExp.test(file.name);
     if (!isLt) {
       message.error('文件命名格式不规范，请参照说明');
       return false
     }
     let fileName = file.name.split('-');
-    if (fileName[2] != "linux" && fileName[2] != "windows" && fileName[2] != "darwin"){
-       message.error("文件命名错误(操作系统)");
-       return false
+    if (fileName[2] != "linux" && fileName[2] != "windows" && fileName[2] != "darwin") {
+      message.error("文件命名错误(操作系统)");
+      return false
     }
-    if (fileName[3].split(".")[0] != "amd64" && fileName[3].split(".")[0] != "386" && fileName[3].split(".")[0] != "arm" && fileName[3].split(".")[0] != "arm64"){
+    if (fileName[3].split(".")[0] != "amd64" && fileName[3].split(".")[0] != "386" && fileName[3].split(".")[0] != "arm" && fileName[3].split(".")[0] != "arm64") {
       message.error("文件命名错误(架构)");
       return false
-   }
+    }
     return iszip && isLt;
   };
 
@@ -74,7 +74,7 @@ export default function () {
 
   const handleModal = (action: string, rowKeys: any | null) => {
     if (action == "download") {
-      let url = "/api/n9e/target/version/export-gz";
+      let url = "/api/n9e/target/version/export-zip";
       let body = {}
       //debugger;
       if (rowKeys != null) {
@@ -102,7 +102,7 @@ export default function () {
         // 调用删除接口
         // 请确保在服务端实现删除版本的接口，并根据需要修改下面的接口路径和请求方法
         // fetch(`/api/n9e/target/version/delete-gz`, {
-        fetch(`/api/n9e/target/version/delete-gz?filename=${filenameToDelete}`, {
+        fetch(`/api/n9e/target/version/delete-zip?filename=${filenameToDelete}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
@@ -141,9 +141,9 @@ export default function () {
     name: 'file',
     multiple: false,
     action: '/api/n9e/target/version',
-    
+
     headers: { Authorization: `Bearer ${Cookies.get('access_token') || ''}` },
-    
+
     onChange(info) {
       const { status, response } = info.file;
       // if (status !== 'uploading') {
@@ -167,9 +167,16 @@ export default function () {
     <PageLayout title='探针版本'>
       <div style={{ height: 150, overflow: 'visible' }}>
         <div style={{ padding: 20, marginBottom: 20 }}>
-          探针上传需要按规范文件名上传,文件名需要包括版本号,操作系统,架构,并通过gzip压缩后上传.<br></br> 如:categraf-1.0.0-linux-amd64.gz
+          探针上传需要按规范文件名上传,文件名需要包括版本号,操作系统,架构,并通过zip压缩后上传.<br></br> 如:ln-agent-1.0.0-linux-amd64.zip
         </div>
         <div style={{ textAlign: 'right' }}>
+          <Space style={{marginRight: '5px'}}>
+            <RefreshIcon
+              onClick={() => {
+                loadingVersions();
+              }}
+            />
+          </Space>
           <Upload {...props} showUploadList={false} beforeUpload={beforeUpload}>
             <Button icon={<UploadOutlined />}>点击或拖放文件上传</Button>
           </Upload>

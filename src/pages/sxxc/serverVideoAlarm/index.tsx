@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState } from "react";
 // import PageLayout from '@/components/pageLayout';
 // import { DeleteOutlined, DownOutlined, EditOutlined, PlusSquareOutlined, PoweroffOutlined, SearchOutlined, UndoOutlined, UserOutlined } from '@ant-design/icons';
 
@@ -10,9 +10,10 @@ const serverVideoAlarm = function () {
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
   const timestamp = new Date().getTime();
+  const [url, setUrl] = useState(`/servervideo?time=${timestamp}#/alarm-management`);
   return (
     <iframe
-      src={`/servervideo/#/alarm-management?time=${timestamp}`}
+      src={url}
       style={{ width: "100%", height: "100%" }}
     ></iframe>
   );
