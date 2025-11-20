@@ -35,7 +35,7 @@ export default function ScreenView() {
   const [first, setFirst] = useState<any>('')
   const [activeColor, setActiveColor] = useState<any>(null)
   const timestamp = new Date().getTime();
-  const baseUrl = `/dataroom?timestamp=${timestamp}#/bigscreen/preview`
+  const baseUrl = `/dataroom/?timestamp=${timestamp}#/bigscreen/preview`
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
   const token = Cookies.get('access_token')

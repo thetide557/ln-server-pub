@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 const topology = function () {
   const token = Cookies.get('access_token')
   const timestamp = new Date().getTime();
-  const [url, setUrl] = useState(`/topology?time=${timestamp}`);
+  const [url, setUrl] = useState(`/topology/?time=${timestamp}`);
   // const iframeRef = useRef(null);
   // const handleload = () => {
   //   const domElement:any = iframeRef?.current;

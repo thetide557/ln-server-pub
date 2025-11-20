@@ -10,7 +10,7 @@ const serverVideoAlarm = function () {
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
   const timestamp = new Date().getTime();
-  const [url, setUrl] = useState(`/servervideo?time=${timestamp}#/alarm-management`);
+  const [url, setUrl] = useState(`/servervideo/?time=${timestamp}#/alarm-management`);
   return (
     <iframe
       src={url}

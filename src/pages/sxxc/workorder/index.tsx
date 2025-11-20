@@ -11,11 +11,11 @@ const workOrder = function () {
   const [url, setUrl] = useState('');
   useEffect(() => {
     if (!permList.includes('/workorder/order') && !permList.includes('/workorder/ticket/index')) {
-      setUrl(`/workorder?time=${timestamp}#/ticket/space`)
+      setUrl(`/workorder/?time=${timestamp}#/ticket/space`)
     } else if (!permList.includes('/workorder/order')) {
-      setUrl(`/workorder?time=${timestamp}#/ticket/index`)
+      setUrl(`/workorder/?time=${timestamp}#/ticket/index`)
     } else {
-      setUrl(`/workorder?time=${timestamp}`)
+      setUrl(`/workorder/?time=${timestamp}`)
 
     }
   }, [])
