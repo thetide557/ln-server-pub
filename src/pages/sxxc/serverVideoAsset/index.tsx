@@ -10,7 +10,7 @@ const serverVideoAsset = function () {
   //   domElement.contentWindow.postMessage({ 'token': token }, '*');
   // }
   const timestamp = new Date().getTime();
-  const [url, setUrl] = useState(`/servervideo?time=${timestamp}#/asset-management`);
+  const [url, setUrl] = useState(`/servervideo/?time=${timestamp}#/asset-management`);
   return (
     <iframe
       src={url}

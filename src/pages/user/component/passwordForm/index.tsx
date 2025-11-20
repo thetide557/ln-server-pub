@@ -25,7 +25,7 @@ const PasswordForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((prop
     form: form,
   }));
   const validatePassword = (_, value) => {
-    if (value && value.length >= 8) {
+    if (value && value.length >= 12) {
       const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&-*.]/].reduce((acc, regex) => {
         return acc + (regex.test(value) ? 1 : 0);
       }, 0);
@@ -33,7 +33,7 @@ const PasswordForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((prop
         return Promise.resolve();
       }
     }
-    return Promise.reject('密码必须大于8位，并且包含大写字母、小写字母、数字和符号中的任意3种');
+    return Promise.reject('密码必须大于12位，并且包含大写字母、小写字母、数字和符号中的任意3种');
   };
   return (
     <Form layout='vertical' form={form}>

@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 const healthReport = function () {
   const token = Cookies.get('access_token')
   const timestamp = new Date().getTime();
-  const [url, setUrl] = useState(`/healthreport?time=${timestamp}`);
+  const [url, setUrl] = useState(`/healthreport/?time=${timestamp}`);
   // const iframeRef = useRef(null);
   // const handleload = () => {
   //   const domElement:any = iframeRef?.current;

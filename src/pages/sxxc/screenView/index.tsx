@@ -34,7 +34,10 @@ export default function ScreenView() {
   const [url, setUrl] = useState<any>('')
   const [first, setFirst] = useState<any>('')
   const [activeColor, setActiveColor] = useState<any>(null)
-  const baseUrl = '/dataroom/#/bigscreen/preview'
+  // const baseUrl = ' http://localhost:7521/#/bigscreen/preview'
+  // const baseUrl = '/dataroom/#/bigscreen/preview'
+   const timestamp = new Date().getTime();
+  const baseUrl = `/dataroom/?timestamp=${timestamp}#/bigscreen/preview`
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
   const token = Cookies.get('access_token')
