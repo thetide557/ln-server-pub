@@ -37,6 +37,7 @@ import {
   updateDutyLog,
   deleteDutyLog,
   getScheduleList,
+  batchDeleteDutyLog
 } from "@/services/sxxc/dutyManage";
 import { exportTemplet } from "@/services/assets/asset";
 import "./DutyLogs.less";
@@ -45,6 +46,7 @@ import { OperateType } from "./DutyList";
 import { OperationModal } from "./OperationModal";
 import _ from "lodash";
 import TextArea from "antd/lib/input/TextArea";
+import BatchDeleteModal, { TimeRange } from './BatchDeleteModal';
 
 // 定义值班日志接口
 interface ScheduleItem {
@@ -87,6 +89,30 @@ const DutyLogs: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
   const [showScheduleDetail, setShowScheduleDetail] = useState(false);  //控制是否显示排班详情
   const [scheduleList, setScheduleList] = useState<ScheduleListItem[]>([]); //排班数据
+  const [batchDeleteVisible, setBatchDeleteVisible] = useState(false);  //批量删除弹窗是否显示
+
+  // 处理批量删除确认
+  const handleBatchDelete = async (timeRanges: TimeRange[]) => {
+    try {
+      // console.log('要删除的时间范围:', timeRanges);
+      // 转换为字符串格式发送给后端
+      const apiData = {
+        time_ranges: timeRanges.map((range) => {
+          return {
+            start_time: range.start ? range.start.format("YYYY-MM-DD") : "",
+            end_time: range.end ? range.end.format("YYYY-MM-DD") : "",
+          };
+        }),
+      };
+      await batchDeleteDutyLog(apiData);
+      message.success(`成功删除 ${timeRanges.length} 个时间段的值班日志`);
+      // 刷新值班日志数据
+      getData();
+      getCurrentSchedule();
+    } catch (error) {
+      throw error
+    }
+  };
   // 只可选登录当天及以后日期
   const disableDate = (current: Moment) => {
     const today = moment().startOf("day");
@@ -513,6 +539,17 @@ const DutyLogs: React.FC = () => {
                                 导出
                               </Button>
                             )}
+                            {(profile.roles?.includes("Admin") ||
+                            permList.includes("/sxxc/duty_log/batch_delete")) && (
+
+                            <Button
+                              icon={<DeleteOutlined />}
+                              onClick={() => setBatchDeleteVisible(true)}
+                              size="small"
+                            >
+                            批量删除
+                            </Button>
+                        )}
                         </Space>
                       </div>
                     </div>
@@ -606,6 +643,13 @@ const DutyLogs: React.FC = () => {
           </Row>
         </Form>
       </Modal>
+
+       {/* 批量删除弹窗 */}
+      <BatchDeleteModal
+        visible={batchDeleteVisible}
+        onCancel={() => setBatchDeleteVisible(false)}
+        onConfirm={handleBatchDelete}
+      />
 
     </div>
   );

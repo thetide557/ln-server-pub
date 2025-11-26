@@ -37,6 +37,7 @@ import {
   updateSchedule,
   getScheduleDetail,
   deleteSchedule,
+  batchDeleteSchedule,
 } from "@/services/sxxc/dutyManage";
 import { exportTemplet } from "@/services/assets/asset";
 import "./ScheduleList.less";
@@ -44,6 +45,7 @@ import { CommonStateContext } from "@/App";
 import { OperateType } from "./DutyList";
 import { OperationModal } from "./OperationModal";
 import _ from "lodash";
+import BatchDeleteModal, { TimeRange } from './BatchDeleteModal';
 
 // 定义排班数据接口
 interface ScheduleItem {
@@ -99,6 +101,7 @@ const ScheduleList: React.FC = () => {
   const { profile, permList } = useContext(CommonStateContext);
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
+  const [batchDeleteVisible, setBatchDeleteVisible] = useState(false); // 批量删除弹框
   // 只可选登录当天及以后日期
   const disableDate = (current: Moment) => {
     const today = moment().startOf("day");
@@ -562,6 +565,28 @@ const ScheduleList: React.FC = () => {
     );
   };
 
+
+  // 确认批量删除
+  const handleBatchDelete = async (timeRanges: TimeRange[]) => {
+    try {    
+      // 转换为字符串格式发送给后端
+      const apiData = {
+        time_ranges: timeRanges.map((range) => {
+          return {
+            start_time: range.start ? range.start.format("YYYY-MM-DD") : "",
+            end_time: range.end ? range.end.format("YYYY-MM-DD") : "",
+          };
+        }),
+      };
+      await batchDeleteSchedule(apiData);
+      message.success(`成功删除 ${timeRanges.length} 个时间段的排班`);
+      getData();
+      getCurrentSchedule();
+    } catch (error:any) {
+      throw error;
+    }
+  };
+
   return (
     <div className="schedule-management-page">
       <Row gutter={16} className="content-container">
@@ -637,6 +662,16 @@ const ScheduleList: React.FC = () => {
                             size="small"
                           >
                             导出
+                          </Button>
+                        )}
+                        {(profile.roles?.includes("Admin") ||
+                          permList.includes("/sxxc/schedule_list/batch_delete")) && (
+                          <Button
+                            icon={<DeleteOutlined />}
+                            onClick={() => setBatchDeleteVisible(true)}
+                            size="small"
+                          >
+                            批量删除
                           </Button>
                         )}
                         </Space>
@@ -802,6 +837,14 @@ const ScheduleList: React.FC = () => {
           templateTitle: "排班数据",
         }}
       />
+
+       {/* 批量删除弹窗 */}
+      <BatchDeleteModal
+        visible={batchDeleteVisible}
+        onCancel={() => setBatchDeleteVisible(false)}
+        onConfirm={handleBatchDelete}
+      />
+
     </div>
   );
 };

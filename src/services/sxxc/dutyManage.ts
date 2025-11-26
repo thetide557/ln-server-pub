@@ -105,6 +105,14 @@ export const updateSchedule = function (data) {
   });
 };
 
+// 批量删除排班
+export const batchDeleteSchedule = function (data) {
+  return request("/api/n9e/xh/schedule/delete/batch", {
+    method: RequestMethod.Delete,
+    data,
+  });
+};
+
 
 // ============值班日志===================
 
@@ -147,4 +155,14 @@ export const deleteDutyLog = function (ids) {
     data: { ids },
   });
 };
+
+// 批量删除值班日志
+export const batchDeleteDutyLog = function (data) {
+  return request("/api/n9e/busi-group/-1/batchdutylog", {
+    method: RequestMethod.Delete,
+    data,
+  });
+}
+
+
 
