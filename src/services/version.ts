@@ -115,3 +115,11 @@ export const getAllVersion = function (params) {
     params,
   });
 }
+
+// 更新探针
+export const updateTarget = function (data) {
+  return request('/api/n9e/target/version/batch-update', {
+    method: RequestMethod.Post,
+    data,
+  });
+};
