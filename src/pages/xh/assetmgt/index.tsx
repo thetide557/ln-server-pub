@@ -33,7 +33,7 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { batchShelfXhAssets,deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
@@ -62,6 +62,8 @@ export enum OperateType {
   Delete = 'delete',
   ChangeOrganize = 'changeOrganize',
   None = 'none',
+  AssetBatchList = 'assetBatchList',
+  AssetBatchDelist = 'assetBatchDelist'
 }
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
@@ -1557,6 +1559,18 @@ export default function () {
                                 return;
                               }
                               setOperateType(key as OperateType);
+                            } else if(key == OperateType.AssetBatchList || key == OperateType.AssetBatchDelist){
+                              
+                              const data = {
+                                "asset_ids": selectedAssets,
+                                "is_shelf": key === OperateType.AssetBatchList
+                              }
+                               batchShelfXhAssets(data).then((res) => {
+                                  message.success('批量操作成功！');
+                                  getAssetTree()
+                                  // setSelectedAssets([]);
+                                });
+                              console.log('OperateType.AssetBatchList==',data)
                             } else {
                               setOperateType(key as OperateType);
                             }
@@ -1570,6 +1584,8 @@ export default function () {
                             // { key: OperateType.RemoveBusi, label: '移出业务组' },
                             // { key: OperateType.UpdateNote, label: '修改备注' },
                             { key: OperateType.Delete, label: '批量删除' },
+                            { key: OperateType.AssetBatchList, label: '批量上架' },
+                            { key: OperateType.AssetBatchDelist, label: '批量下架' },
                           ]}
                         ></Menu>
                       }
