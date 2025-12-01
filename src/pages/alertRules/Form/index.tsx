@@ -537,7 +537,7 @@ export default function index(props: IProps) {
                         handleMessage(res);
                       } else {
                         let curBusiId =
-                          initialValues?.group_id || Number(bgid) || 1;
+                          initialValues?.[0]?.group_id || Number(bgid) || 1;
                         if (curBusiId <= 0) {
                           curBusiId = 1;
                         }
