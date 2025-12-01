@@ -67,6 +67,19 @@ const EventDetailPage: React.FC = () => {
         }}>{content}</div>;
       },
     },
+    // 告警策略名称
+    {
+      label: '策略名称',
+      key: 'strategy_name',
+      align: 'center',
+      render: (strategy_name, { strategy_id }) => {
+        // return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+        //   history.push(`/alert-rules/edit/${strategy_id}?mode=view`)
+        // }}>{strategy_name}</div>;
+        return strategy_name || '-';
+      },
+    },
+
     {
       label: '资产名称',
       key: 'asset_name',
