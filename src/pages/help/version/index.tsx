@@ -51,17 +51,17 @@ export default function version() {
     maxCount: 1,
     action: "/api/n9e/server/update",
     headers: { Authorization: `Bearer ${Cookies.get("access_token") || ""}` },
-    data: () => ({ hosts: projectList.toString() }),
-    beforeUpload(file, fileList) {
-      let projectList = taskRef.current.serveList;
-      setProjectList(projectList)
-      if (!projectList.length) {
-        message.warning('请先选择项目！');
-        return false
-      } else {
-        return file
-      }
-    },
+    // data: () => ({ hosts: projectList.toString() }),
+    // beforeUpload(file, fileList) {
+    //   let projectList = taskRef.current.serveList;
+    //   setProjectList(projectList)
+    //   if (!projectList.length) {
+    //     message.warning('请先选择项目！');
+    //     return false
+    //   } else {
+    //     return file
+    //   }
+    // },
     onChange(info) {
       const { status } = info.file;
       if (status !== "uploading") {
@@ -90,7 +90,7 @@ export default function version() {
           > <div>
               <ul style={{ padding: "20px 30px" }}>
                 <li>
-                  {t("frontend")}：{"v1.1"}
+                  {t("frontend")}：{"v2.0"}
                 </li>
                 {/* <li>
             {t('backend')}：{backendVersion}
@@ -100,7 +100,7 @@ export default function version() {
               {(profile.roles?.includes("Admin") ||
                 permList.includes("/help/version/update")) && (
                   <div>
-                    <Row gutter={16}>
+                    {/* <Row gutter={16}>
                       <Col span={12}>
                         <Card>
                           <RunForm ref={taskRef} />
@@ -118,7 +118,15 @@ export default function version() {
                           </Dragger>
                         </Card>
                       </Col>
-                    </Row>
+                    </Row> */}
+                    <Dragger {...props}>
+                      <p className="ant-upload-drag-icon">
+                        <InboxOutlined />
+                      </p>
+                      <p className="ant-upload-text">
+                        点击或拖放系统升级包（ln-server.gz）到这个区域上传
+                      </p>
+                    </Dragger>
                   </div>
                 )}
             </div></PageLayout>
