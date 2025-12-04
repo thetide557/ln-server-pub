@@ -62,7 +62,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
   });
   const history = useHistory();
   const [bigScreenType, setBigScreenType] = useState();
-   const [carouselMode, setCarouselMode] = useState();
+  const [carouselMode, setCarouselMode] = useState();
   const [bigScreenOption, setBigScreenOption] = useState<Option[]>([]);
   const [businessGroupOption, setBusinessGroupOption] = useState<Option[]>([]);
   const layout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
@@ -210,12 +210,28 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                         <Form.Item name='carousel_mode' label='大屏轮播' rules={[{ required: true }]}>
                           <Select
                             options={[
-        { value: 1, label: '静态' },
-        { value: 2, label: '轮播' },
-      ]}
-                  onChange={(val) => {
-                    setCarouselMode(val);
-                  }}
+                              { value: 1, label: '静态' },
+                              { value: 2, label: '轮播' },
+                            ]}
+                            onChange={(val) => {
+                              setCarouselMode(val);
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  )
+                }
+                {
+                  bigScreenType == '2' && (
+                    <Row>
+                      <Col span={12}>
+                        <Form.Item name='carousel_mode' label='大屏轮播' rules={[{ required: true }]} hidden>
+                          <Select
+                            options={[
+                              { value: 1, label: '静态' },
+                              { value: 2, label: '轮播' },
+                            ]}
                           />
                         </Form.Item>
                       </Col>
@@ -229,11 +245,11 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                         <Form.Item name='carousel_interval' label='轮播间隔时长' rules={[{ required: true }]}>
                           <Select
                             options={[
-        { value: 30, label: '30s' },
-        { value: 60, label: '1分钟' },
-        { value: 300, label: '5分钟' },
-        { value: 600, label: '10分钟' },
-      ]}
+                              { value: 30, label: '30s' },
+                              { value: 60, label: '1分钟' },
+                              { value: 300, label: '5分钟' },
+                              { value: 600, label: '10分钟' },
+                            ]}
                           />
                         </Form.Item>
                       </Col>
