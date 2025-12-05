@@ -14,17 +14,6 @@
  * limitations under the License.
  *
  */
-import React, { useEffect, useState, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
-import Icon, { InboxOutlined } from '@ant-design/icons';
-import PageLayout from '@/components/pageLayout';
-import SystemInfoSvg from '../../../../public/image/system-info.svg';
-import pkgJson from '../../../../package.json';
-import './locale';
-import { Divider, message, Upload, UploadProps } from 'antd';
-import { CommonStateContext } from '@/App';
-import Cookies from 'js-cookie';
-
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Icon, { InboxOutlined } from "@ant-design/icons";
@@ -41,36 +30,14 @@ import Targets from "@/pages/targets/version"
 const { Dragger } = Upload;
 import "./index.less";
 
-const props: UploadProps = {
-  name: 'file',
-  multiple: false,
-  maxCount: 1,
-  action: '/api/n9e/server/update',
-  headers: { Authorization: `Bearer ${Cookies.get('access_token') || ''}` },
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} 文件上传成功.`);
-    } else if (status === 'error') {
-      message.error(`${info.file.name} 文件上传失败.`);
-    }
-  },
-  onDrop(e) {
-    console.log('Dropped files', e.dataTransfer.files);
-  },
-};
-
 export default function version() {
-  const { t } = useTranslation('version');
-  const [backendVersion, setBackendVersion] = useState('');
+  const { t } = useTranslation("version");
+  const [backendVersion, setBackendVersion] = useState("");
   const { profile, permList } = useContext(CommonStateContext);
   const [projectList, setProjectList] = useState([] as any);
   const taskRef = useRef(null as any);
   useEffect(() => {
-    fetch('/api/n9e/version')
+    fetch("/api/n9e/version")
       .then((res) => {
         return res.text();
       })
