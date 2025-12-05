@@ -132,7 +132,7 @@ export default function version() {
             </div></PageLayout>
 
         </Tabs.TabPane>
-        <Tabs.TabPane tab="探针版本" key="2">
+        <Tabs.TabPane tab="更新探针" key="2">
           <Targets />
         </Tabs.TabPane>
       </Tabs>

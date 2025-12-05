@@ -160,12 +160,12 @@ export default function () {
             </Row>
             <Row gutter={10}>
               <Col span={8}>
-                <Form.Item label="用户登录token过期时间" name='access_expired' labelAlign='right'>
+                <Form.Item label="用户登录token过期时间（分钟）" name='access_expired' labelAlign='right'>
                   <Input />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="用户登录token刷新时间" name='refresh_expired' labelAlign='right'>
+                <Form.Item label="用户登录token刷新时间（分钟）" name='refresh_expired' labelAlign='right'>
                   <Input />
                 </Form.Item>
               </Col>
