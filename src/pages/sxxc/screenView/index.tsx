@@ -20,7 +20,7 @@ import { useHistory } from 'react-router-dom';
 import _ from 'lodash';
 import Cookies from 'js-cookie';
 import { getBigScreen2, getDashboards, getNav2 } from '@/services/sxxc/bigScreen';
-import { Dropdown, Menu, message, Select } from 'antd';
+import { Dropdown, Menu, message, Select ,Carousel } from 'antd';
 import { DownOutlined, AppstoreOutlined } from '@ant-design/icons';
 import './index.less'
 
@@ -32,14 +32,20 @@ export default function ScreenView() {
   const { busiGroups } = useContext(CommonStateContext);
   const [nav2, setNav2] = useState<any>([]);
   const [url, setUrl] = useState<any>('')
+  const [urls, setUrls] = useState<any>('')
+  const [carousel_interval, setcarousel_interval] = useState<any>(3000)
   const [first, setFirst] = useState<any>('')
   const [activeColor, setActiveColor] = useState<any>(null)
-  const timestamp = new Date().getTime();
+  // const timestamp = new Date().getTime();
+  // const baseUrl = ' http://localhost:7521/#/bigscreen/preview'
+  // const baseUrl = '/dataroom/#/bigscreen/preview'
+   const timestamp = new Date().getTime();
   const baseUrl = `/dataroom/?timestamp=${timestamp}#/bigscreen/preview`
   // console.log('baseUrl', baseUrl);
   // console.log('url', url);
   const token = Cookies.get('access_token')
-
+  
+  const carouselRef:any = useRef(null);
   const sendToken = window.onload = function () {
     var iframe: any = document.getElementById('logFrame');
     iframe.onload = function () {
@@ -108,14 +114,38 @@ export default function ScreenView() {
         if (code.includes('?')) {
           let code1 = code + `&token=${token}`
           setUrl(code1)
+          urls.forEach((url, index) => {
+            const code2 = url['config']
+            if(code2 == code){
+              if(carouselRef.current){
+                carouselRef.current.goTo(index);
+              }
+            }
+          })
         } else {
           let code1 = code + `?token=${token}`
           setUrl(code1)
+          urls.forEach((url, index) => {
+            const code2 = url['config']
+            if(code2 == code){
+              if(carouselRef.current){
+                carouselRef.current.goTo(index);
+              }
+            }
+          })
         }
         sendToken()
       } else {
         const screenUrl = `${baseUrl}?code=${code}`
         setUrl(screenUrl)
+        urls.forEach((url, index) => {
+            const code2 = url['config']
+            if(code2 == code){
+              if(carouselRef.current){
+                carouselRef.current.goTo(index);
+              }
+            }
+          })
         // sendToken()
       }
     }
@@ -154,7 +184,6 @@ export default function ScreenView() {
   //   </Menu>
   // );
 
-
   const goBack = () => {
     // 清除趋势图缓存数据
     localStorage.removeItem('card5Data')
@@ -166,6 +195,7 @@ export default function ScreenView() {
   useEffect(() => {
     let busiGroup = localStorage.getItem('groupIds') || '';
     getBigScreen2(busiGroup).then(res => {
+      console.log('busiGroup==',res)
       if (res.dat.list.length > 0) {
         setScreenList(res.dat.list)
         setNav2(res.dat.list.filter(x => x.type == 2 && x.busi_group != 0))
@@ -191,6 +221,24 @@ export default function ScreenView() {
           setUrl(screenUrl)
           // sendToken()
         }
+        const urlss:any = []
+        res.dat.list.forEach(d => {
+          const code = d['config']
+          if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
+          }else{
+            if(code && d['carousel_mode'] == 2){
+             
+              const screenUrl = `${baseUrl}?code=${code}`
+               console.log('screenUrl===',screenUrl)
+              urlss.push({
+                ...d,screenUrl
+              })
+              setcarousel_interval(d['carousel_interval'] * 1000)
+            }
+          }
+        })
+        console.log('urlss',urlss)
+        setUrls(urlss)
       } 
       else {
         history.push(`/home`)
@@ -203,6 +251,9 @@ export default function ScreenView() {
     //   }
     // })
   }, []);
+  const iframeLoaded = (index) => {
+    console.log("onload")
+  }
   return (
     <div className='screen-view'>
       <div className='screen1'>
@@ -246,7 +297,15 @@ export default function ScreenView() {
             <img src="/image/screenview/back.png" alt="" />
           </div>
         </div>
-        <iframe id="logFrame" src={url} sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
+        {
+          urls.length > 0 ? <Carousel ref={carouselRef} dots={false} autoplay style={{'width': '100%'}} autoplaySpeed={carousel_interval}>
+          {
+            _.map(urls,(item,index)=> {
+              return <iframe  className='logFrame' key={index} src={item.screenUrl} sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
+            })
+          }
+        </Carousel> : <iframe id="logFrame" src={url} sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
+        }
       </div>
     </div>
   );

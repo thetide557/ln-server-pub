@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import _, { forEach } from 'lodash';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
-import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory } from '@/services/assets';
+import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory ,getAssetShelfHistory} from '@/services/assets';
+
 import { MinusCircleOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -55,6 +56,8 @@ export default function () {
   const [scheduleMaintenanceDate, setScheduleMaintenanceDate] = useState('');
   const [maintenanceStatusOption, setMaintenanceStatusOption] = useState([]);
   const [nextMaintenaceDateNull, setNextMaintenaceDateNull] = useState(false);
+  const [assetReleaseModalOpen, setAssetReleaseModalOpen] = useState(false); // 资产上下架历史弹窗
+  const [assetReleaseHistory, setAssetReleaseHistory] = useState<any[]>([]);
   const isNull = useRef(nextMaintenaceDateNull);
   const panelBaseProps: any = {
     size: 'small',
@@ -312,6 +315,11 @@ export default function () {
   };
 
   const submitForm = async () => {
+    // 检查管理状态，如果是上架状态则清空下架原因
+    if (assetData.is_shelf === true) {
+      assetData.shelf_reason = ''
+    }
+    
     if (editType !== 'edit') {
       await insertXHAsset(assetData);
       message.success('添加成功');
@@ -601,6 +609,22 @@ export default function () {
     return assetOptions.sort((a, b) => localeCompare(a.label, b.label));
   }, [assetOptions]);
 
+  // 资产上下架历史弹窗
+  const showAssetReleaseHistory = () => {
+    getAssetReleaseHistory()
+    setAssetReleaseModalOpen(true);
+  }
+  // 获取资产上下架历史
+  const getAssetReleaseHistory = (date?: number) => { 
+    getAssetShelfHistory({ asset_id: _.toNumber(id) ,date}).then((res) => {
+      setAssetReleaseHistory(res.dat?.dat);
+    });
+  }
+  const assetReleaseDateChange = (date, dateString) => {
+    // console.log('上下架日期',date, dateString);
+    getAssetReleaseHistory(timestamp(date.startOf('day')))
+  }
+
   return (
     <div className='asset_every'>
       <div className='assetmgt_header_select'>
@@ -762,6 +786,53 @@ export default function () {
                     <Input placeholder='填写备注' />
                   </Form.Item>
                 </Col>
+                {/* 管理状态：上架资产、下架资产 */}
+                <Col span={12}>
+                  <Form.Item label='管理状态' name='is_shelf' rules={[{ required: true }]} initialValue={true}>
+                    <Select
+                      style={{ width: '100%' }}
+                      allowClear 
+                      placeholder='请选择管理状态'
+                    >
+                      {mode === 'view' ? (
+                        // 查看模式：已上架、已下架
+                        <>
+                          <Select.Option value={true}>已上架</Select.Option> 
+                          <Select.Option value={false}>已下架</Select.Option> 
+                        </>
+                      ) : (
+                        // 编辑/新增模式：上架资产、下架资产
+                        <>
+                          <Select.Option value={true}>上架资产</Select.Option> 
+                          <Select.Option value={false}>下架资产</Select.Option> 
+                        </>
+                      )}
+                    </Select>
+                  </Form.Item>
+                  {mode === 'view' && (
+                  <span className='hsBtn' style={{fontSize:'12px',position:'absolute',left:'76%',top:'15%'}} onClick={showAssetReleaseHistory} >上下架历史</span>
+                  )}
+                </Col>
+                {form.getFieldValue('is_shelf') === false && (
+                  <Col span={24}>
+                    <Form.Item 
+                      labelCol={{ span: 4 }}
+                      wrapperCol={{ span: 17 }}
+                      label='下架原因' 
+                      name='shelf_reason' 
+                      rules={[{
+                        required: true,
+                        message: '请填写下架原因'
+                      }]}
+                    >
+                      <Input.TextArea 
+                        placeholder='请填写下架原因' 
+                        rows={4}
+                      />
+                    </Form.Item>
+                  </Col>
+                )}
+                
               </Row>
             </Card>
             {params.length > 0 && (
@@ -1140,6 +1211,37 @@ export default function () {
             )
           }
         </Timeline>
+      </Modal>
+
+      {/* 资产上下架历史弹窗 */}
+      <Modal title="资产上下架历史" width='50%' footer={null} visible={assetReleaseModalOpen} onOk={() => { setAssetReleaseModalOpen(false) }} onCancel={() => { setAssetReleaseModalOpen(false) }}>
+        <div style={{ marginBottom: '1rem' }}>
+          <span>选择日期&nbsp;&nbsp;</span>
+          <DatePicker allowClear  format='YYYY-MM-DD' style={{ width: '30%' }} onChange={assetReleaseDateChange} placeholder='请选择上下架日期' />
+        </div>
+        <div style={{ marginLeft: '2rem'}}>
+        <div style={{ marginBottom: '.5rem' }}>共{assetReleaseHistory.length}条记录</div>
+        <Timeline style={{ maxHeight: '500px', overflowY: 'auto', padding: '.5rem 0' }}>
+          {
+            assetReleaseHistory.length && (
+              assetReleaseHistory.map((x, index) => {
+                return (
+                  <Timeline.Item key={index} color="#2977d7">
+                    <Space>
+                      <span>{moment.unix(x.operation_time).format('YYYY-MM-DD HH:mm:ss')} </span>
+                      <Tag color={x.is_shelf ? "success" : "default"}>{x.is_shelf ? "上架资产" : "下架资产"} </Tag>
+                    </Space>
+                    <div style={{ margin: '.5rem 0' }}>操作人：{x.operator}</div>
+                    {!x.is_shelf && (
+                      <div style={{ padding: '.5rem 0', background: '#F2F8FF' }}>下架原因：{x.reason}</div>
+                    )}
+                  </Timeline.Item>
+                )
+              })
+            )
+          }
+        </Timeline>
+        </div>
       </Modal>
     </div>
   );

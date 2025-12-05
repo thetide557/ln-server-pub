@@ -33,7 +33,7 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { batchShelfXhAssets,deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
@@ -41,6 +41,15 @@ import { OperationModal } from './OperationModal';
 import { factories, serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
+
+
+interface OperationsAssetType extends assetsType {
+  shelf_record?: {
+    is_shelf: boolean;
+    operator: string;
+    operation_time: number;
+  };
+}
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -53,16 +62,19 @@ export enum OperateType {
   Delete = 'delete',
   ChangeOrganize = 'changeOrganize',
   None = 'none',
+  AssetBatchList = 'assetBatchList',
+  AssetBatchDelist = 'assetBatchDelist'
 }
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'manufacturers', label: '厂商', type: 'select' },
   { name: 'os', label: '操作系统', type: 'input' },
-  { name: 'status', label: '管理状态', type: 'select' },
+  { name: 'status', label: '资产状态', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'position', label: '资产位置', type: 'input' },
   { name: 'maintenanceStatus', label: '维保状态', type: 'select' },
+  { name: 'is_shelf', label: '管理状态', type: 'select' },
   // { name: 'service_level', label: '服务层级', type: 'select' },
   // { name: 'device_type', label: '设备形态', type: 'select' },
 ];
@@ -164,6 +176,11 @@ export default function () {
         label: item.label,
       };
     }),
+    is_shelf: [
+      { value: '上架', label: '已上架' },
+      { value: '下架', label: '已下架' },
+    ],
+
   };
 
 
@@ -259,7 +276,7 @@ export default function () {
       },
     },
     {
-      title: '管理状态',
+      title: '资产状态',
       dataIndex: 'status',
       align: 'center',
       width: 120,
@@ -367,6 +384,77 @@ export default function () {
         return a.create_at > b.create_at ? 1 : -1;
       },
     },
+    // 管理状态：已上架  已下架
+    {
+      title: '管理状态',
+      dataIndex: ['shelf_record', 'is_shelf'],
+      align: 'center',
+      width: 120,
+      ellipsis: true,
+      sorter: (a, b) => {
+        const statusA = a.shelf_record?.is_shelf === true ? 1 : 0;
+        const statusB = b.shelf_record?.is_shelf === true ? 1 : 0;
+        return statusA - statusB;
+      },
+      render(value, record, index) {
+        let label;
+        if (value === false) {
+          label = (
+            <Tag color='default'>
+              已下架
+            </Tag>
+          );
+        } else if (value === true) {
+          label = (
+            <Tag color='success'>
+              已上架
+            </Tag>
+          );
+        }
+        return label;
+      },
+    },
+    // 管理时长
+    {
+      title: '管理时长',
+      align: 'center',
+      width: 120,
+      ellipsis: true,
+      render(value, record, index) {
+        if (record.create_at) {
+          const days = moment().diff(moment.unix(record.create_at), 'days');
+          // 显示天数，对于小于1天的情况显示为1天
+          return (days > 0 ? days : 1) + '天';
+        }
+        return '-';
+      },
+      sorter: (a, b) => {
+        const daysA = moment().diff(moment.unix(a.create_at), 'days');
+        const daysB = moment().diff(moment.unix(b.create_at), 'days');
+        return (daysA > 0 ? daysA : 1) - (daysB > 0 ? daysB : 1);
+      },
+    },
+    // 最近更新时间、最近更新人
+    {
+      title: '最近更新时间',
+      dataIndex: ['shelf_record', 'operation_time'],    
+      align: 'center',
+      ellipsis: true,
+      width: 130,
+      render(text, record, index) {
+        return moment.unix(text).format('YYYY-MM-DD HH:mm:ss');
+      },
+      sorter: (a, b) => {
+        return a.shelf_record?.operation_time > b.shelf_record?.operation_time ? 1 : -1;
+      },
+    },
+    {
+      title: '最近更新人',
+      dataIndex: ['shelf_record', 'operator'],
+      align: 'center',
+      ellipsis: true,
+      width: 120,
+    },
   ];
 
   const fixColumns: any[] = [
@@ -375,7 +463,7 @@ export default function () {
       width: 200,
       align: 'center',
       fixed: 'right',
-      render: (text: string, record: assetsType) => (
+      render: (text: string, record: OperationsAssetType) => (
         <Space>
           {
             (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/monitor")) && <VideoCameraOutlined
@@ -411,12 +499,15 @@ export default function () {
             />
           }
           {
-            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/del")) && <DeleteOutlined
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/del")) && 
+            record.shelf_record?.is_shelf === false &&
+            <DeleteOutlined
               title='删除'
               className='table-operator-area-warning'
               onClick={async () => {
                 Modal.confirm({
-                  title: t('common:confirm.delete'),
+                  // title: t('common:confirm.delete'),
+                  title: '下架后，将不保留资产上下架历史，是否确认删除？', // 更新提示信息
                   onOk: async () => {
                     await deleteXhAssets({ ids: [record.id.toString()] });
                     message.success(t('common:success.delete'));
@@ -1467,6 +1558,18 @@ export default function () {
                                 return;
                               }
                               setOperateType(key as OperateType);
+                            } else if(key == OperateType.AssetBatchList || key == OperateType.AssetBatchDelist){
+                              
+                              const data = {
+                                "asset_ids": selectedAssets,
+                                "is_shelf": key === OperateType.AssetBatchList
+                              }
+                               batchShelfXhAssets(data).then((res) => {
+                                  message.success('批量操作成功！');
+                                  getAssetTree()
+                                  // setSelectedAssets([]);
+                                });
+                              console.log('OperateType.AssetBatchList==',data)
                             } else {
                               setOperateType(key as OperateType);
                             }
@@ -1480,6 +1583,8 @@ export default function () {
                             // { key: OperateType.RemoveBusi, label: '移出业务组' },
                             // { key: OperateType.UpdateNote, label: '修改备注' },
                             { key: OperateType.Delete, label: '批量删除' },
+                            { key: OperateType.AssetBatchList, label: '批量上架' },
+                            { key: OperateType.AssetBatchDelist, label: '批量下架' },
                           ]}
                         ></Menu>
                       }

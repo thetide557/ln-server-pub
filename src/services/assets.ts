@@ -1,9 +1,9 @@
-import request from '@/utils/request';
-import { RequestMethod } from '@/store/common';
-import { assetsType } from '@/store/assetsInterfaces';
+import request from "@/utils/request";
+import { RequestMethod } from "@/store/common";
+import { assetsType } from "@/store/assetsInterfaces";
 
 export const getAssets = function (bgid, query, organization_id) {
-  return request('/api/n9e/assets', {
+  return request("/api/n9e/assets", {
     method: RequestMethod.Get,
     params: {
       bgid,
@@ -14,14 +14,14 @@ export const getAssets = function (bgid, query, organization_id) {
 };
 
 export const getAssets1 = function (params) {
-  return request('/api/n9e/assets', {
+  return request("/api/n9e/assets", {
     method: RequestMethod.Get,
-    params
+    params,
   });
 };
 
 export const getAssetsByCondition = function (params) {
-  return request('/api/n9e/xh/assets/filter', {
+  return request("/api/n9e/xh/assets/filter", {
     method: RequestMethod.Get,
     params,
   });
@@ -35,7 +35,7 @@ export const getAssetsByCondition = function (params) {
 
 // 获取资产列表 告警数据分权分域
 export const getAssetsByGroupsMember = function (params) {
-  return request('/api/n9e/busi-groups/member', {
+  return request("/api/n9e/busi-groups/member", {
     method: RequestMethod.Get,
     params,
   });
@@ -59,7 +59,7 @@ export const getAssetBoard = function (id: string | number) {
 };
 
 export const addAsset = function (data: assetsType) {
-  return request('/api/n9e/assets', {
+  return request("/api/n9e/assets", {
     method: RequestMethod.Post,
     data,
   });
@@ -67,33 +67,36 @@ export const addAsset = function (data: assetsType) {
 
 //针对西航项目
 export const insertXHAsset = function (data) {
-  return request('/api/n9e/xh/assets', {
+  return request("/api/n9e/xh/assets", {
     method: RequestMethod.Post,
     data,
   });
 };
 export const updateXHAsset = function (data) {
-  return request('/api/n9e/xh/assets', {
+  return request("/api/n9e/xh/assets", {
     method: RequestMethod.Put,
     data,
   });
 };
 
 export const addXHAssetExpansion = function (data, asset, type) {
-  return request('/api/n9e/xh/assets-expansion?asset=' + asset + '&type=' + type, {
-    method: RequestMethod.Put,
-    data,
-  });
+  return request(
+    "/api/n9e/xh/assets-expansion?asset=" + asset + "&type=" + type,
+    {
+      method: RequestMethod.Put,
+      data,
+    }
+  );
 };
 
 export const putOptionalMetrics = function (data) {
-  return request('/api/n9e/assets/optmetrics', {
+  return request("/api/n9e/assets/optmetrics", {
     method: RequestMethod.Put,
     data,
   });
 };
 export const updateAsset = function (data: assetsType) {
-  return request('/api/n9e/assets', {
+  return request("/api/n9e/assets", {
     method: RequestMethod.Put,
     data,
   });
@@ -124,38 +127,45 @@ export const getAssetDefaultConfig = function (type: string, data) {
 
 //获取可用监控探针
 export const getAssetsIdents = function () {
-  return request('/api/n9e/assets/idents', {
+  return request("/api/n9e/assets/idents", {
     method: RequestMethod.Get,
   });
 };
 
-export const getAssetsMonitor = function (start_at: number, end_at: number, monitorids: number[]) {
-  return request('/api/n9e/xh/monitoring/data?start=' + start_at + '&end=' + end_at, {
-    method: RequestMethod.Post,
-    data: { ids: monitorids },
-  });
+export const getAssetsMonitor = function (
+  start_at: number,
+  end_at: number,
+  monitorids: number[]
+) {
+  return request(
+    "/api/n9e/xh/monitoring/data?start=" + start_at + "&end=" + end_at,
+    {
+      method: RequestMethod.Post,
+      data: { ids: monitorids },
+    }
+  );
 };
 
 //获取资产类型
 export const getAssetstypes = function () {
-  return request('/api/n9e/assets/types', {
+  return request("/api/n9e/assets/types", {
     method: RequestMethod.Get,
   });
 };
 
 //获取资产类型
 export const getAssetstypesByParams = function (params: any) {
-  return request('/api/n9e/assets/types', {
+  return request("/api/n9e/assets/types", {
     method: RequestMethod.Get,
-    params
+    params,
   });
 };
 
 // 获取监控资产
 export const getMonitorAssetstypes = function (params: any) {
-  return request('/api/n9e/assets/monitortypes', {
+  return request("/api/n9e/assets/monitortypes", {
     method: RequestMethod.Get,
-    params
+    params,
   });
 };
 
@@ -217,7 +227,7 @@ export function getOrganizationTree(data) {
 export const importXhAssetSetData = function (url, data) {
   return request(url, {
     headers: {
-      enctype: 'multipart/form-data',
+      enctype: "multipart/form-data",
     },
     body: data,
     method: RequestMethod.Post,
@@ -267,7 +277,7 @@ export function getOrganizationsByIds(data) {
   });
 }
 export const addOrganization = function (data) {
-  return request('/api/n9e/organization', {
+  return request("/api/n9e/organization", {
     method: RequestMethod.Post,
     data,
   });
@@ -304,54 +314,53 @@ export const getMonitoringOptions = function () {
 
 // 查询资产组织树分组
 export const getAssetstypesNew = function (params: any) {
-  return request('/api/n9e/assets/assettissuetree', {
+  return request("/api/n9e/assets/assettissuetree", {
     method: RequestMethod.Get,
-    params
+    params,
   });
 };
 // 监控指标组织树列表
 export const getMonitortree = function (params: any) {
   // return request('/api/n9e/assets/monitortree', {
-  return request('/api/n9e/assetss/monitortrees', {
+  return request("/api/n9e/assetss/monitortrees", {
     method: RequestMethod.Get,
-    params
+    params,
   });
 };
 
 export const addAssetstypesNew = function (data: any) {
-  return request('/api/n9e/assets/assettissuetree', {
+  return request("/api/n9e/assets/assettissuetree", {
     method: RequestMethod.Post,
-    data
+    data,
   });
 };
 
 export const editAssetstypesNew = function (data: any) {
-  return request('/api/n9e/assets/assettissuetree', {
+  return request("/api/n9e/assets/assettissuetree", {
     method: RequestMethod.Put,
-    data
+    data,
   });
 };
 
 export const delAssetstypesNew = function (params: any) {
-  return request('/api/n9e/assets/assettissuetree', {
+  return request("/api/n9e/assets/assettissuetree", {
     method: RequestMethod.Delete,
-    params
+    params,
   });
 };
-
 
 // 新增资产分组
 export const addXhAssetstypesNew = function (data: any) {
-  return request('/api/n9e/xh/group', {
+  return request("/api/n9e/xh/group", {
     method: RequestMethod.Post,
-    data
+    data,
   });
 };
 // 修改资产分组
-export const editXhAssetstypesNew = function (data: any,id:any) {
+export const editXhAssetstypesNew = function (data: any, id: any) {
   return request(`/api/n9e/xh/updategroup?group_id=${id}`, {
     method: RequestMethod.Put,
-    data
+    data,
   });
 };
 // 删除资产分组
@@ -361,17 +370,16 @@ export const delXhAssetstypesNew = function (id) {
   });
 };
 
-
 // 查询资产清单维保信息
 export const getMaintenanceInfoById = function (id) {
-  return request('/api/n9e/asset-maintenance-info/' + id, {
+  return request("/api/n9e/asset-maintenance-info/" + id, {
     method: RequestMethod.Get,
   });
 };
 
 // 更新资产清单维保信息
 export const editMaintenanceInfo = function (data) {
-  return request('/api/n9e/asset-maintenance-info', {
+  return request("/api/n9e/asset-maintenance-info", {
     method: RequestMethod.Put,
     data,
   });
@@ -379,15 +387,40 @@ export const editMaintenanceInfo = function (data) {
 
 // 新增维保信息
 export const addMaintenanceHistory = function (data) {
-  return request('/api/n9e/asset-maintenance-history', {
+  return request("/api/n9e/asset-maintenance-history", {
     method: RequestMethod.Post,
     data,
   });
 };
 
 // 查询维保历史
-export const getMaintenanceHistory = function ({id, actual_maintenance_date}) {
-  return request('/api/n9e/asset-maintenance-history?assetId=' + id + '&actual_maintenance_date=' + actual_maintenance_date, {
+export const getMaintenanceHistory = function ({
+  id,
+  actual_maintenance_date,
+}) {
+  return request(
+    "/api/n9e/asset-maintenance-history?assetId=" +
+      id +
+      "&actual_maintenance_date=" +
+      actual_maintenance_date,
+    {
+      method: RequestMethod.Get,
+    }
+  );
+};
+
+// 查询资产上下架历史
+export const getAssetShelfHistory = function (params) {
+  return request("/api/n9e/xh/assets/query-by-date", {
     method: RequestMethod.Get,
+    params,
+  });
+};
+
+// 资产批量上架和下架
+export const batchShelfXhAssets = function (data: any) {
+  return request(`/api/n9e/assets/batch-shelf`, {
+    method: RequestMethod.Post,
+    data,
   });
 };

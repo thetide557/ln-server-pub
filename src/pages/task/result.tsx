@@ -200,7 +200,7 @@ const index = (props: any) => {
                 <span>
                   {data.action === 'start' ? (
                     <Button className='success-btn' onClick={() => handleTaskAction('pause')}>
-                      {t('Pause')}
+                      {/* {t('Pause')} */}暂停
                     </Button>
                   ) : (
                     <Button className='success-btn' onClick={() => handleTaskAction('start')}>

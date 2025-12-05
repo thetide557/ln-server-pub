@@ -165,6 +165,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         const query = {
             // query: '',
             // bgid: '-1',
+            group_id: -1,
             page: 1,
             limit: 5000,
             groupIds: localStorage.getItem('groupIds')
@@ -253,7 +254,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         // getInspectionDetailByGroup(id, params).then((res) => {
         setType(formObj.executeCycle)
         setScope(formObj.scope)
-        formObj.excuteTime = dayjs(formObj.excuteTime, timeFormat)
+        formObj.excuteTime = formObj.excuteTime ? moment(formObj.excuteTime, timeFormat) : null;
         formObj.groupId = Number(formObj.groupId)
         console.log('--->time', formObj.excuteTime)
         setSelectedRowKeys(formObj.scriptId?.split(',').map(item => Number(item)))
@@ -261,7 +262,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         if (formObj.executeCycle == 2) {
             formObj.week = formObj.week.split(',').map(item => Number(item))
         } else if (formObj.executeCycle == 3) {
-            formObj.excuteDate = dayjs(formObj.excuteDate, dateFormat)
+            formObj.excuteDate = formObj.excuteDate ? moment(formObj.excuteDate, dateFormat) : null;
         }
         if (formObj.scope == 2) {
             formObj.scopeContext = formObj.scopeContext.split(',').map(item => Number(item))
