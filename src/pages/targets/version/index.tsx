@@ -332,15 +332,15 @@ export default function () {
         // 在这里执行更新操作
         updateTarget(params).then(res => {
           if (res.dat?.task_id) {
-            const {task_id } = res.dat;
-            message.success('更新成功');
+            const { task_id } = res.dat;
+            message.success('探针更新成功,请前往探针管理查看更新结果');
             setModalShow(false);
             loadingVersions()
             // location.href = `/job-tasks/${task_id}/result`;
-            setTimeout(() => {
-              window.open(`/job-tasks/${task_id}/result`)
-            }, 1000);
-            
+            // setTimeout(() => {
+            //   window.open(`/job-tasks/${task_id}/result`)
+            // }, 1000);
+
           }
         });
       })
@@ -381,7 +381,7 @@ export default function () {
   };
 
   return (
-    <PageLayout title='探针版本'>
+    <PageLayout title='更新探针'>
       <div style={{ height: 150, overflow: 'visible' }}>
         <div style={{ padding: 20, marginBottom: 20 }}>
           探针上传需要按规范文件名上传,文件名需要包括版本号,操作系统,架构,并通过zip压缩后上传.<br></br> 如:ln-agent-1.0.0-linux-amd64.zip
@@ -429,6 +429,29 @@ export default function () {
           columns={columns1}
           size='small'
           {...tableProps}
+          onRow={(record) => ({
+            onClick: () => {
+              const id = record.id;
+              const isSelected = selectedRowKeys.includes(id);
+
+              // 切换选择状态
+              let newSelectedRowKeys: (string | number)[];
+              let newSelectedIdents: string[];
+
+              if (isSelected) {
+                // 如果已选中，则取消选中
+                newSelectedRowKeys = selectedRowKeys.filter(key => key !== id);
+                newSelectedIdents = selectedIdents.filter(ident => ident !== record.ident);
+              } else {
+                // 如果未选中，则添加到选中列表
+                newSelectedRowKeys = [...selectedRowKeys, id];
+                newSelectedIdents = [...selectedIdents, record.ident];
+              }
+
+              setSelectedRowKeys(newSelectedRowKeys);
+              setSelectedIdents(newSelectedIdents);
+            },
+          })}
           rowSelection={{
             type: 'checkbox',
             selectedRowKeys: selectedRowKeys,
