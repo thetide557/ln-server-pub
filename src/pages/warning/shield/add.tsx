@@ -72,6 +72,10 @@ const AddShield: React.FC = () => {
       query.tags = [];
     }
   }
+  if (query.ruleName) {
+    const timestamp = Math.floor(new Date().getTime() / 1000);
+    query.note = query.ruleName + timestamp;
+  }
 
   return (
     <PageLayout title={t('title')} showBack>

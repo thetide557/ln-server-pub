@@ -233,6 +233,7 @@ function Card(props: Props, ref) {
                     cate: record.cate,
                     datasource_ids: [record.datasource_id],
                     tags: record.tags,
+                    ruleName: record.rule_name
                   }),
                 });
               }}
