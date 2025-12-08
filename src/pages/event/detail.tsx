@@ -325,6 +325,7 @@ const EventDetailPage: React.FC = () => {
                           cate: eventDetail.cate,
                           datasource_ids: [eventDetail.datasource_id],
                           tags: eventDetail.tags,
+                          ruleName: eventDetail.rule_name
                         }),
                       });
                     }}

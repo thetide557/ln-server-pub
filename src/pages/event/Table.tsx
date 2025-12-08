@@ -178,6 +178,7 @@ export default function TableCpt(props: IProps) {
                     from: "list",
                     datasource_ids: [record.datasource_id],
                     tags: record.tags,
+                    ruleName: record.rule_name
                   }),
                 });
               }}
