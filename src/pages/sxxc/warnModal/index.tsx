@@ -9,7 +9,7 @@ import {
   updataprocess,
 } from "@/pages/sxxc/screenView/alarmApi";
 import "./index.less";
-import AlarmChartLine from "@/pages/sxxc/screenView/alarmChartLine";
+import AlarmChartLine from "./alarmChartLine";
 import { getRuleSolution, getFeedbacks } from "@/services/warning";
 import { marked } from "marked";
 import _ from "lodash";
@@ -242,6 +242,7 @@ const WarnModal = (props) => {
     setAlartMutes(params, curWarn.group_id).then((res) => {
       setOpen1(false);
       message.success("屏蔽成功");
+      handleAlarm();
     });
   };
 
@@ -545,7 +546,11 @@ const WarnModal = (props) => {
               </div>
               {curWarn.id && (
                 <div className="col2">
-                  <div className="pb-btn" onClick={handlePb}>屏蔽</div>
+                  {curWarn?.is_muted == 1 ? (
+                    <div className="pb-btn">已屏蔽</div>
+                  ) : (
+                    <div className="pb-btn" onClick={handlePb}>屏蔽</div>
+                  )}
                   {curWarn.processe == 1 ? (
                     <div>已处理</div>
                   ) : (
@@ -664,6 +669,18 @@ const WarnModal = (props) => {
                 </span>
               </div> */}
             </div>
+            {
+              curWarn?.is_muted == 1 && <div className="row">
+                <div className="col">
+                  <img className="dian" src="/image/alarm/dian.png" alt="" />
+                  <span>屏蔽开始时间：{curWarn.mute_start_time}</span>
+                </div>
+                <div className="col">
+                  <img className="dian" src="/image/alarm/dian.png" alt="" />
+                  <span>屏蔽结束时间：{curWarn.mute_end_time}</span>
+                </div>
+              </div>
+            }
           </div>
           <div className="chart1">
             {curWarn.id && <AlarmChartLine curWarn={curWarn} />}
