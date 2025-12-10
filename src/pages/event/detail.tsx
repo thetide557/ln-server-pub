@@ -224,7 +224,7 @@ const EventDetailPage: React.FC = () => {
         return time;
       },
     }] : []),
-    
+
     // {
     //   label: '屏蔽状态',
     //   key: 'is_muted',
@@ -338,24 +338,26 @@ const EventDetailPage: React.FC = () => {
             actions={[
               <div className='alert_detail_action-btns'>
                 <Space>
-                  <Button
-                    type='primary'
-                    onClick={() => {
-                      history.push({
-                        pathname: '/alert-mutes/add',
-                        search: queryString.stringify({
-                          busiGroup: eventDetail.group_id,
-                          prod: eventDetail.rule_prod,
-                          cate: eventDetail.cate,
-                          datasource_ids: [eventDetail.datasource_id],
-                          tags: eventDetail.tags,
-                          ruleName: eventDetail.rule_name
-                        }),
-                      });
-                    }}
-                  >
-                    {t('shield')}
-                  </Button>
+                  {
+                    eventDetail?.is_muted != 1 && <Button
+                      type='primary'
+                      onClick={() => {
+                        history.push({
+                          pathname: '/alert-mutes/add',
+                          search: queryString.stringify({
+                            busiGroup: eventDetail.group_id,
+                            prod: eventDetail.rule_prod,
+                            cate: eventDetail.cate,
+                            datasource_ids: [eventDetail.datasource_id],
+                            tags: eventDetail.tags,
+                            ruleName: eventDetail.rule_name
+                          }),
+                        });
+                      }}
+                    >
+                      {t('shield')}
+                    </Button>
+                  }
                   {/* {!isHistory && ( */}
                   <Button
                     // danger

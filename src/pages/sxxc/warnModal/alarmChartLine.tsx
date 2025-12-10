@@ -7,7 +7,7 @@ import { getWarningChart } from '@/pages/sxxc/screenView/alarmApi';
 
 const AlarmChartLine = function (props: any) {
   const { curWarn } = props;
-  const {id, setId} = useState(null)
+  const { id, setId } = useState(null)
 
   // const [chartList, setChartList] = useState([])
 
@@ -31,6 +31,17 @@ const AlarmChartLine = function (props: any) {
     } else {
       return `${Hour}:${Minute}`;
     }
+  }
+
+  const getSerieName = (metric) => {
+    const metricName = metric?.__name__ || '';
+    const labels = _.keys(metric)
+      .filter((ml) => ml !== '__name__')
+      .map((label) => {
+        return `${label}="${metric[label]}"`;
+      });
+
+    return `${metricName}{${_.join(labels, ',')}}`;
   }
 
 
@@ -76,18 +87,35 @@ const AlarmChartLine = function (props: any) {
           // x轴
           xList = allTimestamps.map((item) => convertTime(item, "year"));
         }
-  
         // 构建统一的时间戳数组
         list1.forEach((item) => {
           item.values = allTimestamps.map((timestamp) => {
-            let found = item.values.find((item) => item[0] === timestamp);
+            let found = item.values.find((item2) => item2[0] === timestamp);
             return found ? found : [timestamp, 0];
           });
-  
-          const data = item.values.map((item2) => Number(item2[1]).toFixed(3));
+
+          const data = item.values.map((item2) => {
+            const value = Number(item2[1]);
+            // 转换为字符串检查小数位数
+            const valueStr = value.toString();
+            if (valueStr.includes('.')) {
+              const decimalPlaces = valueStr.split('.')[1].length;
+              // 如果小数位数大于3位，则保留3位小数
+              if (decimalPlaces > 3) {
+                return value.toFixed(3);
+              } else {
+                // 否则保留原始值
+                return value;
+              }
+            } else {
+              // 整数直接返回
+              return value;
+            }
+          });
           // console.log(data);
           seriesData.push({
             // name: `${item.metric.agent_ip}-${item.metric.asset_id}`,
+            name: getSerieName(item.metric),
             type: "line",
             smooth: true,
             showSymbol: false,
@@ -103,7 +131,28 @@ const AlarmChartLine = function (props: any) {
             containLabel: true
           },
           tooltip: {
-            trigger: 'axis'
+            trigger: "axis",
+            // confine: true,
+            axisPointer: {
+              type: 'shadow',
+              shadowStyle: {
+                color: 'rgba(52, 105, 135, 0.1)'
+              }
+            },
+            textStyle: {
+              fontSize: 12,
+            },
+            extraCssText: 'width: 500px; white-space: normal;',
+            formatter: (params) => {
+              let con = params[0].name + ":<br/>";
+              for (let i = 0; i < params.length; i++) {
+                con += `<div style="display: flex; line-height: 25px;">
+              <span>${params[i].marker}</span>
+              <span><span style="display: inline-block; word-break: break-all; white-space: normal;">${params[i].seriesName}: <span style="font-weight: 700; margin-left: 5px;">${params[i].value}</span></span></span>
+            </div>`;
+              }
+              return con;
+            }
           },
           xAxis: {
             type: "category",
