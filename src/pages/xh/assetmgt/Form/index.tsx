@@ -402,7 +402,7 @@ export default function () {
             alignItems: 'center',
             color: value ? '#ccc' : '#bfbfbf',
             pointerEvents: 'none',
-            fontSize: 14,
+            fontSize: 12,
             userSelect: 'none',
             whiteSpace: 'pre',
           }}
