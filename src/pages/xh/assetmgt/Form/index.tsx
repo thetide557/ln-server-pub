@@ -112,8 +112,10 @@ export default function () {
   // 根据选择资产类型生成表单
   useEffect(() => {
     const assetType: any = assetTypes.find((v) => v.name === currentType);
+    
     if (assetType) {
       setParams(assetType.form || []); // 显示form表单
+      console.log('assetType.form===',assetType.form)
       // http服务鉴权字段处理
       if (currentType == 'HTTP服务') {
         let formData = form.getFieldsValue(true);
@@ -325,6 +327,11 @@ export default function () {
       message.success('添加成功');
       history.goBack();
     } else {
+      console.log("submitForm====",assetData,map)
+      const keys = Object.keys(map)
+      keys.forEach(key => {
+        assetData.params[key] = map[key]
+      })
       delete assetData['tags']; // 更新信息不包括tag，格式不符
       assetData.id = _.toNumber(id);
       await updateXHAsset(assetData);
@@ -355,12 +362,74 @@ export default function () {
       // loadAssetInfo(id);
     }
   };
+  let map = {}
+  const AlwaysShowPlaceholderPassword = ({ placeholder, form, name }) => {
+    const [value, setValue] = useState('');
+    const inputRef = useRef(null);
 
+    const handleChange = (e) => {
+      const val = e.target.value;
+      setValue(val);
+      map[name] = val
+      console.log('handleChange==',val,form.getFieldsValue())
+    };
+
+    if (value) {
+      return <Input.Password value={value} autoFocus onChange={handleChange} />;
+    }
+
+    return (
+      <div style={{ position: 'relative', width: '100%' }}>
+        <Input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={handleChange}
+          style={{
+            color: 'transparent',
+            textShadow: '0 0 0 transparent',
+            caretColor: '#333',
+          }}
+        />
+        <div
+          onClick={() => inputRef.current?.focus()}
+          style={{
+            position: 'absolute',
+            left: 12,
+            top: 0,
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            color: value ? '#ccc' : '#bfbfbf',
+            pointerEvents: 'none',
+            fontSize: 14,
+            userSelect: 'none',
+            whiteSpace: 'pre',
+          }}
+        >
+          {placeholder || '请输入密码'}
+        </div>
+      </div>
+    );
+  };
   const renderFormItem = (v) => {
+    
     if (v.type === 'select') {
       return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options} onChange={onSelectChange}></Select>;
     }
     if (v.type === 'password') {
+      console.log('password===',form.getFieldsValue())
+      if(mode == 'view'){ //查看
+        return <Input.Password key={'v' + v.name} visibilityToggle={false}/>;
+      }
+      if(mode == 'edit' && id){ //编辑
+        let placeholder = '请输入密码'
+        if(form.getFieldsValue() && form.getFieldsValue().params && form.getFieldsValue().params[v.name]){
+          placeholder = '请输入密码，不输入代表不更新'
+        }
+        
+        return <AlwaysShowPlaceholderPassword form={form} name={v.name} placeholder={placeholder} />
+      }
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
     }
     if (v.type === 'checkbox') {
@@ -841,7 +910,7 @@ export default function () {
                   {params.map((v) => {
                     return (
                       <Col span={12} key={`col-${v.name}`}>
-                        <Form.Item
+                        <Form.Item  
                           label={v.label}
                           name={['params', v.name]}
                           key={`formitem=${v.name}`}
