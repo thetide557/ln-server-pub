@@ -65,7 +65,6 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
   const [carouselMode, setCarouselMode] = useState();
   const [bigScreenOption, setBigScreenOption] = useState<Option[]>([]);
   const [businessGroupOption, setBusinessGroupOption] = useState<Option[]>([]);
-  const [businessGroupOption2, setBusinessGroupOption2] = useState<Option[]>([]);
   const layout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
   const hiddenLayout = { span: 0 };
   const displayOption = [
@@ -105,12 +104,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
           value: x.id
         }
       })
-      setBusinessGroupOption([{
-        id: -1,
-        label: '全部',
-        value: -1
-      }, ...options])
-      setBusinessGroupOption2(options)
+      setBusinessGroupOption(options)
     });
   }
   // 获取大屏列表
@@ -159,15 +153,9 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                   placeholder='请选择大屏类型'
                   onChange={(val) => {
                     setBigScreenType(val);
-                    // if (val == 1 && !initialValues?.id) {
-                    //   form.setFieldsValue({
-                    //     busi_group: -1
-                    //   })
-                    // } else if (val == 2 && !initialValues?.id) {
-                    //   form.setFieldsValue({
-                    //     busi_group: undefined
-                    //   })
-                    // }
+                    form.setFieldsValue({
+                      busi_group: undefined
+                    })
                   }}
                 />
               </Form.Item>
@@ -192,22 +180,13 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                     )
                   }
                   <Col span={12}>
-                    {
-                      bigScreenType == '1' ? (
-                        <Form.Item name='busi_group' label='业务组' rules={[{ required: true }]}>
-                          <Select
-                            // mode="multiple"
-                            options={businessGroupOption2}
-                            placeholder='请选择业务组'
-                          />
-                        </Form.Item>
-                      ) : <Form.Item name='busi_group' label='业务组' rules={[{ required: true }]}>
-                        <Select
-                          options={businessGroupOption2}
-                          placeholder='请选择业务组'
-                        />
-                      </Form.Item>
-                    }
+                    <Form.Item name='busi_group' label='业务组' rules={[{ required: true }]}>
+                      <Select
+                        mode={bigScreenType == '1' ? 'multiple' : undefined}
+                        options={businessGroupOption}
+                        placeholder='请选择业务组'
+                      />
+                    </Form.Item>
                   </Col>
                   {
                     bigScreenType == '1' && (

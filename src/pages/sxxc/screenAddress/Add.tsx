@@ -13,7 +13,12 @@ export default () => {
 
   const saveData = (val: ApiServiceType) => {
     console.log(val);
-    addBigScreen(val).then(res => {
+    const params = {
+      ...val,
+      busi_group: val?.busi_group.toString(),
+    }
+    // console.log(params);
+    addBigScreen(params).then(res => {
         message.success('添加成功');
         history.goBack();
     });
