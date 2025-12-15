@@ -17,6 +17,7 @@ export type ApiServiceType = {
   title: string;
   desc: string;
   config: string;
+  busi_group: string | Array<number | string>;
   // datasource_id: number;
   // url: string;
   // script: string;

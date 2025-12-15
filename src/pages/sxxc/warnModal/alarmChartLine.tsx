@@ -142,7 +142,7 @@ const AlarmChartLine = function (props: any) {
             textStyle: {
               fontSize: 12,
             },
-            extraCssText: 'width: 500px; white-space: normal;',
+            extraCssText: 'width: 600px; white-space: normal;',
             formatter: (params) => {
               let con = params[0].name + ":<br/>";
               for (let i = 0; i < params.length; i++) {
