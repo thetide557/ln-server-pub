@@ -59,6 +59,7 @@ export default function () {
   const [assetReleaseModalOpen, setAssetReleaseModalOpen] = useState(false); // 资产上下架历史弹窗
   const [assetReleaseHistory, setAssetReleaseHistory] = useState<any[]>([]);
   const isNull = useRef(nextMaintenaceDateNull);
+  const [fields_with_a_password_entered, setFields_with_a_password_entered] = useState<any>([]);
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
@@ -229,7 +230,8 @@ export default function () {
           });
           delete dat.exps;
         }
-
+        console.log("dat===",dat)
+        setFields_with_a_password_entered(dat.params.fields_with_a_password_entered)
         const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
@@ -418,7 +420,12 @@ export default function () {
       return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options} onChange={onSelectChange}></Select>;
     }
     if (v.type === 'password') {
-      console.log('password===',form.getFieldsValue())
+      console.log('password===',form.getFieldsValue(),fields_with_a_password_entered,v)
+      if(fields_with_a_password_entered.includes(v.name)){
+        form.setFields([
+        { name:['params',v.name], value: 'haveValue' }
+      ]);
+      }
       if(mode == 'view'){ //查看
         return <Input.Password key={'v' + v.name} visibilityToggle={false}/>;
       }
