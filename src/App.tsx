@@ -194,7 +194,7 @@ function App() {
   // 右下角告警
   const handleClick = () => {
     // console.log('点击了', location.pathname);
-    
+
     if (window.location.pathname != '/screenView') {
       window.location.href = '/alert-cur-events/' + alertId;
       setWarnModalShow(false)
@@ -211,19 +211,19 @@ function App() {
     alertWebsocket.current = new WebSocket(WebSocketURL + 232443);//获取推送过来的告警消息
     alertWebsocket.current.onmessage = e => {
       if (!anonymous) {
-        setWarnModalShow(false)
-        message.error("有设备发生告警信息")
-        if (audioRef?.current) {
-          audioRef?.current.play();
-        }
+        const busiGroups = localStorage.getItem('groupIds')?.split(',').map(id => Number(id));
         let data = JSON.parse(e.data);
-        // console.log('data2222', data);
-
-        setAlertLevel(data.dat[0].severity);
-        setAlertId(data.dat[0].id);
-        setDialogShow('1');
+        if (busiGroups?.includes(data.dat[0].group_id)) {
+          setWarnModalShow(false)
+          message.error("有设备发生告警信息")
+          if (audioRef?.current) {
+            audioRef?.current.play();
+          }
+          setAlertLevel(data.dat[0].severity);
+          setAlertId(data.dat[0].id);
+          setDialogShow('1');
+        }
       }
-
     };
     return () => {
       alertWebsocket.current?.close();
@@ -390,7 +390,7 @@ function App() {
       </div>
 
       {/* 大屏告警弹窗 */}
-      { warnModalShow && <WarnModal alertId={alertId} visible={warnModalShow} onClose={() => setWarnModalShow(false)} />}
+      {warnModalShow && <WarnModal alertId={alertId} visible={warnModalShow} onClose={() => setWarnModalShow(false)} />}
 
     </div>
   );
