@@ -161,3 +161,11 @@ export function getDeepseektoken() {
     method: RequestMethod.Get,
   });
 }
+
+// 是否开启sso
+export const ifShowSso = function () {
+  return request("/api/n9e/auth/ifShowSso", {
+    method: RequestMethod.Get,
+    silence: true,
+  });
+};

@@ -221,25 +221,33 @@ function Card(props: Props, ref) {
                 fetchCardDetail(openedCard!);
               }}
             />
-            <Button
-              size='small'
-              type='link'
-              onClick={() => {
-                history.push({
-                  pathname: '/alert-mutes/add',
-                  search: queryString.stringify({
-                    busiGroup: record.group_id,
-                    prod: record.rule_prod,
-                    cate: record.cate,
-                    datasource_ids: [record.datasource_id],
-                    tags: record.tags,
-                    ruleName: record.rule_name
-                  }),
-                });
-              }}
-            >
-              {t('shield')}
-            </Button>
+            {
+              record?.is_muted != 1 ? <Button
+                size='small'
+                type='link'
+                onClick={() => {
+                  history.push({
+                    pathname: '/alert-mutes/add',
+                    search: queryString.stringify({
+                      busiGroup: record.group_id,
+                      prod: record.rule_prod,
+                      cate: record.cate,
+                      datasource_ids: [record.datasource_id],
+                      tags: record.tags,
+                      ruleName: record.rule_name
+                    }),
+                  });
+                }}
+              >
+                {t('shield')}
+              </Button> : <Button
+                size='small'
+                type='link'
+                disabled
+              >
+                {t('shield')}
+              </Button>
+            }
             <Button
               size='small'
               type='link'

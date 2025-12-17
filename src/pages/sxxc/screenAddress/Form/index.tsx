@@ -153,9 +153,16 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
                   placeholder='请选择大屏类型'
                   onChange={(val) => {
                     setBigScreenType(val);
-                    form.setFieldsValue({
-                      busi_group: undefined
-                    })
+                    const values = businessGroupOption.map(item => item.value);
+                    if (val == 1 && !initialValues?.id) {
+                      form.setFieldsValue({
+                        busi_group: values
+                      })
+                    } else if (val == 2 && !initialValues?.id) {
+                      form.setFieldsValue({
+                        busi_group: undefined
+                      })
+                    }
                   }}
                 />
               </Form.Item>

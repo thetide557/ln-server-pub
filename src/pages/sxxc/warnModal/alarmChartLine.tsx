@@ -140,13 +140,13 @@ const AlarmChartLine = function (props: any) {
               }
             },
             textStyle: {
-              fontSize: 12,
+              fontSize: 11,
             },
-            extraCssText: 'width: 600px; white-space: normal;',
+            extraCssText: 'width: 700px; white-space: normal;',
             formatter: (params) => {
               let con = params[0].name + ":<br/>";
               for (let i = 0; i < params.length; i++) {
-                con += `<div style="display: flex; line-height: 25px;">
+                con += `<div style="display: flex; line-height: 20px;">
               <span>${params[i].marker}</span>
               <span><span style="display: inline-block; word-break: break-all; white-space: normal;">${params[i].seriesName}: <span style="font-weight: 700; margin-left: 5px;">${params[i].value}</span></span></span>
             </div>`;

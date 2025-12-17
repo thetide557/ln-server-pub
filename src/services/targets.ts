@@ -29,6 +29,17 @@ export function getMonObjectList(params) {
   });
 }
 
+export function getMonObjectUpdateList(params) {
+  let url = '/api/n9e/targetsForUpdate';
+  if (import.meta.env.VITE_IS_PRO === 'true') {
+    url = '/api/n9e-plus/targetsForUpdate';
+  }
+  return request(url, {
+    method: RequestMethod.Get,
+    params,
+  });
+}
+
 export function bindTags(data) {
   return bindOrUnbindTags(true, data);
 }

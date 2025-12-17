@@ -25,7 +25,7 @@ import { useAntdTable } from 'ahooks';
 import { CommonStateContext } from '@/App';
 import { getEvents } from './services';
 import { deleteAlertEventsModal } from './index';
-import { SeverityColor,SeverityFont } from './index';
+import { SeverityColor, SeverityFont } from './index';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import '../event/index.less';
 // @ts-ignore
@@ -39,14 +39,14 @@ interface IProps {
   header: React.ReactNode;
   filter: any;
   setFilter: (filter: any) => void;
-  deleteAlert:(id: any) => void;
+  deleteAlert: (id: any) => void;
   refreshFlag: string;
   selectedRowKeys: number[];
   setSelectedRowKeys: (selectedRowKeys: number[]) => void;
 }
 
 export default function TableCpt(props: IProps) {
-  const { filterObj, filter, setFilter, header, selectedRowKeys, setSelectedRowKeys,deleteAlert } = props;
+  const { filterObj, filter, setFilter, header, selectedRowKeys, setSelectedRowKeys, deleteAlert } = props;
   const history = useHistory();
   const { t } = useTranslation('AlertCurEvents');
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
@@ -54,8 +54,8 @@ export default function TableCpt(props: IProps) {
 
 
 
-  const columns:any = [
-    
+  const columns: any = [
+
     {
       title: '告警规则名称',
       dataIndex: 'rule_name',
@@ -65,7 +65,7 @@ export default function TableCpt(props: IProps) {
           history.push(`/alert-cur-events/${id}`)
         }}>{title}</div>;
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.rule_name).localeCompare(b.rule_name)
       },
     },
@@ -73,14 +73,14 @@ export default function TableCpt(props: IProps) {
       title: '资产名称',
       dataIndex: 'asset_name',
       width: 100,
-      align: "center",  
-      ellipsis: true,    
+      align: "center",
+      ellipsis: true,
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
           history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.asset_name).localeCompare(b.asset_name)
       },
     },
@@ -94,7 +94,7 @@ export default function TableCpt(props: IProps) {
           history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.asset_ip).localeCompare(b.asset_ip)
       },
     },
@@ -115,17 +115,17 @@ export default function TableCpt(props: IProps) {
       dataIndex: 'severity',
       align: "center",
       width: 60,
-      render(val,record) {
+      render(val, record) {
         return (
           <>
-          <Tag  color={SeverityColor[val-1]}>
-             {SeverityFont[val-1]} 
+            <Tag color={SeverityColor[val - 1]}>
+              {SeverityFont[val - 1]}
             </Tag>
           </>
         );
       },
-      sorter: (a, b) =>{
-        return (a.severity)-(b.severity)
+      sorter: (a, b) => {
+        return (a.severity) - (b.severity)
       },
     },
     {
@@ -133,7 +133,7 @@ export default function TableCpt(props: IProps) {
       dataIndex: 'trigger_time',
       align: "center",
       width: 120,
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return a.trigger_time > b.trigger_time ? 1 : -1
       },
       render(value) {
@@ -145,7 +145,7 @@ export default function TableCpt(props: IProps) {
       dataIndex: 'group_name',
       align: "center",
       width: 120,
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.group_name).localeCompare(b.group_name)
       },
       render(value) {
@@ -157,49 +157,51 @@ export default function TableCpt(props: IProps) {
       dataIndex: 'operate',
       width: 80,
       align: 'center',
-      fixed:'right',
+      fixed: 'right',
       render(value, record) {
         return (
           <div>
             <Space size={'small'} className='table-operate-column'>
-              <FileSearchOutlined title='详情' onClick={()=>{
-                  history.push({
-                    pathname: `/alert-cur-events/${record.id}`
-                  });
-              }}/>
-            <EyeInvisibleOutlined  title='屏蔽'
-              onClick={() => {
+              <FileSearchOutlined title='详情' onClick={() => {
                 history.push({
-                  pathname: '/alert-mutes/add',
-                  search: queryString.stringify({
-                    busiGroup: record.group_id,
-                    prod: record.rule_prod,
-                    cate: record.cate,
-                    from: "list",
-                    datasource_ids: [record.datasource_id],
-                    tags: record.tags,
-                    ruleName: record.rule_name
-                  }),
+                  pathname: `/alert-cur-events/${record.id}`
                 });
-              }}
-            />
-            <DownloadOutlined className='down_icon' title='导出'
-              onClick={() => {
-                deleteAlert(record.id);
-              }}
-            />
-            <DeleteOutlined  title='删除' onClick={() => {
-              deleteAlertEventsModal(
-                [record.id],
-                () => {
-                  setSelectedRowKeys(selectedRowKeys.filter((key) => key !== record.id));
-                  setRefreshFlag(_.uniqueId('refresh_'));
-                },
-                t,
-              )
-            }} />
+              }} />
+              {
+                record?.is_muted != 1 ? <EyeInvisibleOutlined title='屏蔽'
+                  onClick={() => {
+                    history.push({
+                      pathname: '/alert-mutes/add',
+                      search: queryString.stringify({
+                        busiGroup: record.group_id,
+                        prod: record.rule_prod,
+                        cate: record.cate,
+                        from: "list",
+                        datasource_ids: [record.datasource_id],
+                        tags: record.tags,
+                        ruleName: record.rule_name
+                      }),
+                    });
+                  }}
+                /> : <EyeInvisibleOutlined title='屏蔽' style={{ color: '#ccc', cursor: 'not-allowed' }} />
+              }
+              <DownloadOutlined className='down_icon' title='导出'
+                onClick={() => {
+                  deleteAlert(record.id);
+                }}
+              />
+              <DeleteOutlined title='删除' onClick={() => {
+                deleteAlertEventsModal(
+                  [record.id],
+                  () => {
+                    setSelectedRowKeys(selectedRowKeys.filter((key) => key !== record.id));
+                    setRefreshFlag(_.uniqueId('refresh_'));
+                  },
+                  t,
+                )
+              }} />
 
-          </Space>
+            </Space>
           </div>
         );
       },
@@ -216,8 +218,8 @@ export default function TableCpt(props: IProps) {
     });
   }
   const fetchData = () => {
-    filterObj["alert_type"] =1;
-    let current =localStorage.getItem('events_current_from')?parseInt(""+localStorage.getItem('events_current_from')):1;
+    filterObj["alert_type"] = 1;
+    let current = localStorage.getItem('events_current_from') ? parseInt("" + localStorage.getItem('events_current_from')) : 1;
     return getEvents({
       page: current,
       limit: pageSize,
@@ -226,22 +228,22 @@ export default function TableCpt(props: IProps) {
     }).then(async (res) => {
 
       let list = res.dat.list;
-      if(list!=null){
-        let ruleIds  =Array.from(new Set(list.map(obj => obj.rule_id)))
-        await getStrategiesByRuleIds(ruleIds).then((res)=>{
-           let rules = {};
-           res.dat.forEach(rule => {
-              return rules[rule.id]=rule;
-           });
-           list.forEach(item => {
-                if(rules[item.rule_id]){
-                  item["rule_config_cn"] = rules[item.rule_id].rule_config_cn;
-                  
-                }else{
-                  item["rule_config_cn"] = "";
-                }
-                return item
-           });
+      if (list != null) {
+        let ruleIds = Array.from(new Set(list.map(obj => obj.rule_id)))
+        await getStrategiesByRuleIds(ruleIds).then((res) => {
+          let rules = {};
+          res.dat.forEach(rule => {
+            return rules[rule.id] = rule;
+          });
+          list.forEach(item => {
+            if (rules[item.rule_id]) {
+              item["rule_config_cn"] = rules[item.rule_id].rule_config_cn;
+
+            } else {
+              item["rule_config_cn"] = "";
+            }
+            return item
+          });
         })
       }
       return {
@@ -253,13 +255,13 @@ export default function TableCpt(props: IProps) {
 
   const { tableProps } = useAntdTable(fetchData, {
     refreshDeps: [refreshFlag, JSON.stringify(filterObj), props.refreshFlag],
-    defaultPageSize: pageSize,    
+    defaultPageSize: pageSize,
     debounceWait: 500,
   });
 
   const onPageChange = (page: number, pageSize: number) => {
     // setCurrent(page);
-    localStorage.setItem('events_current_from',""+page)
+    localStorage.setItem('events_current_from', "" + page)
     setPageSize(pageSize);
   };
 
@@ -286,7 +288,7 @@ export default function TableCpt(props: IProps) {
             ...tableProps.pagination,
             showSizeChanger: true,
             showQuickJumper: true,
-            current: localStorage.getItem('events_current_from')?parseInt(""+localStorage.getItem('events_current_from')):1,
+            current: localStorage.getItem('events_current_from') ? parseInt("" + localStorage.getItem('events_current_from')) : 1,
             pageSize: pageSize,
             onChange: onPageChange,
             showTotal: (total) => `总共 ${total} 条`,

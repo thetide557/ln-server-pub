@@ -34,6 +34,7 @@ export default function () {
   const [swithCaptcha, setSwithCaptcha] = useState<any>();
   const [switchAi, setSwitchAi] = useState<any>();
   const [swithRsa, setSwithRsa] = useState<any>();
+  const [swithSso, setSwithSso] = useState<any>();
   const [checkBoxCheck, setCheckBoxCheck] = useState<any>();
   const [checkedValues, setCheckedValues] = useState<any>([]);
   const { Group: RadioGroup } = Radio;
@@ -42,6 +43,7 @@ export default function () {
     setSwithCaptcha(true);
     setSwithRsa(true);
     setSwitchAi(true);
+    setSwithSso(true);
     getParametersList().then(({ dat }) => {
       console.log("AAAAAAAAAAAAAA")
       console.log(dat);
@@ -53,6 +55,9 @@ export default function () {
       }
       if (dat.enable_deepseek == 2) {
         setSwitchAi(false);
+      }
+      if (dat.sso == 2) {
+        setSwithSso(false);
       }
       let groups = [];
       if (dat.log_lever) {
@@ -88,6 +93,7 @@ export default function () {
     values["captcha"] = swithCaptcha ? 1 : 2;
     values["open_rsa"] = swithRsa ? 1 : 2;
     values["enable_deepseek"] = switchAi ? 1 : 2;
+    values["sso"] = swithSso ? 1 : 2;
     updateParametersList(values).then((res) => {
       message.success('保存成功');
       window.location.reload()
@@ -105,6 +111,11 @@ export default function () {
   };
   const onSwitchRsaChange = (checked: boolean) => {
     setSwithRsa(checked);
+    console.log(`switch to ${checked}`);
+  };
+
+   const onSwitchSsoChange = (checked: boolean) => {
+    setSwithSso(checked);
     console.log(`switch to ${checked}`);
   };
   // const onCheckChange = (checkedValues: CheckboxValueType[]) => {
@@ -169,9 +180,14 @@ export default function () {
                   <Input />
                 </Form.Item>
               </Col>
-              <Col span={8}>
+              <Col span={4}>
                 <Form.Item label='启动RSA加密' name='open_rsa' labelAlign='right'>
                   <Switch checked={swithRsa} onChange={onSwitchRsaChange}></Switch>
+                </Form.Item>
+              </Col>
+               <Col span={4}>
+                <Form.Item label='启用单点登录' name='sso' labelAlign='right'>
+                  <Switch checked={swithSso} onChange={onSwitchSsoChange}></Switch>
                 </Form.Item>
               </Col>
             </Row>
