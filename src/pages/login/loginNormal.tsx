@@ -39,7 +39,7 @@ export interface DisplayName {
 }
 
 
-export default function Login() {
+export default function LoginNormal() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const location = useLocation();
