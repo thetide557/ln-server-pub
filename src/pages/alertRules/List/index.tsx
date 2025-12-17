@@ -46,7 +46,7 @@ let queryFilter = [
   { name: 'severity', label: '告警级别', type: 'select' },
   { name: 'type', label: '资产类型', type: 'select' },
   { name: 'name', label: '资产名称', type: 'input' },
-  { name: 'alert_rule', label: '告警规则', type: 'input' },
+  // { name: 'alert_rule', label: '告警规则', type: 'input' },
 ];
 
 interface Filter {
