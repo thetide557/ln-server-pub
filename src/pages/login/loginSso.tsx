@@ -19,7 +19,7 @@ import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
 import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, authLoginLdap, getRSAConfig, getDeepseektoken, getRedirectURLCAS, getRedirectURL, getRedirectURLOAuth } from '@/services/login';
-import './login.less';
+import './loginSso.less';
 // import cookie from "react-cookies";
 // @ts-ignore
 import useSsoWay from 'plus:/parcels/SSOConfigs/useSsoWay';
@@ -39,7 +39,7 @@ export interface DisplayName {
 }
 
 
-export default function Login() {
+export default function LoginSso() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const location = useLocation();
@@ -350,7 +350,7 @@ export default function Login() {
   };
 
   return (
-    <div className='login-warp'>
+    <div className='login-warp-sso'>
       <div className='login-panel'>
         <div className='login-main'>
           <div className='title'> {theme?.title}</div>

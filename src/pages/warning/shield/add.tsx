@@ -61,7 +61,8 @@ const AddShield: React.FC = () => {
         query.tags = [query.tags];
       }
       query.tags = query.tags.map((tag) => {
-        const [key, value] = tag.split('=');
+        // 将标签字符串按照等号分割为键值对数组，通过正则表达式匹配等号及其后的内容，最多分割为2个部分，过滤掉空值元素，确保只返回有效的键值对    
+        const [key, value] = tag.split(/=(.+)/, 2).filter(Boolean);
         return {
           func: '==',
           key,

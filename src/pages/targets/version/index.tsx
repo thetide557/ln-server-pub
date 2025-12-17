@@ -384,7 +384,7 @@ export default function () {
     <PageLayout title='更新探针'>
       <div style={{ height: 150, overflow: 'visible' }}>
         <div style={{ padding: 20, marginBottom: 20 }}>
-          探针上传需要按规范文件名上传,文件名需要包括版本号,操作系统,架构,并通过zip压缩后上传.<br></br> 如:ln-agent-1.0.0-linux-amd64.zip
+          探针上传需要按规范文件名上传,文件名需要包括版本号,操作系统,架构,并通过zip压缩后上传.<br></br> 如:ln-agent-v1.0.0-linux-amd64.zip
         </div>
         <div style={{ textAlign: 'right' }}>
           <Space style={{ marginRight: '5px' }}>
