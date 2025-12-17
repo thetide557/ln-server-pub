@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import PageLayout from '@/components/pageLayout';
 import { InboxOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, AlignCenterOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { getAllVersion, updateTarget } from '@/services/version';
-import { getMonObjectList } from '@/services/targets';
+import { getMonObjectUpdateList } from '@/services/targets';
 import RefreshIcon from '@/components/RefreshIcon';
 import type { UploadProps } from 'antd';
 import { exportTempletZip } from '@/pages/historyEvents/services';
@@ -184,7 +184,7 @@ export default function () {
       limit: pageSize,
       p: current,
     };
-    return getMonObjectList(query).then((res) => {
+    return getMonObjectUpdateList(query).then((res) => {
       return {
         total: res.dat.total,
         list: res.dat.list,
