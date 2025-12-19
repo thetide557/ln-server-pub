@@ -59,6 +59,7 @@ export default function () {
   const [assetReleaseModalOpen, setAssetReleaseModalOpen] = useState(false); // 资产上下架历史弹窗
   const [assetReleaseHistory, setAssetReleaseHistory] = useState<any[]>([]);
   const isNull = useRef(nextMaintenaceDateNull);
+  const [showRootWarning, setShowRootWarning] = useState(false);
   const [fields_with_a_password_entered, setFields_with_a_password_entered] = useState<any>([]);
   const panelBaseProps: any = {
     size: 'small',
@@ -441,6 +442,35 @@ export default function () {
     }
     if (v.type === 'checkbox') {
       return <Checkbox onChange={onCheckChange}></Checkbox>;
+    }
+    if(form.getFieldsValue() && form.getFieldsValue().type && form.getFieldsValue().type == '宿主机'
+  && v.name === 'user'){
+      console.log("suzhuji",v.name)
+      return (
+      <>
+        <Input
+          key={'v' + v.name}
+          placeholder={`请填写${v.label}`}
+          name={v.name}
+          onChange={(e) => {
+            const value = e.target.value;
+            setShowRootWarning(value === 'root'); // 仅当输入 root 时显示提示
+          }}
+        />
+        {showRootWarning && (
+          <div
+            style={{
+              color: '#faad14',
+              fontSize: 12,
+              marginTop: 4,
+              lineHeight: '16px',
+            }}
+          >
+            请慎用 root 账号，建议使用已开通的监控账号。
+          </div>
+        )}
+      </>
+    );
     }
     return <Input key={'v' + v.name} placeholder={`请填写${v.label}`} name={v.name} />;
   };

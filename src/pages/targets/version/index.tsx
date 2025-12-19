@@ -333,7 +333,7 @@ export default function () {
         updateTarget(params).then(res => {
           if (res.dat?.task_id) {
             const { task_id } = res.dat;
-            message.success('探针更新成功,请前往探针管理查看更新结果');
+            message.success('探针执行更新成功,2分钟后请前往系统管理-探针管理中查看更新结果。');
             setModalShow(false);
             loadingVersions()
             // location.href = `/job-tasks/${task_id}/result`;
