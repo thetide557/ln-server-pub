@@ -220,33 +220,35 @@ export default function () {
       })
     } else if (action === "delete" && rowKeys) {
       // 删除逻辑
-      const confirmDelete = window.confirm("确定要删除该版本吗？");
-      if (confirmDelete) {
-        const filenameToDelete = rowKeys.filename;
-
-        // 调用删除接口
-        // 请确保在服务端实现删除版本的接口，并根据需要修改下面的接口路径和请求方法
-        // fetch(`/api/n9e/target/version/delete-gz`, {
-        fetch(`/api/n9e/target/version/delete-zip?filename=${filenameToDelete}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
-          },
-        })
-          .then(response => {
-            if (response.ok) {
-              message.success('删除成功');
-              // 更新表格数据源
-              loadingVersions();
-            } else {
-              message.error('删除失败');
-            }
+      Modal.confirm({
+        title: "确定要删除该版本吗",
+        onOk: async () => {
+          const filenameToDelete = rowKeys.filename;
+          // 调用删除接口
+          // 请确保在服务端实现删除版本的接口，并根据需要修改下面的接口路径和请求方法
+          // fetch(`/api/n9e/target/version/delete-gz`, {
+          fetch(`/api/n9e/target/version/delete-zip?filename=${filenameToDelete}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
+            },
           })
-          .catch(error => {
-            console.error('删除请求错误:', error);
-            message.error('删除请求错误');
-          });
-      }
+            .then(response => {
+              if (response.ok) {
+                message.success('删除成功');
+                // 更新表格数据源
+                loadingVersions();
+              } else {
+                message.error('删除失败');
+              }
+            })
+            .catch(error => {
+              console.error('删除请求错误:', error);
+              message.error('删除请求错误');
+            });
+        },
+        onCancel() { },
+      });
     } else if (action === "update") {
       setModalShow(true);
       setFileName(rowKeys);
