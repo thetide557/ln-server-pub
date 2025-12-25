@@ -33,7 +33,7 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { batchShelfXhAssets,deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { batchShelfXhAssets, deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
@@ -126,7 +126,9 @@ export default function () {
   const [level, setLevel] = useState<number | undefined>(undefined);  // 资产组织树新增分组层级
   const [parentId, setParentId] = useState(null);  // 资产组织树新增分组父级id
   const [isAllAssets, setIsAllAssets] = useLocalStorage('left_asset_isallassets', false); // 资产组织树点击的是否是全部资产下的节点
-  
+  // 用useRef保存递增计数器（每个组件实例独立，不共享）
+  const requestIdCounter = useRef(0);
+
   const maintenanceStatusOption = [
     {
       label: '维保中',
@@ -158,7 +160,7 @@ export default function () {
         label: factory.value,
       };
     }),
-    maintenanceStatus:maintenanceStatusOption.map((factory) => {
+    maintenanceStatus: maintenanceStatusOption.map((factory) => {
       return {
         value: _.toString(factory.value),
         label: factory.label,
@@ -345,7 +347,7 @@ export default function () {
         let label;
         if (value == 0) {
           label = (
-            <Tag icon={< SyncOutlined spin/>} color='processing'>
+            <Tag icon={< SyncOutlined spin />} color='processing'>
               维保中
             </Tag>
           );
@@ -357,11 +359,11 @@ export default function () {
           );
         } else if (value == 2) {
           label = (
-            <Tag icon={<CloseCircleOutlined   />} color='warning'>
+            <Tag icon={<CloseCircleOutlined />} color='warning'>
               待维保
             </Tag>
           );
-        }else if (value == -1) {
+        } else if (value == -1) {
           label = (
             <Tag icon={<StopOutlined />} color='processing'>
               暂无
@@ -437,7 +439,7 @@ export default function () {
     // 最近更新时间、最近更新人
     {
       title: '最近更新时间',
-      dataIndex: ['shelf_record', 'operation_time'],    
+      dataIndex: ['shelf_record', 'operation_time'],
       align: 'center',
       ellipsis: true,
       width: 130,
@@ -499,7 +501,7 @@ export default function () {
             />
           }
           {
-            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/del")) && 
+            (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/del")) &&
             record.shelf_record?.is_shelf === false &&
             <DeleteOutlined
               title='删除'
@@ -677,14 +679,13 @@ export default function () {
   }
   const getAssetTree = () => {
     // console.log('ac', activeColor);
-    console.log('parId', parId);
-    console.log('left_asset_type', localStorage.getItem('left_asset_type'));
-    
+    // console.log('parId', parId);
+    // console.log('left_asset_type', localStorage.getItem('left_asset_type'));
     // console.log('treeQuery', treeQuery);
     treeQuery['status'] = 0
     treeQuery['groupIds'] = groupIds?.toString()
-    treeQuery['query'] = searchVal?searchVal:undefined;
-    treeQuery['filter'] = filterParam?filterParam:undefined;
+    treeQuery['query'] = searchVal ? searchVal : undefined;
+    treeQuery['filter'] = filterParam ? filterParam : undefined;
     getAssetstypesNew(treeQuery).then(res => {
       const { dat } = res
       // dat.forEach(item => {
@@ -736,7 +737,7 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [searchVal, typeId, refreshKey, tissueId,treeList]);
+  }, [searchVal, typeId, refreshKey, tissueId, treeList]);
 
   useEffect(() => {
     getAssetTree()
@@ -747,7 +748,11 @@ export default function () {
   }, 1000 * 30);
 
   const getTableData = () => {
+    // 1. 生成当前请求的唯一ID（组件内独立递增）
+    const requestId = ++requestIdCounter.current;
     const parentId = localStorage.getItem('left_parId')
+    // console.log(requestIdCounter);
+    // console.log(requestId);
     const param = {
       page: current,
       limit: pageSize,
@@ -773,7 +778,7 @@ export default function () {
         const treeItem = treeList
           .find((item) => item.id === -1)
           ?.sub_groups?.find((item) => item.id === tissueId);
-          // console.log('treeItem', treeItem);
+        // console.log('treeItem', treeItem);
         const typeListNames = treeItem?.type_list
           ?.map((item) => item.name)
           .join(",");
@@ -804,7 +809,7 @@ export default function () {
       //     break;
       // }
     }
-    
+
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
       treeQuery['filter'] = filterParam
@@ -852,8 +857,11 @@ export default function () {
       // });
       // console.log('1111list', dat.list);
 
-      setList(dat.list || []);
-      setTotal(dat.total);
+      // 2. 只有本次请求ID等于最新计数器值，才更新数据
+      if (requestId === requestIdCounter.current) {
+        setList(dat.list || []);
+        setTotal(dat.total);
+      }
     });
   };
 
@@ -1074,11 +1082,11 @@ export default function () {
   }
 
   // const handleClickTree = (item: any, par: any) => {
-  const handleClickTree = (item: any, par: any,isAllAssets:boolean) => {
+  const handleClickTree = (item: any, par: any, isAllAssets: boolean) => {
     // console.log('isAllAssets', isAllAssets)
-      // 是否是全部资产下的节点点击
+    // 是否是全部资产下的节点点击
     setIsAllAssets(isAllAssets)
-    
+
     if (par) {
       setParId(par.id)
       setTypeId(item.id);
@@ -1099,7 +1107,7 @@ export default function () {
 
   /** 资产树组件 */
   // isAllAssets：一个布尔值，用于标记当前节点是否是"全部资产"的子节点。
-  const TreeNode = ({ item, expandedIds, onToggle ,isAllAssets = false }) => {
+  const TreeNode = ({ item, expandedIds, onToggle, isAllAssets = false }) => {
     const isExpanded = expandedIds.has(item.id);
     return (
       <div key={item.name} className="tree-row">
@@ -1121,18 +1129,18 @@ export default function () {
           <span
             className="g-name"
             // onClick={() => handleClickTree(item, null)}
-            onClick={() => handleClickTree(item, null,isAllAssets)}
+            onClick={() => handleClickTree(item, null, isAllAssets)}
             style={{
               backgroundColor:
                 item.id == localStorage.getItem("left_asset_type") &&
-                !localStorage.getItem("left_parId")
+                  !localStorage.getItem("left_parId")
                   ? "#92b7d1"
                   : "",
             }}
           >
             {item.name}
           </span>
-          {item.id != -1 &&!isAllAssets && (
+          {item.id != -1 && !isAllAssets && (
             <Dropdown
               // trigger={['click']}
               overlay={
@@ -1151,7 +1159,7 @@ export default function () {
                         title: "是否确认删除该分组？",
                         onOk: async () => {
                           // delAssetstypesNew({ ids: item.id }).then((res) => {
-                          delXhAssetstypesNew( item.id ).then((res) => {
+                          delXhAssetstypesNew(item.id).then((res) => {
                             message.success("删除成功");
                             // 删除自己则返回默认
                             if (item.id == tissueId) {
@@ -1166,7 +1174,7 @@ export default function () {
                             // setSelectedAssets([]);
                           });
                         },
-                        onCancel() {},
+                        onCancel() { },
                       });
                     } else if (key === "add-sub") {
                       setTitle("新增分组");
@@ -1179,12 +1187,12 @@ export default function () {
                   items={[
                     ...((profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && item.group_level < 3 && !item.type_list?.length
                       ? [
-                          {
-                            key: "add-sub",
-                            label: "新增分组",
-                            icon: <PlusOutlined />,
-                          },
-                        ]
+                        {
+                          key: "add-sub",
+                          label: "新增分组",
+                          icon: <PlusOutlined />,
+                        },
+                      ]
                       : []),
                     (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/editGroup")) && { key: "edit", label: "编辑", icon: <EditOutlined /> },
                     (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/delGroup")) && { key: "del", label: "删除", icon: <DeleteOutlined /> },
@@ -1209,14 +1217,14 @@ export default function () {
                     style={{
                       backgroundColor:
                         item1.id == localStorage.getItem("left_asset_type") &&
-                        parId == item.id
+                          parId == item.id
                           ? "#92b7d1"
                           : "",
                     }}
                     className="asset-name"
                     // onClick={() => handleClickTree(item1, item)}
 
-                    onClick={() => handleClickTree(item1, item,isAllAssets)}
+                    onClick={() => handleClickTree(item1, item, isAllAssets)}
                   >
                     <span>{item1.name}</span>
                     <span>{item1.number}</span>
@@ -1316,21 +1324,21 @@ export default function () {
                 <span>组织树列表</span>
                 {
                   (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && <span
-                  className="add_group"
-                  onClick={() => {
-                    setOpen(true);
-                    setCurGroup({});
-                    setTitle("新增分组");
-                    setLevel(1);
-                    setParentId(null);
-                  }}
-                >
-                  新增分组
-                </span>
+                    className="add_group"
+                    onClick={() => {
+                      setOpen(true);
+                      setCurGroup({});
+                      setTitle("新增分组");
+                      setLevel(1);
+                      setParentId(null);
+                    }}
+                  >
+                    新增分组
+                  </span>
                 }
               </div>
               <div className='tree-list'>
-                <AssetTree data={treeList} />	
+                <AssetTree data={treeList} />
                 {/* {
                   _.map(treeList, (item) => {
                     return (
@@ -1558,18 +1566,18 @@ export default function () {
                                 return;
                               }
                               setOperateType(key as OperateType);
-                            } else if(key == OperateType.AssetBatchList || key == OperateType.AssetBatchDelist){
-                              
+                            } else if (key == OperateType.AssetBatchList || key == OperateType.AssetBatchDelist) {
+
                               const data = {
                                 "asset_ids": selectedAssets,
                                 "is_shelf": key === OperateType.AssetBatchList
                               }
-                               batchShelfXhAssets(data).then((res) => {
-                                  message.success('批量操作成功！');
-                                  getAssetTree()
-                                  // setSelectedAssets([]);
-                                });
-                              console.log('OperateType.AssetBatchList==',data)
+                              batchShelfXhAssets(data).then((res) => {
+                                message.success('批量操作成功！');
+                                getAssetTree()
+                                // setSelectedAssets([]);
+                              });
+                              console.log('OperateType.AssetBatchList==', data)
                             } else {
                               setOperateType(key as OperateType);
                             }
