@@ -35,15 +35,23 @@ export default function version() {
   const [backendVersion, setBackendVersion] = useState("");
   const { profile, permList } = useContext(CommonStateContext);
   const [projectList, setProjectList] = useState([] as any);
+  const [tabActiveKey, setTabActiveKey] = useState<any>('tab1');
   const taskRef = useRef(null as any);
   useEffect(() => {
-    fetch("/api/n9e/version")
-      .then((res) => {
-        return res.text();
-      })
-      .then((res) => {
-        setBackendVersion(res);
-      });
+    if (profile.roles?.includes("Admin") || permList.includes("/help/version/tab")) {
+      setTabActiveKey('tab1')
+      fetch("/api/n9e/version")
+        .then((res) => {
+          return res.text();
+        })
+        .then((res) => {
+          setBackendVersion(res);
+        });
+    } else if (profile.roles?.includes("Admin") || permList.includes("/target/version/tab")) {
+      setTabActiveKey('tab2')
+    } else {
+      setTabActiveKey('')
+    }
   }, []);
   const props: UploadProps = {
     name: "file",
@@ -78,29 +86,33 @@ export default function version() {
     },
   };
   return (
-   <div>
-      <Tabs defaultActiveKey="1" className="version-tabs" size="large">
-        <Tabs.TabPane tab="系统版本" key="1">
-          <PageLayout
-            title={
-              <>
-                {t("title")}
-              </>
-            }
-          > <div>
-              <ul style={{ padding: "20px 30px" }}>
-                <li>
-                  {t("frontend")}：{"v2.0"}
-                </li>
-                {/* <li>
+    <div>
+      <Tabs activeKey={tabActiveKey} className="version-tabs" size="large" onChange={(key) => {
+        setTabActiveKey(key);
+      }}>
+        {
+          (profile.roles?.includes("Admin") ||
+            permList.includes("/help/version/tab")) && <Tabs.TabPane tab="系统版本" key="tab1">
+            <PageLayout
+              title={
+                <>
+                  {t("title")}
+                </>
+              }
+            > <div>
+                <ul style={{ padding: "20px 30px" }}>
+                  <li>
+                    {t("frontend")}：{"v2.0"}
+                  </li>
+                  {/* <li>
             {t('backend')}：{backendVersion}
           </li> */}
-              </ul>
-              <Divider></Divider>
-              {(profile.roles?.includes("Admin") ||
-                permList.includes("/help/version/update")) && (
-                  <div>
-                    {/* <Row gutter={16}>
+                </ul>
+                <Divider></Divider>
+                {(profile.roles?.includes("Admin") ||
+                  permList.includes("/help/version/update")) && (
+                    <div>
+                      {/* <Row gutter={16}>
                       <Col span={12}>
                         <Card>
                           <RunForm ref={taskRef} />
@@ -119,22 +131,25 @@ export default function version() {
                         </Card>
                       </Col>
                     </Row> */}
-                    <Dragger {...props}>
-                      <p className="ant-upload-drag-icon">
-                        <InboxOutlined />
-                      </p>
-                      <p className="ant-upload-text">
-                        点击或拖放系统升级包（ln-server.gz）到这个区域上传
-                      </p>
-                    </Dragger>
-                  </div>
-                )}
-            </div></PageLayout>
-
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="更新探针" key="2">
-          <Targets />
-        </Tabs.TabPane>
+                      <Dragger {...props}>
+                        <p className="ant-upload-drag-icon">
+                          <InboxOutlined />
+                        </p>
+                        <p className="ant-upload-text">
+                          点击或拖放系统升级包（ln-server.gz）到这个区域上传
+                        </p>
+                      </Dragger>
+                    </div>
+                  )}
+              </div></PageLayout>
+          </Tabs.TabPane>
+        }
+        {
+          (profile.roles?.includes("Admin") ||
+            permList.includes("/target/version/tab")) && <Tabs.TabPane tab="更新探针" key="tab2">
+            <Targets />
+          </Tabs.TabPane>
+        }
       </Tabs>
     </div>
   );

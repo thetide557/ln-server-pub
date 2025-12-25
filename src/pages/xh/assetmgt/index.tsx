@@ -738,7 +738,7 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [searchVal, typeId, refreshKey, tissueId, treeList]);
+  }, [typeId, refreshKey, tissueId, treeList]);
 
   useEffect(() => {
     getAssetTree()
