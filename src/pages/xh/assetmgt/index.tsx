@@ -752,10 +752,8 @@ export default function () {
     // 1. 生成当前请求的唯一ID（组件内独立递增）
     const requestId = ++requestIdCounter.current;
     const parentId = localStorage.getItem('left_parId')
-    console.log(requestIdCounter);
-    console.log(requestId);
-    
-    
+    // console.log(requestIdCounter);
+    // console.log(requestId);
     const param = {
       page: current,
       limit: pageSize,
