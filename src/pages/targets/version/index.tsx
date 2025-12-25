@@ -1,5 +1,5 @@
 import { message, Table, Upload, Button, Space, Modal, Form, Input, Tooltip } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 import PageLayout from '@/components/pageLayout';
 import { InboxOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, AlignCenterOutlined, QuestionCircleOutlined } from '@ant-design/icons';
@@ -16,6 +16,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { useTranslation, Trans } from 'react-i18next';
 import { BusiGroupItem } from '@/store/commonInterface';
+import { CommonStateContext } from "@/App";
 import './index.less'
 
 interface ITargetProps {
@@ -40,6 +41,7 @@ export default function () {
   const [form] = Form.useForm();
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
   const [selectedIdents, setSelectedIdents] = useState<string[]>([]);
+  const { profile, permList } = useContext(CommonStateContext);
   const GREEN_COLOR = '#3FC453';
   const YELLOW_COLOR = '#FF9919';
   const RED_COLOR = '#FF656B';
@@ -93,15 +95,21 @@ export default function () {
       width: "15%",
       render: (text, record) => (
         <Space>
-          <Button icon={<AlignCenterOutlined />} onClick={() => handleModal("update", record.filename)}>
-            更新
-          </Button>
-          <Button icon={<DownloadOutlined />} onClick={() => handleModal("download", record.filename)}>
-            下载
-          </Button>
-          <Button icon={<DeleteOutlined />} onClick={() => handleModal("delete", record)}>
-            删除
-          </Button>
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/target/version/update")) && <Button icon={<AlignCenterOutlined />} onClick={() => handleModal("update", record.filename)}>
+              更新
+            </Button>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/target/version/download")) && <Button icon={<DownloadOutlined />} onClick={() => handleModal("download", record.filename)}>
+              下载
+            </Button>
+          }
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/target/version/del")) && <Button icon={<DeleteOutlined />} onClick={() => handleModal("delete", record)}>
+              删除
+            </Button>
+          }
         </Space>
       ),
     },
@@ -396,11 +404,12 @@ export default function () {
               }}
             />
           </Space>
-          <Upload {...props} showUploadList={false} beforeUpload={beforeUpload}>
-            <Button icon={<UploadOutlined />}>点击或拖放文件上传</Button>
-          </Upload>
+          {
+            (profile.roles?.includes("Admin") || permList.includes("/target/version/upload")) && <Upload {...props} showUploadList={false} beforeUpload={beforeUpload}>
+              <Button icon={<UploadOutlined />}>点击或拖放文件上传</Button>
+            </Upload>
+          }
           <Table columns={columns} dataSource={tableData} />
-
         </div>
       </div>
       {/* 更新弹窗 */}
