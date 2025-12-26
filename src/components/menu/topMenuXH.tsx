@@ -63,10 +63,15 @@ const getMenuList = (t) => {
         //   label: t('仪表盘'),
         // },
         {
-          key: "/metric/explorer",
-          icon: <IconFont type="icon-Menu_Infrastructure" />,
-          label: t("即时查询"),
+          key: '/metric/explorer',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('即时查询'),
         },
+        {
+          key: '/recording-rules',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('记录规则'),
+        }
       ],
     },
     {
