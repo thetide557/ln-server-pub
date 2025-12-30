@@ -458,7 +458,7 @@ export default function () {//{ selectMenu?:any }
         // console.log(res);
         if (res.dat?.length > 0) {
           setSafeUrl(res.dat[0].dict_value);
-        }  
+        }
       })
     }
   }, []);
@@ -554,25 +554,42 @@ export default function () {//{ selectMenu?:any }
   };
 
   const handleClick = (item) => {
-     // 新增: 判断 access_token 与 refresh_token 是否存在
+    // 新增: 判断 access_token 与 refresh_token 是否存在
     if (!Cookies.get('access_token') && !Cookies.get('refresh_token')) {
-      Logout().then(() => {
-        Cookies.remove('access_token');
-        Cookies.remove('refresh_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('curBusiId');
-        localStorage.removeItem('card5Data');
-        localStorage.removeItem('card7Data');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('left_tissueId');
-        localStorage.removeItem('left_parId');
-        localStorage.removeItem('left_asset_type');
-        window.location.href = '/login';
+      Logout().then((res) => {
+        if (res?.dat?.logout_url) {
+          Cookies.remove('access_token');
+          Cookies.remove('refresh_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('curBusiId');
+          localStorage.removeItem('card5Data');
+          localStorage.removeItem('card7Data');
+          localStorage.removeItem('userId');
+          localStorage.removeItem('left_tissueId');
+          localStorage.removeItem('left_parId');
+          localStorage.removeItem('left_asset_type');
+          // history.push('/login');
+          window.location.href = res.dat.logout_url
+        } else {
+          Cookies.remove('access_token');
+          Cookies.remove('refresh_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('curBusiId');
+          localStorage.removeItem('card5Data');
+          localStorage.removeItem('card7Data');
+          localStorage.removeItem('userId');
+          localStorage.removeItem('left_tissueId');
+          localStorage.removeItem('left_parId');
+          localStorage.removeItem('left_asset_type');
+          // history.push('/login');
+          window.location.href = '/login'
+        }
       });
       return;
     }
-    
+
     if ((item.key as string) === "/safety/certification") {
       if (!safeUrl) return message.error(t('请先在数据字典中配置安全认证'))
       return window.open(safeUrl)
@@ -589,7 +606,7 @@ export default function () {//{ selectMenu?:any }
   const goScreen = () => {
     let busiGroup = localStorage.getItem('groupIds') || '';
     getBigScreen2(busiGroup).then(res => {
-      const list = res.dat?.list?.filter((item:any) => item.type == 1) || [];
+      const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
       if (list.length > 0) {
         history.push('/screenView')
       }
@@ -607,20 +624,36 @@ export default function () {//{ selectMenu?:any }
       </Menu.Item>
       <Menu.Item
         onClick={() => {
-          Logout().then(() => {
-            Cookies.remove('access_token');
-            Cookies.remove('refresh_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('curBusiId');
-            localStorage.removeItem('card5Data');
-            localStorage.removeItem('card7Data');
-            localStorage.removeItem('userId');
-            localStorage.removeItem('left_tissueId');
-            localStorage.removeItem('left_parId');
-            localStorage.removeItem('left_asset_type');
-            // history.push('/login');
-            window.location.href = '/login'
+          Logout().then((res) => {
+            if (res?.dat?.logout_url) {
+              Cookies.remove('access_token');
+              Cookies.remove('refresh_token');
+              localStorage.removeItem('refresh_token');
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('curBusiId');
+              localStorage.removeItem('card5Data');
+              localStorage.removeItem('card7Data');
+              localStorage.removeItem('userId');
+              localStorage.removeItem('left_tissueId');
+              localStorage.removeItem('left_parId');
+              localStorage.removeItem('left_asset_type');
+              // history.push('/login');
+              window.location.href = res.dat.logout_url
+            } else {
+              Cookies.remove('access_token');
+              Cookies.remove('refresh_token');
+              localStorage.removeItem('refresh_token');
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('curBusiId');
+              localStorage.removeItem('card5Data');
+              localStorage.removeItem('card7Data');
+              localStorage.removeItem('userId');
+              localStorage.removeItem('left_tissueId');
+              localStorage.removeItem('left_parId');
+              localStorage.removeItem('left_asset_type');
+              // history.push('/login');
+              window.location.href = '/login'
+            }
           });
         }}
       >
@@ -635,7 +668,7 @@ export default function () {//{ selectMenu?:any }
         <div className='logoImg' onClick={goScreen}>
           <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>
           {theme?.title}</div>
-          <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
+        <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
       </div>
       <div className='top_right'>
         <span
