@@ -133,9 +133,8 @@ export default function () {
   };
 
   const validateGreaterThanOne = (_, value) => {
-    if (!value) return Promise.resolve();
     const numValue = Number(value);
-    if (isNaN(numValue) || numValue < 1) {
+    if (!value || isNaN(numValue) || numValue < 1) {
       return Promise.reject('请输入大于或等于1的数字');
     }
     return Promise.resolve();
