@@ -114,7 +114,7 @@ export default function () {
     console.log(`switch to ${checked}`);
   };
 
-   const onSwitchSsoChange = (checked: boolean) => {
+  const onSwitchSsoChange = (checked: boolean) => {
     setSwithSso(checked);
     console.log(`switch to ${checked}`);
   };
@@ -131,6 +131,15 @@ export default function () {
     console.log('选中的值:', selectedValue);
 
   };
+
+  const validateGreaterThanOne = (_, value) => {
+    const numValue = Number(value);
+    if (!value || isNaN(numValue) || numValue < 1) {
+      return Promise.reject('请输入大于或等于1的数字');
+    }
+    return Promise.resolve();
+  };
+
   return (
     <PageLayout icon={<GroupOutlined />} title={'系统参数设置'}>
       <div className='body-list' style={{ width: '94%', margin: '0 auto' }}>
@@ -171,12 +180,12 @@ export default function () {
             </Row>
             <Row gutter={10}>
               <Col span={8}>
-                <Form.Item label="用户登录token过期时间（分钟）" name='access_expired' labelAlign='right'>
+                <Form.Item label="用户登录token过期时间（分钟）" name='access_expired' labelAlign='right' rules={[{ validator: validateGreaterThanOne }]}>
                   <Input />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="用户登录token刷新时间（分钟）" name='refresh_expired' labelAlign='right'>
+                <Form.Item label="用户登录token刷新时间（分钟）" name='refresh_expired' labelAlign='right' rules={[{ validator: validateGreaterThanOne }]}>
                   <Input />
                 </Form.Item>
               </Col>
@@ -185,7 +194,7 @@ export default function () {
                   <Switch checked={swithRsa} onChange={onSwitchRsaChange}></Switch>
                 </Form.Item>
               </Col>
-               <Col span={4}>
+              <Col span={4}>
                 <Form.Item label='启用单点登录' name='sso' labelAlign='right'>
                   <Switch checked={swithSso} onChange={onSwitchSsoChange}></Switch>
                 </Form.Item>
