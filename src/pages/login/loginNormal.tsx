@@ -106,12 +106,22 @@ export default function LoginNormal() {
           localStorage.setItem('deepseek_token', res.dat.deepseek_token);
         })
         if (!err) {
-          getBigScreen().then(res => {
-            if (res.dat.list.length > 0) {
-              window.location.href = '/screenView'
-            } else {
-              window.location.href = '/home';
+          getBusiGroups().then(res => {
+            let busiGroups = res.dat;
+            let groupIds = ''
+            if (busiGroups.length > 0) {
+              groupIds = busiGroups.map(item => item.id).toString()
             }
+            getBigScreen2(groupIds).then(res => {
+              const list = res.dat?.list?.filter((item:any) => item.type == 1) || [];
+              if (list.length > 0) {
+                window.location.href = '/screenView'
+              } else {
+                window.location.href = '/home';
+              }
+            }).catch(_ => {
+              window.location.href = '/home';
+            })
           }).catch(_ => {
             window.location.href = '/home';
           })

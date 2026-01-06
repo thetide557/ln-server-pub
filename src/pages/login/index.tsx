@@ -21,12 +21,17 @@ import LoginSso from './loginSso';
 
 
 export default function Login() {
-  const [showSso, setShowSso] = useState(false);
+  const [showSso, setShowSso] = useState<boolean | null>(null); // 修改初始值为 null
   useEffect(() => {
     ifShowSso().then((res) => {
       setShowSso(res?.dat?.show);
     });
   }, []);
+
+  // 在数据未加载完成前，可以显示加载状态或者返回 null
+  if (showSso === null) {
+    return null; // 或者其他加载组件
+  }
 
   return (
     <>
