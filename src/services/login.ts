@@ -153,3 +153,10 @@ export function getDeepseektoken() {
     method: RequestMethod.Get,
   });
 }
+
+export function loginHtsy(params) {
+  return request(`/api/n9e/auth/login-redirect`, {
+    method: RequestMethod.Get,
+    params
+  });
+}
