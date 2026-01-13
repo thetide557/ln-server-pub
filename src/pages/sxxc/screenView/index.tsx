@@ -34,7 +34,7 @@ export default function ScreenView() {
   const [url, setUrl] = useState<any>('')
   const [urls, setUrls] = useState<any>('')
   const [carousel_interval, setcarousel_interval] = useState<any>(3000)
-  const [first, setFirst] = useState<any>('')
+  // const [first, setFirst] = useState<any>('')
   const [activeColor, setActiveColor] = useState<any>(null)
   // const timestamp = new Date().getTime();
   // const baseUrl = ' http://localhost:7521/#/bigscreen/preview'
@@ -197,15 +197,13 @@ export default function ScreenView() {
     getBigScreen2(busiGroup).then(res => {
       console.log('busiGroup==',res)
       if (res.dat.list.length > 0) {
-        setScreenList(res.dat.list)
+        const tabList = res.dat.list.filter(x => x.type == 1)
+        setScreenList(tabList)
         setNav2(res.dat.list.filter(x => x.type == 2 && x.busi_group != 0))
-        const id = res.dat.list[0].id.toString()
-        // 切换
-        setFirst(id)
         // tab页
-        setActiveColor(res.dat.list[0].id)
+        setActiveColor(tabList[0].id)
         // code值
-        const code = res.dat.list[0]['config']
+        const code = tabList[0]['config']
         // 外部链接
         if (code.startsWith('http') || code.startsWith('https') || code.startsWith('www.')) {
           if (code.includes('?')) {
@@ -262,7 +260,7 @@ export default function ScreenView() {
           {/* {
             screenList.length >0 &&
             <div className='screen-tab'>
-              {_.map(screenList.filter(x => x.type == 1), (item, index) => {
+              {_.map(screenList, (item, index) => {
                 return (
                   <div className={['c-tab', activeColor == item.id ? 'active' : null].join(" ")} style={{ width: item.bg_width / 18 + 'vw', height: item.bg_height / 18 + 'vw', background: item.bg_color, ...MyStyle(item.nav_template) }} key={item.id} onClick={() => handleClick(item)}>
                     <span className='title' style={{ fontSize: item.font_size / 18 + 'vw', color: item.font_color, ...MyStyle(item.nav_template) }}>{item.nav_name}</span>

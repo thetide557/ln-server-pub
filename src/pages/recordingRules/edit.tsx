@@ -11,6 +11,7 @@ const StrategyEdit: React.FC = () => {
   const { t } = useTranslation('recordingRules');
   const query = useQuery();
   const isClone = query.get('mode');
+  const isEdit = query.get('edit');
   const params: any = useParams();
   const strategyId = useMemo(() => {
     return params.id;
@@ -28,7 +29,7 @@ const StrategyEdit: React.FC = () => {
 
   return (
     <PageLayout title={t('title')} showBack>
-      {curStrategy.id && <OperateForm detail={curStrategy} type={!isClone ? 1 : 2} />}
+      {curStrategy.id && <OperateForm detail={curStrategy} type={!isClone ? 1 : 2} isEdit={isEdit ? true : false} />}
     </PageLayout>
   );
 };

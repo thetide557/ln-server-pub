@@ -321,8 +321,12 @@ const EventDetailPage: React.FC = () => {
           detailInfo["rule_config_cn"] = rules[detailInfo.rule_id].rule_config_cn;
           detailInfo["strategy_id"] = rules[detailInfo.rule_id].strategy_id;
         }
-      });
+      })
       setEventDetail(detailInfo);
+    }).catch(() => {
+      setTimeout(() => {
+        history.goBack();
+      }, 1500);
     });
   }, [busiId, eventId]);
 
