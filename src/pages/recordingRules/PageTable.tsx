@@ -86,8 +86,12 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
     history.push(`/recording-rules/add/${curBusiId}`);
   };
 
-  const handleClickEdit = (id, isClone = false) => {
-    history.push(`/recording-rules/edit/${id}${isClone ? '?mode=clone' : ''}`);
+  const handleClickEdit = (id, isClone = false, isEdit = false) => {
+    if (isEdit && !isClone) {
+      history.push(`/recording-rules/edit/${id}?edit=true`);
+      return;
+    }
+    history.push(`/recording-rules/edit/${id}${isClone ? '?mode=clone&edit=true' : ''}`);
   };
 
   const refreshList = () => {
@@ -189,7 +193,23 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
             <div
               className='table-operator-area-normal'
               onClick={() => {
-                handleClickEdit(record.id, true);
+                handleClickEdit(record.id);
+              }}
+            >
+              {t('详情')}
+            </div>
+            <div
+              className='table-operator-area-normal'
+              onClick={() => {
+                handleClickEdit(record.id, false, true);
+              }}
+            >
+              {t('修改')}
+            </div>
+            <div
+              className='table-operator-area-normal'
+              onClick={() => {
+                handleClickEdit(record.id, true, true);
               }}
             >
               {t('common:btn.clone')}

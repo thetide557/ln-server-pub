@@ -14,6 +14,7 @@ const DATASOURCE_ALL = 0;
 interface Props {
   detail?: any;
   type?: number; // 1:编辑 2:克隆
+  isEdit?: boolean;  // 是否是编辑状态
 }
 
 // 校验单个标签格式是否正确
@@ -29,7 +30,7 @@ function getFirstDatasourceId(datasourceIds = [], datasourceList: { id: number }
   return _.isEqual(datasourceIds, [DATASOURCE_ALL]) && datasourceList.length > 0 ? datasourceList[0]?.id : datasourceIds[0];
 }
 
-const operateForm: React.FC<Props> = ({ type, detail = {} }) => {
+const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
   const { t } = useTranslation('recordingRules');
   const history = useHistory(); // 创建的时候默认选中的值
   const [form] = Form.useForm();
@@ -121,6 +122,7 @@ const operateForm: React.FC<Props> = ({ type, detail = {} }) => {
   return (
     <div className='operate_con'>
       <Form
+        disabled={!isEdit && detail?.id}
         form={form}
         className='strategy-form'
         layout='vertical'
@@ -211,7 +213,7 @@ const operateForm: React.FC<Props> = ({ type, detail = {} }) => {
                       });
                     },
 
-                    onCancel() {},
+                    onCancel() { },
                   });
                 }}
               >
