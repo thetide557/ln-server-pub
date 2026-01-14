@@ -11,7 +11,12 @@ export default () => {
 
   useEffect(() => {
     getScreenById(id).then((res) => {
-      setData(res.dat);
+      const busi_group = res.dat?.busi_group.split(',').map((item:string | number) => Number(item));
+      const data = {
+        ...res.dat,
+        busi_group,
+      }
+      setData(data);
     });
   }, [id]);
 
