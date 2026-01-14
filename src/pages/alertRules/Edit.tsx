@@ -47,6 +47,9 @@ export default function Edit() {
             window.localStorage.setItem('select_monitor_asset_id',item.asset_id);
             window.localStorage.setItem('select_monitor_asset_ip',item.asset_ip);
           }
+          if (mode === 'clone') {
+            item.name = '';
+          }
           return item
         })
         setValues(data || []);

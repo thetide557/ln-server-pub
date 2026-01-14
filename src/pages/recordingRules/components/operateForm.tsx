@@ -198,7 +198,8 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
           {
             (isEdit || !detail?.id) && <Form.Item>
               <Button type='primary' onClick={addSubmit} style={{ marginRight: '8px' }}>
-                {type === 1 ? t('common:btn.edit') : type === 2 ? t('common:btn.clone') : t('common:btn.add')}
+                {/* {type === 1 ? t('common:btn.edit') : type === 2 ? t('common:btn.clone') : t('common:btn.add')} */}
+                保存
               </Button>
               {/* {type === 1 && (
                 <Button
