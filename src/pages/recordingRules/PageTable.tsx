@@ -6,7 +6,7 @@ import { ColumnType } from 'antd/lib/table';
 import moment from 'moment';
 import _ from 'lodash';
 import RefreshIcon from '@/components/RefreshIcon';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, CopyTwoTone, DeleteOutlined, EditOutlined, FileSearchOutlined } from '@ant-design/icons';
 import { getRecordingRuleSubList, updateRecordingRules } from '@/services/recording';
 import SearchInput from '@/components/BaseSearchInput';
 import { strategyItem, strategyStatus } from '@/store/warningInterface';
@@ -187,38 +187,45 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
     {
       title: t('common:table.operations'),
       dataIndex: 'operator',
+      width: 120,
+      fixed: 'right',
       render: (data, record) => {
+
         return (
-          <div className='table-operator-area'>
-            <div
-              className='table-operator-area-normal'
+          <Space>
+            <FileSearchOutlined
+              title="查看"
               onClick={() => {
                 handleClickEdit(record.id);
               }}
-            >
-              {t('详情')}
-            </div>
-            <div
-              className='table-operator-area-normal'
+              rev={undefined}
+            />
+            <EditOutlined
+              title="编辑"
               onClick={() => {
                 handleClickEdit(record.id, false, true);
               }}
-            >
-              {t('修改')}
-            </div>
+              rev={undefined}
+            />
             <div
+              title='克隆'
               className='table-operator-area-normal'
+              style={{ cursor: 'pointer' }}
               onClick={() => {
                 handleClickEdit(record.id, true, true);
               }}
             >
-              {t('common:btn.clone')}
+              <CopyTwoTone rev={undefined} />
             </div>
             <div
-              className='table-operator-area-warning'
+              title='删除'
+              style={{ cursor: 'pointer' }}
+              className="table-operator-area-warning"
               onClick={() => {
                 confirm({
                   title: t('common:confirm.delete'),
+                  okText: "确认",
+                  cancelText: "取消",
                   onOk: () => {
                     deleteRecordingRule([record.id], curBusiId).then(() => {
                       message.success(t('common:success.delete'));
@@ -226,13 +233,13 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
                     });
                   },
 
-                  onCancel() {},
+                  onCancel() { },
                 });
               }}
             >
-              {t('common:btn.delete')}
+              <DeleteOutlined rev={undefined} />
             </div>
-          </div>
+          </Space>
         );
       },
     },
@@ -292,7 +299,7 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
                   });
                 },
 
-                onCancel() {},
+                onCancel() { },
               });
             } else {
               message.warning(t('batch.must_select_one'));
@@ -410,6 +417,7 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
           },
         }}
         columns={columns}
+        className='ruler-table_columns'
       />
       {isModalVisible && <EditModal isModalVisible={isModalVisible} editModalFinish={editModalFinish} />}
     </div>

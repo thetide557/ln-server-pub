@@ -106,7 +106,7 @@ export default function List(props: ListProps) {
           <Link
             className='table-text'
             to={{
-              pathname: `/alert-rules/edit/${record.strategy_id}`,
+              pathname: `/alert-rules/edit/${record.strategy_id}?mode=view`,
             }}
           >
             {name}
