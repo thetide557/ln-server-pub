@@ -24,6 +24,9 @@ const StrategyEdit: React.FC = () => {
 
   const getStrategy = async () => {
     const res = await getRecordingRule(strategyId);
+    if (isClone) {
+      res.dat.name = '';
+    }
     setCurStrategy(res.dat || {});
   };
 
