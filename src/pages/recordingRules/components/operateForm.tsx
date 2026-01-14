@@ -195,40 +195,42 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
           <Form.Item label={t('append_tags')} name='append_tags' rules={[isValidFormat]}>
             <Select mode='tags' tokenSeparators={[' ']} open={false} placeholder={t('append_tags_placeholder')} tagRender={tagRender} />
           </Form.Item>
-          <Form.Item>
-            <Button type='primary' onClick={addSubmit} style={{ marginRight: '8px' }}>
-              {type === 1 ? t('common:btn.edit') : type === 2 ? t('common:btn.clone') : t('common:btn.add')}
-            </Button>
-            {type === 1 && (
-              <Button
-                danger
-                style={{ marginRight: '8px' }}
-                onClick={() => {
-                  Modal.confirm({
-                    title: t('common:confirm.delete'),
-                    onOk: () => {
-                      deleteRecordingRule([detail.id], curBusiId).then(() => {
-                        message.success(t('common:success.delete'));
-                        history.push('/recording-rules');
-                      });
-                    },
+          {
+            (isEdit || !detail?.id) && <Form.Item>
+              <Button type='primary' onClick={addSubmit} style={{ marginRight: '8px' }}>
+                {type === 1 ? t('common:btn.edit') : type === 2 ? t('common:btn.clone') : t('common:btn.add')}
+              </Button>
+              {/* {type === 1 && (
+                <Button
+                  danger
+                  style={{ marginRight: '8px' }}
+                  onClick={() => {
+                    Modal.confirm({
+                      title: t('common:confirm.delete'),
+                      onOk: () => {
+                        deleteRecordingRule([detail.id], curBusiId).then(() => {
+                          message.success(t('common:success.delete'));
+                          history.push('/recording-rules');
+                        });
+                      },
 
-                    onCancel() { },
-                  });
+                      onCancel() { },
+                    });
+                  }}
+                >
+                  {t('common:btn.delete')}
+                </Button>
+              )} */}
+
+              <Button
+                onClick={() => {
+                  history.push('/recording-rules');
                 }}
               >
-                {t('common:btn.delete')}
+                {t('common:btn.cancel')}
               </Button>
-            )}
-
-            <Button
-              onClick={() => {
-                history.push('/recording-rules');
-              }}
-            >
-              {t('common:btn.cancel')}
-            </Button>
-          </Form.Item>
+            </Form.Item>
+          }
         </Space>
       </Form>
     </div>
