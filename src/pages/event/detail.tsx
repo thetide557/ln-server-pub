@@ -325,7 +325,7 @@ const EventDetailPage: React.FC = () => {
       setEventDetail(detailInfo);
     }).catch(() => {
       setTimeout(() => {
-        history.goBack();
+        history.push('/alert-cur-events');
       }, 1500);
     });
   }, [busiId, eventId]);
