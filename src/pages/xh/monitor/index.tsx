@@ -744,12 +744,26 @@ export default function () {
     getAssetTree()
   }, [searchVal]);
 
-  // 仅在本页首次挂载且树数据到位时展开第一层（页面刷新或重新进入路由）
+  // 首次挂载且树数据到位时：
+  // - 没有 currentAssetId（正常从菜单进来）：默认展开第一层
+  // - 有 currentAssetId（外部带 assetId 进来）：从 localStorage.expandedIds 恢复展开状态
   useEffect(() => {
     if (!treeList?.length || assetTreeInitialExpandDone.current) return;
     assetTreeInitialExpandDone.current = true;
+    if (currentAssetId && currentAssetId > 0) {
+      try {
+        const saved = localStorage.getItem('expandedIds');
+        if (saved) {
+          const arr = JSON.parse(saved || '[]');
+          setAssetTreeExpandedIds(new Set(arr));
+          return;
+        }
+      } catch (e) {
+        // ignore parse error and fall back to 默认展开第一层
+      }
+    }
     setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
-  }, [treeList]);
+  }, [treeList, currentAssetId]);
 
   const getTableData = (assets, units) => {
     // 1. 生成当前请求的唯一ID（组件内独立递增）

@@ -1278,6 +1278,9 @@ export default function () {
   };
   // 资产组织树：展开状态由页面传入，仅页面刷新或重新进入路由时展开第一层，点击树/新增分组等保持最新状态
   const AssetTree = ({ data, expandedIds, setExpandedIds }) => {
+    useEffect(() => {
+      localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
+    }, [expandedIds]);
     const handleToggle = (nodeId) => {
       setExpandedIds((prev) => {
         const newSet = new Set(prev);
