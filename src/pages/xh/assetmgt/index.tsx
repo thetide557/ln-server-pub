@@ -127,6 +127,9 @@ export default function () {
   const [level, setLevel] = useState<number | undefined>(undefined);  // 资产组织树新增分组层级
   const [parentId, setParentId] = useState(null);  // 资产组织树新增分组父级id
   const [isAllAssets, setIsAllAssets] = useLocalStorage('left_asset_isallassets', false); // 资产组织树点击的是否是全部资产下的节点
+  // 树展开状态提升到页面级：仅页面刷新或重新进入路由时展开第一层，其余保持最新状态
+  const [assetTreeExpandedIds, setAssetTreeExpandedIds] = useState<Set<number | string>>(() => new Set());
+  const assetTreeInitialExpandDone = useRef(false);
   // 用useRef保存递增计数器（每个组件实例独立，不共享）
   const requestIdCounter = useRef(0);
 
@@ -744,6 +747,13 @@ export default function () {
     getAssetTree()
   }, [searchVal]);
 
+  // 仅在本页首次挂载且树数据到位时展开第一层（页面刷新或重新进入路由）
+  useEffect(() => {
+    if (!treeList?.length || assetTreeInitialExpandDone.current) return;
+    assetTreeInitialExpandDone.current = true;
+    setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
+  }, [treeList]);
+
   useInterval(() => {
     setRefreshKey(_.uniqueId('refreshKey_'));
   }, 1000 * 30);
@@ -1251,22 +1261,8 @@ export default function () {
       </div>
     );
   };
-  // 资产组织树
-  const AssetTree = ({ data }) => {
-    //  展开的节点列表
-    const [expandedIds, setExpandedIds] = useState(() => {
-      try {
-        const saved = localStorage.getItem("expandedIds");
-        return new Set(JSON.parse(saved || "[]"));
-      } catch {
-        return new Set();
-      }
-    });
-
-    useEffect(() => {
-      localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
-    }, [expandedIds]);
-
+  // 资产组织树：展开状态由页面传入，仅页面刷新或重新进入路由时展开第一层，点击树/新增分组等保持最新状态
+  const AssetTree = ({ data, expandedIds, setExpandedIds }) => {
     const handleToggle = (nodeId) => {
       setExpandedIds((prev) => {
         const newSet = new Set(prev);
@@ -1339,7 +1335,7 @@ export default function () {
                 }
               </div>
               <div className='tree-list'>
-                <AssetTree data={treeList} />
+                <AssetTree data={treeList} expandedIds={assetTreeExpandedIds} setExpandedIds={setAssetTreeExpandedIds} />
                 {/* {
                   _.map(treeList, (item) => {
                     return (
