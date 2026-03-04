@@ -130,6 +130,8 @@ export default function () {
   // 树展开状态提升到页面级：仅页面刷新或重新进入路由时展开第一层，其余保持最新状态
   const [assetTreeExpandedIds, setAssetTreeExpandedIds] = useState<Set<number | string>>(() => new Set());
   const assetTreeInitialExpandDone = useRef(false);
+  // 首次进入路由/刷新页面时，避免重复请求
+  const skipNextGetTableDataRef = useRef(false);
   // 用useRef保存递增计数器（每个组件实例独立，不共享）
   const requestIdCounter = useRef(0);
 
@@ -739,20 +741,33 @@ export default function () {
     });
   }, []);
 
+  // 首次进入路由或刷新页面：展开第一层，默认选中全部资产并高亮，表格请求全部资产数据
   useEffect(() => {
-    getTableData();
-  }, [typeId, refreshKey, tissueId, treeList]);
+    if (!treeList?.length || assetTreeInitialExpandDone.current) return;
+    assetTreeInitialExpandDone.current = true;
+    skipNextGetTableDataRef.current = true;
+    setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
+    localStorage.setItem('left_asset_type', '-1');
+    localStorage.removeItem('left_parId');
+    setTissueId(-1);
+    setParId(undefined);
+    setTypeId(undefined);
+    setIsAllAssets(true);
+    setRefreshKey(_.uniqueId('refreshKey_'));
+  }, [treeList]);
 
   useEffect(() => {
     getAssetTree()
   }, [searchVal]);
 
-  // 仅在本页首次挂载且树数据到位时展开第一层（页面刷新或重新进入路由）
   useEffect(() => {
-    if (!treeList?.length || assetTreeInitialExpandDone.current) return;
-    assetTreeInitialExpandDone.current = true;
-    setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
-  }, [treeList]);
+    if (!treeList?.length) return; // 未加载组织树前不请求表格，避免多余请求
+    if (skipNextGetTableDataRef.current) {
+      skipNextGetTableDataRef.current = false;
+      return;
+    }
+    getTableData();
+  }, [typeId, refreshKey, tissueId, treeList, isAllAssets]);
 
   useInterval(() => {
     setRefreshKey(_.uniqueId('refreshKey_'));

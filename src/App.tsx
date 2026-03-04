@@ -129,7 +129,9 @@ function App() {
   const [dialogShow, setDialogShow] = useState<string>(_.toString(localStorage.getItem('alert_dialog_show') || '0'));
   const [alertLevel, setAlertLevel] = useState<number>(0);
   const [alertId, setAlertId] = useState<number>(0);
-  const [warnModalShow, setWarnModalShow] = useState<boolean>(false)
+  const [warnModalShow, setWarnModalShow] = useState<boolean>(false);
+  const alertDialogHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
   const setPageTitle = (newTitle) => {
     document.title = newTitle;
@@ -190,6 +192,25 @@ function App() {
     },
     isPlus,
   });
+
+  // 告警提醒 5 分钟后自动隐藏；有新告警时重新计时，到 5 分钟再隐藏
+  useEffect(() => {
+    if (alertDialogHideTimerRef.current) {
+      clearTimeout(alertDialogHideTimerRef.current);
+      alertDialogHideTimerRef.current = null;
+    }
+    if (dialogShow !== '0') {
+      alertDialogHideTimerRef.current = setTimeout(() => {
+        setDialogShow('0');
+        alertDialogHideTimerRef.current = null;
+      }, FIVE_MINUTES_MS);
+    }
+    return () => {
+      if (alertDialogHideTimerRef.current) {
+        clearTimeout(alertDialogHideTimerRef.current);
+      }
+    };
+  }, [dialogShow, alertLevel]);
 
   // 右下角告警
   const handleClick = () => {
