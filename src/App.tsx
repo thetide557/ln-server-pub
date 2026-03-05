@@ -42,7 +42,7 @@ import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import { useLocalStorage } from 'react-use';
-import { getAlertEventsById, getHistoryEventsById, getWarningChart, setAlartMutes, updataprocess } from '@/pages/sxxc/screenView/alarmApi';
+import { getAlertEventsById } from '@/services/warning';
 import AiRobotSse from '@/pages/sxxc/aiRobot/sse';
 import WarnModal from '@/pages/sxxc/warnModal';
 
@@ -129,9 +129,7 @@ function App() {
   const [dialogShow, setDialogShow] = useState<string>(_.toString(localStorage.getItem('alert_dialog_show') || '0'));
   const [alertLevel, setAlertLevel] = useState<number>(0);
   const [alertId, setAlertId] = useState<number>(0);
-  const [warnModalShow, setWarnModalShow] = useState<boolean>(false);
-  const alertDialogHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const FIVE_MINUTES_MS = 5 * 60 * 1000;
+  const [warnModalShow, setWarnModalShow] = useState<boolean>(false)
 
   const setPageTitle = (newTitle) => {
     document.title = newTitle;
@@ -193,32 +191,18 @@ function App() {
     isPlus,
   });
 
-  // 告警提醒 5 分钟后自动隐藏；有新告警时重新计时，到 5 分钟再隐藏
-  useEffect(() => {
-    if (alertDialogHideTimerRef.current) {
-      clearTimeout(alertDialogHideTimerRef.current);
-      alertDialogHideTimerRef.current = null;
-    }
-    if (dialogShow !== '0') {
-      alertDialogHideTimerRef.current = setTimeout(() => {
-        setDialogShow('0');
-        alertDialogHideTimerRef.current = null;
-      }, FIVE_MINUTES_MS);
-    }
-    return () => {
-      if (alertDialogHideTimerRef.current) {
-        clearTimeout(alertDialogHideTimerRef.current);
-      }
-    };
-  }, [dialogShow, alertLevel]);
-
   // 右下角告警
   const handleClick = () => {
     // console.log('点击了', location.pathname);
 
     if (window.location.pathname != '/screenView') {
-      window.location.href = '/alert-cur-events/' + alertId;
       setWarnModalShow(false)
+      getAlertEventsById(alertId)
+        .then((res) => {
+          window.location.href = '/alert-cur-events/' + alertId;
+        }).catch(_ => {
+          setDialogShow('0')
+        })
     } else {
       setTimeout(() => {
         setDialogShow('0')
@@ -400,7 +384,7 @@ function App() {
           </span>
         </div>
         <div className='alert_content'>
-          <div className='level'>{alertLevel}</div>
+          <div className='level'>{alertLevel == 1 ? '紧急' : alertLevel == 2 ? '重要' : alertLevel == 3 ? '一般' : ''}</div>
           <div
             className='detail'
             onClick={handleClick}
