@@ -38,6 +38,7 @@ import {
   getScheduleDetail,
   deleteSchedule,
   batchDeleteSchedule,
+  autoSchedule
 } from "@/services/sxxc/dutyManage";
 import { exportTemplet } from "@/services/assets/asset";
 import "./ScheduleList.less";
@@ -46,6 +47,7 @@ import { OperateType } from "./DutyList";
 import { OperationModal } from "./OperationModal";
 import _ from "lodash";
 import BatchDeleteModal, { TimeRange } from './BatchDeleteModal';
+import AutoScheduleModal from './AutoScheduleModal';
 
 // 定义排班数据接口
 interface ScheduleItem {
@@ -57,9 +59,9 @@ interface ScheduleItem {
   third_line_ids?: string[];
   createTime?: number;
   director?: object;
-  first_lines?: Array<{Name: string, id: string}>;
-  second_lines?: Array<{Name: string, id: string}>;
-  third_lines?: Array<{Name: string, id: string}>;
+  first_lines?: Array<{ Name: string, id: string }>;
+  second_lines?: Array<{ Name: string, id: string }>;
+  third_lines?: Array<{ Name: string, id: string }>;
 }
 
 // 定义人员选项接口
@@ -102,6 +104,7 @@ const ScheduleList: React.FC = () => {
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId("refreshKey_"));
   const [batchDeleteVisible, setBatchDeleteVisible] = useState(false); // 批量删除弹框
+  const [autoScheduleVisible, setAutoScheduleVisible] = useState(false); // 自动排班弹框
   // 只可选登录当天及以后日期
   const disableDate = (current: Moment) => {
     const today = moment().startOf("day");
@@ -159,7 +162,7 @@ const ScheduleList: React.FC = () => {
   const onDateSelect = (date: Moment) => {
     setSelectedDate(date);
     // console.log("选中日期", date.format("YYYY-MM-DD"));
-     // 检查月份是否发生变化，如果是则更新selectedMonth
+    // 检查月份是否发生变化，如果是则更新selectedMonth
     if (!selectedMonth.isSame(date, 'month')) {
       setSelectedMonth(date);
     }
@@ -260,7 +263,7 @@ const ScheduleList: React.FC = () => {
       }
       setModalVisible(false);
       getData();
-    } catch (error:any) {
+    } catch (error: any) {
       message.error(error?.message || "操作失败，请重试");
     } finally {
       setConfirmLoading(false);
@@ -283,9 +286,8 @@ const ScheduleList: React.FC = () => {
       },
     });
   };
-
   // 导入排班
-  const handleImport = () => { 
+  const handleImport = () => {
     setOperateType(OperateType.Import);
   };
 
@@ -353,40 +355,8 @@ const ScheduleList: React.FC = () => {
     const lunarDay = d.getDayInChinese();
     // 初一显示完整农历月份和日期，其他日期只显示日期
     const lunar = lunarDay === "初一" ? `${lunarMonth}月${lunarDay}` : lunarDay;
-// 如果不是详情模式，显示简单的"已排班"标记
+    // 如果不是详情模式，显示简单的"已排班"标记
     if (!showScheduleDetail) {
-    return (
-      <div className="calendar-cell">
-        <div className="top">
-          <div
-            className="date-number"
-            style={
-              isToday
-                ? {
-                    borderRadius: "50%",
-                    backgroundColor: "#2888f7",
-                    color: "#fff",
-                  }
-                : {}
-            }
-          >
-            {date.date()}
-          </div>
-          <div className="lunar-date">{lunar}</div>
-        </div>
-        <div className="bottom">
-          {hasSch && <div className="schedule-text">已排班</div>}
-        </div>
-      </div>
-    );
-  } else { 
-    // 详情模式：显示一线和二线运维人员
-      // 获取一线运维人员列表
-      const firstLinePersonnel = scheduleItem?.first_lines || [];
-      // 获取二线运维人员列表
-      const secondLinePersonnel = scheduleItem?.second_lines || [];
-      const firstLineNames = firstLinePersonnel.map(p =>p.Name || '');
-      const secondLineNames = secondLinePersonnel.map(p =>p.Name || '');
       return (
         <div className="calendar-cell">
           <div className="top">
@@ -395,10 +365,42 @@ const ScheduleList: React.FC = () => {
               style={
                 isToday
                   ? {
-                      borderRadius: "50%",
-                      backgroundColor: "#2888f7",
-                      color: "#fff",
-                    }
+                    borderRadius: "50%",
+                    backgroundColor: "#2888f7",
+                    color: "#fff",
+                  }
+                  : {}
+              }
+            >
+              {date.date()}
+            </div>
+            <div className="lunar-date">{lunar}</div>
+          </div>
+          <div className="bottom">
+            {hasSch && <div className="schedule-text">已排班</div>}
+          </div>
+        </div>
+      );
+    } else {
+      // 详情模式：显示一线和二线运维人员
+      // 获取一线运维人员列表
+      const firstLinePersonnel = scheduleItem?.first_lines || [];
+      // 获取二线运维人员列表
+      const secondLinePersonnel = scheduleItem?.second_lines || [];
+      const firstLineNames = firstLinePersonnel.map(p => p.Name || '');
+      const secondLineNames = secondLinePersonnel.map(p => p.Name || '');
+      return (
+        <div className="calendar-cell">
+          <div className="top">
+            <div
+              className="date-number"
+              style={
+                isToday
+                  ? {
+                    borderRadius: "50%",
+                    backgroundColor: "#2888f7",
+                    color: "#fff",
+                  }
                   : {}
               }
             >
@@ -414,7 +416,7 @@ const ScheduleList: React.FC = () => {
                   <Tooltip title={firstLineNames.join(', ')}>
                     一线运维：{firstLineNames.join('、')}
                   </Tooltip>
-                  
+
                 </div>
               )}
               {/* 二线运维 */}
@@ -429,9 +431,9 @@ const ScheduleList: React.FC = () => {
           </div>
         </div>
       );
-    
 
-  }
+
+    }
   };
 
   // 渲染排班详情
@@ -447,11 +449,11 @@ const ScheduleList: React.FC = () => {
             <div className="text">排班表</div>
             {(profile.roles?.includes("Admin") ||
               permList.includes("/sxxc/schedule_list/add")) && (
-              <PlusSquareFilled
-                onClick={() => showModal("add")}
-                style={{ fontSize: 13, color: "#2888f7" }}
-              />
-            )}
+                <PlusSquareFilled
+                  onClick={() => showModal("add")}
+                  style={{ fontSize: 13, color: "#2888f7" }}
+                />
+              )}
           </div>
           <div>{selectedDate.format("YYYY-MM-DD")}</div>
 
@@ -469,22 +471,22 @@ const ScheduleList: React.FC = () => {
               <>
                 {(profile.roles?.includes("Admin") ||
                   permList.includes("/sxxc/schedule_list/edit")) && (
-                  <EditOutlined
-                    style={{ color: "#2888f7" }}
-                    title="编辑"
-                    onClick={() => {
-                      showModal("edit", currentSchedule.id);
-                    }}
-                  />
-                )}
+                    <EditOutlined
+                      style={{ color: "#2888f7" }}
+                      title="编辑"
+                      onClick={() => {
+                        showModal("edit", currentSchedule.id);
+                      }}
+                    />
+                  )}
                 {(profile.roles?.includes("Admin") ||
                   permList.includes("/sxxc/schedule_list/del")) && (
-                  <DeleteOutlined
-                    style={{ color: "#f5222d" }}
-                    title="删除"
-                    onClick={() => handleDeleteSchedule(currentSchedule.id)}
-                  />
-                )}
+                    <DeleteOutlined
+                      style={{ color: "#f5222d" }}
+                      title="删除"
+                      onClick={() => handleDeleteSchedule(currentSchedule.id)}
+                    />
+                  )}
               </>
             )}
           </div>
@@ -568,7 +570,7 @@ const ScheduleList: React.FC = () => {
 
   // 确认批量删除
   const handleBatchDelete = async (timeRanges: TimeRange[]) => {
-    try {    
+    try {
       // 转换为字符串格式发送给后端
       const apiData = {
         time_ranges: timeRanges.map((range) => {
@@ -582,7 +584,25 @@ const ScheduleList: React.FC = () => {
       message.success(`成功删除 ${timeRanges.length} 个时间段的排班`);
       getData();
       getCurrentSchedule();
-    } catch (error:any) {
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
+  // 处理自动排班
+  const handleAutoSchedule = async (values: any) => {
+    try {
+      // 转换为字符串格式发送给后端
+      const apiData = {
+        mode: values.mode,
+        start_date: values.dateRange ? values.dateRange[0].format("YYYY-MM-DD") : null,
+        end_date: values.dateRange ? values.dateRange[1].format("YYYY-MM-DD") : null,
+      };
+      await autoSchedule(apiData);
+      message.success(`排班成功`);
+      getData();
+      getCurrentSchedule();
+    } catch (error: any) {
       throw error;
     }
   };
@@ -643,37 +663,47 @@ const ScheduleList: React.FC = () => {
                       </div>
                       <div>
                         <Space>
-                        {(profile.roles?.includes("Admin") ||
-                          permList.includes("/sxxc/schedule_list/import")) && (
-                          <Button
-                            icon={<ImportOutlined />}
-                            onClick={handleImport}
-                            size="small"
-                          >
-                            导入
-                          </Button>
-                        )}
-                        {(profile.roles?.includes("Admin") ||
-                          permList.includes("/sxxc/schedule_list/export")) && (
-                          <Button
-                            icon={<UploadOutlined />}
-                            onClick={handleExport}
-                            loading={isExporting}
-                            size="small"
-                          >
-                            导出
-                          </Button>
-                        )}
-                        {(profile.roles?.includes("Admin") ||
-                          permList.includes("/sxxc/schedule_list/batch_delete")) && (
-                          <Button
-                            icon={<DeleteOutlined />}
-                            onClick={() => setBatchDeleteVisible(true)}
-                            size="small"
-                          >
-                            批量删除
-                          </Button>
-                        )}
+                          {(profile.roles?.includes("Admin") ||
+                            permList.includes("/sxxc/schedule_list/import")) && (
+                              <Button
+                                icon={<ImportOutlined />}
+                                onClick={handleImport}
+                                size="small"
+                              >
+                                导入
+                              </Button>
+                            )}
+                          {(profile.roles?.includes("Admin") ||
+                            permList.includes("/sxxc/schedule_list/export")) && (
+                              <Button
+                                icon={<UploadOutlined />}
+                                onClick={handleExport}
+                                loading={isExporting}
+                                size="small"
+                              >
+                                导出
+                              </Button>
+                            )}
+                          {(profile.roles?.includes("Admin") ||
+                            permList.includes("/sxxc/schedule_list/batch_delete")) && (
+                              <Button
+                                icon={<DeleteOutlined />}
+                                onClick={() => setBatchDeleteVisible(true)}
+                                size="small"
+                              >
+                                批量删除
+                              </Button>
+                            )}
+                          {(profile.roles?.includes("Admin") ||
+                            permList.includes("/sxxc/schedule_list/auto_schedule")) && (
+                              <Button
+                                icon={<EditOutlined />}
+                                onClick={() => setAutoScheduleVisible(true)}
+                                size="small"
+                              >
+                                自动排班
+                              </Button>
+                            )}
                         </Space>
                       </div>
                     </div>
@@ -838,11 +868,18 @@ const ScheduleList: React.FC = () => {
         }}
       />
 
-       {/* 批量删除弹窗 */}
+      {/* 批量删除弹窗 */}
       <BatchDeleteModal
         visible={batchDeleteVisible}
         onCancel={() => setBatchDeleteVisible(false)}
         onConfirm={handleBatchDelete}
+      />
+
+      {/* 自动排班弹窗 */}
+      <AutoScheduleModal
+        visible={autoScheduleVisible}
+        onCancel={() => setAutoScheduleVisible(false)}
+        onConfirm={handleAutoSchedule}
       />
 
     </div>

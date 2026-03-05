@@ -164,5 +164,13 @@ export const batchDeleteDutyLog = function (data) {
   });
 }
 
+// 自动排班
+export const autoSchedule = function (data) {
+  return request("/api/n9e/duty/schedule/auto", {
+    method: RequestMethod.Post,
+    data,
+  });
+};
+
 
 

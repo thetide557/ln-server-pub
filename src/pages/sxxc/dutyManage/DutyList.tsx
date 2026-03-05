@@ -158,6 +158,15 @@ export default function () {
       },
     },
     {
+      title: "排班次数",
+      dataIndex: "total_schedule_count",
+      align: "center",
+      ellipsis: true,
+      sorter: (a, b) => {
+        return a.total_schedule_count - b.total_schedule_count;
+      },
+    },
+    {
       title: "状态",
       dataIndex: "Status",
       width: 80,
