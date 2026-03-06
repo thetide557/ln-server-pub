@@ -87,6 +87,8 @@ export default function () {
   const { search } = useLocation();
   const { assetId } = queryString.parse(search);
   const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
+  // 若从其它页面跳转过来未携带 assetId：首次请求列表时不应该带上本地缓存的 typeId（assetType）
+  const skipTypeIdOnFirstFetchRef = useRef<boolean>(assetId == null);
 
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
   const [collapse, setCollapse] = useState(localStorage.getItem('left_monitor_list') === '1');
@@ -792,7 +794,9 @@ export default function () {
 
 
     const parentId = localStorage.getItem('left_parId')
-    if (currentAssetId <= 0 && typeId != null && typeId + '' != '0' && parentId) {
+    // 未带 assetId 首次进入页面时：不带 assetType（TypeId）做首次查询，避免“进来就被历史 typeId 过滤”
+    const shouldSkipAssetTypeThisFetch = skipTypeIdOnFirstFetchRef.current && currentAssetId <= 0;
+    if (!shouldSkipAssetTypeThisFetch && currentAssetId <= 0 && typeId != null && typeId + '' != '0' && parentId) {
       param['assetType'] = typeId;
     }
     if (tissueId != null && !parentId) {
@@ -818,6 +822,9 @@ export default function () {
       }
     }
 
+
+    // 只跳过第一次
+    if (skipTypeIdOnFirstFetchRef.current) skipTypeIdOnFirstFetchRef.current = false;
 
     getMonitorInfoList(param).then(({ dat }) => {
       dat.list.forEach((entity) => {
