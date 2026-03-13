@@ -1,26 +1,27 @@
 // @ts-nocheck
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs, DatePicker, Modal, InputNumber, Timeline, Tag } from 'antd';
+import { Button, Card, Checkbox, Col, Empty, Form, FormInstance, Input, message, Row, Select, Space, Spin, Tabs, DatePicker, Modal, InputNumber, Timeline, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _, { forEach } from 'lodash';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
 import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory ,getAssetShelfHistory} from '@/services/assets';
+import { getDictDataListByType } from '@/services/system/dict';
+import { addDictDataBySingle } from '@/services/system/dictdata';
 
-import { MinusCircleOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
-import { factories, serviceHierarchyOptions, deviceFormOptions } from '../catalog';
+import { serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
 import { timestamp, timestampToCST, isSameDay, getPreviousWeekTimestamp } from '@/utils/day';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
-const { Option } = Select;
 const { TextArea } = Input;
 
 export default function () {
@@ -45,6 +46,10 @@ export default function () {
   const [currentType, setCurrentType] = useState();
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
+  const [manufacturerOptions, setManufacturerOptions] = useState<{ value: string; label: string }[]>([]);
+  const [manufacturerSearch, setManufacturerSearch] = useState('');
+  const [manufacturerLoading, setManufacturerLoading] = useState(false);
+  const [addingManufacturer, setAddingManufacturer] = useState(false);
   // const [assetOptions1, setAssetOptions1] = useState<any[]>([]);
   const [maintenanceRecordModalOpen, setMaintenanceRecordModalOpen] = useState(false);
   const [maintenanceHistoryModalOpen, setMaintenanceHistoryModalOpen] = useState(false);
@@ -111,8 +116,111 @@ export default function () {
       value: 2
     }
   ]
-  // 根据选择资产类型生成表单
+
+  const loadManufacturerOptions = useCallback(async (showError = true) => {
+    setManufacturerLoading(true);
+    try {
+      const res = await getDictDataListByType('manufacturer');
+      const seen = new Set<string>();
+      const options = _.reduce(
+        res.dat || [],
+        (result: { value: string; label: string }[], item: any) => {
+          const value = _.trim(_.toString(item?.dict_value));
+          if (!value || seen.has(value)) {
+            return result;
+          }
+          seen.add(value);
+          result.push({
+            value,
+            label: value,
+          });
+          return result;
+        },
+        [],
+      );
+      setManufacturerOptions(options);
+      return options;
+    } catch (error) {
+      if (showError) {
+        message.error('厂商字典加载失败');
+      }
+      return [];
+    } finally {
+      setManufacturerLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
+    loadManufacturerOptions();
+  }, [loadManufacturerOptions]);
+
+  const handleAddManufacturer = useCallback(async () => {
+    const nextManufacturer = _.trim(manufacturerSearch);
+    if (!nextManufacturer) {
+      return;
+    }
+
+    const exists = manufacturerOptions.some((item) => item.value === nextManufacturer);
+    if (exists) {
+      form.setFieldsValue({ manufacturers: nextManufacturer });
+      return;
+    }
+
+    setAddingManufacturer(true);
+    try {
+      await addDictDataBySingle({
+        dict_key: nextManufacturer,
+        type_code: 'manufacturer',
+        dict_value: nextManufacturer,
+        remark: '',
+      });
+      const options = await loadManufacturerOptions(false);
+      const currentExists = options.some((item) => item.value === nextManufacturer);
+      if (!currentExists) {
+        setManufacturerOptions((prev) => prev.concat([{ value: nextManufacturer, label: nextManufacturer }]));
+      }
+      form.setFieldsValue({ manufacturers: nextManufacturer });
+      setManufacturerSearch('');
+      message.success('厂商新增成功');
+    } catch (error: any) {
+      await loadManufacturerOptions(false);
+      message.error(error?.message || '厂商新增失败');
+    } finally {
+      setAddingManufacturer(false);
+    }
+  }, [form, loadManufacturerOptions, manufacturerOptions, manufacturerSearch]);
+
+  const manufacturerNotFoundContent = useMemo(() => {
+    if (manufacturerLoading) {
+      return (
+        <div style={{ padding: '12px 0', textAlign: 'center' }}>
+          <Spin size='small' />
+        </div>
+      );
+    }
+
+    const nextManufacturer = _.trim(manufacturerSearch);
+    if (!nextManufacturer) {
+      return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='暂无数据' />;
+    }
+
+    return (
+      <div
+        style={{ padding: '12px 0', textAlign: 'center' }}
+        onMouseDown={(event) => {
+          event.preventDefault();
+        }}
+      >
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='没有匹配的厂商' />
+        <Button type='link' icon={<PlusOutlined />} loading={addingManufacturer} onClick={handleAddManufacturer}>
+          新增厂商 "{nextManufacturer}"
+        </Button>
+      </div>
+    );
+  }, [addingManufacturer, handleAddManufacturer, manufacturerLoading, manufacturerSearch]);
+
+  useEffect(() => {
+    // 根据选择资产类型生成表单
     const assetType: any = assetTypes.find((v) => v.name === currentType);
     
     if (assetType) {
@@ -824,22 +932,19 @@ export default function () {
                     <Select
                       style={{ width: '100%' }}
                       allowClear
-                      showSearch filterOption optionFilterProp={"label"}
-                      options={factories.map(({ key, value }) => ({
-                        label: value,
-                        value: value,
-                      }))}
+                      showSearch
+                      filterOption
+                      optionFilterProp={"label"}
+                      onSearch={(value) => {
+                        setManufacturerSearch(value);
+                      }}
+                      onBlur={() => {
+                        setManufacturerSearch('');
+                      }}
+                      notFoundContent={manufacturerNotFoundContent}
+                      options={manufacturerOptions}
                       placeholder='请选择厂商'
-                    >
-                      {/* {factories.map(({key, value}) => (
-                      <Option value={value} key={key}>
-                        <div style={{display:"flex"}}>
-                          <div className='factory_icon_title'>{value}</div>
-                          <div style={{ color: '#8c8c8c' }}><img src={'/image/factory/' + key + '.png'} className='factory_icon_image'></img></div>
-                        </div>
-                      </Option>
-                    ))}   */}
-                    </Select>
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>

@@ -11,7 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 const { TextArea } = Input;
-import { factories, unitTypes } from '../../assetmgt/catalog';
+import { unitTypes } from '../../assetmgt/catalog';
 import { FilterOutlined, MinusCircleOutlined, SearchOutlined } from '@ant-design/icons';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {

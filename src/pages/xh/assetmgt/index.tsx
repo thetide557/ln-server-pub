@@ -34,11 +34,12 @@ import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
 import { batchShelfXhAssets, deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { getDictDataListByType } from '@/services/system/dict';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { factories, serviceHierarchyOptions, deviceFormOptions } from './catalog';
+import { serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
 
@@ -134,6 +135,7 @@ export default function () {
   const skipNextGetTableDataRef = useRef(false);
   // 用useRef保存递增计数器（每个组件实例独立，不共享）
   const requestIdCounter = useRef(0);
+  const [manufacturerOptions, setManufacturerOptions] = useState<{ value: string; label: string }[]>([]);
 
   const maintenanceStatusOption = [
     {
@@ -160,12 +162,7 @@ export default function () {
         label: group.name,
       };
     }),
-    manufacturers: factories.map((factory) => {
-      return {
-        value: _.toString(factory.value),
-        label: factory.value,
-      };
-    }),
+    manufacturers: manufacturerOptions,
     maintenanceStatus: maintenanceStatusOption.map((factory) => {
       return {
         value: _.toString(factory.value),
@@ -711,6 +708,33 @@ export default function () {
       setTreeList(processDat)
     })
   }
+
+  useEffect(() => {
+    getDictDataListByType('manufacturer')
+      .then((res) => {
+        const seen = new Set<string>();
+        const options = _.reduce(
+          res.dat || [],
+          (result: { value: string; label: string }[], item: any) => {
+            const value = _.trim(_.toString(item?.dict_value));
+            if (!value || seen.has(value)) {
+              return result;
+            }
+            seen.add(value);
+            result.push({
+              value,
+              label: value,
+            });
+            return result;
+          },
+          [],
+        );
+        setManufacturerOptions(options);
+      })
+      .catch(() => {
+        message.error('厂商字典加载失败');
+      });
+  }, []);
 
   useEffect(() => {
     //来源数据字典
