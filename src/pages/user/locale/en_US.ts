@@ -42,6 +42,7 @@ const en_US = {
     label_enable_tip:
       'The system will automatically use the English identifier of the business group as a label attached to the time series data of the monitoring object under the business group',
     label_value: 'Ident',
+    robot_token: 'Robot Token',
     label_value_tip: `
       <0>
         Use English, and it cannot be repeated with other business group, the system will automatically generate

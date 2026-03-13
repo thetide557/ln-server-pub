@@ -32,6 +32,7 @@ const en_US = {
   enable_in_bg_tip: 'Determine the ownership relationship based on the ident in the alert event',
   notify_configs: 'Notify Configs',
   notify_channels: 'Channels',
+  notify_busi_group: 'Notify Business Group',
   notify_recovered: 'Recovered',
   notify_recovered_tip: 'Send notification when the alert is recovered',
   recover_duration: 'Recover Duration (s)',

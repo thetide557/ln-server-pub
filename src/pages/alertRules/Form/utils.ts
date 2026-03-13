@@ -137,6 +137,9 @@ export function processFormValues(values) {
     callbacks: _.map(values.callbacks, (item) => item.url),
     datasource_ids: _.isArray(values.datasource_ids) ? values.datasource_ids : values.datasource_ids ? [values.datasource_ids] : [],
     annotations: _.chain(values.annotations).keyBy('key').mapValues('value').value(),
+    // 新增/编辑：通知到业务组（后端字段）
+    // - 编辑若为 null/undefined（旧规则且用户未选择），也按 false 传
+    is_busi_notify: values?.is_busi_notify ?? false,
   };
   return data;
 }
@@ -168,6 +171,7 @@ export function processInitialValues(values) {
   }
   return {
     ...values,
+    is_busi_notify: _.get(values, 'is_busi_notify', false),
     enable_in_bg: values?.enable_in_bg === 1,
     enable_status: values?.disabled === undefined ? true : !values?.disabled,
     notify_recovered: values?.notify_recovered === 1 || values?.notify_recovered === undefined ? true : false, // 1:启用 0:禁用

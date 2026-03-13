@@ -121,11 +121,18 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
     }
     if (isBusinessForm) {
       let form = teamRef.current.form;
-      const { name, members, label_enable, label_value } = await form.validateFields();
+      const { name, members, label_enable, label_value, robot_token } = await form.validateFields();
+      let contacts = {};
+      robot_token &&
+        robot_token.forEach((item: Contacts) => {
+          contacts[item.key] = item.value;
+        });
+      contacts = JSON.stringify(contacts)
       let params = {
         name,
         label_enable: label_enable ? 1 : 0,
         label_value,
+        robot_token: contacts,
         members: members
           ? members.map(({ perm_flag, user_group_id }) => ({
               user_group_id,

@@ -38,6 +38,7 @@ const zh_HK = {
     label_enable: '作為標籤使用',
     label_enable_tip: '系統會自動把業務組的英文標識作為標籤附到該業務組下轄監控物件的時序資料上',
     label_value: '英文標識',
+    robot_token: '機器人token',
     label_value_tip: `
       <0>
         儘量用英文，不能與其他業務組標識重複，系統會自動生成

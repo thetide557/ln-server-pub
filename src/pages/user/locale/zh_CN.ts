@@ -41,6 +41,7 @@ const zh_CN = {
     label_enable: '作为标签使用',
     label_enable_tip: '系统会自动把业务组的英文标识作为标签附到该业务组下辖监控对象的时序数据上',
     label_value: '英文标识',
+    robot_token: '机器人token',
     label_value_tip: `
       <0>
         尽量用英文，不能与其他业务组标识重复，系统会自动生成

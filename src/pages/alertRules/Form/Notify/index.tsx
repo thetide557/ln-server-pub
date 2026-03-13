@@ -18,7 +18,7 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { Card, Form, Checkbox, Switch, Space, Select, Tooltip, Row, Col, InputNumber, Input, AutoComplete } from 'antd';
+import { Card, Form, Checkbox, Switch, Space, Select, Tooltip, Row, Col, InputNumber, Input, AutoComplete, Radio } from 'antd';
 import { PlusCircleOutlined, MinusCircleOutlined, QuestionCircleFilled } from '@ant-design/icons';
 import { getTeamInfoList, getNotifiesList } from '@/services/manage';
 import { panelBaseProps } from '../../constants';
@@ -49,29 +49,46 @@ export default function index({ disabled ,field}) {
     <>
       <Card {...panelBaseProps} className='rule-card' title={t('notify_configs')}>
         {/* <Form.Item label={t('notify_channels')} name='notify_channels'> */}
-        <Form.Item label={t('notify_channels')} {...field} name={[field.name, 'notify_channels']}>
-          <Checkbox.Group disabled={disabled}>
-            {contactList.map((item) => {
-              return (
-                <Checkbox value={item.key} key={item.label}>
-                  {item.label}
-                </Checkbox>
-              );
-            })}
-          </Checkbox.Group>
+        <Form.Item label={t('notify_busi_group')} {...field} name={[field.name, 'is_busi_notify']} initialValue={false}>
+          <Radio.Group>
+            <Radio value={true}>{t('是')}</Radio>
+            <Radio value={false}>{t('否')}</Radio>
+          </Radio.Group>
         </Form.Item>
-        {/* <Form.Item label={t('notify_groups')} name='notify_groups'> */}
-        <Form.Item label={t('notify_groups')} {...field} name={[field.name, 'notify_groups']}>
-          <Select mode='multiple' showSearch optionFilterProp='children'>
-            {_.map(notifyGroups, (item) => {
-              // id to string 兼容 v5
-              return (
-                <Select.Option value={_.toString(item.id)} key={item.id}>
-                  {item.name}
-                </Select.Option>
-              );
-            })}
-          </Select>
+
+        <Form.Item shouldUpdate noStyle>
+          {({ getFieldValue }) => {
+            const isBusiNotify = getFieldValue(['strategies', field?.name, 'is_busi_notify']);
+            const disableNotifyGroups = isBusiNotify === true;
+            return (
+              <>
+                <Form.Item label={t('notify_channels')} {...field} name={[field.name, 'notify_channels']}>
+                  <Checkbox.Group disabled={disabled || disableNotifyGroups}>
+                    {contactList.map((item) => {
+                      return (
+                        <Checkbox value={item.key} key={item.label}>
+                          {item.label}
+                        </Checkbox>
+                      );
+                    })}
+                  </Checkbox.Group>
+                </Form.Item>
+                {/* <Form.Item label={t('notify_groups')} name='notify_groups'> */}
+                <Form.Item label={t('notify_groups')} {...field} name={[field.name, 'notify_groups']}>
+                  <Select mode='multiple' showSearch optionFilterProp='children' disabled={disabled || disableNotifyGroups}>
+                    {_.map(notifyGroups, (item) => {
+                      // id to string 兼容 v5
+                      return (
+                        <Select.Option value={_.toString(item.id)} key={item.id}>
+                          {item.name}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>
+                </Form.Item>
+              </>
+            );
+          }}
         </Form.Item>
         <Form.Item label={t('notify_recovered')}>
           <Space>

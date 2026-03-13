@@ -16,11 +16,12 @@
  */
 import React, { useEffect, useState, useImperativeHandle, ReactNode, useCallback } from 'react';
 import { Form, Input, Select, Switch, Tag, Space, Button } from 'antd';
-import { MinusCircleOutlined, PlusOutlined, CaretDownOutlined } from '@ant-design/icons';
-import { getBusinessTeamInfo, getTeamInfoList } from '@/services/manage';
-import { TeamProps, Team, ActionType } from '@/store/manageInterface';
+import { MinusCircleOutlined, PlusOutlined, CaretDownOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { getBusinessTeamInfo, getTeamInfoList, getNotifyChannels } from '@/services/manage';
+import { TeamProps, Team, ActionType, ContactsItem, Contacts } from '@/store/manageInterface';
 import { useTranslation, Trans } from 'react-i18next';
 import { debounce } from 'lodash';
+import _ from 'lodash';
 
 const { Option } = Select;
 const TeamForm = React.forwardRef<ReactNode, TeamProps>((props, ref) => {
@@ -28,19 +29,27 @@ const TeamForm = React.forwardRef<ReactNode, TeamProps>((props, ref) => {
   const { businessId, action } = props;
   const [form] = Form.useForm();
   const [userTeam, setUserTeam] = useState<Team[]>([]);
+  const [contactsList, setContactsList] = useState<ContactsItem[]>([]);
   const [initialValues, setInitialValues] = useState({
     label_enable: true,
     label_value: '',
     members: [{ perm_flag: true }],
     name: '',
+    robot_token: [] as any,
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [refresh, setRefresh] = useState(true);
   useImperativeHandle(ref, () => ({
     form: form,
   }));
+  const getContacts = () => {
+    getNotifyChannels().then((data: Array<ContactsItem>) => {
+      setContactsList(data);
+    });
+  };
 
   useEffect(() => {
+    getContacts()
     if (businessId && action === ActionType.EditBusiness) {
       getTeamInfoDetail(businessId);
     } else {
@@ -49,7 +58,18 @@ const TeamForm = React.forwardRef<ReactNode, TeamProps>((props, ref) => {
   }, []);
 
   const getTeamInfoDetail = (id: string) => {
-    getBusinessTeamInfo(id).then((data: { name: string; label_enable: number; label_value: string; user_groups: { perm_flag: string; user_group: { id: number } }[] }) => {
+    getBusinessTeamInfo(id).then((data: { name: string; label_enable: number; label_value: string; user_groups: { perm_flag: string; user_group: { id: number } }[]; robot_token: any }) => {
+      let contacts: Array<Contacts> = [];
+      if (data.robot_token) {
+        const robot = JSON.parse(data.robot_token);
+        Object.keys(robot).forEach((item: string) => {
+          let val: Contacts = {
+            key: item,
+            value: robot[item],
+          };
+          contacts.push(val);
+        });
+      }
       setInitialValues({
         name: data.name,
         label_enable: data.label_enable === 1,
@@ -58,6 +78,7 @@ const TeamForm = React.forwardRef<ReactNode, TeamProps>((props, ref) => {
           perm_flag: item.perm_flag === 'rw',
           user_group_id: item.user_group?.id,
         })),
+        robot_token: contacts,
       });
       setLoading(false);
     });
@@ -139,6 +160,75 @@ const TeamForm = React.forwardRef<ReactNode, TeamProps>((props, ref) => {
                 )
               );
             }}
+          </Form.Item>
+          <Form.Item
+            label={
+              <Space>
+                {t('account:profile.moreContact')}
+                {/* <Link to='/help/notification-settings?tab=contacts' target='_blank'>
+              {t('account:profile.moreContactLinkToSetting')}
+            </Link> */}
+                <div style={{ color: '#005fb6', cursor: 'pointer' }} onClick={() => { window.open('/help/notification-settings?tab=contacts') }}>
+                  {t('account:profile.moreContactLinkToSetting')}
+                </div>
+              </Space>
+            }
+            labelCol={{ span: 7 }}
+          >
+            <Form.List name='robot_token'>
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, fieldKey, ...restField }) => (
+                    <Space
+                      key={key}
+                      style={{
+                        display: 'flex',
+                      }}
+                      align='baseline'
+                    >
+                      <Form.Item
+                        style={{
+                          width: '170px',
+                        }}
+                        {...restField}
+                        name={[name, 'key']}
+                        rules={[
+                          {
+                            required: true,
+                            message: '是必选/必填项',
+                          },
+                        ]}
+                      >
+                        <Select suffixIcon={<CaretDownOutlined />} placeholder={t('account:profile.moreContactPlaceholder')}>
+                          {_.map(contactsList, (item, index) => (
+                            <Option value={item.key} key={index}>
+                              {item.label}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        style={{
+                          width: '170px',
+                        }}
+                        name={[name, 'value']}
+                        rules={[
+                          {
+                            required: true,
+                            message: '是必选/必填项',
+                          },
+                        ]}
+                      >
+                        <Input />
+                      </Form.Item>
+                      <MinusCircleOutlined className='control-icon-normal' onClick={() => remove(name)} />
+                    </Space>
+                  ))}
+                  <PlusCircleOutlined style={{ padding: '0 5px' }} className='control-icon-normal' onClick={() => add()} />
+                </>
+              )}
+            </Form.List>
           </Form.Item>
         </>
       )}
