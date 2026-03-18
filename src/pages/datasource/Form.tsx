@@ -8,6 +8,7 @@ import BreadCrumb from '@/components/BreadCrumb';
 import { getDataSourceDetailById, submitRequest } from './services';
 import Form from './Datasources/Form';
 import './index.less';
+import { aesDecrypt, CIPHER_PREFIX } from '@/utils/aes';
 
 export default function FormCpt() {
   const { t } = useTranslation('datasourceManage');
@@ -17,6 +18,7 @@ export default function FormCpt() {
   const id = action === 'edit' ? params.id : undefined;
   const [type, setType] = useState(action === 'add' ? params.type : '');
   const [data, setData] = useState<any>();
+  const [formRenderKey, setFormRenderKey] = useState(0);
   const [submitLoading, setSubmitLoading] = useState(false);
   const onFinish = async (values: any) => {
     setSubmitLoading(true);
@@ -67,13 +69,23 @@ export default function FormCpt() {
   };
 
   useEffect(() => {
+    let cancelled = false;
     if (action === 'edit' && id !== undefined) {
       getDataSourceDetailById(id).then((res: any) => {
         _.set(res, 'http.headers', _.map(res?.http?.headers, (value, key) => ({ key, value })) || []);
+        const pwd = _.get(res, ['auth', 'basic_auth_password']);
+        if (_.isString(pwd) && pwd && pwd.startsWith(CIPHER_PREFIX)) {
+          _.set(res, ['auth', 'basic_auth_password'], aesDecrypt(pwd));
+        }
+        if (cancelled) return;
         setData(res);
         setType(res.plugin_type);
+        setFormRenderKey((k) => k + 1);
       });
     }
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -100,6 +112,7 @@ export default function FormCpt() {
           <Spin spinning={true} />
         ) : (
           <Form
+            key={formRenderKey}
             data={data}
             onFinish={(values, clusterInstance) => {
               if (

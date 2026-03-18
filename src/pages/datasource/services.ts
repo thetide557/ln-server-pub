@@ -1,6 +1,7 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import _ from 'lodash';
+import { aesEncrypt, CIPHER_PREFIX } from '@/utils/aes';
 
 interface IItem {
   id: number;
@@ -36,12 +37,18 @@ export const getDataSourceDetailById = (id: string | number) => {
 
 export const submitRequest = (body) => {
   let url = `${apiPrefix}/upsert`;
-  if (import.meta.env['VITE_IS_PRO']) {
+  const env = (import.meta as any)?.env;
+  if (env?.['VITE_IS_PRO']) {
     url = ' /api/n9e-plus/datasource/upsert';
+  }
+  const nextBody = _.cloneDeep(body);
+  const pwd = _.get(nextBody, ['auth', 'basic_auth_password']);
+  if (_.isString(pwd) && pwd && !pwd.startsWith(CIPHER_PREFIX)) {
+    _.set(nextBody, ['auth', 'basic_auth_password'], aesEncrypt(pwd));
   }
   return request(url, {
     method: RequestMethod.Post,
-    data: body,
+    data: nextBody,
   }).then((res) => res.data);
 };
 

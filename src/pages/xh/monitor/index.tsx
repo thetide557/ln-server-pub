@@ -27,7 +27,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import { getAssetstypes, getAssetstypesByParams, getAssetsByCondition, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor, getAssetstypesNew, delXhAssetstypesNew, getMonitortree } from '@/services/assets';
+import { getAssetstypes, getAssetstypesByParams, getAssetsByCondition, getAssetsByMonitor, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor, getAssetstypesNew, delXhAssetstypesNew, getMonitortree } from '@/services/assets';
 import { getMonitorInfoList, deleteXhMonitor, deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
@@ -692,8 +692,8 @@ export default function () {
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
     getAssetstypes().then(({ dat }) => {
       const types = dat.map(item => item.name).toString()
-      getAssetsByCondition({ limit: -1, types }).then(({ dat }) => {
-        dat.list.forEach((v) => {
+      getAssetsByMonitor({ limit: -1, types }).then(({ dat }) => {
+        dat.forEach((v) => {
           assetInfo[v.id] = v;
         });
         setAssetInfo({ ...assetInfo });
