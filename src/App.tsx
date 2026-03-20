@@ -42,7 +42,7 @@ import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import { useLocalStorage } from 'react-use';
-import { getAlertEventsById, getHistoryEventsById, getWarningChart, setAlartMutes, updataprocess } from '@/pages/sxxc/screenView/alarmApi';
+import { getAlertEventsById } from '@/services/warning';
 import AiRobotSse from '@/pages/sxxc/aiRobot/sse';
 import WarnModal from '@/pages/sxxc/warnModal';
 
@@ -196,8 +196,13 @@ function App() {
     // console.log('点击了', location.pathname);
 
     if (window.location.pathname != '/screenView') {
-      window.location.href = '/alert-cur-events/' + alertId;
       setWarnModalShow(false)
+      getAlertEventsById(alertId)
+        .then((res) => {
+          window.location.href = '/alert-cur-events/' + alertId;
+        }).catch(_ => {
+          setDialogShow('0')
+        })
     } else {
       setTimeout(() => {
         setDialogShow('0')
@@ -379,7 +384,7 @@ function App() {
           </span>
         </div>
         <div className='alert_content'>
-          <div className='level'>{alertLevel}</div>
+          <div className='level'>{alertLevel == 1 ? '紧急' : alertLevel == 2 ? '重要' : alertLevel == 3 ? '一般' : ''}</div>
           <div
             className='detail'
             onClick={handleClick}

@@ -27,7 +27,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import { getAssetstypes, getAssetstypesByParams, getAssetsByCondition, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor, getAssetstypesNew, delXhAssetstypesNew, getMonitortree } from '@/services/assets';
+import { getAssetstypes, getAssetstypesByParams, getAssetsByCondition, getAssetsByMonitor, getAssetDirectoryTree, getXhAsset, getMonitorAssetstypes, getAssetsMonitor, getAssetstypesNew, delXhAssetstypesNew, getMonitortree } from '@/services/assets';
 import { getMonitorInfoList, deleteXhMonitor, deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
@@ -87,11 +87,16 @@ export default function () {
   const { search } = useLocation();
   const { assetId } = queryString.parse(search);
   const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
+  // 若从其它页面跳转过来未携带 assetId：首次请求列表时不应该带上本地缓存的 typeId（assetType）
+  const skipTypeIdOnFirstFetchRef = useRef<boolean>(assetId == null);
 
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
   const [collapse, setCollapse] = useState(localStorage.getItem('left_monitor_list') === '1');
   const [width, setWidth] = useLocalStorage<any>('left_monitor_width', 200);
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
+  // 树展开状态提升到页面级：仅页面刷新或重新进入路由时展开第一层，其余保持最新状态
+  const [assetTreeExpandedIds, setAssetTreeExpandedIds] = useState<Set<number | string>>(() => new Set());
+  const assetTreeInitialExpandDone = useRef(false);
   const [typeId, setTypeId] = useLocalStorage<any>('monitors_type_id', 0);
   const [filterParam, setFilterParam] = useLocalStorage<any>('monitors_filter_param', 'ip');
   const [filterParam2, setFilterParam2] = useLocalStorage<any>('monitors_filter_param2', 'asset_ip');
@@ -459,23 +464,8 @@ export default function () {
       setTreeList(processDat)
     })
   }
-  // 资产组织树
-  const AssetTree = ({ data }) => {
-    //  展开的节点列表
-    const [expandedIds, setExpandedIds] = useState(() => {
-      try {
-        const saved = localStorage.getItem("expandedIds");
-        return new Set(JSON.parse(saved || "[]"));
-      } catch {
-        return new Set();
-      }
-    });
-
-
-    useEffect(() => {
-      localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
-    }, [expandedIds]);
-
+  // 资产组织树：展开状态由页面传入，仅页面刷新或重新进入路由时展开第一层，点击树/新增分组等保持最新状态
+  const AssetTree = ({ data, expandedIds, setExpandedIds }) => {
     const handleToggle = (nodeId) => {
       setExpandedIds((prev) => {
         const newSet = new Set(prev);
@@ -702,8 +692,8 @@ export default function () {
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
     getAssetstypes().then(({ dat }) => {
       const types = dat.map(item => item.name).toString()
-      getAssetsByCondition({ limit: -1, types }).then(({ dat }) => {
-        dat.list.forEach((v) => {
+      getAssetsByMonitor({ limit: -1, types }).then(({ dat }) => {
+        dat.forEach((v) => {
           assetInfo[v.id] = v;
         });
         setAssetInfo({ ...assetInfo });
@@ -756,6 +746,27 @@ export default function () {
     getAssetTree()
   }, [searchVal]);
 
+  // 首次挂载且树数据到位时：
+  // - 没有 currentAssetId（正常从菜单进来）：默认展开第一层
+  // - 有 currentAssetId（外部带 assetId 进来）：从 localStorage.expandedIds 恢复展开状态
+  useEffect(() => {
+    if (!treeList?.length || assetTreeInitialExpandDone.current) return;
+    assetTreeInitialExpandDone.current = true;
+    if (currentAssetId && currentAssetId > 0) {
+      try {
+        const saved = localStorage.getItem('expandedIds');
+        if (saved) {
+          const arr = JSON.parse(saved || '[]');
+          setAssetTreeExpandedIds(new Set(arr));
+          return;
+        }
+      } catch (e) {
+        // ignore parse error and fall back to 默认展开第一层
+      }
+    }
+    setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
+  }, [treeList, currentAssetId]);
+
   const getTableData = (assets, units) => {
     // 1. 生成当前请求的唯一ID（组件内独立递增）
     const requestId = ++requestIdCounter.current;
@@ -783,7 +794,9 @@ export default function () {
 
 
     const parentId = localStorage.getItem('left_parId')
-    if (currentAssetId <= 0 && typeId != null && typeId + '' != '0' && parentId) {
+    // 未带 assetId 首次进入页面时：不带 assetType（TypeId）做首次查询，避免“进来就被历史 typeId 过滤”
+    const shouldSkipAssetTypeThisFetch = skipTypeIdOnFirstFetchRef.current && currentAssetId <= 0;
+    if (!shouldSkipAssetTypeThisFetch && currentAssetId <= 0 && typeId != null && typeId + '' != '0' && parentId) {
       param['assetType'] = typeId;
     }
     if (tissueId != null && !parentId) {
@@ -809,6 +822,9 @@ export default function () {
       }
     }
 
+
+    // 只跳过第一次
+    if (skipTypeIdOnFirstFetchRef.current) skipTypeIdOnFirstFetchRef.current = false;
 
     getMonitorInfoList(param).then(({ dat }) => {
       dat.list.forEach((entity) => {
@@ -960,7 +976,7 @@ export default function () {
               </div>
               <div className='tree-list'>
                 {expandedKeys && treeList && (
-                  <AssetTree data={treeList} />
+                  <AssetTree data={treeList} expandedIds={assetTreeExpandedIds} setExpandedIds={setAssetTreeExpandedIds} />
                   // <Tree
                   //   showLine={true}
                   //   showIcon={true}

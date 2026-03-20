@@ -480,15 +480,14 @@ export default function List(props: IProps) {
           />
           <Input
             className='search-input'
+            allowClear
             prefix={<SearchOutlined />}
             placeholder={t('search_placeholder')}
             value={searchVal}
-            onChange={(e) => setSearchVal(e.target.value)}
-            onPressEnter={() => {
-              setTableQueryContent(searchVal);
-            }}
-            onBlur={() => {
-              setTableQueryContent(searchVal);
+            onChange={(e) => {
+              setSearchVal(e.target.value)
+              setTableQueryContent(e.target.value);
+              run({ current: 1, pageSize: tableProps.pagination.pageSize });
             }}
           />
           <Select

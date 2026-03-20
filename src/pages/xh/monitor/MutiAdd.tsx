@@ -8,7 +8,7 @@ import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetstypes, updateAsset, getAssetsByCondition } from '@/services/assets';
 import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from '../monitor/Form/PromBox';
-import { factories, unitTypes } from '../assetmgt/catalog';
+import { unitTypes } from '../assetmgt/catalog';
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 import PageLayout from '@/components/pageLayout';

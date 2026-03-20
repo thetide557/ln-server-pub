@@ -34,11 +34,12 @@ import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
 import { batchShelfXhAssets, deleteXhAssets, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { getDictDataListByType } from '@/services/system/dict';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { factories, serviceHierarchyOptions, deviceFormOptions } from './catalog';
+import { serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
 
@@ -126,8 +127,14 @@ export default function () {
   const [level, setLevel] = useState<number | undefined>(undefined);  // 资产组织树新增分组层级
   const [parentId, setParentId] = useState(null);  // 资产组织树新增分组父级id
   const [isAllAssets, setIsAllAssets] = useLocalStorage('left_asset_isallassets', false); // 资产组织树点击的是否是全部资产下的节点
+  // 树展开状态提升到页面级：仅页面刷新或重新进入路由时展开第一层，其余保持最新状态
+  const [assetTreeExpandedIds, setAssetTreeExpandedIds] = useState<Set<number | string>>(() => new Set());
+  const assetTreeInitialExpandDone = useRef(false);
+  // 首次进入路由/刷新页面时，避免重复请求
+  const skipNextGetTableDataRef = useRef(false);
   // 用useRef保存递增计数器（每个组件实例独立，不共享）
   const requestIdCounter = useRef(0);
+  const [manufacturerOptions, setManufacturerOptions] = useState<{ value: string; label: string }[]>([]);
 
   const maintenanceStatusOption = [
     {
@@ -154,12 +161,7 @@ export default function () {
         label: group.name,
       };
     }),
-    manufacturers: factories.map((factory) => {
-      return {
-        value: _.toString(factory.value),
-        label: factory.value,
-      };
-    }),
+    manufacturers: manufacturerOptions,
     maintenanceStatus: maintenanceStatusOption.map((factory) => {
       return {
         value: _.toString(factory.value),
@@ -707,6 +709,33 @@ export default function () {
   }
 
   useEffect(() => {
+    getDictDataListByType('manufacturer')
+      .then((res) => {
+        const seen = new Set<string>();
+        const options = _.reduce(
+          res.dat || [],
+          (result: { value: string; label: string }[], item: any) => {
+            const value = _.trim(_.toString(item?.dict_value));
+            if (!value || seen.has(value)) {
+              return result;
+            }
+            seen.add(value);
+            result.push({
+              value,
+              label: value,
+            });
+            return result;
+          },
+          [],
+        );
+        setManufacturerOptions(options);
+      })
+      .catch(() => {
+        message.error('厂商字典加载失败');
+      });
+  }, []);
+
+  useEffect(() => {
     //来源数据字典
     getAssetstypesByParams(treeQuery).then((res) => {
       let arr = ['0'];
@@ -735,13 +764,33 @@ export default function () {
     });
   }, []);
 
+  // 首次进入路由或刷新页面：展开第一层，默认选中全部资产并高亮，表格请求全部资产数据
   useEffect(() => {
-    getTableData();
-  }, [typeId, refreshKey, tissueId, treeList]);
+    if (!treeList?.length || assetTreeInitialExpandDone.current) return;
+    assetTreeInitialExpandDone.current = true;
+    skipNextGetTableDataRef.current = true;
+    setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
+    localStorage.setItem('left_asset_type', '-1');
+    localStorage.removeItem('left_parId');
+    setTissueId(-1);
+    setParId(undefined);
+    setTypeId(undefined);
+    setIsAllAssets(true);
+    setRefreshKey(_.uniqueId('refreshKey_'));
+  }, [treeList]);
 
   useEffect(() => {
     getAssetTree()
   }, [searchVal]);
+
+  useEffect(() => {
+    if (!treeList?.length) return; // 未加载组织树前不请求表格，避免多余请求
+    if (skipNextGetTableDataRef.current) {
+      skipNextGetTableDataRef.current = false;
+      return;
+    }
+    getTableData();
+  }, [typeId, refreshKey, tissueId, treeList, isAllAssets]);
 
   useInterval(() => {
     setRefreshKey(_.uniqueId('refreshKey_'));
@@ -1250,22 +1299,11 @@ export default function () {
       </div>
     );
   };
-  // 资产组织树
-  const AssetTree = ({ data }) => {
-    //  展开的节点列表
-    const [expandedIds, setExpandedIds] = useState(() => {
-      try {
-        const saved = localStorage.getItem("expandedIds");
-        return new Set(JSON.parse(saved || "[]"));
-      } catch {
-        return new Set();
-      }
-    });
-
+  // 资产组织树：展开状态由页面传入，仅页面刷新或重新进入路由时展开第一层，点击树/新增分组等保持最新状态
+  const AssetTree = ({ data, expandedIds, setExpandedIds }) => {
     useEffect(() => {
       localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
     }, [expandedIds]);
-
     const handleToggle = (nodeId) => {
       setExpandedIds((prev) => {
         const newSet = new Set(prev);
@@ -1338,7 +1376,7 @@ export default function () {
                 }
               </div>
               <div className='tree-list'>
-                <AssetTree data={treeList} />
+                <AssetTree data={treeList} expandedIds={assetTreeExpandedIds} setExpandedIds={setAssetTreeExpandedIds} />
                 {/* {
                   _.map(treeList, (item) => {
                     return (

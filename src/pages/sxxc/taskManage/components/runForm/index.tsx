@@ -50,68 +50,86 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
     projectCodes: projectCodes
   }));
 
+  // 配置 Table 的 rowSelection
+  const rowSelection = {
+    // 选择列宽度
+    columnWidth: 80,
+    onChange: (selectedRowKeys: any[], selectedRows: Serve[]) => {
+      // 更新选中的 IP 列表
+      const newServeList = selectedRows.map(row => row.ip);
+      setServeList(newServeList);
+      
+      // 更新对应的 projectCodes 和 projectNameList
+      const newProjectCodes = selectedRows.map(row => row.groupId);
+      const newProjectNameList = selectedRows.map(row => row.groupName);
+      
+      setProjectCodes(newProjectCodes);
+      setProjectNameList(newProjectNameList);
+    }
+  };
+
   const taskColumn: ColumnsType<Serve> = [
-    {
-      title: '选择',
-      render: (text: string, record) => (
-        <>
-          <Switch onChange={(val)=>{
-            console.log(record);
+    // {
+    //   title: '选择',
+    //   render: (text: string, record) => (
+    //     <>
+    //       <Switch onChange={(val)=>{
+    //         console.log(record);
             
-            // console.log(record.ident)
-            if(val){
-              // serveList.push(record.ident)
-              serveList.push(record.ip)
-              setServeList(serveList)
+    //         // console.log(record.ident)
+    //         if(val){
+    //           // serveList.push(record.ident)
+    //           serveList.push(record.ip)
+    //           setServeList(serveList)
 
-              projectNameList.push(record.groupName)
-              setProjectNameList(projectNameList)
+    //           projectNameList.push(record.groupName)
+    //           setProjectNameList(projectNameList)
 
-              projectCodes.push(record.groupId)
-              setProjectCodes(projectCodes)
-            }else{
-              // console.log(111, record);
+    //           projectCodes.push(record.groupId)
+    //           setProjectCodes(projectCodes)
+    //         }else{
+    //           // console.log(111, record);
               
-              // for(let i = 0;i<serveList.length;i++){
-              //   if(serveList[i] == record.ident){
-              //     serveList.splice(i,1)
-              //     return
-              //   }
-              // }
-              // console.log(serveList)
-              // setServeList(serveList)
-              for(let i = 0;i<serveList.length;i++){
-                if(serveList[i] == record.ip){
-                  serveList.splice(i,1)
-                  break
-                }
-              }
-              setServeList(serveList)
+    //           // for(let i = 0;i<serveList.length;i++){
+    //           //   if(serveList[i] == record.ident){
+    //           //     serveList.splice(i,1)
+    //           //     return
+    //           //   }
+    //           // }
+    //           // console.log(serveList)
+    //           // setServeList(serveList)
+    //           for(let i = 0;i<serveList.length;i++){
+    //             if(serveList[i] == record.ip){
+    //               serveList.splice(i,1)
+    //               break
+    //             }
+    //           }
+    //           setServeList(serveList)
               
-              for(let i = 0;i<projectCodes.length;i++){
-                if(projectCodes[i] == record.groupId){
-                  projectCodes.splice(i,1)
-                  break
-                }
-              }
-              // console.log('gg', projectCodes);
+    //           for(let i = 0;i<projectCodes.length;i++){
+    //             if(projectCodes[i] == record.groupId){
+    //               projectCodes.splice(i,1)
+    //               break
+    //             }
+    //           }
+    //           // console.log('gg', projectCodes);
             
-              setProjectCodes(projectCodes)
+    //           setProjectCodes(projectCodes)
 
 
-              for(let i = 0;i<projectNameList.length;i++){
-                if(projectNameList[i] == record.groupName){
-                  projectNameList.splice(i,1)
-                  break
-                }
-              }
-              setProjectNameList(projectNameList)
-            }
-          }}
-          ></Switch>
-        </>
-      )
-    },
+    //           for(let i = 0;i<projectNameList.length;i++){
+    //             if(projectNameList[i] == record.groupName){
+    //               projectNameList.splice(i,1)
+    //               break
+    //             }
+    //           }
+    //           setProjectNameList(projectNameList)
+    //         }
+    //       }}
+    //       ></Switch>
+    //     </>
+    //   )
+    // },
     {
       title: '序号',
       render:(text,record,index)=>`${index+1}`,
@@ -254,6 +272,7 @@ const TaskForm = React.forwardRef<ReactNode, TaskAndPasswordFormProps>((props, r
         size='small'
         rowKey='id'
         columns={taskColumn}
+        rowSelection={rowSelection}
         {...tableProps}
         pagination={{
           ...tableProps.pagination,
