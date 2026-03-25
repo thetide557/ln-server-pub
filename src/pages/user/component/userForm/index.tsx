@@ -210,10 +210,10 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       <Row>
         <Col span={12} key={"item-" + 7}>
           <Form.Item label={t('account:profile.phone')} name='phone' rules={[
-              {
-                required: true,
-              },
-            ]}>
+            {
+              required: true,
+            },
+          ]}>
             <Input />
           </Form.Item>
         </Col>
@@ -221,10 +221,10 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           !userId && (
             <Col span={12} key={"item-" + 8}>
               <Form.Item label={'所属团队'} name='group_id' rules={[
-                  {
-                    required: true,
-                  },
-                ]}>
+                {
+                  required: true,
+                },
+              ]}>
                 <Select mode='multiple' options={treeData}>
 
                 </Select>
@@ -233,6 +233,20 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             </Col>
           )
         }
+        <Col span={12} key={"item-" + 10}>
+          <Form.Item label={'单一会话'} name='single_session' initialValue={0} rules={[
+            {
+              required: true,
+            },
+          ]}>
+            <Select options={[
+              { label: '关闭', value: 0 },
+              { label: '启用', value: 1 },
+              { label: '禁用', value: 2 },
+            ]}>
+            </Select>
+          </Form.Item>
+        </Col>
         {/* <Col span={12} key={"item-" + 8}>
           <Form.Item label={'所属团队'} name='group_id' rules={[
               {
@@ -259,13 +273,13 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             {/* <Link to='/help/notification-settings?tab=contacts' target='_blank'>
               {t('account:profile.moreContactLinkToSetting')}
             </Link> */}
-            <div style={{color: '#005fb6', cursor: 'pointer'}} onClick={() => {window.open('/help/notification-settings?tab=contacts')}}>
+            <div style={{ color: '#005fb6', cursor: 'pointer' }} onClick={() => { window.open('/help/notification-settings?tab=contacts') }}>
               {t('account:profile.moreContactLinkToSetting')}
             </div>
           </Space>
         }
-        labelCol={{span: 7 }}
-       >
+        labelCol={{ span: 7 }}
+      >
         <Form.List name='contacts'>
           {(fields, { add, remove }) => (
             <>
@@ -316,7 +330,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
                   <MinusCircleOutlined className='control-icon-normal' onClick={() => remove(name)} />
                 </Space>
               ))}
-              <PlusCircleOutlined style={{padding: '0 5px'}} className='control-icon-normal' onClick={() => add()} />
+              <PlusCircleOutlined style={{ padding: '0 5px' }} className='control-icon-normal' onClick={() => add()} />
             </>
           )}
         </Form.List>

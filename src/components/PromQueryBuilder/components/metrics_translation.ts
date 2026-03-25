@@ -1447,11 +1447,11 @@ export const cn_name = {
 	categraf_prometheus_template_text_expansions_total : "Prometheus模板文本扩展总数",
 	categraf_prometheus_treecache_watcher_goroutines : "Prometheus树缓存监视器goroutines数",
 	categraf_prometheus_treecache_zookeeper_failures_total : "Prometheus树缓存ZooKeeper失败总数",
-	n9e_alert_alert_queue_size : "N9e警报队列大小",
-	n9e_alert_alerts_total : "N9e警报总数",
-	n9e_cron_duration : "N9e Cron任务持续时间",
-	n9e_cron_sync_number : "N9e Cron同步次数",
-	n9e_pushgw_samples_received_total : "N9e Push Gateway接收样本总数"
+	ln_server_alert_alert_queue_size : "ln_server警报队列大小",
+	ln_server_alert_alerts_total : "ln_server警报总数",
+	ln_server_cron_duration : "ln_server Cron任务持续时间",
+	ln_server_cron_sync_number : "ln_server Cron同步次数",
+	ln_server_pushgw_samples_received_total : "ln_server Push Gateway接收样本总数"
 }
 export const en_name = {
   ip_conntrack_count: "连接跟踪表条目总数",
