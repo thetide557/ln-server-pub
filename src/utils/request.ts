@@ -147,7 +147,7 @@ request.interceptors.response.use(
       }
     } else if (status === 401) {
       // 先检查响应体中的err_code是否为LOGIN_CONFLICT
-      response.clone().json().then((data) => {
+      return response.clone().json().then((data) => {
         if (data?.err_code === 'LOGIN_CONFLICT') {
           message.error(data.err || '您已在其他地方登录，请重新登录');
           setTimeout(() => {
@@ -157,7 +157,13 @@ request.interceptors.response.use(
                 : ""
             }`;
           }, 1000);
-          return;
+          throw {
+            name: processError(data),
+            message: processError(data),
+            silence: options.silence,
+            data,
+            response,
+          };
         }
         
         if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
@@ -192,7 +198,12 @@ request.interceptors.response.use(
                   : ""
               }`);
         }
-      }).catch(() => {
+      }).catch((e) => {
+        // 只要是在 LOGIN_CONFLICT 分支里 throw 的对象，就继续向上抛出
+        // 避免 catch 吃掉导致调用方 then 仍继续执行
+        if (e && e.message) {
+          throw e;
+        }
         // 如果解析响应体失败，执行默认的401处理逻辑
         if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
           location.href = `/login${
