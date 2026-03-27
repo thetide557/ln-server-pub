@@ -297,10 +297,10 @@ export default function ScreenView() {
           urls.length > 0 ? <Carousel ref={carouselRef} dots={false} autoplay style={{'width': '100%'}} autoplaySpeed={carousel_interval}>
           {
             _.map(urls,(item,index)=> {
-              return <iframe  className='logFrame' key={index} src={item.screenUrl} sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
+              return <iframe  className='logFrame' key={index} src={item.screenUrl} sandbox="allow-top-navigation allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
             })
           }
-        </Carousel> : <iframe id="logFrame" src={url} sandbox="allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
+        </Carousel> : <iframe id="logFrame" src={url} sandbox="allow-top-navigation allow-forms allow-popups allow-same-origin allow-scripts"></iframe>
         }
       </div>
     </div>
