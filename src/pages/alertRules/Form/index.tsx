@@ -35,6 +35,7 @@ import { defaultValues } from './constants';
 import { useSearchParam } from 'react-use';
 import { buildPromVisualQueryFromPromQL, renderQuery } from '@/components/PromQueryBuilder';
 import { PromVisualQueryLabelFilter } from '@/components/PromQueryBuilder/types';
+import HelpLabel from './components/HelpLabel';
 
 interface IProps {
   type?: number; // 空: 新增 1:编辑 2:克隆 3:查看
@@ -164,6 +165,7 @@ export default function index(props: IProps) {
 
   // 1. 策略名称
   const [tempStrategyName, setTempStrategyName] = useState("");
+  const strategyHelpDescription = '同一告警规则名称可设置多个不同时段的告警策略，并选择单个或多个策略有效。';
 
   // 打开弹窗时，设置策略名称值
   const onEditStrategyName = (index) => {
@@ -253,13 +255,16 @@ export default function index(props: IProps) {
                                 key={`container-${field.key}`}
                               >
                                 <div className="strategy-tab-content">
-                                  <span className="strategy-name">
-                                    {form.getFieldValue([
+                                  <HelpLabel
+                                    className="strategy-name"
+                                    label={form.getFieldValue([
                                       "strategies",
                                       field.name,
                                       "strategy_name",
                                     ])}
-                                  </span>
+                                    field={'策略'}
+                                    description={strategyHelpDescription}
+                                  />
                                   {!disabled && (
                                     <Dropdown
                                       overlay={

@@ -22,11 +22,14 @@ import { Card, Form, Checkbox, Switch, Space, Select, Tooltip, Row, Col, InputNu
 import { PlusCircleOutlined, MinusCircleOutlined, QuestionCircleFilled } from '@ant-design/icons';
 import { getTeamInfoList, getNotifiesList } from '@/services/manage';
 import { panelBaseProps } from '../../constants';
+import HelpLabel from '../components/HelpLabel';
 // @ts-ignore
 import NotifyExtra from 'plus:/parcels/AlertRule/NotifyExtra';
 
 export default function index({ disabled ,field}) {
   const { t } = useTranslation('alertRules');
+  const callbacksHelpDescription = '告警发生时，平台自动请求该 URL 地址，用于将告警信息推送至第三方系统/模块。';
+  const annotationsHelpDescription = '告警或回调发生时，告警详情里显示配置的附加链接或备注，用于补充说明或提供快捷处理入口。';
   const [contactList, setContactList] = useState<{ key: string; label: string }[]>([]);
   const [notifyGroups, setNotifyGroups] = useState<any[]>([]);
   const getNotifyChannel = () => {
@@ -133,7 +136,7 @@ export default function index({ disabled ,field}) {
           {(fields, { add, remove }) => (
             <div>
               <Space align='baseline'>
-                {t('callbacks')}
+                <HelpLabel label={t('callbacks')} field={t('callbacks')} description={callbacksHelpDescription} />
                 <PlusCircleOutlined className='control-icon-normal' onClick={() => add()} />
               </Space>
               {fields.map((field) => (
@@ -157,7 +160,7 @@ export default function index({ disabled ,field}) {
           {(fields, { add, remove }) => (
             <div>
               <Space align='baseline'>
-                {t('annotations')}
+                <HelpLabel label={t('annotations')} field={t('annotations')} description={annotationsHelpDescription} />
                 <PlusCircleOutlined className='control-icon-normal' onClick={() => add()} />
               </Space>
               {fields.map((field) => (
