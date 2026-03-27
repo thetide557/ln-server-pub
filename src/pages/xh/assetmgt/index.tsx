@@ -18,6 +18,7 @@ import {
   FundOutlined,
   GroupOutlined,
   LeftOutlined,
+  QuestionCircleOutlined,
   RightOutlined,
   SearchOutlined,
   SyncOutlined,
@@ -189,7 +190,27 @@ export default function () {
   };
 
 
-  const baseColumns: any[] = [
+  const renderHeaderHelpContent = (field: string, description: string) => (
+    <div className='asset-header-help-tooltip'>
+      <div className='asset-header-help-tooltip-field'>{field}</div>
+      <div className='asset-header-help-tooltip-description'>{description}</div>
+    </div>
+  );
+
+  const renderHeaderHelpTitle = (label: string, field: string, description: string) => (
+    <span className='asset-header-help-title'>
+      <span>{label}</span>
+      <Tooltip title={renderHeaderHelpContent(field, description)} overlayClassName='asset-header-help-overlay' placement='top'>
+        <span className='asset-header-help-icon' onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+          <QuestionCircleOutlined />
+        </span>
+      </Tooltip>
+    </span>
+  );
+
+  const getColumnLabel = (column: any) => column.columnLabel || (typeof column.title === 'string' ? column.title : '');
+
+  const rawBaseColumns: any[] = [
     {
       title: '资产名称',
       dataIndex: 'name',
@@ -462,6 +483,28 @@ export default function () {
     },
   ];
 
+  const headerHelpByBaseColumnIndex: Record<number, { field: string; description: string }> = {
+    6: { field: '资产状态', description: '反映资产是否在线的状态。' },
+    7: { field: '运行状态', description: '反映部署在资产上的探针、Agent或数据采集服务的运行是否正常的状态。' },
+    10: { field: '管理状态', description: '反映资产在平台中是否已上下架的状态（已下架的资产，不纳入监控范围）。' },
+    11: { field: '管理时长', description: '反映资产在平台中的有效管理周期。' },
+  };
+
+  const baseColumns: any[] = rawBaseColumns.map((column, index) => {
+    const help = headerHelpByBaseColumnIndex[index];
+    if (!help) {
+      return column;
+    }
+
+    const label = getColumnLabel(column);
+    return {
+      ...column,
+      columnLabel: label,
+      title: renderHeaderHelpTitle(label, help.field, help.description),
+      showSorterTooltip: false,
+    };
+  });
+
   const fixColumns: any[] = [
     {
       title: '操作',
@@ -538,7 +581,7 @@ export default function () {
 
   // 列处理
   const [groupedColumns, setGroupedColumns] = useState<any>({});
-  const [defaultValues, setDefaultValues] = useLocalStorage<string[]>('ASSET_SELECTED_COLUMNS', Array.from(new Set(baseColumns.map((obj) => obj.title))));
+  const [defaultValues, setDefaultValues] = useLocalStorage<string[]>('ASSET_SELECTED_COLUMNS', Array.from(new Set(baseColumns.map((obj) => getColumnLabel(obj)))));
   const [optionColumns, setOptionColumns] = useState<any[]>(baseColumns); // 可选列
   const [selectColumns, setSelectColumns] = useState<any[]>(baseColumns.concat(fixColumns));
   const { resizableColumns, components, tableWidth } = useAntdResizableHeader({
@@ -552,7 +595,7 @@ export default function () {
   useEffect(() => {
     const { optionalColumns } = getAssetTypeItems(typeId, assetTypes);
     setOptionColumns(optionalColumns);
-    const newSelectedColumns = optionalColumns.filter((v) => defaultValues?.includes(v.title));
+    const newSelectedColumns = optionalColumns.filter((v) => defaultValues?.includes(getColumnLabel(v)));
     setSelectColumns(newSelectedColumns.concat(fixColumns));
   }, [groupedColumns, typeId, assetTypes]);
 
@@ -639,11 +682,11 @@ export default function () {
   function handelShowColumn(checkedValues) {
     let showColumns = new Array();
     optionColumns.map((item, index) => {
-      if (checkedValues.includes(item.title)) {
+      if (checkedValues.includes(getColumnLabel(item))) {
         showColumns.push(item);
       }
     });
-    setDefaultValues(showColumns.map((v) => v.title));
+    setDefaultValues(showColumns.map((v) => getColumnLabel(v)));
     setSelectColumns(showColumns.concat(fixColumns));
   }
 
@@ -921,7 +964,7 @@ export default function () {
         {optionColumns.map((item, index) => (
           <Row key={'option' + index} style={{ marginBottom: '5px' }}>
             <Col span={24}>
-              <Checkbox value={item.title}>{item.title}</Checkbox>
+              <Checkbox value={getColumnLabel(item)}>{getColumnLabel(item)}</Checkbox>
             </Col>
           </Row>
         ))}
