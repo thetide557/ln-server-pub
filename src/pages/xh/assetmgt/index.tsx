@@ -57,6 +57,8 @@ export enum OperateType {
   BindTag = 'bindTag',
   UnbindTag = 'unbindTag',
   AssetBatchImport = 'assetBatchImport',
+  /** 网络设备 OID 模板/导入，弹窗同「导入设备」，接口不同 */
+  AssetOidBatchImport = 'assetOidBatchImport',
   AssetBatchExport = 'assetBatchExport',
   UpdateBusi = 'updateBusi',
   RemoveBusi = 'removeBusi',
@@ -123,7 +125,7 @@ export default function () {
   const [curGroup, setCurGroup] = useState<any>({})
   const [isShow, setIsShow] = useLocalStorage('left_tissueId', Number(-1))
   // const [activeColor, setActiveColor] = useLocalStorage('left_asset_type', Number(-1))
-  const [parId, setParId] = useLocalStorage('left_parId')
+  const [parId, setParId, removeParId] = useLocalStorage('left_parId');
   const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1))
 
   const [level, setLevel] = useState<number | undefined>(undefined);  // 资产组织树新增分组层级
@@ -815,10 +817,9 @@ export default function () {
     skipNextGetTableDataRef.current = true;
     setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
     localStorage.setItem('left_asset_type', '-1');
-    localStorage.removeItem('left_parId');
+    removeParId();
     setTissueId(-1);
-    setParId(undefined);
-    setTypeId(undefined);
+    setTypeId('0');
     setIsAllAssets(true);
     setRefreshKey(_.uniqueId('refreshKey_'));
   }, [treeList]);
@@ -1185,10 +1186,10 @@ export default function () {
       setTypeId(item.id);
       setTissueId(undefined)
     } else {
-      setTissueId(item.id)
-      setTypeId(undefined)
-      localStorage.removeItem('left_parId')
-      setParId(undefined)
+      setTissueId(item.id);
+      // 点父级/全部分组：离开具体资产类型；setTypeId(undefined) 在 react-use 中无效，需用 '0'
+      setTypeId('0');
+      removeParId();
     }
     // console.log(item);
     // setActiveColor(item.id)
@@ -1258,7 +1259,7 @@ export default function () {
                             if (item.id == tissueId) {
                               localStorage.setItem("left_tissueId", "-1");
                               localStorage.setItem("left_asset_type", "-1");
-                              localStorage.removeItem("left_parId");
+                              removeParId();
                               setTissueId(-1);
                               // setActiveColor(-1)
                             }
@@ -1452,7 +1453,7 @@ export default function () {
                                             if (item.id == tissueId) {
                                               localStorage.setItem('left_tissueId', '-1')
                                               localStorage.setItem('left_asset_type', '-1')
-                                              localStorage.removeItem('left_parId')
+                                              removeParId()
                                               setTissueId(-1)
                                               // setActiveColor(-1)
                                             }
@@ -1666,6 +1667,10 @@ export default function () {
                           }}
                           items={[
                             { key: OperateType.AssetBatchImport, label: '导入设备' },
+                            // 仅当选中组织树下某一叶子类型「网络设备」时出现（点了父级/全部资产会清 parId，避免 localStorage 残留 typeId 误判）
+                            ...(typeId === '网络设备' && parId != null && parId !== ''
+                              ? [{ key: OperateType.AssetOidBatchImport, label: '网络设备导入' }]
+                              : []),
                             { key: OperateType.AssetBatchExport, label: '导出设备' },
                             // { key: OperateType.BindTag, label: '绑定标签' },
                             // { key: OperateType.UnbindTag, label: '解绑标签' },
@@ -1726,6 +1731,7 @@ export default function () {
                 names={selectedAssetsName}
                 reloadList={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
+                  getAssetTree();
                 }}
               />
             </div>
