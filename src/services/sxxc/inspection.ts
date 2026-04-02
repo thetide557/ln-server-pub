@@ -70,3 +70,44 @@ export function getInspectionReport(params) {
         params,
     });
 }
+
+
+
+// ===========信创检测相关接口============
+// 获取信创检测列表
+export function getXinchuangComponentInstances(params) {
+    return request(`/api/n9e/xinchuang/component-instances`, {
+        method: RequestMethod.Get,
+        params,
+    });
+}
+// 导出
+export const exportTemplet = function (url, params?: any) {
+  return request(url, {
+    method: RequestMethod.Get,
+    params: params || {},
+    responseType: 'blob',
+  });
+};
+// 获取信创组件清单
+export function getXinchuangComponentItems(params) {
+    return request(`/api/n9e/xinchuang/component-items`, {
+        method: RequestMethod.Get,
+        params,
+    });
+}
+// 批量删除组件清单 
+export function batchDeleteXinchuangComponentItems(data: any) {
+    return request(`/api/n9e/xinchuang/component-items/batch-delete`, {
+        method: RequestMethod.Post,
+        data,
+    });
+}
+
+// 修改清单 
+export function batchSaveXinchuangComponentItems(data: any) {
+    return request(`/api/n9e/xinchuang/component-items/batch-save`, {
+        method: RequestMethod.Post,
+        data,
+    });
+}
