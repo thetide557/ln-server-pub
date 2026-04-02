@@ -18,6 +18,7 @@ import {
   FundOutlined,
   GroupOutlined,
   LeftOutlined,
+  QuestionCircleOutlined,
   RightOutlined,
   SearchOutlined,
   SyncOutlined,
@@ -56,6 +57,8 @@ export enum OperateType {
   BindTag = 'bindTag',
   UnbindTag = 'unbindTag',
   AssetBatchImport = 'assetBatchImport',
+  /** 网络设备 OID 模板/导入，弹窗同「导入设备」，接口不同 */
+  AssetOidBatchImport = 'assetOidBatchImport',
   AssetBatchExport = 'assetBatchExport',
   UpdateBusi = 'updateBusi',
   RemoveBusi = 'removeBusi',
@@ -122,7 +125,7 @@ export default function () {
   const [curGroup, setCurGroup] = useState<any>({})
   const [isShow, setIsShow] = useLocalStorage('left_tissueId', Number(-1))
   // const [activeColor, setActiveColor] = useLocalStorage('left_asset_type', Number(-1))
-  const [parId, setParId] = useLocalStorage('left_parId')
+  const [parId, setParId, removeParId] = useLocalStorage('left_parId');
   const [tissueId, setTissueId] = useLocalStorage('left_tissueId', Number(-1))
 
   const [level, setLevel] = useState<number | undefined>(undefined);  // 资产组织树新增分组层级
@@ -189,7 +192,27 @@ export default function () {
   };
 
 
-  const baseColumns: any[] = [
+  const renderHeaderHelpContent = (field: string, description: string) => (
+    <div className='asset-header-help-tooltip'>
+      <div className='asset-header-help-tooltip-field'>{field}</div>
+      <div className='asset-header-help-tooltip-description'>{description}</div>
+    </div>
+  );
+
+  const renderHeaderHelpTitle = (label: string, field: string, description: string) => (
+    <span className='asset-header-help-title'>
+      <span>{label}</span>
+      <Tooltip title={renderHeaderHelpContent(field, description)} overlayClassName='asset-header-help-overlay' placement='top'>
+        <span className='asset-header-help-icon' onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+          <QuestionCircleOutlined />
+        </span>
+      </Tooltip>
+    </span>
+  );
+
+  const getColumnLabel = (column: any) => column.columnLabel || (typeof column.title === 'string' ? column.title : '');
+
+  const rawBaseColumns: any[] = [
     {
       title: '资产名称',
       dataIndex: 'name',
@@ -462,6 +485,28 @@ export default function () {
     },
   ];
 
+  const headerHelpByBaseColumnIndex: Record<number, { field: string; description: string }> = {
+    6: { field: '资产状态', description: '反映资产是否在线的状态。' },
+    7: { field: '运行状态', description: '反映部署在资产上的探针、Agent或数据采集服务的运行是否正常的状态。' },
+    10: { field: '管理状态', description: '反映资产在平台中是否已上下架的状态（已下架的资产，不纳入监控范围）。' },
+    11: { field: '管理时长', description: '反映资产在平台中的有效管理周期。' },
+  };
+
+  const baseColumns: any[] = rawBaseColumns.map((column, index) => {
+    const help = headerHelpByBaseColumnIndex[index];
+    if (!help) {
+      return column;
+    }
+
+    const label = getColumnLabel(column);
+    return {
+      ...column,
+      columnLabel: label,
+      title: renderHeaderHelpTitle(label, help.field, help.description),
+      showSorterTooltip: false,
+    };
+  });
+
   const fixColumns: any[] = [
     {
       title: '操作',
@@ -538,7 +583,7 @@ export default function () {
 
   // 列处理
   const [groupedColumns, setGroupedColumns] = useState<any>({});
-  const [defaultValues, setDefaultValues] = useLocalStorage<string[]>('ASSET_SELECTED_COLUMNS', Array.from(new Set(baseColumns.map((obj) => obj.title))));
+  const [defaultValues, setDefaultValues] = useLocalStorage<string[]>('ASSET_SELECTED_COLUMNS', Array.from(new Set(baseColumns.map((obj) => getColumnLabel(obj)))));
   const [optionColumns, setOptionColumns] = useState<any[]>(baseColumns); // 可选列
   const [selectColumns, setSelectColumns] = useState<any[]>(baseColumns.concat(fixColumns));
   const { resizableColumns, components, tableWidth } = useAntdResizableHeader({
@@ -552,7 +597,7 @@ export default function () {
   useEffect(() => {
     const { optionalColumns } = getAssetTypeItems(typeId, assetTypes);
     setOptionColumns(optionalColumns);
-    const newSelectedColumns = optionalColumns.filter((v) => defaultValues?.includes(v.title));
+    const newSelectedColumns = optionalColumns.filter((v) => defaultValues?.includes(getColumnLabel(v)));
     setSelectColumns(newSelectedColumns.concat(fixColumns));
   }, [groupedColumns, typeId, assetTypes]);
 
@@ -639,11 +684,11 @@ export default function () {
   function handelShowColumn(checkedValues) {
     let showColumns = new Array();
     optionColumns.map((item, index) => {
-      if (checkedValues.includes(item.title)) {
+      if (checkedValues.includes(getColumnLabel(item))) {
         showColumns.push(item);
       }
     });
-    setDefaultValues(showColumns.map((v) => v.title));
+    setDefaultValues(showColumns.map((v) => getColumnLabel(v)));
     setSelectColumns(showColumns.concat(fixColumns));
   }
 
@@ -772,10 +817,9 @@ export default function () {
     skipNextGetTableDataRef.current = true;
     setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
     localStorage.setItem('left_asset_type', '-1');
-    localStorage.removeItem('left_parId');
+    removeParId();
     setTissueId(-1);
-    setParId(undefined);
-    setTypeId(undefined);
+    setTypeId('0');
     setIsAllAssets(true);
     setRefreshKey(_.uniqueId('refreshKey_'));
   }, [treeList]);
@@ -921,7 +965,7 @@ export default function () {
         {optionColumns.map((item, index) => (
           <Row key={'option' + index} style={{ marginBottom: '5px' }}>
             <Col span={24}>
-              <Checkbox value={item.title}>{item.title}</Checkbox>
+              <Checkbox value={getColumnLabel(item)}>{getColumnLabel(item)}</Checkbox>
             </Col>
           </Row>
         ))}
@@ -1142,10 +1186,10 @@ export default function () {
       setTypeId(item.id);
       setTissueId(undefined)
     } else {
-      setTissueId(item.id)
-      setTypeId(undefined)
-      localStorage.removeItem('left_parId')
-      setParId(undefined)
+      setTissueId(item.id);
+      // 点父级/全部分组：离开具体资产类型；setTypeId(undefined) 在 react-use 中无效，需用 '0'
+      setTypeId('0');
+      removeParId();
     }
     // console.log(item);
     // setActiveColor(item.id)
@@ -1215,7 +1259,7 @@ export default function () {
                             if (item.id == tissueId) {
                               localStorage.setItem("left_tissueId", "-1");
                               localStorage.setItem("left_asset_type", "-1");
-                              localStorage.removeItem("left_parId");
+                              removeParId();
                               setTissueId(-1);
                               // setActiveColor(-1)
                             }
@@ -1409,7 +1453,7 @@ export default function () {
                                             if (item.id == tissueId) {
                                               localStorage.setItem('left_tissueId', '-1')
                                               localStorage.setItem('left_asset_type', '-1')
-                                              localStorage.removeItem('left_parId')
+                                              removeParId()
                                               setTissueId(-1)
                                               // setActiveColor(-1)
                                             }
@@ -1623,6 +1667,10 @@ export default function () {
                           }}
                           items={[
                             { key: OperateType.AssetBatchImport, label: '导入设备' },
+                            // 仅当选中组织树下某一叶子类型「网络设备」时出现（点了父级/全部资产会清 parId，避免 localStorage 残留 typeId 误判）
+                            ...(typeId === '网络设备' && parId != null && parId !== ''
+                              ? [{ key: OperateType.AssetOidBatchImport, label: '网络设备导入' }]
+                              : []),
                             { key: OperateType.AssetBatchExport, label: '导出设备' },
                             // { key: OperateType.BindTag, label: '绑定标签' },
                             // { key: OperateType.UnbindTag, label: '解绑标签' },
@@ -1683,6 +1731,7 @@ export default function () {
                 names={selectedAssetsName}
                 reloadList={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
+                  getAssetTree();
                 }}
               />
             </div>

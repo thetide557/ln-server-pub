@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select } from 'antd';
+import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,6 +13,7 @@ import {
   LeftOutlined,
   PoweroffOutlined,
   ProfileTwoTone,
+  QuestionCircleOutlined,
   RightOutlined,
   SearchOutlined,
   UnorderedListOutlined,
@@ -123,6 +124,35 @@ export default function () {
     setSelectedAssets([]);
     setSelectedAssetsName([]);
   };
+  const renderHeaderHelpContent = (field: string, description: string) => (
+    <div className='asset-header-help-tooltip'>
+      <div className='asset-header-help-tooltip-field'>{field}</div>
+      <div className='asset-header-help-tooltip-description'>{description}</div>
+    </div>
+  );
+
+  const renderHeaderHelpTitle = (label: string, field: string, description: string) => (
+    <span className='asset-header-help-title'>
+      <span>{label}</span>
+      <Tooltip placement='top' title={renderHeaderHelpContent(field, description)}>
+        <span
+          className='asset-header-help-icon'
+          onClick={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          <QuestionCircleOutlined />
+        </span>
+      </Tooltip>
+    </span>
+  );
+
+  const getColumnLabel = (column: any) => {
+    if (column?.columnLabel) {
+      return column.columnLabel;
+    }
+    return typeof column?.title === 'string' ? column.title : '';
+  };
+
   const baseColumns: any[] = [
     {
       title: '监控名称',
@@ -202,7 +232,7 @@ export default function () {
       },
     },
   ];
-  const choooseColumns = [
+  const rawChooooseColumns = [
     {
       title: '描述',
       width: '105px',
@@ -245,6 +275,16 @@ export default function () {
       },
     },
   ];
+  const choooseColumns = rawChooooseColumns.map((column) => {
+    if (column.dataIndex !== 'status') {
+      return column;
+    }
+    return {
+      ...column,
+      columnLabel: '监控状态',
+      title: renderHeaderHelpTitle('监控状态', '监控状态', '反映资产对应指标检测是否正常的状态。'),
+    };
+  });
   const fixColumns: any[] = [
     {
       title: '操作',
@@ -385,7 +425,7 @@ export default function () {
   function handelShowColumn(checkedValues) {
     let showColumns = new Array();
     optionColumns.forEach((item) => {
-      if (checkedValues.includes(item.title)) {
+      if (checkedValues.includes(getColumnLabel(item))) {
         showColumns.push(item);
       }
     });
@@ -687,7 +727,7 @@ export default function () {
   useEffect(() => {
     setSecondAddButton(false);
     setOptionColumns(baseColumns.concat(choooseColumns));
-    let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map((obj) => obj.title)));
+    let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map((obj) => getColumnLabel(obj))));
     setDefaultValues(modelIds);
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
     getAssetstypes().then(({ dat }) => {
@@ -861,9 +901,9 @@ export default function () {
     <div>
       <Checkbox.Group defaultValue={defaultValues} style={{ width: '100%' }} onChange={handelShowColumn}>
         {optionColumns.map((item) => (
-          <Row key={item.title} style={{ marginBottom: '5px' }}>
+          <Row key={getColumnLabel(item)} style={{ marginBottom: '5px' }}>
             <Col span={24}>
-              <Checkbox value={item.title}>{item.title}</Checkbox>
+              <Checkbox value={getColumnLabel(item)}>{getColumnLabel(item)}</Checkbox>
             </Col>
           </Row>
         ))}

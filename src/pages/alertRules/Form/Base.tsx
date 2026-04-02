@@ -25,6 +25,7 @@ import { useLocation } from 'react-router-dom';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import _ from 'lodash';
 import { buildPromVisualQueryFromPromQL, renderQuery } from '@/components/PromQueryBuilder';
+import HelpLabel from './components/HelpLabel';
 // import { parser } from "lezer-promql";
 import { PromVisualQueryLabelFilter } from '@/components/PromQueryBuilder/types';
 import { handleAssetIdTags } from '@/utils/editSql';
@@ -39,6 +40,7 @@ function isTagValid(tag) {
 
 export default function Base({ type, form, assetId, onAssetChange }) {
   const { t } = useTranslation('alertRules');
+  const appendTagsHelpDescription = '告警发生时，告警详情中的事件标签中显示配置的附加标签内容，用于对告警进行分类标记和快速筛选';
   // type = 1;
   const { search } = useLocation();
   const [assetList, setAssetList] = useState<any>({});
@@ -323,7 +325,7 @@ export default function Base({ type, form, assetId, onAssetChange }) {
       )}
       <Row gutter={10}>
         <Col span={12}>
-          <Form.Item label={t('append_tags')} name='append_tags' rules={[isValidFormat]}>
+          <Form.Item label={<HelpLabel label={t('append_tags')} field={t('append_tags')} description={appendTagsHelpDescription} />} name='append_tags' rules={[isValidFormat]}>
             <Select mode='tags' tokenSeparators={[' ']} open={false} placeholder={t('append_tags_placeholder')} tagRender={tagRender} />
           </Form.Item>
         </Col>

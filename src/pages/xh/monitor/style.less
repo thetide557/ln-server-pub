@@ -30,6 +30,21 @@
         // padding: 0 15px 15px 15px;
         margin-top: 5px;
         .table-view {
+            .asset-header-help-title {
+                display: inline-flex;
+                align-items: center;
+            }
+            .asset-header-help-icon {
+                display: inline-flex;
+                align-items: center;
+                margin-left: 4px;
+                color: #8c8c8c;
+                cursor: help;
+                line-height: 1;
+            }
+            .asset-header-help-icon:hover {
+                color: #2B7EE5;
+            }
             .anticon-file-protect, .anticon-file-search, .anticon-edit, .anticon-delete,.anticon-fund, .anticon-search{
                 color:#1890FF;
                 font-size: 16px;
@@ -49,6 +64,17 @@
       }
    }
 
+}
+.asset-header-help-tooltip {
+    max-width: 320px;
+}
+.asset-header-help-tooltip-field {
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+.asset-header-help-tooltip-description {
+    line-height: 1.5;
+    white-space: normal;
 }
 .default_monitor {
     .monitor_ {
