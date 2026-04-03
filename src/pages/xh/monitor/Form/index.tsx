@@ -17,6 +17,12 @@ import { FilterOutlined, MinusCircleOutlined, SearchOutlined } from '@ant-design
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
   const history = useHistory();
+  const backToMonitorList = () => {
+    history.push({
+      pathname: '/xh/monitor',
+      state: { isops: true },
+    });
+  };
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
@@ -73,7 +79,7 @@ const [operateScript, setOperateScript] = useState<any>({
     })
    setScriptOptions(scripList);
     if (action == null || 'addeditview'.indexOf(action + '') < 0) {
-      history.goBack();
+      backToMonitorList();
     }
     
     getAssetstypes().then((res) => {
@@ -438,7 +444,7 @@ const [operateScript, setOperateScript] = useState<any>({
                   </Button>
                   <Button
                     onClick={() => {
-                      history.goBack()
+                      backToMonitorList();
                     }}
                   >
                     取消
@@ -510,7 +516,7 @@ const [operateScript, setOperateScript] = useState<any>({
         <div className='monitor_management_button_zone'>
           <Button
             onClick={() => {
-              history.goBack()
+              backToMonitorList();
             }}
           >
             取消

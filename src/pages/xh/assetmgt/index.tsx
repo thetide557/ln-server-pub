@@ -38,7 +38,7 @@ import { batchShelfXhAssets, deleteXhAssets, getAssetstypesByParams, getAssetsBy
 import { getDictDataListByType } from '@/services/system/dict';
 
 import RefreshIcon from '@/components/RefreshIcon';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import { serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
@@ -83,9 +83,58 @@ let queryFilter = [
   // { name: 'device_type', label: '设备形态', type: 'select' },
 ];
 
+/** 在组织树中查找分组节点 id 从根到该节点的路径（展开祖先链后子节点与 type_list 才可见） */
+function findGroupPathToId(
+  nodes: any[],
+  targetId: number | string,
+  path: (number | string)[] = [],
+): (number | string)[] | null {
+  if (!nodes?.length) return null;
+  for (const node of nodes) {
+    const nextPath = [...path, node.id];
+    if (node.id == targetId) return nextPath;
+    if (node.sub_groups?.length) {
+      const found = findGroupPathToId(node.sub_groups, targetId, nextPath);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function isValidAssetTissueId(tissueId: unknown): boolean {
+  if (tissueId == null || tissueId === '') return false;
+  if (tissueId === -1 || tissueId === '-1') return false;
+  if (Number(tissueId) === -1) return false;
+  return true;
+}
+
+/** 根据当前选中（叶子父分组 parId 或仅分组 tissueId）计算应展开的节点 id */
+function getAssetTreeExpandIdsForSelection(
+  treeList: any[],
+  parId: unknown,
+  tissueId: unknown,
+): Set<number | string> {
+  const firstLevel = new Set(treeList.map((n: any) => n.id));
+  let targetId: number | string | null = null;
+  if (parId != null && String(parId) !== '') {
+    targetId = parId as number | string;
+  } else if (isValidAssetTissueId(tissueId)) {
+    targetId = tissueId as number | string;
+  }
+  if (targetId == null) {
+    return firstLevel;
+  }
+  const path = findGroupPathToId(treeList, targetId);
+  if (!path?.length) {
+    return firstLevel;
+  }
+  return new Set(path);
+}
+
 export default function () {
   const { t } = useTranslation('assets');
   const history = useHistory();
+  const location = useLocation();
 
   const [list, setList] = useState<any[]>([]);
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
@@ -815,10 +864,33 @@ export default function () {
     });
   }, []);
 
-  // 首次进入路由或刷新页面：展开第一层，默认选中全部资产并高亮，表格请求全部资产数据
+  // 首次进入路由或刷新页面：展开第一层，默认选中全部资产并高亮，表格请求全部资产数据。
+  // 从运维表单返回（state.isops=true）时：保持离开前的组织树展开与选中（路径展开 + expandedIds）。
   useEffect(() => {
     if (!treeList?.length || assetTreeInitialExpandDone.current) return;
     assetTreeInitialExpandDone.current = true;
+    const fromOpsForm = (location.state as { isops?: boolean } | null)?.isops === true;
+    console.log('fromOpsForm', fromOpsForm);
+    if (fromOpsForm) {
+      skipNextGetTableDataRef.current = false;
+      const pathExpand = getAssetTreeExpandIdsForSelection(treeList, parId, tissueId);
+      const merged = new Set(pathExpand);
+      try {
+        const raw = localStorage.getItem('expandedIds');
+        if (raw) {
+          const ids = JSON.parse(raw) as (number | string)[];
+          if (Array.isArray(ids)) {
+            ids.forEach((id) => merged.add(id));
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+      setAssetTreeExpandedIds(merged);
+      setRefreshKey(_.uniqueId('refreshKey_'));
+      return;
+    }
+
     skipNextGetTableDataRef.current = true;
     setAssetTreeExpandedIds(new Set(treeList.map((node: any) => node.id)));
     localStorage.setItem('left_asset_type', '-1');
@@ -1352,6 +1424,8 @@ export default function () {
   // 资产组织树：展开状态由页面传入，仅页面刷新或重新进入路由时展开第一层，点击树/新增分组等保持最新状态
   const AssetTree = ({ data, expandedIds, setExpandedIds }) => {
     useEffect(() => {
+      // 避免首次渲染时 expandedIds 初始为空 Set，把历史展开状态覆盖掉
+      if (!assetTreeInitialExpandDone.current) return;
       localStorage.setItem("expandedIds", JSON.stringify([...expandedIds]));
     }, [expandedIds]);
     const handleToggle = (nodeId) => {

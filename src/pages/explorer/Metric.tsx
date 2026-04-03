@@ -26,12 +26,22 @@ import './index.less';
 
 const MetricExplorerPage = () => {
   const { t } = useTranslation('explorer');
-  const { search } = useLocation();
+  const location = useLocation();
+  const { search } = location;
   const { prom_ql } = queryString.parse(search);
   // console.log(queryString.parse(search));
+  const fromXhMonitor = (location.state as { isops?: boolean } | null)?.isops === true;
+  // 仅当“从 /xh/monitor 跳转”时，返回固定跳回 /xh/monitor；其他来源保持 PageLayout 默认 goBack 行为
+  const backPath = fromXhMonitor ? '/xh/monitor' : undefined;
+  const backState = backPath ? { isops: true } : undefined;
   
   return (
-    <PageLayout title={t('title')} icon={<LineChartOutlined />} showBack={prom_ql ? true : false}>
+    <PageLayout
+      title={t('title')}
+      icon={<LineChartOutlined />}
+      showBack={prom_ql ? true : false}
+      {...(backPath ? { backPath, backState } : {})}
+    >
       <div className='prometheus-page'>
         <Explorer type='metric' defaultCate='prometheus' />
       </div>

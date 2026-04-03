@@ -37,10 +37,12 @@ interface IPageLayoutProps {
   customArea?: ReactNode;
   showBack?: Boolean;
   backPath?: string;
+  /** 与 backPath 一起使用时传给 history.push 的 state（如列表页需识别来源） */
+  backState?: Record<string, unknown>;
   docFn?: Function;
 }
 
-const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introIcon, children, customArea, showBack, backPath, docFn }) => {
+const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introIcon, children, customArea, showBack, backPath, backState, docFn }) => {
   const { t, i18n } = useTranslation('pageLayout');
   const history = useHistory();
   const { profile } = useContext(CommonStateContext);
@@ -89,6 +91,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
                     if (backPath) {
                       history.push({
                         pathname: backPath,
+                        ...(backState != null ? { state: backState } : {}),
                       });
                     } else {
                       history.goBack();

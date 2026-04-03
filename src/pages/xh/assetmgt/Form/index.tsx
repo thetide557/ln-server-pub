@@ -32,6 +32,9 @@ export default function () {
   const [tabIndex, setTabIndex] = useState<string>('base_set');
   const [editType, setEditType] = useState<string>('insert');
   const history = useHistory();
+  const backToAssetList = () => {
+    history.push({ pathname: '/xh/assetmgt', state: { isops: true } });
+  };
 
   const [hasSave, setHasSave] = useState<boolean>(true);
 
@@ -436,7 +439,7 @@ export default function () {
     if (editType !== 'edit') {
       await insertXHAsset(assetData);
       message.success('添加成功');
-      history.goBack();
+      backToAssetList();
     } else {
       console.log("submitForm====",assetData,map)
       const keys = Object.keys(map)
@@ -469,7 +472,7 @@ export default function () {
       if (form.getFieldsValue().asset_position) {
         saveMaintenanceInfo();
       }
-      history.goBack();
+      backToAssetList();
       // loadAssetInfo(id);
     }
   };
@@ -1247,7 +1250,7 @@ export default function () {
                 </Button>
                 <Button
                   onClick={() => {
-                    history.goBack();
+                    backToAssetList();
                   }}
                 >
                   关闭
@@ -1261,7 +1264,7 @@ export default function () {
         <div className='asset_manage_button_zone'>
           <Button
             onClick={() => {
-              history.goBack();
+              backToAssetList();
             }}
           >
             关闭
