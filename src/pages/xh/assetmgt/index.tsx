@@ -139,6 +139,8 @@ export default function () {
   // 用useRef保存递增计数器（每个组件实例独立，不共享）
   const requestIdCounter = useRef(0);
   const [manufacturerOptions, setManufacturerOptions] = useState<{ value: string; label: string }[]>([]);
+  // 物理资源下的设备类型
+  const [oidTreeList, setOidTreeList] = useState<any[]>([]);
 
   const maintenanceStatusOption = [
     {
@@ -751,6 +753,9 @@ export default function () {
       const processDat = sortAndProcessTypeList(dat)
       console.log('dat', processDat);
       setTreeList(processDat)
+      const data = processDat.find(item => item.id == -1)?.sub_groups.find(item => item.name == '物理资源')?.type_list.filter(item => item.name != '物理服务器' && item.name != '宿主机')?.map(item => item.name);
+      console.log('data', data);
+      setOidTreeList(data);
     })
   }
 
@@ -1668,8 +1673,8 @@ export default function () {
                           items={[
                             { key: OperateType.AssetBatchImport, label: '导入设备' },
                             // 仅当选中组织树下某一叶子类型「网络设备」时出现（点了父级/全部资产会清 parId，避免 localStorage 残留 typeId 误判）
-                            ...(typeId === '网络设备' && parId != null && parId !== ''
-                              ? [{ key: OperateType.AssetOidBatchImport, label: '网络设备导入' }]
+                            ...(oidTreeList.includes(typeId) && parId != null && parId !== ''
+                              ? [{ key: OperateType.AssetOidBatchImport, label: 'oid扩展属性导入' }]
                               : []),
                             { key: OperateType.AssetBatchExport, label: '导出设备' },
                             // { key: OperateType.BindTag, label: '绑定标签' },
