@@ -607,6 +607,22 @@ const ScheduleList: React.FC = () => {
     }
   };
 
+  const setSchedule = () => {
+    Modal.confirm({
+      title: "确认自动排班吗？",
+      content: "系统将为您生成未来30天的工作日排班。",
+      okText: "确认",
+      okType: "primary",
+      onOk: () => {
+       autoSchedule({}).then(()=>{
+        message.success(`排班成功`);
+        getData();
+        getCurrentSchedule();
+       })
+      },
+    });
+  };
+
   return (
     <div className="schedule-management-page">
       <Row gutter={16} className="content-container">
@@ -694,11 +710,21 @@ const ScheduleList: React.FC = () => {
                                 批量删除
                               </Button>
                             )}
-                          {(profile.roles?.includes("Admin") ||
+                          {/* {(profile.roles?.includes("Admin") ||
                             permList.includes("/sxxc/schedule_list/auto_schedule")) && (
                               <Button
                                 icon={<EditOutlined />}
                                 onClick={() => setAutoScheduleVisible(true)}
+                                size="small"
+                              >
+                                自动排班
+                              </Button>
+                            )} */}
+                            {(profile.roles?.includes("Admin") ||
+                            permList.includes("/sxxc/schedule_list/auto_schedule")) && (
+                              <Button
+                                icon={<EditOutlined />}
+                                onClick={setSchedule}
                                 size="small"
                               >
                                 自动排班
