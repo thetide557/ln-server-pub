@@ -610,7 +610,7 @@ const ScheduleList: React.FC = () => {
   const setSchedule = () => {
     Modal.confirm({
       title: "确认自动排班吗？",
-      content: "系统将为您生成未来30天的工作日排班。",
+      content: "系统将从首个未排班的工作日起，生成未来30天的排班。",
       okText: "确认",
       okType: "primary",
       onOk: () => {
