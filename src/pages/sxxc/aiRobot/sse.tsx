@@ -240,7 +240,7 @@ const calculateDialogSize = () => {
     // 验证表单字段并获取用户输入
     form.validateFields().then(async (values) => {
       console.log(values);
-      if (!values.note) return message.error("提问内容不能为空");
+      if (!values.note) return message.warning("提问内容不能为空");
       // 检查用户输入是否有效且当前没有正在进行的请求
       if (values.note?.trim() && !loading) {
         setTaskId(undefined);
@@ -275,7 +275,7 @@ const calculateDialogSize = () => {
           ]);
           // 清空输入框并滚动到消息列表底部
           form.setFieldsValue({ note: "" });
-          aiRef.current.scrollTop = aiRef.current.scrollHeight;
+          // aiRef.current.scrollTop = aiRef.current.scrollHeight;
           // 处理文本区域焦点
           if (textAreaRef.current) {
             if (e) e.preventDefault();
@@ -484,9 +484,12 @@ const calculateDialogSize = () => {
       setFileList(newFileList);
     },
   };
-  // useEffect(() => {
-  //   console.log("aiMessages", aiMessages);
-  // }, [aiMessages]);
+  // 当aiMessages变化时，自动滚动到最新内容
+  useEffect(() => {
+    if (aiRef.current) {
+      aiRef.current.scrollTop = aiRef.current.scrollHeight;
+    }
+  }, [aiMessages]);
 
   // useEffect(() => {
   //   console.log("taskId", taskId);
@@ -628,8 +631,7 @@ const calculateDialogSize = () => {
                                   >
                                     {message.text?.length > 0 ? (
                                       <div className="ai-answer-content">
-                                        {message.afterThinkContent?.length >
-                                          0 ? (
+                                        {message.afterThinkContent?.length > 0 ? (
                                           <>
                                             <Collapse
                                               bordered={false}
@@ -656,37 +658,31 @@ const calculateDialogSize = () => {
                                               }}
                                             ></div>
                                           </>
-                                        ) : // <div
-                                          //   className="ai-think"
-                                          //   dangerouslySetInnerHTML={{
-                                          //     __html: message.text,
-                                          //   }}
-                                          // ></div>
-                                          message.text.length > 1 && success ? (
-                                            <Collapse
-                                              bordered={false}
-                                              defaultActiveKey={[index]}
+                                        ) : message.thinkContent ? (
+                                          <Collapse
+                                            bordered={false}
+                                            defaultActiveKey={[index]}
+                                          >
+                                            <Panel
+                                              header={"深度思考中..."}
+                                              key={index}
                                             >
-                                              <Panel
-                                                header={"深度思考中..."}
-                                                key={index}
-                                              >
-                                                <div
-                                                  className="ai-think"
-                                                  dangerouslySetInnerHTML={{
-                                                    __html: message.text,
-                                                  }}
-                                                ></div>
-                                              </Panel>
-                                            </Collapse>
-                                          ) : (
-                                            <div
-                                              className="ai-think"
-                                              dangerouslySetInnerHTML={{
-                                                __html: message.text,
-                                              }}
-                                            ></div>
-                                          )}
+                                              <div
+                                                className="ai-think"
+                                                dangerouslySetInnerHTML={{
+                                                  __html: message.text,
+                                                }}
+                                              ></div>
+                                            </Panel>
+                                          </Collapse>
+                                        ) : (
+                                          <div
+                                            className="ai-think"
+                                            dangerouslySetInnerHTML={{
+                                              __html: message.text,
+                                            }}
+                                          ></div>
+                                        )}
                                       </div>
                                     ) : (
                                       loading && (

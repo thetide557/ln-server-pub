@@ -20,6 +20,8 @@ const WarnModal = (props) => {
   const { alertId, visible, onClose } = props;
   const [curWarn, setCurWarn] = useState<any>({});
   const [open1, setOpen1] = useState(false);
+  const aiRef = useRef<any>(null);
+  const scrollThrottleTimerRef = useRef<any>(null);
   const timeLensDefault = [
     {
       label: "1h",
@@ -511,6 +513,80 @@ const WarnModal = (props) => {
     };
   }, []);
 
+  // 当aiMessages变化时，自动滚动到最新内容
+  useEffect(() => {
+    if (!aiRef.current) return;
+    const hasContent = !!(
+      aiMessages &&
+      ((typeof aiMessages.text === "string" && aiMessages.text.trim().length) ||
+        (typeof aiMessages.thinkContent === "string" &&
+          aiMessages.thinkContent.trim().length) ||
+        (typeof aiMessages.afterThinkContent === "string" &&
+          aiMessages.afterThinkContent.trim().length))
+    );
+    // 进入页面时不滚动：只有有 AI 内容时才滚
+    if (!hasContent) return;
+    // 流式更新很频繁：做一个简单节流，避免整页滚动过于频繁导致卡顿
+    if (scrollThrottleTimerRef.current) return;
+    scrollThrottleTimerRef.current = setTimeout(() => {
+      scrollThrottleTimerRef.current = null;
+      // 等待 DOM 更新后再滚动，避免拿到旧的 scrollHeight
+      requestAnimationFrame(() => {
+        if (!aiRef.current) return;
+        const getScrollParent = (node: HTMLElement | null) => {
+          let cur: HTMLElement | null = node;
+          while (cur && cur !== document.body) {
+            const style = window.getComputedStyle(cur);
+            const overflowY = style.overflowY;
+            if (
+              /(auto|scroll|overlay)/.test(overflowY) &&
+              cur.scrollHeight > cur.clientHeight + 1
+            ) {
+              return cur;
+            }
+            cur = cur.parentElement;
+          }
+          return (document.scrollingElement ||
+            document.documentElement ||
+            document.body) as HTMLElement;
+        };
+
+        const targetEl = aiRef.current as HTMLElement;
+        const scrollParent = getScrollParent(targetEl.parentElement);
+        const targetRect = targetEl.getBoundingClientRect();
+
+        // 预留一点底部空间，避免贴边
+        const bottomPadding = 300;
+
+        if (
+          scrollParent === document.scrollingElement ||
+          scrollParent === document.documentElement ||
+          scrollParent === document.body
+        ) {
+          const maxTop = Math.max(
+            0,
+            scrollParent.scrollHeight - window.innerHeight
+          );
+          const targetTop = targetRect.bottom + window.scrollY - window.innerHeight + bottomPadding;
+          window.scrollTo({
+            top: Math.min(Math.max(0, targetTop), maxTop),
+            behavior: "smooth",
+          });
+          return;
+        }
+
+        const parentRect = scrollParent.getBoundingClientRect();
+        const targetTop =
+          targetRect.bottom - parentRect.top + scrollParent.scrollTop - scrollParent.clientHeight + bottomPadding;
+        const maxTop = Math.max(0, scrollParent.scrollHeight - scrollParent.clientHeight);
+        scrollParent.scrollTo({
+          top: Math.min(Math.max(0, targetTop), maxTop),
+          behavior: "smooth",
+        });
+      });
+    }, 500);
+  }, [aiMessages]);
+
   return (
     <>
       {/* 大屏告警弹窗 */}
@@ -808,7 +884,7 @@ const WarnModal = (props) => {
                         )}
                       </div>
                     </div>
-                    <div className="solution-search-cont">
+                    <div className="solution-search-cont" ref={aiRef}>
                       {aiMessages.text?.length > 0 ? (
                         <div className="solution-answer-content">
                           {aiMessages.afterThinkContent?.length > 0 ? (
@@ -830,7 +906,7 @@ const WarnModal = (props) => {
                                 }}
                               ></div>
                             </>
-                          ) : aiMessages.text.length > 1 && success ? (
+                          ) : aiMessages.thinkContent ? (
                             <Collapse bordered={false} defaultActiveKey={"1"}>
                               <Panel header={"深度思考中..."} key="1">
                                 <div

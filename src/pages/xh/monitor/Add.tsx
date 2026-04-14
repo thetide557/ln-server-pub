@@ -9,9 +9,17 @@ export default function () {
   
   const location = useLocation();
   const params=new URLSearchParams(location.search);  
+  const type = params.get('type');
+  const backPath =
+    type === 'asset' ? '/xh/monitor' : type === 'monitor' ? '/xh/assetmgt' : undefined;
+  const backState = backPath ? { isops: true } : undefined;
 
   return (
-    <PageLayout title={'监控管理'} showBack>
+    <PageLayout
+      title={'监控管理'}
+      showBack
+      {...(backPath ? { backPath, backState } : {})}
+    >
       {params.get('type')=="asset" && (
           <Form initialValues={{}}  initParams={{}} disabled={params.get('action') == "view" ? true : false}></Form>
       )}

@@ -14,7 +14,12 @@ export default function () {
 
 
   return (
-    <PageLayout title={id!=null?(mode=="view"?'资产信息查看':'资产信息修改'):'资产信息新增'} showBack>
+    <PageLayout
+      title={id!=null?(mode=="view"?'资产信息查看':'资产信息修改'):'资产信息新增'}
+      showBack
+      backPath="/xh/assetmgt"
+      backState={{ isops: true }}
+    >
       <Form></Form>
     </PageLayout>
   );
