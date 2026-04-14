@@ -932,10 +932,7 @@ export default function () {
       //   param['assetType'] = typeId;
       // }
     }
-
-
-    // 使用 state 的 parId，避免点击树时 setParId 刚触发但 localStorage 还没写入导致缺参
-    const parentId = parId != null ? parId : localStorage.getItem('left_parId')
+    const parentId = localStorage.getItem('left_parId')
     // 未带 assetId 首次进入页面时：不带 assetType（TypeId）做首次查询，避免“进来就被历史 typeId 过滤”
     const shouldSkipAssetTypeThisFetch = skipTypeIdOnFirstFetchRef.current && currentAssetId <= 0;
     // 当 URL 带 assetId 时（currentAssetId > 0），点击树节点后也应补上传 assetType
