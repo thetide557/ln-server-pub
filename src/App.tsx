@@ -58,6 +58,8 @@ interface IProfile {
   portrait: string;
   contacts: { string?: string };
   board_id: number;
+  temp_remaining_days?: number;
+  password_valid_days?: number;
 }
 
 interface Datasource {

@@ -40,9 +40,10 @@ interface IPageLayoutProps {
   /** 与 backPath 一起使用时传给 history.push 的 state（如列表页需识别来源） */
   backState?: Record<string, unknown>;
   docFn?: Function;
+  desc?: string;
 }
 
-const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introIcon, children, customArea, showBack, backPath, backState, docFn }) => {
+const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introIcon, children, customArea, showBack, backPath, backState, docFn, desc }) => {
   const { t, i18n } = useTranslation('pageLayout');
   const history = useHistory();
   const { profile } = useContext(CommonStateContext);
@@ -105,6 +106,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
               {icon}
               {title}
             </div>
+            {desc && <div className={'page-header-desc'}>{desc}</div>}
           </div>
         </div>
       )}

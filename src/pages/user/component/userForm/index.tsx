@@ -16,7 +16,7 @@
  */
 // @ts-nocheck
 import React, { useEffect, useState, useImperativeHandle, ReactNode } from 'react';
-import { Col, Form, Input, Row, Select, Space, TreeSelect } from 'antd';
+import { Col, Form, Input, Row, Select, Space, TreeSelect, InputNumber, DatePicker, Switch } from 'antd';
 import { getUserInfo, getNotifyChannels, getRoles, getTeamInfoList, } from '@/services/manage';
 import { UserAndPasswordFormProps, Contacts, ContactsItem, User } from '@/store/manageInterface';
 import { MinusCircleOutlined, PlusCircleOutlined, CaretDownOutlined } from '@ant-design/icons';
@@ -24,6 +24,8 @@ import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { Link } from 'react-router-dom';
 import { getOrganizationTree } from '@/services/assets';
+import moment from 'moment';
+import { timestampToCST } from "@/utils/day";
 
 const { Option } = Select;
 const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, ref) => {
@@ -82,6 +84,8 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           contacts.push(val);
         });
       }
+      data.lock_enabled = data.lock_enabled === 1 ? true : false;
+      data.temp_user_expire_at = moment(timestampToCST(data.temp_user_expire_at), 'YYYY-MM-DD');
       console.log("初始化数据擦好看", data)
       setInitialValues(
         Object.assign({}, data, {
@@ -91,7 +95,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       setLoading(false);
     });
   };
-  const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 10 } };
+  const formItemLayout = { labelCol: { span: 10 }, wrapperCol: { span: 10 } };
   const validatePassword = (_, value) => {
     if (value && value.length >= 12) {
       const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&-*.]/].reduce((acc, regex) => {
@@ -185,7 +189,14 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
               },
             ]}
           >
-            <Select mode='multiple'>
+            <Select
+              mode='multiple'
+              onChange={(values) => {
+                if (values.includes('临时用户')) {
+                  form.setFieldsValue({ roles: ['临时用户'] });
+                }
+              }}
+            >
               {roleList.map((item, index) => (
                 <Option value={item.name} key={index}>
                   <div>
@@ -264,8 +275,122 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
               <Input />
           </Form.Item>
         </Col> */}
+        {
+          !form.getFieldValue('roles')?.includes("Admin") && <>
+            <Col span={12} key={"item-" + 11}>
+              <Form.Item label={t('密码有效期（天）')} name='password_valid_days' initialValue={90} rules={[
+                {
+                  required: true,
+                },
+                {
+                  validator: (_, value) => {
+                    if (value <= 0) {
+                      return Promise.reject(new Error('密码有效期必须大于0'));
+                    }
+                    if (value && !Number.isInteger(value)) {
+                      return Promise.reject(new Error('密码有效期必须为整数'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}>
+                <InputNumber style={{ width: '100%' }} precision={0} />
+              </Form.Item>
+            </Col>
+            <Col span={12} key={"item-" + 12}>
+              <Form.Item
+                noStyle
+                shouldUpdate={(prevValues, currentValues) => prevValues.roles !== currentValues.roles}
+              >
+                {({ getFieldValue }) =>
+                  getFieldValue('roles')?.includes('临时用户') ? (
+                    <Form.Item name="temp_user_expire_at" label={t('使用期限至')} rules={[
+                      {
+                        required: true,
+                        message: '请选择使用期限'
+                      },
+                      {
+                        validator: (_, value) => {
+                          if (value) {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const selectedDate = new Date(value);
+                            selectedDate.setHours(0, 0, 0, 0);
+                            if (selectedDate <= today) {
+                              return Promise.reject(new Error('使用期限不能早于或等于当前日期'));
+                            }
+                          }
+                          return Promise.resolve();
+                        }
+                      }
+                    ]}>
+                      <DatePicker
+                        style={{ width: '100%' }}
+                        format="YYYY-MM-DD"
+                        disabledDate={(current) => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return current && current.valueOf() <= today.valueOf();
+                        }}
+                      />
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+            </Col>
+          </>
+        }
       </Row>
-
+      {
+        !form.getFieldValue('roles')?.includes("Admin") && <Row>
+          <Col span={12} key={"item-" + 13}>
+            <Form.Item label={t('账号锁定策略')} name='lock_enabled' initialValue={true} valuePropName="checked">
+              <Switch
+                checkedChildren="启用"
+                unCheckedChildren="关闭"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12} key={"item-" + 14}>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, currentValues) => prevValues.lock_enabled !== currentValues.lock_enabled}
+            >
+              {({ getFieldValue }) =>
+                getFieldValue('lock_enabled') == 1 ? (
+                  <div style={{ display: 'flex' }}>
+                    <Form.Item
+                      label={t('连续')}
+                      name='lock_consecutive_days'
+                      initialValue={90}
+                      rules={[
+                        {
+                          required: true,
+                          message: '请输入连续未登录天数'
+                        },
+                        {
+                          validator: (_, value) => {
+                            if (value <= 0) {
+                              return Promise.reject(new Error('连续未登录天数必须大于0'));
+                            }
+                            if (value && !Number.isInteger(value)) {
+                              return Promise.reject(new Error('连续未登录天数必须为整数'));
+                            }
+                            return Promise.resolve();
+                          }
+                        }
+                      ]}
+                    >
+                      <InputNumber precision={0} />
+                    </Form.Item>
+                    <span style={{ marginLeft: '15px', marginTop: '7px', color: 'rgba(0, 0, 0, 0.85)', fontSize: '12px' }}>天未登录，自动锁定账号</span>
+                  </div>
+                ) : null
+              }
+            </Form.Item>
+          </Col>
+        </Row>
+      }
       <Form.Item
         label={
           <Space>
