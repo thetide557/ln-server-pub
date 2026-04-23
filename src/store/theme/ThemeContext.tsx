@@ -31,6 +31,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return getThemeConfig(themeType!);
   }, [themeType]);
 
+  // 当主题变化时，更新 body 的类名
+  useEffect(() => {
+    const body = document.body;
+    // 移除所有主题类名
+    body.classList.remove('theme-light', 'theme-dark');
+    // 添加当前主题类名
+    body.classList.add(`theme-${themeType}`);
+  }, [themeType]);
+
   const value = useMemo(() => ({
     themeType: themeType!,
     themeConfig,
