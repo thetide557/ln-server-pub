@@ -314,7 +314,7 @@ function Card(props: Props, ref) {
   return (
     <div className='event-content cur-events' style={{ display: 'flex', height: '100%' }} ref={Ref}>
       <CardLeft onRefreshRule={setGroupId} />
-      <div style={{ background: '#fff', flex: 1, padding: 16, overflowY: 'auto' }}>
+      <div style={{ flex: 1, padding: 16, overflowY: 'auto' }}>
         {header}
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
           {cardList?.map((card, i) => (

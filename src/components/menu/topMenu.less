@@ -10,16 +10,19 @@
   background-position: center;
   justify-content: space-between;
   align-items: center;
+
   .top_left {
     width: 100%;
     display: flex;
     align-items: center;
   }
+
   .xh_logo_image_size {
     width: 41px;
     height: 41px;
-    margin-right:5px;
+    margin-right: 5px;
   }
+
   .logoImg {
     background-position: center;
     height: 60px;
@@ -95,7 +98,9 @@
 }
 
 .avator {
-  line-height: @baseFontSizeMiddle;
+  line-height: 60px;
+  display: inline-flex;
+  align-items: center;
 
   img {
     width: @baseFontSizeMiddle;
@@ -103,19 +108,37 @@
     border-radius: 50%;
     transform: scale(1.5);
     margin-right: 10px;
-    vertical-align: text-bottom;
+    vertical-align: middle;
     display: inline-block;
-    // background: url('/image/avatar1.png') 100% 100% / cover;
   }
 
   padding-right: 20px;
   color: #f5f5f5;
+
+  .display-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
 }
 
 .language {
   margin-right: 20px;
   color: #f5f5f5;
 }
+
 .my_portrait {
   cursor: pointer;
+}
+.theme-switch {
+  margin-right: 20px;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    opacity: 0.8;
+  }
 }

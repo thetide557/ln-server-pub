@@ -39,13 +39,13 @@ import { getSystemTheme } from '@/services/login';
 import useIsPlus from 'plus:/components/useIsPlus';
 import './App.less';
 import './global.variable.less';
-// import TopMenu from './components/menu/topMenu';
+import './styles/theme.less';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import { useLocalStorage } from 'react-use';
 import { getAlertEventsById } from '@/services/warning';
 import AiRobotSse from '@/pages/sxxc/aiRobot/sse';
 import WarnModal from '@/pages/sxxc/warnModal';
-
+import { ThemeProvider, useTheme } from '@/store/theme';
 interface IProfile {
   admin?: boolean;
   nickname: string;
@@ -353,7 +353,17 @@ function App() {
   }
 
   return (
-    <div className='App' style={path.startsWith('/login') ? { overflow: 'hidden' } : { overflow: 'auto' }}>
+    <ThemeProvider>
+      <AppWrapper dialogShow={dialogShow} alertLevel={alertLevel} alertId={alertId} warnModalShow={warnModalShow} setWarnModalShow={setWarnModalShow} setDialogShow={setDialogShow} handleClick={handleClick} commonState={commonState} path={path} audioRef={audioRef} i18n={i18n} />
+    </ThemeProvider>
+  );
+}
+
+function AppWrapper({ i18n, dialogShow, alertLevel, alertId, warnModalShow, setWarnModalShow, setDialogShow, handleClick, commonState, path, audioRef }: any) {
+  const { themeType } = useTheme();
+
+  return (
+    <div className={`App theme-${themeType}`} style={path.startsWith('/login') ? { overflow: 'hidden' } : { overflow: 'auto' }}>
       <audio ref={audioRef} src='/music/y2168.mp3' />
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
@@ -362,7 +372,6 @@ function App() {
               <Route exact path='/job-task/:busiId/output/:taskId/:outputType' component={TaskOutput} />
               <Route exact path='/job-task/:busiId/output/:taskId/:host/:outputType' component={TaskHostOutput} />
               <>
-                {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
                 <AiRobotSse />
                 <div className='content-box'>

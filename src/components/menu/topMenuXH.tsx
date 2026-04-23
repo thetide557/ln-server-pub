@@ -1,6 +1,6 @@
 import { CommonStateContext, initTheme } from '@/App';
 import { getMenuPerm } from '@/services/common';
-import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined } from '@ant-design/icons';
+import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined, BgColorsOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
 import { Dropdown, Menu, Space, Image, message } from 'antd';
 import _ from 'lodash';
@@ -17,7 +17,9 @@ import { useLocalStorage } from 'react-use';
 import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getDictDataListByType } from '@/services/system/dict';
 import Cookies from 'js-cookie';
-
+import { ThemeType } from '@/store/theme/themeConfig';
+import { useTheme } from '@/store/theme/ThemeContext';
+import { Radio } from 'antd';
 const getMenuList = (t) => {
   const menuList = [
     {
@@ -426,7 +428,7 @@ interface IProps {
 
 export default function () {//{ selectMenu?:any }
   const { t, i18n } = useTranslation('menu');
-
+  const { themeType, setThemeType } = useTheme();
   const menuList = getMenuList(t);
   const [menus, setMenus] = useState(menuList);
   const [defaultSelectedKeys, setDefaultSelectedKeys] = useState<string[]>();
@@ -671,6 +673,23 @@ export default function () {//{ selectMenu?:any }
         <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
       </div>
       <div className='top_right'>
+        <Dropdown
+          overlay={
+            <Menu>
+              <Menu.Item key='light'>
+                <Radio checked={themeType === 'light'} onClick={() => setThemeType('light')}>亮色主题</Radio>
+              </Menu.Item>
+              <Menu.Item key='dark'>
+                <Radio checked={themeType === 'dark'} onClick={() => setThemeType('dark')}>暗色主题</Radio>
+              </Menu.Item>
+            </Menu>
+          }
+          trigger={['click']}
+        >
+          <span className='theme-switch' title='切换主题'>
+            <BgColorsOutlined />
+          </span>
+        </Dropdown>
         <span
           className='language'
           onClick={() => {
