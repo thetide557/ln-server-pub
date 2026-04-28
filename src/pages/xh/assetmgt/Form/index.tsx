@@ -23,6 +23,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 const { TextArea } = Input;
+const PASSWORD_PLACEHOLDER_VALUE = 'haveValue';
 
 export default function () {
   const { t } = useTranslation('assets');
@@ -343,11 +344,18 @@ export default function () {
           delete dat.exps;
         }
         console.log("dat===",dat)
-        setFields_with_a_password_entered(dat.params.fields_with_a_password_entered)
+        const passwordFields = dat?.params?.fields_with_a_password_entered || [];
+        const formData = _.cloneDeep(dat);
+        passwordFields.forEach((fieldName) => {
+          if (_.isNil(formData?.params?.[fieldName]) || formData.params[fieldName] === '') {
+            formData.params[fieldName] = PASSWORD_PLACEHOLDER_VALUE;
+          }
+        });
+        setFields_with_a_password_entered(passwordFields)
         const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
-        form.setFieldsValue(dat);
+        form.setFieldsValue(formData);
         setCurrentType(dat.type);
       });
     }
@@ -477,19 +485,23 @@ export default function () {
     }
   };
   let map = {}
-  const AlwaysShowPlaceholderPassword = ({ placeholder, form, name }) => {
-    const [value, setValue] = useState('');
+  const AlwaysShowPlaceholderPassword = ({ placeholder, name, value, onChange, hasStoredValue }) => {
     const inputRef = useRef(null);
+    const currentValue = value === PASSWORD_PLACEHOLDER_VALUE ? '' : value || '';
 
     const handleChange = (e) => {
-      const val = e.target.value;
-      setValue(val);
-      map[name] = val
-      console.log('handleChange==',val,form.getFieldsValue())
+      const nextValue = e.target.value;
+      const formValue = !nextValue && hasStoredValue ? PASSWORD_PLACEHOLDER_VALUE : nextValue;
+      map[name] = nextValue
+      onChange?.({
+        target: {
+          value: formValue,
+        },
+      });
     };
 
-    if (value) {
-      return <Input.Password value={value} autoFocus onChange={handleChange} />;
+    if (currentValue) {
+      return <Input.Password value={currentValue} autoFocus onChange={handleChange} />;
     }
 
     return (
@@ -497,7 +509,7 @@ export default function () {
         <Input
           ref={inputRef}
           type="text"
-          value={value}
+          value={currentValue}
           onChange={handleChange}
           style={{
             color: 'transparent',
@@ -514,7 +526,7 @@ export default function () {
             height: '100%',
             display: 'flex',
             alignItems: 'center',
-            color: value ? '#ccc' : '#bfbfbf',
+            color: currentValue ? '#ccc' : '#bfbfbf',
             pointerEvents: 'none',
             fontSize: 12,
             userSelect: 'none',
@@ -533,21 +545,14 @@ export default function () {
     }
     if (v.type === 'password') {
       console.log('password===',form.getFieldsValue(),fields_with_a_password_entered,v)
-      if(fields_with_a_password_entered.includes(v.name)){
-        form.setFields([
-        { name:['params',v.name], value: 'haveValue' }
-      ]);
-      }
       if(mode == 'view'){ //查看
         return <Input.Password key={'v' + v.name} visibilityToggle={false}/>;
       }
       if(mode == 'edit' && id){ //编辑
-        let placeholder = '请输入密码'
-        if(form.getFieldsValue() && form.getFieldsValue().params && form.getFieldsValue().params[v.name]){
-          placeholder = '请输入密码，不输入代表不更新'
-        }
+        const hasStoredValue = fields_with_a_password_entered.includes(v.name);
+        const placeholder = hasStoredValue ? '请输入密码，不输入代表不更新' : '请输入密码'
         
-        return <AlwaysShowPlaceholderPassword form={form} name={v.name} placeholder={placeholder} />
+        return <AlwaysShowPlaceholderPassword name={v.name} placeholder={placeholder} hasStoredValue={hasStoredValue} />
       }
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
     }
