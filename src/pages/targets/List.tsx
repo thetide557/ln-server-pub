@@ -72,6 +72,23 @@ export default function List(props: IProps) {
   const [collectsDrawerIdent, setCollectsDrawerIdent] = useState('');
   const [downtime, setDowntime] = useState();
   const [versionOptions, setVersionOptions] = useState<{ label: string; value: string }[]>([]);
+  const [filterType, setFilterType] = useState<any>('input');
+  const [filterParam, setFilterParam] = useState<any>('ip');
+  let queryFilter = [
+    { name: 'ip', label: 'IP地址/主机名', type: 'input' },
+    { name: 'group_id', label: '业务组', type: 'select' },
+    { name: 'current_version', label: '探针版本', type: 'input' },
+    { name: 'note', label: '备注', type: 'input' },
+  ];
+  const filterOptions = {
+    group_id: busiGroups.map((group) => {
+      return {
+        value: _.toString(group.id),
+        label: group.name,
+      };
+    })
+  };
+
   const columns: ColumnsType<any> = [
     {
       title: (
@@ -361,7 +378,7 @@ export default function List(props: IProps) {
         width: 100,
         dataIndex: 'remote_addr',
         render: (val, reocrd) => {
-          if (reocrd.cpu_num === -1) return 'unknown';
+          if (reocrd.cpu_num === -1) return '';
           return val;
         },
       });
@@ -387,7 +404,7 @@ export default function List(props: IProps) {
         title: t('ip_address'),
         dataIndex: 'ip_address',
         render: (val, reocrd) => {
-          if (reocrd.ip_address === '') return 'unknown';
+          if (reocrd.ip_address === '') return '';
           return val;
         },
       });
@@ -397,7 +414,7 @@ export default function List(props: IProps) {
         title: t('current_version'),
         dataIndex: 'current_version',
         render: (val, record) => {
-          if (record.current_version === '') return 'unknown';
+          if (record.current_version === '') return '';
           return (
             <>{val}</>
             // <Select
@@ -434,12 +451,17 @@ export default function List(props: IProps) {
 
   const featchData = ({ current, pageSize }: { current: number; pageSize: number }): Promise<any> => {
     const query = {
-      query: tableQueryContent,
       bgid: curBusiId,
       limit: pageSize,
       p: current,
       downtime,
     };
+    if (searchVal != null && searchVal.length > 0) {
+      query['query'] = tableQueryContent;
+    }
+    if (filterParam != null && filterParam.length > 0 && searchVal != '' && searchVal.length > 0) {
+      query['filter'] = filterParam;
+    }
     return getMonObjectList(query).then((res) => {
       return {
         total: res.dat.total,
@@ -478,7 +500,7 @@ export default function List(props: IProps) {
               setRefreshFlag(_.uniqueId('refreshFlag_'));
             }}
           />
-          <Input
+          {/* <Input
             className='search-input'
             allowClear
             prefix={<SearchOutlined />}
@@ -504,7 +526,87 @@ export default function List(props: IProps) {
             onChange={(val) => {
               setDowntime(val);
             }}
-          />
+          /> */}
+          <div className='table-handle-search'>
+            <Space>
+              <Select
+                defaultValue={filterParam}
+                placeholder='选择过滤器'
+                style={{ width: 120 }}
+                // allowClear
+                onChange={(value) => {
+                  queryFilter.forEach((item) => {
+                    if (item.name == value) {
+                      setFilterType(item.type);
+                    }
+                  });
+                  setFilterParam(value);
+                  setSearchVal('');
+                  setTableQueryContent('');
+                }}
+              >
+                {queryFilter.map((item, index) => (
+                  <Select.Option value={item.name} key={index}>
+                    {item.label}
+                  </Select.Option>
+                ))}
+              </Select>
+              {filterType == 'input' && (
+                <Input
+                  className={'searchInput'}
+                  value={searchVal}
+                  allowClear
+                  onChange={(e) => {
+                    if (e != undefined) {
+                      setSearchVal(e.target.value);
+                      setTableQueryContent(e.target.value);
+                    } else {
+                      setSearchVal('');
+                      setTableQueryContent('');
+                    }
+                  }}
+                  suffix={<SearchOutlined />}
+                  placeholder={'输入模糊检索关键字'}
+                />
+              )}
+              {filterType == 'select' && (
+                <Select
+                  className={'searchInput'}
+                  placeholder={'选择要查询的条件'}
+                  value={searchVal}
+                  allowClear
+                  showSearch
+                  filterOption
+                  optionFilterProp={'label'}
+                  options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
+                  onChange={(val) => {
+                    if (val != undefined) {
+                      setSearchVal(val);
+                      setTableQueryContent(val);
+                    } else {
+                      setSearchVal('');
+                      setTableQueryContent(''); 
+                    }
+                  }}
+                />
+              )}
+              <Select
+                allowClear
+                placeholder={t('filterDowntime')}
+                style={{ width: 200 }}
+                options={_.map(downtimeOptions, (item) => {
+                  return {
+                    label: t('filterDowntimeMin', { count: item }),
+                    value: item * 60,
+                  };
+                })}
+                value={downtime}
+                onChange={(val) => {
+                  setDowntime(val);
+                }}
+              />
+            </Space>
+          </div>
         </Space>
         <Space>
           {

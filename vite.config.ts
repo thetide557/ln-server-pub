@@ -60,7 +60,11 @@ const x6Chunk = [
 const antvChunk = ["@ant-design/graphs", "@ant-design/plots"];
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  // 生产构建时移除 console / debugger
+  esbuild: {
+    drop: mode === "production" ? ["console", "debugger"] : [],
+  },
   plugins: [
     md(),
     reactRefresh(),
@@ -191,4 +195,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

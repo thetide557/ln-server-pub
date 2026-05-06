@@ -19,7 +19,8 @@ import { useHistory, useParams } from 'react-router';
 import moment from 'moment';
 import _ from 'lodash';
 import queryString from 'query-string';
-import { Button, Card, message, Space, Spin, Tag, Typography } from 'antd';
+import { Button, Card, message, Space, Spin, Tag, Tooltip, Typography } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '@/components/pageLayout';
@@ -43,6 +44,29 @@ const { Paragraph } = Typography;
 const EventDetailPage: React.FC = () => {
   const { t } = useTranslation('AlertCurEvents');
   const { busiId, eventId } = useParams<{ busiId: string; eventId: string }>();
+  const tagsHelpDescription = '告警发生时，系统自动采集并附加在告警事件上的结构化标签信息，用于完整描述告警的上下文环境、关联资产和监控指标维度。';
+  const renderHelpLabel = (label: React.ReactNode, field: React.ReactNode, description: React.ReactNode) => (
+    <span className='desc-label-help'>
+      <span>{label}</span>
+      <Tooltip
+        placement='top'
+        title={
+          <div className='desc-label-help-tooltip'>
+            <div className='desc-label-help-tooltip-field'>{field}</div>
+            <div className='desc-label-help-tooltip-description'>{description}</div>
+          </div>
+        }
+      >
+        <span
+          className='desc-label-help-icon'
+          onClick={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          <QuestionCircleOutlined />
+        </span>
+      </Tooltip>
+    </span>
+  );
   const commonState = useContext(CommonStateContext);
   const { busiGroups, datasourceList } = commonState;
   const handleNavToWarningList = (id) => {
@@ -126,7 +150,7 @@ const EventDetailPage: React.FC = () => {
       },
     },
     {
-      label: t('detail.tags'),
+      label: renderHelpLabel(t('detail.tags'), t('detail.tags'), tagsHelpDescription),
       key: 'tags',
       render(tags) {
         return tags

@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select } from 'antd';
+import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,6 +13,7 @@ import {
   LeftOutlined,
   PoweroffOutlined,
   ProfileTwoTone,
+  QuestionCircleOutlined,
   RightOutlined,
   SearchOutlined,
   UnorderedListOutlined,
@@ -59,6 +60,55 @@ let queryFilter = [
   { name: 'status', label: '监控状态', type: 'select' },
   { name: 'ip', label: 'IP地址', type: 'input' },
 ];
+
+/** 在组织树中查找分组节点 id 从根到该节点的路径（展开祖先链后子节点与 type_list 才可见） */
+function findGroupPathToId(
+  nodes: any[],
+  targetId: number | string,
+  path: (number | string)[] = [],
+): (number | string)[] | null {
+  if (!nodes?.length) return null;
+  for (const node of nodes) {
+    const nextPath = [...path, node.id];
+    if (node.id == targetId) return nextPath;
+    if (node.sub_groups?.length) {
+      const found = findGroupPathToId(node.sub_groups, targetId, nextPath);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function isValidMonitorTissueId(tissueId: unknown): boolean {
+  if (tissueId == null || tissueId === '') return false;
+  if (tissueId === -1 || tissueId === '-1') return false;
+  if (Number(tissueId) === -1) return false;
+  return true;
+}
+
+/** 根据当前选中（叶子父分组 parId 或仅分组 tissueId）计算应在监控组织树中展开的节点 id */
+function getMonitorTreeExpandIdsForSelection(
+  treeList: any[],
+  parId: unknown,
+  tissueId: unknown,
+): Set<number | string> {
+  const firstLevel = new Set(treeList.map((n: any) => n.id));
+  let targetId: number | string | null = null;
+  if (parId != null && String(parId) !== '') {
+    targetId = parId as number | string;
+  } else if (isValidMonitorTissueId(tissueId)) {
+    targetId = tissueId as number | string;
+  }
+  if (targetId == null) {
+    return firstLevel;
+  }
+  const path = findGroupPathToId(treeList, targetId);
+  if (!path?.length) {
+    return firstLevel;
+  }
+  return new Set(path);
+}
+
 export default function () {
   const { t } = useTranslation('assets');
   const [list, setList] = useState<any[]>([]);
@@ -85,8 +135,15 @@ export default function () {
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
   const { search } = useLocation();
+  const location = useLocation();
   const { assetId } = queryString.parse(search);
   const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
+  // 当页面通过 url 带了 assetId 时，只在首次进入时根据该 asset 初始化 typeId/searchVal；
+  // 避免后续点击左侧组织树触发 getTableData 后重复覆盖，从而产生“双接口调用”。
+  const didInitAssetIdRef = useRef(false);
+  // 只有当用户实际点击了左侧组织树后，才允许在带 assetId 的情况下也传递 assetType 参数
+  // （避免改变你“首次进入带 assetId”的原始请求参数行为）。
+  const didClickTreeRef = useRef(false);
   // 若从其它页面跳转过来未携带 assetId：首次请求列表时不应该带上本地缓存的 typeId（assetType）
   const skipTypeIdOnFirstFetchRef = useRef<boolean>(assetId == null);
 
@@ -123,6 +180,35 @@ export default function () {
     setSelectedAssets([]);
     setSelectedAssetsName([]);
   };
+  const renderHeaderHelpContent = (field: string, description: string) => (
+    <div className='asset-header-help-tooltip'>
+      <div className='asset-header-help-tooltip-field'>{field}</div>
+      <div className='asset-header-help-tooltip-description'>{description}</div>
+    </div>
+  );
+
+  const renderHeaderHelpTitle = (label: string, field: string, description: string) => (
+    <span className='asset-header-help-title'>
+      <span>{label}</span>
+      <Tooltip placement='top' title={renderHeaderHelpContent(field, description)}>
+        <span
+          className='asset-header-help-icon'
+          onClick={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          <QuestionCircleOutlined />
+        </span>
+      </Tooltip>
+    </span>
+  );
+
+  const getColumnLabel = (column: any) => {
+    if (column?.columnLabel) {
+      return column.columnLabel;
+    }
+    return typeof column?.title === 'string' ? column.title : '';
+  };
+
   const baseColumns: any[] = [
     {
       title: '监控名称',
@@ -202,7 +288,7 @@ export default function () {
       },
     },
   ];
-  const choooseColumns = [
+  const rawChooooseColumns = [
     {
       title: '描述',
       width: '105px',
@@ -245,6 +331,16 @@ export default function () {
       },
     },
   ];
+  const choooseColumns = rawChooooseColumns.map((column) => {
+    if (column.dataIndex !== 'status') {
+      return column;
+    }
+    return {
+      ...column,
+      columnLabel: '监控状态',
+      title: renderHeaderHelpTitle('监控状态', '监控状态', '反映资产对应指标检测是否正常的状态。'),
+    };
+  });
   const fixColumns: any[] = [
     {
       title: '操作',
@@ -330,6 +426,7 @@ export default function () {
                     start: moment().subtract(30, 'minutes').unix(),
                     end: moment().add(30, 'minutes').unix(),
                   }),
+                  state: { isops: true },
                 });
               }}
             />
@@ -385,7 +482,7 @@ export default function () {
   function handelShowColumn(checkedValues) {
     let showColumns = new Array();
     optionColumns.forEach((item) => {
-      if (checkedValues.includes(item.title)) {
+      if (checkedValues.includes(getColumnLabel(item))) {
         showColumns.push(item);
       }
     });
@@ -444,6 +541,12 @@ export default function () {
     // treeQuery['groupIds'] = groupIds?.toString()
     // treeQuery['query'] = searchVal?searchVal:undefined;
     // treeQuery['filter'] = filterParam?filterParam:undefined;
+    if (searchVal != null && searchVal.length > 0) {
+      treeQuery['query'] = searchVal
+    }
+    if (filterParam2 != null && filterParam2.length > 0 && searchVal != null && searchVal.length > 0) {
+      treeQuery['filter'] = filterParam2;
+    }
     getMonitortree(treeQuery).then(res => {
       // getAssetstypesNew(treeQuery).then(res => {
       const { dat } = res
@@ -464,8 +567,15 @@ export default function () {
       setTreeList(processDat)
     })
   }
-  // 资产组织树：展开状态由页面传入，仅页面刷新或重新进入路由时展开第一层，点击树/新增分组等保持最新状态
   const AssetTree = ({ data, expandedIds, setExpandedIds }) => {
+    // 资产组织树：展开状态由页面传入，仅在首轮初始化完成后才持久化到 localStorage，避免覆盖历史展开记录
+    useEffect(() => {
+      if (!assetTreeInitialExpandDone.current) return;
+      // 首次渲染 expandedIds 可能是空 Set，若此时写入 localStorage，会覆盖离开前的展开状态
+      if (!expandedIds || expandedIds.size === 0) return;
+      localStorage.setItem('expandedIds', JSON.stringify([...expandedIds]));
+    }, [expandedIds]);
+
     const handleToggle = (nodeId) => {
       setExpandedIds((prev) => {
         const newSet = new Set(prev);
@@ -682,12 +792,14 @@ export default function () {
     //资产类型操作
     setCurrent(1);
     localStorage.setItem('left_asset_type', item.id);
+    // 标记：只有用户点击左侧树后，才允许在带 assetId 的模式下补上传 assetType
+    didClickTreeRef.current = true;
     setRefreshKey(_.uniqueId('refreshKey_'));
   }
   useEffect(() => {
     setSecondAddButton(false);
     setOptionColumns(baseColumns.concat(choooseColumns));
-    let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map((obj) => obj.title)));
+    let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map((obj) => getColumnLabel(obj))));
     setDefaultValues(modelIds);
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
     getAssetstypes().then(({ dat }) => {
@@ -743,15 +855,44 @@ export default function () {
   }, [searchVal, refreshFlag, typeId, refreshKey]);
 
   useEffect(() => {
+    didInitAssetIdRef.current = false;
+    didClickTreeRef.current = false;
+  }, [currentAssetId]);
+
+  useEffect(() => {
     getAssetTree()
   }, [searchVal]);
 
-  // 首次挂载且树数据到位时：
-  // - 没有 currentAssetId（正常从菜单进来）：默认展开第一层
-  // - 有 currentAssetId（外部带 assetId 进来）：从 localStorage.expandedIds 恢复展开状态
   useEffect(() => {
     if (!treeList?.length || assetTreeInitialExpandDone.current) return;
     assetTreeInitialExpandDone.current = true;
+
+    const fromOpsForm = (location.state as { isops?: boolean } | null)?.isops === true;
+    console.log('fromOpsForm', fromOpsForm);
+    
+
+    // 从监控表单返回（携带 state.isops）时：按照当前选中分组/类型恢复展开 + 合并历史 expandedIds
+    if (fromOpsForm) {
+      const pathExpand = getMonitorTreeExpandIdsForSelection(treeList, parId, tissueId);
+      const merged = new Set(pathExpand);
+      try {
+        const raw = localStorage.getItem('expandedIds');
+        if (raw) {
+          const ids = JSON.parse(raw) as (number | string)[];
+          if (Array.isArray(ids)) {
+            ids.forEach((id) => merged.add(id));
+          }
+        }
+      } catch {
+        // ignore
+      }
+      setAssetTreeExpandedIds(merged);
+      return;
+    }
+
+    // 首次挂载且树数据到位时：
+    // - 没有 currentAssetId（正常从菜单进来）：默认展开第一层
+    // - 有 currentAssetId（外部带 assetId 进来）：从 localStorage.expandedIds 恢复展开状态
     if (currentAssetId && currentAssetId > 0) {
       try {
         const saved = localStorage.getItem('expandedIds');
@@ -791,12 +932,17 @@ export default function () {
       //   param['assetType'] = typeId;
       // }
     }
-
-
     const parentId = localStorage.getItem('left_parId')
     // 未带 assetId 首次进入页面时：不带 assetType（TypeId）做首次查询，避免“进来就被历史 typeId 过滤”
     const shouldSkipAssetTypeThisFetch = skipTypeIdOnFirstFetchRef.current && currentAssetId <= 0;
-    if (!shouldSkipAssetTypeThisFetch && currentAssetId <= 0 && typeId != null && typeId + '' != '0' && parentId) {
+    // 当 URL 带 assetId 时（currentAssetId > 0），点击树节点后也应补上传 assetType
+    if (
+      !shouldSkipAssetTypeThisFetch &&
+      typeId != null &&
+      typeId + '' != '0' &&
+      parentId &&
+      (currentAssetId <= 0 || didClickTreeRef.current)
+    ) {
       param['assetType'] = typeId;
     }
     if (tissueId != null && !parentId) {
@@ -841,7 +987,10 @@ export default function () {
         setList(dat.list || []);
         setTotal(dat.total);
       }
-      if (currentAssetId > 0) {
+      // 当通过 URL 带 assetId 进入时，只需要初始化一次 typeId/searchVal；
+      // 后续点击左侧组织树也会触发 getTableData，从而重复 getXhAsset 并造成二次接口调用。
+      if (currentAssetId > 0 && !didInitAssetIdRef.current) {
+        didInitAssetIdRef.current = true;
         getXhAsset('' + currentAssetId).then(({ dat }) => {
           setTypeId(dat.type);
           setFilterParam('ip');
@@ -861,9 +1010,9 @@ export default function () {
     <div>
       <Checkbox.Group defaultValue={defaultValues} style={{ width: '100%' }} onChange={handelShowColumn}>
         {optionColumns.map((item) => (
-          <Row key={item.title} style={{ marginBottom: '5px' }}>
+          <Row key={getColumnLabel(item)} style={{ marginBottom: '5px' }}>
             <Col span={24}>
-              <Checkbox value={item.title}>{item.title}</Checkbox>
+              <Checkbox value={getColumnLabel(item)}>{getColumnLabel(item)}</Checkbox>
             </Col>
           </Row>
         ))}
@@ -883,7 +1032,11 @@ export default function () {
       history.push(`/xh/monitor/add?type=monitor&id=${id}&action=monitor`);
     } else if (action == 'rules') {
       let asset = assetInfo[id];
-      history.push(`/alert-rules?id=${asset.group_id}&&asset_id=${id}`);
+      history.push({
+        pathname: `/alert-rules`,
+        search: `?id=${asset.group_id}&&asset_id=${id}`,
+        state: { isops: true },
+      });
     }
   };
   const titleRender = (node) => {
@@ -928,7 +1081,7 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack={assetId ? true : false}>
+    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack={assetId ? true : false}  backPath="/xh/assetmgt" backState={{ isops: true }}>
       <div style={{ display: 'flex' }} className='monitor_list_view'>
         <Resizable
           style={{

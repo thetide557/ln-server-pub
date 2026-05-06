@@ -34,7 +34,9 @@ export interface User {
   create_by: number;
   update_at: number;
   update_by: number;
-}
+  lock_enabled: boolean | number;
+  temp_user_expire_at: any;
+ }
 export interface Team {
   id: string;
   name: string;

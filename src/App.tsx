@@ -58,6 +58,8 @@ interface IProfile {
   portrait: string;
   contacts: { string?: string };
   board_id: number;
+  temp_remaining_days?: number;
+  password_valid_days?: number;
 }
 
 interface Datasource {
@@ -219,7 +221,7 @@ function App() {
         const busiGroups = localStorage.getItem('groupIds')?.split(',').map(id => Number(id));
         let data = JSON.parse(e.data);
         if (busiGroups?.includes(data.dat[0].group_id)) {
-          setWarnModalShow(false)
+          // setWarnModalShow(false)
           message.error("有设备发生告警信息")
           if (audioRef?.current) {
             audioRef?.current.play();

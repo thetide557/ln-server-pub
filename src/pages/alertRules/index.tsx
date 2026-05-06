@@ -35,14 +35,24 @@ export { Add, Edit };
 export default function index() {
   const commonState = useContext(CommonStateContext);
   const { t } = useTranslation('alertRules');
-  const { search } = useLocation();
+  const location = useLocation();
+  const { search } = location;
   const history = useHistory();
   const { id,asset_id } = queryString.parse(search);
   const bgid = id ? Number(id) : commonState.curBusiId;  
   const assetid = asset_id ? Number(asset_id) : 0;
+  const fromXhMonitor = (location.state as { isops?: boolean } | null)?.isops === true;
+  // 只有从 /xh/monitor 跳转过来的，返回时才固定回 /xh/monitor；否则保持 PageLayout 默认 goBack。
+  const backPath = fromXhMonitor ? '/xh/monitor' : undefined;
+  const backState = backPath ? { isops: true } : undefined;
 
   return (
-    <PageLayout title={t('title')} icon={<SettingOutlined />} showBack={assetid ? true : false}>
+    <PageLayout
+      title={t('title')}
+      icon={<SettingOutlined />}
+      showBack={assetid ? true : false}
+      {...(backPath ? { backPath, backState } : {})}
+    >
       <div className='alert-rules-container'>
         <BusinessGroup
         

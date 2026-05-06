@@ -369,12 +369,61 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       },
     };
 
-  }
+  };
+
+  // 网络设备 OID 导入：弹窗与「导入设备」一致，导出模板 / 上传接口不同
+  const assetOidBatchImportDetail = () => {
+    return {
+      isFormItem: true,
+      operateTitle: '网络设备导入',
+      render() {
+        return (
+          <Form.Item label="选择文件" name="file" rules={[{ required: true }]}>
+            <div key={Math.random()} style={{ display: 'inline-flex', gap: '8px' }}>
+              <Input value={fileName} style={style.style1}></Input>
+              <Upload {...props}>
+                <Button type="primary">
+                  <Icon type="upload" />浏览
+                </Button>
+              </Upload>
+              <Button
+                className='down_load_button'
+                onClick={() => {
+                  const url = '/api/n9e/xh/asset-oid/templet';
+                  const query =
+                    assets && assets.length > 0 ? { asset_ids: assets.join(',') } : {};
+                  const exportTitle = '网络设备';
+                  exportTemplet(url, {}, query).then((res) => {
+                    const blobUrl = window.URL.createObjectURL(
+                      new Blob([res], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                      }),
+                    );
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    const dlName =
+                      exportTitle + '导入模板_' + moment().format('MMDDHHmmss') + '.xls';
+                    link.setAttribute('download', dlName);
+                    document.body.appendChild(link);
+                    link.click();
+                  });
+                }}
+                style={{ border: '0px solid #fff', fontSize: '14px', color: '#40A2EC' }}
+              >
+                下载模板
+              </Button>
+            </div>
+          </Form.Item>
+        );
+      },
+    };
+  };
 
   const operateDetail = {
     bindTagDetail,
     unbindTagDetail,
     assetBatchImportDetail,
+    assetOidBatchImportDetail,
     updateBusiDetail,
     removeBusiDetail,
     updateNoteDetail,
@@ -428,7 +477,21 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
         reloadList(null,operateType);
       })   
     
-    }else if(operateType === OperateType.AssetBatchExport) {
+    } else if (operateType === OperateType.AssetOidBatchImport) {
+      if (fileList == null || fileList.length == 0) {
+        message.error('请选择要导入的文件');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', fileList[0]);
+      const url = '/api/n9e/xh/asset-oid/import-xls';
+      importXhAssetSetData(url, formData).then(() => {
+        message.success('批量导入成功');
+        setFileName('');
+        setFileList([]);
+        reloadList(null, operateType);
+      });
+    } else if(operateType === OperateType.AssetBatchExport) {
       console.log(assetsList,names);
       let params:any = {};
       // params.ftype = 1;

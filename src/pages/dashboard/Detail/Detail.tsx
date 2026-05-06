@@ -231,6 +231,20 @@ export default function DetailV2(props: IProps) {
     }
   }, 2000);
 
+  useEffect(() => {
+    if (profile?.roles?.includes("Admin")) return;
+    const hasReminded = localStorage.getItem('password_expiry_reminded');
+    if (!hasReminded && profile?.password_valid_days && profile?.password_valid_days < 8) {
+      localStorage.setItem('password_expiry_reminded', 'true');
+      Modal.warning({
+        title: '密码有效期提醒',
+        content: `密码即将过期，请及时更新！`,
+        okType: 'primary',
+        okText: '确定'
+      });
+    }
+  }, []);
+
   return (
     <PageLayout
       customArea={

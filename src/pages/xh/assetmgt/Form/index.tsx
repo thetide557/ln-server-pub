@@ -23,6 +23,24 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 const { TextArea } = Input;
+const PASSWORD_PLACEHOLDER_VALUE = 'haveValue';
+
+const ControlledPasswordField = ({ placeholder, value, onChange, hasStoredValue, onDraftChange }) => {
+  const currentValue = value === PASSWORD_PLACEHOLDER_VALUE ? '' : value || '';
+
+  const handleChange = (e) => {
+    const nextValue = e.target.value;
+    const formValue = !nextValue && hasStoredValue ? PASSWORD_PLACEHOLDER_VALUE : nextValue;
+    onDraftChange?.(nextValue);
+    onChange?.({
+      target: {
+        value: formValue,
+      },
+    });
+  };
+
+  return <Input.Password value={currentValue} onChange={handleChange} placeholder={placeholder || '请输入密码'} />;
+};
 
 export default function () {
   const { t } = useTranslation('assets');
@@ -32,6 +50,9 @@ export default function () {
   const [tabIndex, setTabIndex] = useState<string>('base_set');
   const [editType, setEditType] = useState<string>('insert');
   const history = useHistory();
+  const backToAssetList = () => {
+    history.push({ pathname: '/xh/assetmgt', state: { isops: true } });
+  };
 
   const [hasSave, setHasSave] = useState<boolean>(true);
 
@@ -340,11 +361,18 @@ export default function () {
           delete dat.exps;
         }
         console.log("dat===",dat)
-        setFields_with_a_password_entered(dat.params.fields_with_a_password_entered)
+        const passwordFields = dat?.params?.fields_with_a_password_entered || [];
+        const formData = _.cloneDeep(dat);
+        passwordFields.forEach((fieldName) => {
+          if (_.isNil(formData?.params?.[fieldName]) || formData.params[fieldName] === '') {
+            formData.params[fieldName] = PASSWORD_PLACEHOLDER_VALUE;
+          }
+        });
+        setFields_with_a_password_entered(passwordFields)
         const params = { ident: dat.ip }
         setAssetData({ ...dat, ...params });
         form.resetFields();
-        form.setFieldsValue(dat);
+        form.setFieldsValue(formData);
         setCurrentType(dat.type);
       });
     }
@@ -436,7 +464,7 @@ export default function () {
     if (editType !== 'edit') {
       await insertXHAsset(assetData);
       message.success('添加成功');
-      history.goBack();
+      backToAssetList();
     } else {
       console.log("submitForm====",assetData,map)
       const keys = Object.keys(map)
@@ -469,24 +497,28 @@ export default function () {
       if (form.getFieldsValue().asset_position) {
         saveMaintenanceInfo();
       }
-      history.goBack();
+      backToAssetList();
       // loadAssetInfo(id);
     }
   };
   let map = {}
-  const AlwaysShowPlaceholderPassword = ({ placeholder, form, name }) => {
-    const [value, setValue] = useState('');
+  const AlwaysShowPlaceholderPassword = ({ placeholder, name, value, onChange, hasStoredValue }) => {
     const inputRef = useRef(null);
+    const currentValue = value === PASSWORD_PLACEHOLDER_VALUE ? '' : value || '';
 
     const handleChange = (e) => {
-      const val = e.target.value;
-      setValue(val);
-      map[name] = val
-      console.log('handleChange==',val,form.getFieldsValue())
+      const nextValue = e.target.value;
+      const formValue = !nextValue && hasStoredValue ? PASSWORD_PLACEHOLDER_VALUE : nextValue;
+      map[name] = nextValue
+      onChange?.({
+        target: {
+          value: formValue,
+        },
+      });
     };
 
-    if (value) {
-      return <Input.Password value={value} autoFocus onChange={handleChange} />;
+    if (currentValue) {
+      return <Input.Password value={currentValue} autoFocus onChange={handleChange} />;
     }
 
     return (
@@ -494,7 +526,7 @@ export default function () {
         <Input
           ref={inputRef}
           type="text"
-          value={value}
+          value={currentValue}
           onChange={handleChange}
           style={{
             color: 'transparent',
@@ -511,7 +543,7 @@ export default function () {
             height: '100%',
             display: 'flex',
             alignItems: 'center',
-            color: value ? '#ccc' : '#bfbfbf',
+            color: currentValue ? '#ccc' : '#bfbfbf',
             pointerEvents: 'none',
             fontSize: 12,
             userSelect: 'none',
@@ -530,21 +562,14 @@ export default function () {
     }
     if (v.type === 'password') {
       console.log('password===',form.getFieldsValue(),fields_with_a_password_entered,v)
-      if(fields_with_a_password_entered.includes(v.name)){
-        form.setFields([
-        { name:['params',v.name], value: 'haveValue' }
-      ]);
-      }
       if(mode == 'view'){ //查看
         return <Input.Password key={'v' + v.name} visibilityToggle={false}/>;
       }
       if(mode == 'edit' && id){ //编辑
-        let placeholder = '请输入密码'
-        if(form.getFieldsValue() && form.getFieldsValue().params && form.getFieldsValue().params[v.name]){
-          placeholder = '请输入密码，不输入代表不更新'
-        }
+        const hasStoredValue = fields_with_a_password_entered.includes(v.name);
+        const placeholder = hasStoredValue ? '请输入密码，不输入代表不更新' : '请输入密码'
         
-        return <AlwaysShowPlaceholderPassword form={form} name={v.name} placeholder={placeholder} />
+        return <ControlledPasswordField placeholder={placeholder} hasStoredValue={hasStoredValue} onDraftChange={(nextValue) => { map[v.name] = nextValue; }} />
       }
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
     }
@@ -1247,7 +1272,7 @@ export default function () {
                 </Button>
                 <Button
                   onClick={() => {
-                    history.goBack();
+                    backToAssetList();
                   }}
                 >
                   关闭
@@ -1261,7 +1286,7 @@ export default function () {
         <div className='asset_manage_button_zone'>
           <Button
             onClick={() => {
-              history.goBack();
+              backToAssetList();
             }}
           >
             关闭

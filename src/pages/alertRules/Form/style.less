@@ -27,6 +27,46 @@
   }
 }
 
+.alert-rule-help-label {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.alert-rule-help-label-text {
+  min-width: 0;
+}
+
+.alert-rule-help-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  color: currentColor;
+  opacity: 0.72;
+  cursor: help;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.alert-rule-help-icon:hover {
+  opacity: 1;
+}
+
+.alert-rule-help-tooltip {
+  max-width: 360px;
+}
+
+.alert-rule-help-tooltip-field {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.alert-rule-help-tooltip-description {
+  line-height: 1.5;
+  white-space: normal;
+}
+
 
 
 .alert_strategy {
@@ -90,9 +130,12 @@
     align-items: center;
     .strategy-name {
       flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      min-width: 0;
+      .alert-rule-help-label-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
     .dropdown-icon {
       margin-right: 4px;

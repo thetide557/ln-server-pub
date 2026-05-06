@@ -146,38 +146,87 @@ request.interceptors.response.use(
           });
       }
     } else if (status === 401) {
-      if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
-        location.href = `/login${
-          location.pathname != "/"
-            ? "?redirect=" + location.pathname + location.search
-            : ""
-        }`;
-      } else {
-        Cookies.get("refresh_token")
-          ? UpdateAccessToken().then((res) => {
-              console.log("401 err", res);
-              if (res.err) {
-                location.href = `/login${
-                  location.pathname != "/"
-                    ? "?redirect=" + location.pathname + location.search
-                    : ""
-                }`;
-              } else {
-                const { access_token, refresh_token } = res.dat;
-                Cookies.set("access_token", access_token);
-                Cookies.set("refresh_token", refresh_token);
-                // 嵌入的子项目之前用的local
-                localStorage.setItem('access_token', access_token);
-                localStorage.setItem('refresh_token', refresh_token);
-                location.href = `${location.pathname}${location.search}`;
-              }
-            })
-          : (location.href = `/login${
+      // 先检查响应体中的err_code是否为LOGIN_CONFLICT
+      response.clone().json().then((data) => {
+        if (data?.err_code === 'LOGIN_CONFLICT') {
+          message.error(data.err || '您已在其他地方登录，请重新登录');
+          setTimeout(() => {
+            location.href = `/login${
               location.pathname != "/"
                 ? "?redirect=" + location.pathname + location.search
                 : ""
-            }`);
-      }
+            }`;
+          }, 1000);
+          return;
+        }
+        
+        if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
+          location.href = `/login${
+            location.pathname != "/"
+              ? "?redirect=" + location.pathname + location.search
+              : ""
+          }`;
+        } else {
+          Cookies.get("refresh_token")
+            ? UpdateAccessToken().then((res) => {
+                console.log("401 err", res);
+                if (res.err) {
+                  location.href = `/login${
+                    location.pathname != "/"
+                      ? "?redirect=" + location.pathname + location.search
+                      : ""
+                  }`;
+                } else {
+                  const { access_token, refresh_token } = res.dat;
+                  Cookies.set("access_token", access_token);
+                  Cookies.set("refresh_token", refresh_token);
+                  // 嵌入的子项目之前用的local
+                  localStorage.setItem('access_token', access_token);
+                  localStorage.setItem('refresh_token', refresh_token);
+                  location.href = `${location.pathname}${location.search}`;
+                }
+              })
+            : (location.href = `/login${
+                location.pathname != "/"
+                  ? "?redirect=" + location.pathname + location.search
+                  : ""
+              }`);
+        }
+      }).catch(() => {
+        // 如果解析响应体失败，执行默认的401处理逻辑
+        if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
+          location.href = `/login${
+            location.pathname != "/"
+              ? "?redirect=" + location.pathname + location.search
+              : ""
+          }`;
+        } else {
+          Cookies.get("refresh_token")
+            ? UpdateAccessToken().then((res) => {
+                console.log("401 err", res);
+                if (res.err) {
+                  location.href = `/login${
+                    location.pathname != "/"
+                      ? "?redirect=" + location.pathname + location.search
+                      : ""
+                  }`;
+                } else {
+                  const { access_token, refresh_token } = res.dat;
+                  Cookies.set("access_token", access_token);
+                  Cookies.set("refresh_token", refresh_token);
+                  // 嵌入的子项目之前用的local
+                  localStorage.setItem('access_token', access_token);
+                  localStorage.setItem('refresh_token', refresh_token);
+                  location.href = `${location.pathname}${location.search}`;
+                }
+              })
+            : (location.href = `/login${
+                location.pathname != "/"
+                  ? "?redirect=" + location.pathname + location.search
+                  : ""
+              }`);
+        }
+      });
     } else {
       return response
         .clone()

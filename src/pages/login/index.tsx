@@ -26,6 +26,7 @@ export default function Login() {
     ifShowSso().then((res) => {
       setShowSso(res?.dat?.show);
     });
+    localStorage.removeItem('password_expiry_reminded');
   }, []);
 
   // 在数据未加载完成前，可以显示加载状态或者返回 null
