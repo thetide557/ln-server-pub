@@ -25,6 +25,23 @@ dayjs.extend(customParseFormat);
 const { TextArea } = Input;
 const PASSWORD_PLACEHOLDER_VALUE = 'haveValue';
 
+const ControlledPasswordField = ({ placeholder, value, onChange, hasStoredValue, onDraftChange }) => {
+  const currentValue = value === PASSWORD_PLACEHOLDER_VALUE ? '' : value || '';
+
+  const handleChange = (e) => {
+    const nextValue = e.target.value;
+    const formValue = !nextValue && hasStoredValue ? PASSWORD_PLACEHOLDER_VALUE : nextValue;
+    onDraftChange?.(nextValue);
+    onChange?.({
+      target: {
+        value: formValue,
+      },
+    });
+  };
+
+  return <Input.Password value={currentValue} onChange={handleChange} placeholder={placeholder || '请输入密码'} />;
+};
+
 export default function () {
   const { t } = useTranslation('assets');
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
@@ -552,7 +569,7 @@ export default function () {
         const hasStoredValue = fields_with_a_password_entered.includes(v.name);
         const placeholder = hasStoredValue ? '请输入密码，不输入代表不更新' : '请输入密码'
         
-        return <AlwaysShowPlaceholderPassword name={v.name} placeholder={placeholder} hasStoredValue={hasStoredValue} />
+        return <ControlledPasswordField placeholder={placeholder} hasStoredValue={hasStoredValue} onDraftChange={(nextValue) => { map[v.name] = nextValue; }} />
       }
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
     }
