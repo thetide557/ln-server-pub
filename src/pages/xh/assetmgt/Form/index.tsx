@@ -757,7 +757,7 @@ export default function () {
       last_maintenace_date: timestamp(formData.last_maintenace_date),
       next_maintenace_date: timestamp(formData.next_maintenace_date),
       maintainers: formData.maintainers,
-      alert_status: formData.alert_status,
+      alert_status: 2,
       maintenance_status: formData.maintenance_status,
     }).then((res) => {
       message.success('操作成功');
@@ -1235,7 +1235,7 @@ export default function () {
                     <Input placeholder='请输入维保人员' />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                {/* <Col span={12}>
                   <Form.Item label='维保提醒' name='alert_status' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
@@ -1243,7 +1243,7 @@ export default function () {
                       placeholder='请选择维保提醒'
                     />
                   </Form.Item>
-                </Col>
+                </Col> */}
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                     {/* disabled={maintenanceStatusNum && maintenanceStatusNum != '2'} */}
