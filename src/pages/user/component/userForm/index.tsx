@@ -245,13 +245,13 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           )
         }
         <Col span={12} key={"item-" + 10}>
-          <Form.Item label={'单一会话'} name='single_session' initialValue={0} rules={[
+          <Form.Item label={'单一会话'} name='single_session' initialValue={2} rules={[
             {
               required: true,
             },
           ]}>
             <Select options={[
-              { label: '关闭', value: 0 },
+              // { label: '关闭', value: 0 },
               { label: '启用', value: 1 },
               { label: '禁用', value: 2 },
             ]}>

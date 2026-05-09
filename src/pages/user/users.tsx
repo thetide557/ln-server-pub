@@ -225,9 +225,7 @@ const Resource: React.FC = () => {
       title: t('单一会话'),
       dataIndex: 'single_session',
       render: (val, record) => {
-        if (val === 0) {
-          return "关闭"
-        } else if (val === 1) {
+       if (val === 1) {
           return "启用"
         } else if (val === 2) {
           return "禁用"
