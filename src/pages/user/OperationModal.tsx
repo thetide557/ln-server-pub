@@ -132,7 +132,7 @@ const props = {
               </Upload>
               <Button className='down_load_button'
                 onClick={async event => {
-                  let url = "/api/n9e/xh/users/templet";
+                  let url = "/api/takin/xh/users/templet";
                   let params = {};
                   let exportTitle = "用户";                  
                   exportTemplet(url, params).then((res) => {
@@ -288,7 +288,7 @@ const props = {
       
       let formData = new FormData();
       formData.append("file", fileList[0]);
-      let url = "/api/n9e/xh/users/import-xls";
+      let url = "/api/takin/xh/users/import-xls";
       console.log("批量导入",url);
       importAssetSetData(url, formData).then((res) => {
         message.success('批量导入成功');

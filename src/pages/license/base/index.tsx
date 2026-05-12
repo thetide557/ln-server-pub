@@ -208,7 +208,7 @@ export default function () {
   };
   const handleModal = (action: string, rowKeys: any[] | null) => {
     if (action == "open") {
-      let url = "/api/n9e/xh/license/export-xls";
+      let url = "/api/takin/xh/license/export-xls";
       let exportTitle = "证书";
       let body = {}
       // debugger;

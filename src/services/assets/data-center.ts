@@ -18,34 +18,34 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getDataCenterList = function (params) {
-  return request('/api/n9e/datacenter/list', {
+  return request('/api/takin/datacenter/list', {
     method: RequestMethod.Get,
     params
   });
 };
 export const addDataCenter = function (data) {
-  return request('/api/n9e/datacenter', {
+  return request('/api/takin/datacenter', {
        method: RequestMethod.Post,
        data
   });
 };
 
 export const getDataCenterById = function (id) {
-  return request('api/n9e/datacenter/'+id, {
+  return request('api/takin/datacenter/'+id, {
     method: RequestMethod.Get
   });
 };
 
 
 export const updateDataCenter = function (data) {
-  return request('/api/n9e/datacenter', {
+  return request('/api/takin/datacenter', {
        method: RequestMethod.Put,
        data
   });
 };
 
 export const deleteDataCenter = function (id) {
-  return request('/api/n9e/datacenter/'+id, {
+  return request('/api/takin/datacenter/'+id, {
        method: RequestMethod.Delete
   });
 };

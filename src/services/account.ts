@@ -17,7 +17,7 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-const profileApi = 'api/n9e/self/profile';
+const profileApi = 'api/takin/self/profile';
 // 修改个人信息
 export const UpdateProfile = function (data: object) {
   return request(`/${profileApi}`, {
@@ -32,7 +32,7 @@ export const GetProfile = function () {
   });
 };
 
-const secretApi = 'api/n9e/self/token';
+const secretApi = 'api/takin/self/token';
 // 获取个人秘钥
 export const GetSecret = function () {
   return request(`/${secretApi}`, {
@@ -54,13 +54,13 @@ export const CreateSecret = function () {
 };
 
 export const getUsers = function () {
-  return request('/api/n9e/user/getNames', {
+  return request('/api/takin/user/getNames', {
     method: RequestMethod.Get,
   });
 };
 
 export const updateSelfBoard = function (data) {
-  return request('/api/n9e/self/board', {
+  return request('/api/takin/self/board', {
     method: RequestMethod.Put,
     data,
   });

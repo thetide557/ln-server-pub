@@ -138,7 +138,7 @@ export default function () {
   };
   const handleModal = (action: string, rowKeys: any[] | null, selectLog) => {
     if (action == "open") {
-      let url = "/api/n9e/xh/sys-log/export-xls";
+      let url = "/api/takin/xh/sys-log/export-xls";
       let exportTitle = "系统";
       let params = {}
       if (selectLog != null && selectLog != '0') {

@@ -451,7 +451,7 @@ export default function () {//{ selectMenu?:any }
     if (location.pathname != '/login' && !pathname.startsWith('/callback')) {
       getMyPortrait().then((res) => {
         if (res.dat != null && res.dat != "") {
-          setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
+          setImageUrl(_.cloneDeep("/api/takin/" + res.dat + "?" + Math.random()));
         }
       })
       getDictDataListByType('safety_certification').then((res) => {

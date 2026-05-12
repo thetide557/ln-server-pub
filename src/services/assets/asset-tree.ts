@@ -18,31 +18,31 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const updateAssetCategoryInAsset = function (parentId,assetIds) {
-  return request('/api/n9e/asset-tree/transfer?parent='+parentId, {
+  return request('/api/takin/asset-tree/transfer?parent='+parentId, {
     method: RequestMethod.Post,
     data:assetIds
   });
 };
 
 export const addAssetTree = function (data) {
-  return request('/api/n9e/asset-tree', {
+  return request('/api/takin/asset-tree', {
     method: RequestMethod.Post,
     data
   });
 };
 export const updateAssetTree = function (data) {
-  return request('/api/n9e/asset-tree', {
+  return request('/api/takin/asset-tree', {
     method: RequestMethod.Put,
     data
   });
 };
 export const deleteAssetTree = function (id) {
-  return request('/api/n9e/asset-tree/'+id, {
+  return request('/api/takin/asset-tree/'+id, {
     method: RequestMethod.Delete
   });
 };
 export const getAssetTreeBelongId = function (data) {
-  return request('/api/n9e/asset-tree/asset', {
+  return request('/api/takin/asset-tree/asset', {
     method: RequestMethod.Post,
     data
   });

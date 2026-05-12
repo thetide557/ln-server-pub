@@ -15,7 +15,7 @@
  *
  */
 function getApi(path: string) {
-  const prefix = '/api/n9e/busi-group';
+  const prefix = '/api/takin/busi-group';
   return (busiGroup: string | number) => {
     return `${prefix}/${busiGroup}${path}`;
   }

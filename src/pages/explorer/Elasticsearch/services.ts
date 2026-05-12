@@ -28,7 +28,7 @@ export function getIndices(datasourceValue: number, allow_hide_system_indices = 
   if (allow_hide_system_indices) {
     params.expand_wildcards = 'all';
   }
-  return request(`/api/n9e/proxy/${datasourceValue}/_cat/indices`, {
+  return request(`/api/takin/proxy/${datasourceValue}/_cat/indices`, {
     method: RequestMethod.Get,
     params,
   }).then((res) => {
@@ -44,7 +44,7 @@ export function getFullIndices(datasourceValue: number, target = '*', allow_hide
   if (allow_hide_system_indices) {
     params.expand_wildcards = 'all';
   }
-  return request(`/api/n9e/proxy/${datasourceValue}/_cat/indices/${target}`, {
+  return request(`/api/takin/proxy/${datasourceValue}/_cat/indices/${target}`, {
     method: RequestMethod.Get,
     params,
     silence: true,
@@ -55,7 +55,7 @@ export function getFullIndices(datasourceValue: number, target = '*', allow_hide
 
 export function getFields(datasourceValue: number, index?: string, type?: string, allow_hide_system_indices = false) {
   const url = index ? `/${index}/_mapping` : '/_mapping';
-  return request(`/api/n9e/proxy/${datasourceValue}${url}`, {
+  return request(`/api/takin/proxy/${datasourceValue}${url}`, {
     method: RequestMethod.Get,
     params: _.omit(
       {
@@ -75,7 +75,7 @@ export function getFields(datasourceValue: number, index?: string, type?: string
 
 export function getFullFields(datasourceValue: number, index?: string, type?: string, allow_hide_system_indices = false) {
   const url = index ? `/${index}/_mapping` : '/_mapping';
-  return request(`/api/n9e/proxy/${datasourceValue}${url}`, {
+  return request(`/api/takin/proxy/${datasourceValue}${url}`, {
     method: RequestMethod.Get,
     params: _.omit(
       {
@@ -100,7 +100,7 @@ export function getFullFields(datasourceValue: number, index?: string, type?: st
 }
 
 export function getLogsQuery(datasourceValue: number, requestBody) {
-  return request(`/api/n9e/proxy/${datasourceValue}/_msearch`, {
+  return request(`/api/takin/proxy/${datasourceValue}/_msearch`, {
     method: RequestMethod.Post,
     data: requestBody,
     headers: {
@@ -121,7 +121,7 @@ export function getLogsQuery(datasourceValue: number, requestBody) {
 }
 
 export function getDsQuery(datasourceValue: number, requestBody) {
-  return request(`/api/n9e/proxy/${datasourceValue}/_msearch`, {
+  return request(`/api/takin/proxy/${datasourceValue}/_msearch`, {
     method: RequestMethod.Post,
     data: requestBody,
     headers: {
@@ -134,7 +134,7 @@ export function getDsQuery(datasourceValue: number, requestBody) {
 }
 
 export function getESVersion(datasourceValue: number) {
-  return request(`/api/n9e/proxy/${datasourceValue}`, {
+  return request(`/api/takin/proxy/${datasourceValue}`, {
     method: RequestMethod.Get,
   }).then((res) => {
     const dat = _.get(res, 'version.number');
@@ -143,7 +143,7 @@ export function getESVersion(datasourceValue: number) {
 }
 
 export function getFieldValues(datasourceValue, requestBody, field) {
-  return request(`/api/n9e/proxy/${datasourceValue}/_msearch`, {
+  return request(`/api/takin/proxy/${datasourceValue}/_msearch`, {
     method: RequestMethod.Post,
     data: requestBody,
     headers: {

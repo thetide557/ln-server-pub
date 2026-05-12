@@ -12,7 +12,7 @@ interface IItem {
   status: 'enabled';
 }
 
-const apiPrefix = '/api/n9e/datasource';
+const apiPrefix = '/api/takin/datasource';
 
 export const getDataSourcePluginList = (): Promise<IItem[]> => {
   return request(`${apiPrefix}/plugin/list`, {
@@ -39,7 +39,7 @@ export const submitRequest = (body) => {
   let url = `${apiPrefix}/upsert`;
   const env = (import.meta as any)?.env;
   if (env?.['VITE_IS_PRO']) {
-    url = ' /api/n9e-plus/datasource/upsert';
+    url = ' /api/takin-plus/datasource/upsert';
   }
   const nextBody = _.cloneDeep(body);
   const pwd = _.get(nextBody, ['auth', 'basic_auth_password']);
@@ -67,7 +67,7 @@ export const deleteDataSourceById = (id: string | number) => {
 };
 
 export const getServerClusters = () => {
-  return request('/api/n9e/server-clusters', {
+  return request('/api/takin/server-clusters', {
     method: RequestMethod.Get,
   }).then((res) => res.dat);
 };

@@ -104,13 +104,13 @@ request.interceptors.response.use(
             ) {
               return data;
             } else if (
-              _.some(["/api/n9e/proxy", "/probe/v1"], (item) => {
+              _.some(["/api/takin/proxy", "/probe/v1"], (item) => {
                 return url.includes(item);
               })
             ) {
               return data;
             } else if (
-              _.some(["/api/v1", "/api/v2", "/api/n9e/datasource"], (item) => {
+              _.some(["/api/v1", "/api/v2", "/api/takin/datasource"], (item) => {
                 return url.includes(item);
               })
             ) {
@@ -160,7 +160,7 @@ request.interceptors.response.use(
           return;
         }
         
-        if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
+        if (response.url.indexOf("/api/takin/auth/refresh") > 0) {
           location.href = `/login${
             location.pathname != "/"
               ? "?redirect=" + location.pathname + location.search
@@ -194,7 +194,7 @@ request.interceptors.response.use(
         }
       }).catch(() => {
         // 如果解析响应体失败，执行默认的401处理逻辑
-        if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
+        if (response.url.indexOf("/api/takin/auth/refresh") > 0) {
           location.href = `/login${
             location.pathname != "/"
               ? "?redirect=" + location.pathname + location.search
