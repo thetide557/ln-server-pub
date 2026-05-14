@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import _, { forEach } from 'lodash';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
-import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory ,getAssetShelfHistory} from '@/services/assets';
+import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory, getAssetShelfHistory } from '@/services/assets';
 import { getDictDataListByType } from '@/services/system/dict';
 import { addDictDataBySingle } from '@/services/system/dictdata';
 
@@ -243,10 +243,10 @@ export default function () {
   useEffect(() => {
     // 根据选择资产类型生成表单
     const assetType: any = assetTypes.find((v) => v.name === currentType);
-    
+
     if (assetType) {
       setParams(assetType.form || []); // 显示form表单
-      console.log('assetType.form===',assetType.form)
+      console.log('assetType.form===', assetType.form)
       // http服务鉴权字段处理
       if (currentType == 'HTTP服务') {
         let formData = form.getFieldsValue(true);
@@ -360,7 +360,7 @@ export default function () {
           });
           delete dat.exps;
         }
-        console.log("dat===",dat)
+        console.log("dat===", dat)
         const passwordFields = dat?.params?.fields_with_a_password_entered || [];
         const formData = _.cloneDeep(dat);
         passwordFields.forEach((fieldName) => {
@@ -369,7 +369,7 @@ export default function () {
           }
         });
         setFields_with_a_password_entered(passwordFields)
-        const params = { ident: dat.ip }
+        const params = { ident: dat.ident }
         setAssetData({ ...dat, ...params });
         form.resetFields();
         form.setFieldsValue(formData);
@@ -379,8 +379,16 @@ export default function () {
   };
 
   const handleChange = useCallback((value: string) => {
-    form.setFieldsValue({ ident: value });
-  }, [form]);
+    const selectedOption = assetOptions.find((option) => option.value === value);
+    if (selectedOption) {
+      form.setFieldsValue({ ident: selectedOption.name, ip: selectedOption.ip });
+      setAssetData((prev) => ({ ...prev, ident: selectedOption.name, ip: selectedOption.ip }));
+    } else {
+      // 手动输入或清除时，清空 ident
+      form.setFieldsValue({ ident: undefined });
+      setAssetData((prev) => ({ ...prev, ident: undefined, ip: value }));
+    }
+  }, [form, assetOptions]);
 
   // const mockVal = (str: string) => ({
   //   value: assetOptions.indexOf(str) === 0
@@ -400,7 +408,7 @@ export default function () {
   //     setAssetOptions(assetOptions1)
   //   }
   // }
-  
+
   useEffect(() => {
     const loadData = async () => {
       const { dat } = await getAssetstypes();
@@ -427,9 +435,11 @@ export default function () {
       const res = await getAssetsByCondition(param);
       const options = res.dat?.list.map((v) => ({
         key: v.id,
-        value: v.ip,
+        value: v.id,
         label: `[${v.type}]-[${v.ip}]-${v.name}`,
         type: v.type,
+        name: v.name,
+        ip: v.ip,
       })).sort((a, b) => localeCompare(a.label, b.label))
         .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
 
@@ -460,13 +470,13 @@ export default function () {
     if (assetData.is_shelf === true) {
       assetData.shelf_reason = ''
     }
-    
+
     if (editType !== 'edit') {
       await insertXHAsset(assetData);
       message.success('添加成功');
       backToAssetList();
     } else {
-      console.log("submitForm====",assetData,map)
+      console.log("submitForm====", assetData, map)
       const keys = Object.keys(map)
       keys.forEach(key => {
         assetData.params[key] = map[key]
@@ -556,19 +566,19 @@ export default function () {
     );
   };
   const renderFormItem = (v) => {
-    
+
     if (v.type === 'select') {
       return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options} onChange={onSelectChange}></Select>;
     }
     if (v.type === 'password') {
-      console.log('password===',form.getFieldsValue(),fields_with_a_password_entered,v)
-      if(mode == 'view'){ //查看
-        return <Input.Password key={'v' + v.name} visibilityToggle={false}/>;
+      console.log('password===', form.getFieldsValue(), fields_with_a_password_entered, v)
+      if (mode == 'view') { //查看
+        return <Input.Password key={'v' + v.name} visibilityToggle={false} />;
       }
-      if(mode == 'edit' && id){ //编辑
+      if (mode == 'edit' && id) { //编辑
         const hasStoredValue = fields_with_a_password_entered.includes(v.name);
         const placeholder = hasStoredValue ? '请输入密码，不输入代表不更新' : '请输入密码'
-        
+
         return <ControlledPasswordField placeholder={placeholder} hasStoredValue={hasStoredValue} onDraftChange={(nextValue) => { map[v.name] = nextValue; }} />
       }
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
@@ -576,34 +586,34 @@ export default function () {
     if (v.type === 'checkbox') {
       return <Checkbox onChange={onCheckChange}></Checkbox>;
     }
-    if(form.getFieldsValue() && form.getFieldsValue().type && form.getFieldsValue().type == '宿主机'
-  && v.name === 'user'){
-      console.log("suzhuji",v.name)
+    if (form.getFieldsValue() && form.getFieldsValue().type && form.getFieldsValue().type == '宿主机'
+      && v.name === 'user') {
+      console.log("suzhuji", v.name)
       return (
-      <>
-        <Input
-          key={'v' + v.name}
-          placeholder={`请填写${v.label}`}
-          name={v.name}
-          onChange={(e) => {
-            const value = e.target.value;
-            setShowRootWarning(value === 'root'); // 仅当输入 root 时显示提示
-          }}
-        />
-        {showRootWarning && (
-          <div
-            style={{
-              color: '#faad14',
-              fontSize: 12,
-              marginTop: 4,
-              lineHeight: '16px',
+        <>
+          <Input
+            key={'v' + v.name}
+            placeholder={`请填写${v.label}`}
+            name={v.name}
+            onChange={(e) => {
+              const value = e.target.value;
+              setShowRootWarning(value === 'root'); // 仅当输入 root 时显示提示
             }}
-          >
-            请慎用 root 账号，建议使用已开通的监控账号。
-          </div>
-        )}
-      </>
-    );
+          />
+          {showRootWarning && (
+            <div
+              style={{
+                color: '#faad14',
+                fontSize: 12,
+                marginTop: 4,
+                lineHeight: '16px',
+              }}
+            >
+              请慎用 root 账号，建议使用已开通的监控账号。
+            </div>
+          )}
+        </>
+      );
     }
     return <Input key={'v' + v.name} placeholder={`请填写${v.label}`} name={v.name} />;
   };
@@ -665,12 +675,12 @@ export default function () {
   };
 
   const updateData = (changedValues, values) => {
-    // console.log(changedValues);
-    // console.log(values);
-    // const params = { ident: values.ip }
-    // setAssetData({ ...assetData, ...values, ...params });
-    const params = { ident: values.ip }
-    setAssetData({ ...assetData, ...values });
+    // 如果 values 中有 ident，使用 values.ident；否则保持 assetData.ident 不变
+    const newData = { ...assetData, ...values };
+    if (!values.hasOwnProperty('ident')) {
+      newData.ident = assetData.ident;
+    }
+    setAssetData(newData);
   };
 
   // IP地址校验规则
@@ -854,8 +864,8 @@ export default function () {
     setAssetReleaseModalOpen(true);
   }
   // 获取资产上下架历史
-  const getAssetReleaseHistory = (date?: number) => { 
-    getAssetShelfHistory({ asset_id: _.toNumber(id) ,date}).then((res) => {
+  const getAssetReleaseHistory = (date?: number) => {
+    getAssetShelfHistory({ asset_id: _.toNumber(id), date }).then((res) => {
       setAssetReleaseHistory(res.dat?.dat);
     });
   }
@@ -925,31 +935,37 @@ export default function () {
                     <Input placeholder='请输入IP地址' />
                   </Form.Item> */}
                   <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }, { validator: validateIP }]}>
-                    {/* <Select
+                    <Select
                       showSearch
-                      options={assetOptions}
+                      filterOption={(input, option) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                      }
+                      allowClear={true}
+                      options={sortedAssetOptions}
+                      optionFilterProp={"label"}
                       placeholder='请选择IP地址'
                       onChange={handleChange}
-                      // onChange={(v) => {
-                      //   onAssetChange({
-                      //     includes: v !== 0 ? [v] : [],
-                      //     excludes: form.getFieldValue('excludes'),
-                      //   });
-                      //   buildPromqlWithAsset({});
-                      //   setShowExcludes(v === 0);
-                      // }}
-                    /> */}
-                    <AutoComplete
+                      disabled={currentType === "物理服务器" || currentType === "虚拟服务器"}
+                    // onChange={(v) => {
+                    //   onAssetChange({
+                    //     includes: v !== 0 ? [v] : [],
+                    //     excludes: form.getFieldValue('excludes'),
+                    //   });
+                    //   buildPromqlWithAsset({});
+                    //   setShowExcludes(v === 0);
+                    // }}
+                    />
+                    {/* <AutoComplete
                       allowClear={true}
                       disabled={currentType === "物理服务器" || currentType === "虚拟服务器"}
                       options={sortedAssetOptions}
                       onChange={handleChange}
                       // onSearch={(text) => getPanelValue(text)}
                       filterOption={(inputValue, assetOptions) =>
-                        assetOptions!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                        assetOptions!.ip.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                       }
                       placeholder="请输入IP地址"
-                    />
+                    /> */}
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -1027,48 +1043,48 @@ export default function () {
                   <Form.Item label='管理状态' name='is_shelf' rules={[{ required: true }]} initialValue={true}>
                     <Select
                       style={{ width: '100%' }}
-                      allowClear 
+                      allowClear
                       placeholder='请选择管理状态'
                     >
                       {mode === 'view' ? (
                         // 查看模式：已上架、已下架
                         <>
-                          <Select.Option value={true}>已上架</Select.Option> 
-                          <Select.Option value={false}>已下架</Select.Option> 
+                          <Select.Option value={true}>已上架</Select.Option>
+                          <Select.Option value={false}>已下架</Select.Option>
                         </>
                       ) : (
                         // 编辑/新增模式：上架资产、下架资产
                         <>
-                          <Select.Option value={true}>上架资产</Select.Option> 
-                          <Select.Option value={false}>下架资产</Select.Option> 
+                          <Select.Option value={true}>上架资产</Select.Option>
+                          <Select.Option value={false}>下架资产</Select.Option>
                         </>
                       )}
                     </Select>
                   </Form.Item>
                   {mode === 'view' && (
-                  <span className='hsBtn' style={{fontSize:'12px',position:'absolute',left:'76%',top:'15%'}} onClick={showAssetReleaseHistory} >上下架历史</span>
+                    <span className='hsBtn' style={{ fontSize: '12px', position: 'absolute', left: '76%', top: '15%' }} onClick={showAssetReleaseHistory} >上下架历史</span>
                   )}
                 </Col>
                 {form.getFieldValue('is_shelf') === false && (
                   <Col span={24}>
-                    <Form.Item 
+                    <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 17 }}
-                      label='下架原因' 
-                      name='shelf_reason' 
+                      label='下架原因'
+                      name='shelf_reason'
                       rules={[{
                         required: true,
                         message: '请填写下架原因'
                       }]}
                     >
-                      <Input.TextArea 
-                        placeholder='请填写下架原因' 
+                      <Input.TextArea
+                        placeholder='请填写下架原因'
                         rows={4}
                       />
                     </Form.Item>
                   </Col>
                 )}
-                
+
               </Row>
             </Card>
             {params.length > 0 && (
@@ -1077,7 +1093,7 @@ export default function () {
                   {params.map((v) => {
                     return (
                       <Col span={12} key={`col-${v.name}`}>
-                        <Form.Item  
+                        <Form.Item
                           label={v.label}
                           name={['params', v.name]}
                           key={`formitem=${v.name}`}
@@ -1453,30 +1469,30 @@ export default function () {
       <Modal title="资产上下架历史" width='50%' footer={null} visible={assetReleaseModalOpen} onOk={() => { setAssetReleaseModalOpen(false) }} onCancel={() => { setAssetReleaseModalOpen(false) }}>
         <div style={{ marginBottom: '1rem' }}>
           <span>选择日期&nbsp;&nbsp;</span>
-          <DatePicker allowClear  format='YYYY-MM-DD' style={{ width: '30%' }} onChange={assetReleaseDateChange} placeholder='请选择上下架日期' />
+          <DatePicker allowClear format='YYYY-MM-DD' style={{ width: '30%' }} onChange={assetReleaseDateChange} placeholder='请选择上下架日期' />
         </div>
-        <div style={{ marginLeft: '2rem'}}>
-        <div style={{ marginBottom: '.5rem' }}>共{assetReleaseHistory.length}条记录</div>
-        <Timeline style={{ maxHeight: '500px', overflowY: 'auto', padding: '.5rem 0' }}>
-          {
-            assetReleaseHistory.length && (
-              assetReleaseHistory.map((x, index) => {
-                return (
-                  <Timeline.Item key={index} color="#2977d7">
-                    <Space>
-                      <span>{moment.unix(x.operation_time).format('YYYY-MM-DD HH:mm:ss')} </span>
-                      <Tag color={x.is_shelf ? "success" : "default"}>{x.is_shelf ? "上架资产" : "下架资产"} </Tag>
-                    </Space>
-                    <div style={{ margin: '.5rem 0' }}>操作人：{x.operator}</div>
-                    {!x.is_shelf && (
-                      <div style={{ padding: '.5rem 0', background: '#F2F8FF' }}>下架原因：{x.reason}</div>
-                    )}
-                  </Timeline.Item>
-                )
-              })
-            )
-          }
-        </Timeline>
+        <div style={{ marginLeft: '2rem' }}>
+          <div style={{ marginBottom: '.5rem' }}>共{assetReleaseHistory.length}条记录</div>
+          <Timeline style={{ maxHeight: '500px', overflowY: 'auto', padding: '.5rem 0' }}>
+            {
+              assetReleaseHistory.length && (
+                assetReleaseHistory.map((x, index) => {
+                  return (
+                    <Timeline.Item key={index} color="#2977d7">
+                      <Space>
+                        <span>{moment.unix(x.operation_time).format('YYYY-MM-DD HH:mm:ss')} </span>
+                        <Tag color={x.is_shelf ? "success" : "default"}>{x.is_shelf ? "上架资产" : "下架资产"} </Tag>
+                      </Space>
+                      <div style={{ margin: '.5rem 0' }}>操作人：{x.operator}</div>
+                      {!x.is_shelf && (
+                        <div style={{ padding: '.5rem 0', background: '#F2F8FF' }}>下架原因：{x.reason}</div>
+                      )}
+                    </Timeline.Item>
+                  )
+                })
+              )
+            }
+          </Timeline>
         </div>
       </Modal>
     </div>
