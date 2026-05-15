@@ -436,9 +436,9 @@ export default function () {
       const options = res.dat?.list.map((v) => ({
         key: v.id,
         value: v.id,
-        label: `[${v.type}]-[${v.ip}]-${v.name}`,
+        label: `[${v.type}]-[${v.ip}]-${v.ident}`,
         type: v.type,
-        ident: v.name,
+        ident: v.ident, 
         ip: v.ip,
       })).sort((a, b) => localeCompare(a.label, b.label))
         .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
