@@ -379,16 +379,16 @@ export default function () {
   };
 
   const handleChange = useCallback((value: string) => {
-    const selectedOption = assetOptions.find((option) => option.value === value);
-    if (selectedOption) {
-      form.setFieldsValue({ ident: selectedOption.name, ip: selectedOption.ip });
-      setAssetData((prev) => ({ ...prev, ident: selectedOption.name, ip: selectedOption.ip }));
-    } else {
-      // 手动输入或清除时，清空 ident
-      form.setFieldsValue({ ident: undefined });
-      setAssetData((prev) => ({ ...prev, ident: undefined, ip: value }));
-    }
-  }, [form, assetOptions]);
+    // const selectedOption = assetOptions.find((option) => option.value === value);
+    // if (selectedOption) {
+    //   form.setFieldsValue({ ident: selectedOption.ident, ip: selectedOption.ip });
+    //   setAssetData((prev) => ({ ...prev, ident: selectedOption.ident, ip: selectedOption.ip }));
+    // } else {
+    //   // 手动输入或清除时，清空 ident
+    //   form.setFieldsValue({ ident: undefined });
+    //   setAssetData((prev) => ({ ...prev, ident: undefined, ip: value }));
+    // }
+  }, [form]);
 
   // const mockVal = (str: string) => ({
   //   value: assetOptions.indexOf(str) === 0
@@ -438,7 +438,7 @@ export default function () {
         value: v.id,
         label: `[${v.type}]-[${v.ip}]-${v.name}`,
         type: v.type,
-        name: v.name,
+        ident: v.name,
         ip: v.ip,
       })).sort((a, b) => localeCompare(a.label, b.label))
         .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
@@ -449,6 +449,17 @@ export default function () {
 
     loadData();
   }, [id]);
+
+  useEffect(() => {
+    if (id && assetOptions.length > 0 && assetData) {
+      const selectedOption = assetOptions.find((option) => option.ident === assetData.ident);
+      console.log("selectedOption", selectedOption);
+      if (selectedOption) {
+        form.setFieldsValue({ ip: selectedOption.value });
+        setAssetData((prev) => ({ ...prev, ip: selectedOption.value }));
+      }
+    }
+  }, [assetOptions, assetData.id]);
 
   useEffect(() => {
     if (id) {
@@ -466,27 +477,36 @@ export default function () {
   };
 
   const submitForm = async () => {
-    // 检查管理状态，如果是上架状态则清空下架原因
+    //  检查管理状态，如果是上架状态则清空下架原因
     if (assetData.is_shelf === true) {
       assetData.shelf_reason = ''
     }
+    // ip地址后端需要ip与ident,但ip可能会重复，所以ident只能够通过资产id查询到，所以ip地址下拉框绑定id作为value
+    let paramsData = assetData
+    const selectedOption = assetOptions.find((option) => option.value === assetData.ip);
+    if (selectedOption) {
+      form.setFieldsValue({ ident: selectedOption.ident, ip: selectedOption.ip });
+      setAssetData((prev) => ({ ...prev, ident: selectedOption.ident, ip: selectedOption.ip }));
+      paramsData = { ...paramsData, ident: selectedOption.ident, ip: selectedOption.ip }
+    }
+    console.log("submitForm111", assetData, assetOptions, paramsData)
 
     if (editType !== 'edit') {
-      await insertXHAsset(assetData);
+      await insertXHAsset(paramsData);
       message.success('添加成功');
       backToAssetList();
     } else {
-      console.log("submitForm====", assetData, map)
+      console.log("submitForm====", paramsData, map)
       const keys = Object.keys(map)
       keys.forEach(key => {
-        assetData.params[key] = map[key]
+        paramsData.params[key] = map[key]
       })
-      delete assetData['tags']; // 更新信息不包括tag，格式不符
-      assetData.id = _.toNumber(id);
-      await updateXHAsset(assetData);
+      delete paramsData['tags']; // 更新信息不包括tag，格式不符
+      paramsData.id = _.toNumber(id);
+      await updateXHAsset(paramsData);
       await formItems.map(async (v) => {
         const subItem: any[] = [];
-        const expData = assetData[v.name]; //[{item}]
+        const expData = paramsData[v.name]; //[{item}]
         expData &&
           await expData.map((item) => {
             const groupId = uuidv4();
@@ -571,7 +591,7 @@ export default function () {
       return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options} onChange={onSelectChange}></Select>;
     }
     if (v.type === 'password') {
-      console.log('password===', form.getFieldsValue(), fields_with_a_password_entered, v)
+      // console.log('password===', form.getFieldsValue(), fields_with_a_password_entered, v)
       if (mode == 'view') { //查看
         return <Input.Password key={'v' + v.name} visibilityToggle={false} />;
       }
@@ -685,20 +705,20 @@ export default function () {
 
   // IP地址校验规则
   const validateIP = (rule, value) => {
-    if (value) {
-      const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-      if (!regex.test(value)) {
-        return Promise.reject('请输入合法的IP地址');
-      }
+    // if (value) {
+    //   const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    //   if (!regex.test(value)) {
+    //     return Promise.reject('请输入合法的IP地址');
+    //   }
 
-      const parts = value.split('.').map(Number);
-      if (parts.every(part => part === 0)) {
-        return Promise.reject('请输入合法的IP地址');
-      }
-      if (parts.every(part => part === 255)) {
-        return Promise.reject('请输入合法的IP地址');
-      }
-    }
+    //   const parts = value.split('.').map(Number);
+    //   if (parts.every(part => part === 0)) {
+    //     return Promise.reject('请输入合法的IP地址');
+    //   }
+    //   if (parts.every(part => part === 255)) {
+    //     return Promise.reject('请输入合法的IP地址');
+    //   }
+    // }
     return Promise.resolve();
   };
 
