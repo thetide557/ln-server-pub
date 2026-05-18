@@ -1,6 +1,6 @@
 import { CommonStateContext, initTheme } from '@/App';
 import { getMenuPerm } from '@/services/common';
-import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined } from '@ant-design/icons';
+import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
 import { Dropdown, Menu, Space, Image, message } from 'antd';
 import _ from 'lodash';
@@ -16,7 +16,9 @@ import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getDictDataListByType } from '@/services/system/dict';
+import { downloadTemplet } from '@/services/menu';
 import Cookies from 'js-cookie';
+import moment from 'moment';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -681,6 +683,67 @@ export default function () {//{ selectMenu?:any }
         >
           <Icon type="bell" />
         </span>
+        {/* 帮助文档 - 临时用户和有使用期限的用户不显示 */}
+        {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
+          <Dropdown 
+            overlay={
+              <Menu>
+                <Menu.Item
+                  onClick={() => {
+                    // 操作手册下载接口
+                    const url = '/api/takin/xh/assets/download/manual';
+                    const exportTitle = '操作手册';
+                    downloadTemplet(url).then((res) => {
+                      const blobUrl = window.URL.createObjectURL(
+                      new Blob([res], {
+                        type: 'application/pdf',
+                      }),
+                    );
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    const dlName =
+                      exportTitle + moment().format('YYYY-MM-DD') + '.pdf';
+                      link.setAttribute('download', dlName);
+                      document.body.appendChild(link);
+                      link.click();
+                    });
+                  }}
+                >
+                  <span>操作手册</span>
+                </Menu.Item>
+                <Menu.Item
+                  onClick={() => {
+                    // 版本说明下载接口
+                    const url = '/api/takin/xh/assets/download/version';
+                    const exportTitle = '版本说明'; 
+                    downloadTemplet(url).then((res) => {
+                      const blobUrl = window.URL.createObjectURL(
+                        new Blob([res], {
+                          type: 'application/pdf',
+                        }),
+                      );
+                      const link = document.createElement('a');
+                      link.href = blobUrl;
+                      const dlName =
+                        exportTitle + moment().format('YYYY-MM-DD') + '.pdf';
+                      link.setAttribute('download', dlName);
+                      document.body.appendChild(link);
+                      link.click();
+                    });
+                  }}
+                >
+                  <span>版本说明</span>
+                </Menu.Item>
+              </Menu>
+            } 
+            trigger={['hover']} 
+            className='help-doc'
+          >
+            <span className='help-icon'>
+              <QuestionCircleOutlined />
+            </span>
+          </Dropdown>
+        )}
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
             <img src={imageUrl ? imageUrl : '/image/avatar1.png'} alt='' />
