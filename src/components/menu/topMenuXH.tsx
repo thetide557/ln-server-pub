@@ -127,11 +127,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('巡检管理'),
         },
-        {
-          key: '/inspection/xchgInspection',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('信创检测'),
-        },
+        // {
+        //   key: '/inspection/xchgInspection',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('信创检测'),
+        // },
         // {
         //   key: '/productionplan',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,

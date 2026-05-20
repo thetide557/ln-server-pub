@@ -534,6 +534,13 @@ export default function () {
       ellipsis: true,
       width: 120,
     },
+    {
+      title: '备注',
+      dataIndex: 'memo',
+      align: 'center',
+      ellipsis: true,
+      width: 120,
+    }
   ];
 
   const headerHelpByBaseColumnIndex: Record<number, { field: string; description: string }> = {

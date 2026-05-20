@@ -705,20 +705,20 @@ export default function () {
 
   // IP地址校验规则
   const validateIP = (rule, value) => {
-    // if (value) {
-    //   const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    //   if (!regex.test(value)) {
-    //     return Promise.reject('请输入合法的IP地址');
-    //   }
+    if (value) {
+      const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+      if (!regex.test(value)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
 
-    //   const parts = value.split('.').map(Number);
-    //   if (parts.every(part => part === 0)) {
-    //     return Promise.reject('请输入合法的IP地址');
-    //   }
-    //   if (parts.every(part => part === 255)) {
-    //     return Promise.reject('请输入合法的IP地址');
-    //   }
-    // }
+      const parts = value.split('.').map(Number);
+      if (parts.every(part => part === 0)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+      if (parts.every(part => part === 255)) {
+        return Promise.reject('请输入合法的IP地址');
+      }
+    }
     return Promise.resolve();
   };
 
@@ -954,7 +954,7 @@ export default function () {
                   {/* <Form.Item label='IP地址' name='ip' rules={[{ required: true }]}>
                     <Input placeholder='请输入IP地址' />
                   </Form.Item> */}
-                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }, { validator: validateIP }]}>
+                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }]}>
                     <Select
                       showSearch
                       filterOption={(input, option) =>
@@ -986,6 +986,11 @@ export default function () {
                       }
                       placeholder="请输入IP地址"
                     /> */}
+                  </Form.Item>
+                </Col>
+                 <Col span={12}>
+                  <Form.Item label='资产IP' name='asset_ip' rules={[{ validator: validateIP }]}>
+                    <Input placeholder='请输入资产IP' />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
