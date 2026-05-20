@@ -320,6 +320,13 @@ export default function () {
       },
     },
     {
+      title: '资产IP',
+      dataIndex: 'asset_ip',
+      align: 'center',
+      ellipsis: true,
+      width: 120,
+    },
+    {
       title: '厂商',
       dataIndex: 'manufacturers',
       align: 'center',
