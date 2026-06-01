@@ -148,17 +148,17 @@ request.interceptors.response.use(
     } else if (status === 401) {
       // 先检查响应体中的err_code是否为LOGIN_CONFLICT
       response.clone().json().then((data) => {
-        if (data?.err_code === 'LOGIN_CONFLICT') {
-          message.error(data.err || '您已在其他地方登录，请重新登录');
-          setTimeout(() => {
-            location.href = `/login${
-              location.pathname != "/"
-                ? "?redirect=" + location.pathname + location.search
-                : ""
-            }`;
-          }, 1000);
-          return;
-        }
+        // if (data?.err_code === 'LOGIN_CONFLICT') {
+        //   message.error(data.err || '您已在其他地方登录，请重新登录');
+        //   setTimeout(() => {
+        //     location.href = `/login${
+        //       location.pathname != "/"
+        //         ? "?redirect=" + location.pathname + location.search
+        //         : ""
+        //     }`;
+        //   }, 1000);
+        //   return;
+        // }
         
         if (response.url.indexOf("/api/takin/auth/refresh") > 0) {
           location.href = `/login${

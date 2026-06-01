@@ -244,7 +244,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             </Col>
           )
         }
-        <Col span={12} key={"item-" + 10}>
+        {/* <Col span={12} key={"item-" + 10}>
           <Form.Item label={'单一会话'} name='single_session' initialValue={2} rules={[
             {
               required: true,
@@ -257,7 +257,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             ]}>
             </Select>
           </Form.Item>
-        </Col>
+        </Col> */}
         {/* <Col span={12} key={"item-" + 8}>
           <Form.Item label={'所属团队'} name='group_id' rules={[
               {

@@ -16,7 +16,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { getAssetsByCondition } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
-import { serviceHierarchyOptions, deviceFormOptions } from '../catalog';
+import { factories, serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
 import { timestamp, timestampToCST, isSameDay, getPreviousWeekTimestamp } from '@/utils/day';
 import dayjs from 'dayjs';
@@ -993,19 +993,14 @@ export default function () {
                     <Select
                       style={{ width: '100%' }}
                       allowClear
-                      showSearch
-                      filterOption
-                      optionFilterProp={"label"}
-                      onSearch={(value) => {
-                        setManufacturerSearch(value);
-                      }}
-                      onBlur={() => {
-                        setManufacturerSearch('');
-                      }}
-                      notFoundContent={manufacturerNotFoundContent}
-                      options={manufacturerOptions}
                       placeholder='请选择厂商'
-                    />
+                     showSearch filterOption optionFilterProp={"label"}
+                      options={factories.map(({ key, value }) => ({
+                        label: value,
+                        value: value,
+                      }))}
+                    >
+                    </Select>
                   </Form.Item>
                 </Col>
                 <Col span={12}>
