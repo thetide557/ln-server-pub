@@ -25,7 +25,7 @@ const pageSizeOptionsDefault = ['30', '50', '100', '300'];
 const exportIgnoreAttrsObj = {
   id: undefined,
   group_id: undefined,
-  datasource_ids: undefined,
+  // datasource_ids: undefined,
   create_at: undefined,
   create_by: undefined,
   update_at: undefined,
