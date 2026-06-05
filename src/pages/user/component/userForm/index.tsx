@@ -348,6 +348,13 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
               <Switch
                 checkedChildren="启用"
                 unCheckedChildren="关闭"
+                onChange={(checked) => {
+                  if (checked) {
+                    form.setFieldsValue({ lock_consecutive_days: 90 });
+                  } else {
+                    form.setFieldsValue({ lock_consecutive_days: undefined });
+                  }
+                }}
               />
             </Form.Item>
           </Col>

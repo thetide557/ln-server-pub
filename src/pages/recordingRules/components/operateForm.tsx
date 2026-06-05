@@ -69,7 +69,7 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
               return true;
             }
           });
-        return isInvalid ? Promise.reject(new Error(t('append_tags_msg'))) : Promise.resolve();
+        return isInvalid ? Promise.reject(new Error(t('标签格式不正确，请检查！'))) : Promise.resolve();
       },
     };
   }
@@ -142,7 +142,7 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
               {
                 required: true,
               },
-              { pattern: new RegExp(/^[0-9a-zA-Z_:]{1,}$/, 'g'), message: 'name_msg' },
+              { pattern: new RegExp(/^[0-9a-zA-Z_]{1,}$/, 'g'), message: '指标名称字段限制只能输入英文、数字、下划线' },
             ]}
           >
             <Input />

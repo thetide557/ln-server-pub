@@ -683,6 +683,10 @@ export default function () {//{ selectMenu?:any }
         >
           <Icon type="bell" />
         </span>
+        {/* 临时用户使用时长 */}
+        {profile.roles?.includes("临时用户") && (
+          <div className={'top-header-desc'}>剩余使用时长：{profile?.temp_remaining_days}天</div>
+        )}
         {/* 帮助文档 - 临时用户和有使用期限的用户不显示 */}
         {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
           <Dropdown 

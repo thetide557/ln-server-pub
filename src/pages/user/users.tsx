@@ -77,7 +77,6 @@ const Resource: React.FC = () => {
   const [filterParam, setFilterParam] = useState<string>("");
   const [filterName, setFilterName] = useState<string>("");
   const [filterOptions, setFilterOptions] = useState<any>({});
-  const [desc, setDesc] = useState<string>("");
   // const statusOptions =[
   const [filter, setFilter] = useState<{
     datasourceIds: number[];
@@ -150,10 +149,6 @@ const Resource: React.FC = () => {
 
 
   useEffect(() => {
-    if (profile.roles?.includes("临时用户")) {
-      const days = profile?.temp_remaining_days;
-      setDesc(`剩余使用时长：${days}天`);
-    }
     filterOptions["status"] = [{ value: '0', label: '禁用' }, { value: '1', label: '启用' }]
     setFilterOptions({ ...filterOptions })
     getRoles().then((res) => {
@@ -508,7 +503,7 @@ const Resource: React.FC = () => {
 
 
   return (
-    <PageLayout title={t('user.title')} icon={<UserOutlined />} desc={desc}>
+    <PageLayout title={t('user.title')} icon={<UserOutlined />}>
       <div style={{ display: 'flex', width: '100%' }} className='user_management'>
         <div style={{ width: '245px', display: 'list-item' }}>
           <div className='sub-title'>
