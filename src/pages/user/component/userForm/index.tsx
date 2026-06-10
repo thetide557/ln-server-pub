@@ -179,35 +179,37 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
         </>
       )}
       <Row>
-        <Col span={12} key={"item-" + 5}>
-          <Form.Item
-            label={t('account:profile.role')}
-            name='roles'
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <Select
-              mode='multiple'
-              onChange={(values) => {
-                if (values.includes('临时用户')) {
-                  form.setFieldsValue({ roles: ['临时用户'] });
-                }
-              }}
+        {
+          !form.getFieldValue('roles')?.includes("Admin") && <Col span={12} key={"item-" + 5}>
+            <Form.Item
+              label={t('account:profile.role')}
+              name='roles'
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
             >
-              {roleList.map((item, index) => (
-                <Option value={item.name} key={index}>
-                  <div>
-                    <div>{item.name}</div>
-                    <div style={{ color: '#8c8c8c', overflowY: 'auto' }}>{item.note}</div>
-                  </div>
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
+              <Select
+                mode='multiple'
+                onChange={(values) => {
+                  if (values.includes('临时用户')) {
+                    form.setFieldsValue({ roles: ['临时用户'] });
+                  }
+                }}
+              >
+                {roleList.map((item, index) => (
+                  <Option value={item.name} key={index}>
+                    <div>
+                      <div>{item.name}</div>
+                      <div style={{ color: '#8c8c8c', overflowY: 'auto' }}>{item.note}</div>
+                    </div>
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        }
         <Col span={12} key={"item-" + 6}>
           <Form.Item label={t('account:profile.email')} name='email' rules={[
             {
