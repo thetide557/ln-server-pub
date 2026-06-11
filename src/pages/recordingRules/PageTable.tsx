@@ -38,7 +38,7 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
   const history = useHistory();
   const [selectRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<strategyItem[]>([]);
-  const { curBusiId, groupedDatasourceList } = useContext(CommonStateContext);
+  const { curBusiId, groupedDatasourceList, profile, permList } = useContext(CommonStateContext);
   const [query, setQuery] = useState<string>('');
   const [isModalVisible, setisModalVisible] = useState<boolean>(false);
   const [currentStrategyDataAll, setCurrentStrategyDataAll] = useState([]);
@@ -123,7 +123,9 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
           <div
             className='table-active-text'
             onClick={() => {
-              handleClickEdit(record.id);
+              if (profile.roles?.includes("Admin") || permList.includes("/recording-rules/detail")) {
+                handleClickEdit(record.id);
+              }
             }}
           >
             {data}
@@ -164,7 +166,7 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
       title: t('disabled'),
       dataIndex: 'disabled',
       render: (disabled, record) => (
-        <Switch
+        (profile.roles?.includes("Admin") || permList.includes("/recording-rules/status")) && <Switch
           checked={disabled === strategyStatus.Enable}
           size='small'
           onChange={() => {
@@ -193,52 +195,60 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
 
         return (
           <Space>
-            <FileSearchOutlined
-              title="查看"
-              onClick={() => {
-                handleClickEdit(record.id);
-              }}
-              rev={undefined}
-            />
-            <EditOutlined
-              title="编辑"
-              onClick={() => {
-                handleClickEdit(record.id, false, true);
-              }}
-              rev={undefined}
-            />
-            <div
-              title='克隆'
-              className='table-operator-area-normal'
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                handleClickEdit(record.id, true, true);
-              }}
-            >
-              <CopyTwoTone rev={undefined} />
-            </div>
-            <div
-              title='删除'
-              style={{ cursor: 'pointer' }}
-              className="table-operator-area-warning"
-              onClick={() => {
-                confirm({
-                  title: t('common:confirm.delete'),
-                  okText: "确认",
-                  cancelText: "取消",
-                  onOk: () => {
-                    deleteRecordingRule([record.id], curBusiId).then(() => {
-                      message.success(t('common:success.delete'));
-                      refreshList();
-                    });
-                  },
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/detail")) && <FileSearchOutlined
+                title="查看"
+                onClick={() => {
+                  handleClickEdit(record.id);
+                }}
+                rev={undefined}
+              />
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/put")) && <EditOutlined
+                title="编辑"
+                onClick={() => {
+                  handleClickEdit(record.id, false, true);
+                }}
+                rev={undefined}
+              />
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/clone")) && <div
+                title='克隆'
+                className='table-operator-area-normal'
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  handleClickEdit(record.id, true, true);
+                }}
+              >
+                <CopyTwoTone rev={undefined} />
+              </div>
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/del")) && <div
+                title='删除'
+                style={{ cursor: 'pointer' }}
+                className="table-operator-area-warning"
+                onClick={() => {
+                  confirm({
+                    title: t('common:confirm.delete'),
+                    okText: "确认",
+                    cancelText: "取消",
+                    onOk: () => {
+                      deleteRecordingRule([record.id], curBusiId).then(() => {
+                        message.success(t('common:success.delete'));
+                        refreshList();
+                      });
+                    },
 
-                  onCancel() { },
-                });
-              }}
-            >
-              <DeleteOutlined rev={undefined} />
-            </div>
+                    onCancel() { },
+                  });
+                }}
+              >
+                <DeleteOutlined rev={undefined} />
+              </div>
+            }
           </Space>
         );
       },
@@ -375,21 +385,25 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
         </Space>
         <div className='strategy-table-search-right'>
           <Space>
-            <Button type='primary' onClick={goToAddWarningStrategy} className='strategy-table-search-right-create'>
-              {t('common:btn.add')}
-            </Button>
-            <div className={'table-more-options'}>
-              <Dropdown overlay={menu} trigger={['click']}>
-                <Button onClick={(e) => e.stopPropagation()}>
-                  {t('common:btn.more')}
-                  <DownOutlined
-                    style={{
-                      marginLeft: 2,
-                    }}
-                  />
-                </Button>
-              </Dropdown>
-            </div>
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/add")) && <Button type='primary' onClick={goToAddWarningStrategy} className='strategy-table-search-right-create'>
+                {t('common:btn.add')}
+              </Button>
+            }
+            {
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/ops")) && <div className={'table-more-options'}>
+                <Dropdown overlay={menu} trigger={['click']}>
+                  <Button onClick={(e) => e.stopPropagation()}>
+                    {t('common:btn.more')}
+                    <DownOutlined
+                      style={{
+                        marginLeft: 2,
+                      }}
+                    />
+                  </Button>
+                </Dropdown>
+              </div>
+            }
           </Space>
         </div>
       </div>
