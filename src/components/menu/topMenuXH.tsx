@@ -453,7 +453,7 @@ export default function () {//{ selectMenu?:any }
     if (location.pathname != '/login' && !pathname.startsWith('/callback')) {
       getMyPortrait().then((res) => {
         if (res.dat != null && res.dat != "") {
-          setImageUrl(_.cloneDeep("/api/takin/" + res.dat + "?" + Math.random()));
+          setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
         }
       })
       getDictDataListByType('safety_certification').then((res) => {
@@ -695,7 +695,7 @@ export default function () {//{ selectMenu?:any }
                 <Menu.Item
                   onClick={() => {
                     // 操作手册下载接口
-                    const url = '/api/takin/xh/assets/download/manual';
+                    const url = '/api/n9e/xh/assets/download/manual';
                     const exportTitle = '操作手册';
                     downloadTemplet(url).then((res) => {
                       const blobUrl = window.URL.createObjectURL(
@@ -718,7 +718,7 @@ export default function () {//{ selectMenu?:any }
                 <Menu.Item
                   onClick={() => {
                     // 版本说明下载接口
-                    const url = '/api/takin/xh/assets/download/version';
+                    const url = '/api/n9e/xh/assets/download/version';
                     const exportTitle = '版本说明'; 
                     downloadTemplet(url).then((res) => {
                       const blobUrl = window.URL.createObjectURL(

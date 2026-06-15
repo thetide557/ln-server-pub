@@ -20,7 +20,7 @@ import { RequestMethod } from '@/store/common';
 import { BoardCateType, BoardType, BoardCateIconType } from './types';
 
 export const getDashboardCates = function (): Promise<BoardCateType[]> {
-  return request('/api/takin/builtin-boards-cates', {
+  return request('/api/n9e/builtin-boards-cates', {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;
@@ -28,7 +28,7 @@ export const getDashboardCates = function (): Promise<BoardCateType[]> {
 };
 
 export const getDashboardDetail = function (data: BoardType): Promise<BoardType[]> {
-  return request(`/api/takin/builtin-boards-detail`, {
+  return request(`/api/n9e/builtin-boards-detail`, {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -37,7 +37,7 @@ export const getDashboardDetail = function (data: BoardType): Promise<BoardType[
 };
 
 export const getIntegrationsIcon = function (): Promise<BoardCateIconType[]> {
-  return request('/api/takin/integrations/icon', {
+  return request('/api/n9e/integrations/icon', {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;
@@ -46,7 +46,7 @@ export const getIntegrationsIcon = function (): Promise<BoardCateIconType[]> {
 
 // 创建仪表盘
 export const createDashboard = function (id: number, data: any) {
-  return request(`/api/takin/busi-group/${id}/boards`, {
+  return request(`/api/n9e/busi-group/${id}/boards`, {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -62,7 +62,7 @@ export const createDashboard = function (id: number, data: any) {
 };
 
 export const postBuiltinCateFavorite = function (name: string): Promise<any[]> {
-  return request('/api/takin/builtin-cate-favorite', {
+  return request('/api/n9e/builtin-cate-favorite', {
     method: RequestMethod.Post,
     data: { name },
   }).then((res) => {
@@ -71,7 +71,7 @@ export const postBuiltinCateFavorite = function (name: string): Promise<any[]> {
 };
 
 export const deleteBuiltinCateFavorite = function (name: string): Promise<any[]> {
-  return request(`/api/takin/builtin-cate-favorite/${name}`, {
+  return request(`/api/n9e/builtin-cate-favorite/${name}`, {
     method: RequestMethod.Delete,
   }).then((res) => {
     return res.dat;
@@ -79,7 +79,7 @@ export const deleteBuiltinCateFavorite = function (name: string): Promise<any[]>
 };
 
 export const getInstructionsByName = function (name: string): Promise<string> {
-  return request(`/api/takin/integrations/makedown/${name}`, {
+  return request(`/api/n9e/integrations/makedown/${name}`, {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;

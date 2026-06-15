@@ -40,7 +40,7 @@ export default function version() {
   useEffect(() => {
     if (profile.roles?.includes("Admin") || permList.includes("/help/version/tab")) {
       setTabActiveKey('tab1')
-      fetch("/api/takin/version")
+      fetch("/api/n9e/version")
         .then((res) => {
           return res.text();
         })
@@ -57,7 +57,7 @@ export default function version() {
     name: "file",
     multiple: false,
     maxCount: 1,
-    action: "/api/takin/server/update",
+    action: "/api/n9e/server/update",
     headers: { Authorization: `Bearer ${Cookies.get("access_token") || ""}` },
     // data: () => ({ hosts: projectList.toString() }),
     // beforeUpload(file, fileList) {
@@ -102,7 +102,7 @@ export default function version() {
             > <div>
                 <ul style={{ padding: "20px 30px" }}>
                   <li>
-                    {t("frontend")}：{"v2.0"}
+                    {t("frontend")}：{"v1.8"}
                   </li>
                   {/* <li>
             {t('backend')}：{backendVersion}

@@ -19,9 +19,9 @@ import { RequestMethod } from '@/store/common';
 
 // 获取告警详情
 export function getAlertEventsById(eventId) {
-  let url = '/api/takin/alert-cur-event';
+  let url = '/api/n9e/alert-cur-event';
   if (import.meta.env.VITE_IS_ENT === 'true') {
-    url = '/api/takin-plus/alert-cur-event';
+    url = '/api/n9e-plus/alert-cur-event';
   }
   return request(`${url}/${eventId}`, {
     method: RequestMethod.Get,
@@ -29,9 +29,9 @@ export function getAlertEventsById(eventId) {
 }
 
 export function getHistoryEventsById(eventId) {
-  let url = '/api/takin/alert-his-event';
+  let url = '/api/n9e/alert-his-event';
   if (import.meta.env.VITE_IS_ENT === 'true') {
-    url = '/api/takin-plus/alert-his-event';
+    url = '/api/n9e-plus/alert-his-event';
   }
   return request(`${url}/${eventId}`, {
     method: RequestMethod.Get,
@@ -39,7 +39,7 @@ export function getHistoryEventsById(eventId) {
 }
 
 export function getWarningChart(params, id) {
-  return request(`/api/takin/proxy/${id}/api/v1/query_range`, {
+  return request(`/api/n9e/proxy/${id}/api/v1/query_range`, {
     method: RequestMethod.Post,
     params
   });
@@ -47,7 +47,7 @@ export function getWarningChart(params, id) {
 
 // 设置屏蔽规则
 export function setAlartMutes(data, id) {
-  return request( `/api/takin/busi-group/${id}/alert-mutes`, {
+  return request( `/api/n9e/busi-group/${id}/alert-mutes`, {
     method: RequestMethod.Post,
     data
   });
@@ -55,7 +55,7 @@ export function setAlartMutes(data, id) {
 
 // 处理当前告警
 export function updataprocess(params) {
-  return request(`/api/takin/alert-cur-events/updataprocess`, {
+  return request(`/api/n9e/alert-cur-events/updataprocess`, {
     method: RequestMethod.Get,
     params
   });

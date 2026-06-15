@@ -298,7 +298,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
               </Upload>
               <Button className='down_load_button'
                 onClick={async event => {
-                  let url = "/api/takin/asset-basic/templet";
+                  let url = "/api/n9e/asset-basic/templet";
                   let params = {};
                   let exportTitle = "资产";
                   exportTemplet(url, params).then((res) => {

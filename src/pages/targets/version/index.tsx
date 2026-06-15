@@ -207,7 +207,7 @@ export default function () {
 
   const handleModal = (action: string, rowKeys: any | null) => {
     if (action == "download") {
-      let url = "/api/takin/target/version/export-zip";
+      let url = "/api/n9e/target/version/export-zip";
       let body = {}
       //debugger;
       if (rowKeys != null) {
@@ -234,8 +234,8 @@ export default function () {
           const filenameToDelete = rowKeys.filename;
           // 调用删除接口
           // 请确保在服务端实现删除版本的接口，并根据需要修改下面的接口路径和请求方法
-          // fetch(`/api/takin/target/version/delete-gz`, {
-          fetch(`/api/takin/target/version/delete-zip?filename=${filenameToDelete}`, {
+          // fetch(`/api/n9e/target/version/delete-gz`, {
+          fetch(`/api/n9e/target/version/delete-zip?filename=${filenameToDelete}`, {
             method: 'DELETE',
             headers: {
               Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
@@ -367,7 +367,7 @@ export default function () {
   const props: UploadProps = {
     name: 'file',
     multiple: false,
-    action: '/api/takin/target/version',
+    action: '/api/n9e/target/version',
 
     headers: { Authorization: `Bearer ${Cookies.get('access_token') || ''}` },
 
