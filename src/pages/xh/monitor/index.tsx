@@ -339,6 +339,7 @@ export default function () {
       ...column,
       columnLabel: '监控状态',
       title: renderHeaderHelpTitle('监控状态', '监控状态', '反映资产对应指标检测是否正常的状态。'),
+      showSorterTooltip: false
     };
   });
   const fixColumns: any[] = [
