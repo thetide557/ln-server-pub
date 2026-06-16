@@ -331,7 +331,8 @@ const EventDetailPage: React.FC = () => {
   }, [busiId, eventId]);
 
   return (
-    <PageLayout title={t('detail.title')} showBack backPath={isHistory ? '/alert-his-events' : '/alert-cur-events'}>
+    // <PageLayout title={t('detail.title')} showBack backPath={isHistory ? '/alert-his-events' : '/alert-cur-events'}>
+    <PageLayout title={t('detail.title')} showBack>
       <div className='event-detail-container'>
 
         <Spin spinning={!eventDetail}>

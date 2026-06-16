@@ -201,6 +201,7 @@ function App() {
       setWarnModalShow(false)
       getAlertEventsById(alertId)
         .then((res) => {
+          setDialogShow('0')
           window.location.href = '/alert-cur-events/' + alertId;
         }).catch(_ => {
           setDialogShow('0')
