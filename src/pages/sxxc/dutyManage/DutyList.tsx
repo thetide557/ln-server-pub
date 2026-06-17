@@ -17,6 +17,7 @@ import {
   Select,
   Row,
   Col,
+  Switch
 } from "antd";
 import {
   DeleteOutlined,
@@ -164,6 +165,15 @@ export default function () {
       ellipsis: true,
       sorter: (a, b) => {
         return a.total_schedule_count - b.total_schedule_count;
+      },
+    },
+    {
+      title: "项目支撑",
+      dataIndex: "project_support",
+      align: "center",
+      ellipsis: true,
+      render(value, record, index) {
+        return value==0?'否':'是';
       },
     },
     {
@@ -339,21 +349,22 @@ export default function () {
   const showModal = async (type: "add" | "edit" | "view", id?: number) => {
     setModalType(type);
     setModalVisible(true);
-    form.resetFields();
 
     if (type === "edit" || type === "view") {
       try {
         setConfirmLoading(true);
         const res = await getDutyDetail(id);
         if (res?.dat.personnel) {
-          const { Name, Role, Phone, Email } = res.dat.personnel;
-          const formData = {
-            name: Name,
-            role: Role,
-            phone: Phone,
-            email: Email,
-          };
-          form.setFieldsValue(formData);
+          const { Name, Role, Phone, Email, project_support } = res.dat.personnel;
+          setTimeout(() => {
+            form.setFieldsValue({
+              name: Name,
+              role: Role,
+              phone: Phone,
+              email: Email,
+              project_support: +project_support === 1,
+            });
+          }, 0);
           setInitData(res.dat.personnel);
         }
       } catch (error) {
@@ -361,6 +372,8 @@ export default function () {
       } finally {
         setConfirmLoading(false);
       }
+    } else {
+      form.resetFields();
     }
   };
   // 表单校验规则
@@ -395,11 +408,11 @@ export default function () {
           role: values.role,
           phone: values.phone,
           email: values.email || "",
+          project_support: values.project_support? 1 : 0,
           // 新增时不需要id、status，编辑时需要
           ...(modalType === "edit" && initData && { id: (initData as any).id, status: (initData as any).Status }),
         },
       ];
-
       if (modalType === "add") {
         await addDuty(submitData);
         message.success("新增成功");
@@ -695,7 +708,7 @@ export default function () {
                 disabled={modalType === "view"}
                 initialValues={{ role: "" }}
                 labelAlign="right"
-                labelCol={{ span: 6 }}
+                labelCol={{ span: 8 }}
               >
                 <Row gutter={16}>
                   <Col span={12}>
@@ -720,6 +733,15 @@ export default function () {
                           </Select.Option>
                         ))}
                       </Select>
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="project_support"
+                      label="项目支撑"
+                      valuePropName="checked"
+                    >
+                      <Switch checkedChildren="是" unCheckedChildren="否" />
                     </Form.Item>
                   </Col>
                   <Col span={12}>

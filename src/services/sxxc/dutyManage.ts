@@ -172,5 +172,66 @@ export const autoSchedule = function (data) {
   });
 };
 
+// ============项目支撑===================
+// 获取项目支撑人员选项
+export const getSupportOptions = function () {
+  return request("/api/n9e/busi-group/duty/personnel/support-options", {
+    method: RequestMethod.Get,
+  });
+};
 
+// 新增项目支撑排班
+export const addProdectSchedule = function (data) {
+  return request("/api/n9e/busi-group/-1/project/schedule/add", {
+    method: RequestMethod.Post,
+    data,
+  });
+};
+
+// 查询单日排班详情
+export const getProjectScheduleDetail = function (params) {
+  return request("/api/n9e/busi-group/project/schedule/detail", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+// 查询月度排班
+export const getProjectScheduleList = function (params) {
+  return request("/api/n9e/busi-group/project/schedule/detail-month", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+// 删除单个项目支撑排班
+export const deleteProjectScheduleById = function (id) {
+  return request(`/api/n9e/xh/project/schedule/delete/${id}`, {
+    method: RequestMethod.Delete,
+  });
+};
+
+// 更新项目支撑排班
+export const updateProjectSchedule = function (data) {
+  return request("/api/n9e/busi-group/-1/project/schedule/update", {
+    method: RequestMethod.Post,
+    data,
+  });
+};
+
+// 批量删除项目支撑排班
+export const batchDeleteProjectSchedule = function (data) {
+  return request("/api/n9e/busi-group/-1/project/schedule/batch-delete", {
+    method: RequestMethod.Delete,
+    data,
+  });
+};
+
+// 自动排班
+export const autoProjectSchedule = function (data) {
+  return request("/api/n9e/project/schedule/auto", {
+    method: RequestMethod.Post,
+    data,
+  });
+};
 

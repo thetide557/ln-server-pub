@@ -8,7 +8,8 @@ import _ from "lodash";
 
 import DutyList from "./DutyList";
 import ScheduleList from "./ScheduleList";
-import DutyLogs from "./DutyLogs"; 
+import DutyLogs from "./DutyLogs";
+import ProjectSupport from "./ProjectSupport";
 const { TabPane } = Tabs;
 
 export default function () {
@@ -29,6 +30,9 @@ export default function () {
           </TabPane>
           <TabPane tab="值班日志" key="dutyLogs">
             <DutyLogs />
+          </TabPane>
+          <TabPane tab="项目支撑" key="projectSupport">
+            <ProjectSupport />
           </TabPane>
         </Tabs>
       </div>
