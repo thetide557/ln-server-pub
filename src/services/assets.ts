@@ -33,6 +33,13 @@ export const getAssetsByCondition = function (params) {
   // })
 };
 
+export const getAssetsByConditionSimple = function (params) {
+  return request("/api/takin/xh/assets/simple", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
 export const getAssetsByMonitor = function (params) {
   return request("/api/takin/xh/assets/monitor", {
     method: RequestMethod.Get,
