@@ -14,7 +14,7 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import { getAssetsByCondition } from '@/services/assets';
+import { getAssetsByConditionSimple } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import { factories, serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
@@ -432,7 +432,7 @@ export default function () {
       }
 
       const param = { limit: -1, types };
-      const res = await getAssetsByCondition(param);
+      const res = await getAssetsByConditionSimple(param);
       const options = res.dat?.list.map((v) => ({
         key: v.id,
         value: v.id,

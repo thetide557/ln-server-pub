@@ -4,7 +4,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { Button, Card, Col, Form, Input, InputNumber, InputRef, message, Modal, Radio, Row, Select, Space, Table,  TableProps  } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _, { concat, random, values } from 'lodash';
-import { getAssetsIdents, getAssetstypes, getAssetsByCondition } from '@/services/assets';
+import { getAssetsIdents, getAssetstypes, getAssetsByConditionSimple } from '@/services/assets';
 import { getMonitorUnit, createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -98,7 +98,7 @@ const [operateScript, setOperateScript] = useState<any>({
         limit: -1,
         types: types1,
       };
-      getAssetsByCondition(param).then((assets) => {
+      getAssetsByConditionSimple(param).then((assets) => {
         let options = new Array();
         assets.dat.list.map((v) => {
           options.push({
