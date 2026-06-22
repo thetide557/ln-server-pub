@@ -63,6 +63,7 @@ export default function () {
 
   const [params, setParams] = useState<{ label: string; name: string; required?: boolean; type: string; options?: [] }[]>([]);
   const [form] = Form.useForm();
+  const formId = Form.useWatch('id', form);
   const [assetData, setAssetData] = useState<any>({}); // 集中保存提交的数据
   const [currentType, setCurrentType] = useState();
   const [assetList, setAssetList] = useState<any>({});
@@ -451,15 +452,15 @@ export default function () {
   }, [id]);
 
   useEffect(() => {
-    if (id && assetOptions.length > 0 && assetData) {
-      const selectedOption = assetOptions.find((option) => option.ident === assetData.ident);
+    if (formId && assetOptions.length > 0) {
+      const selectedOption = assetOptions.find((option) => option.ident === form.getFieldValue('ident'));
       console.log("selectedOption", selectedOption);
       if (selectedOption) {
         form.setFieldsValue({ ip: selectedOption.value });
         setAssetData((prev) => ({ ...prev, ip: selectedOption.value }));
       }
     }
-  }, [assetOptions, assetData.id]);
+  }, [formId, assetOptions]);
 
   useEffect(() => {
     if (id) {
@@ -481,7 +482,7 @@ export default function () {
     if (assetData.is_shelf === true) {
       assetData.shelf_reason = ''
     }
-    // ip地址后端需要ip与ident,但ip可能会重复，所以ident只能够通过资产id查询到，所以ip地址下拉框绑定id作为value
+    // ip地址后端需要ip与ident,但ip可能会重复，ident只能够通过资产id查询到，所以ip地址下拉框绑定id作为value
     let paramsData = assetData
     const selectedOption = assetOptions.find((option) => option.value === assetData.ip);
     if (selectedOption) {
