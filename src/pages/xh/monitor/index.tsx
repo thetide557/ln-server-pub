@@ -1082,7 +1082,7 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack={assetId ? true : false}  backPath="/xh/assetmgt" backState={{ isops: true }}>
+    <PageLayout icon={<GroupOutlined />} title={'监控指标'} showBack={assetId ? true : false}  backPath="/xh/assetmgt" backState={{ isops: true }}>
       <div style={{ display: 'flex' }} className='monitor_list_view'>
         <Resizable
           style={{
