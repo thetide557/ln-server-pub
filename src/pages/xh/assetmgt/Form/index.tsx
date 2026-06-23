@@ -527,6 +527,8 @@ export default function () {
       });
       if (form.getFieldsValue().asset_position) {
         saveMaintenanceInfo();
+      } else {
+        message.success('操作成功');
       }
       backToAssetList();
       // loadAssetInfo(id);
