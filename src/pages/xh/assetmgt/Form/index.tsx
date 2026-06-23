@@ -483,11 +483,11 @@ export default function () {
       assetData.shelf_reason = ''
     }
     // ip地址后端需要ip与ident,但ip可能会重复，ident只能够通过资产id查询到，所以ip地址下拉框绑定id作为value
-    let paramsData = assetData
+    let paramsData = {...assetData}
     const selectedOption = assetOptions.find((option) => option.value === assetData.ip);
     if (selectedOption) {
-      form.setFieldsValue({ ident: selectedOption.ident, ip: selectedOption.ip });
-      setAssetData((prev) => ({ ...prev, ident: selectedOption.ident, ip: selectedOption.ip }));
+      // form.setFieldsValue({ ident: selectedOption.ident, ip: selectedOption.ip });
+      // setAssetData((prev) => ({ ...prev, ident: selectedOption.ident, ip: selectedOption.ip }));
       paramsData = { ...paramsData, ident: selectedOption.ident, ip: selectedOption.ip }
     }
     console.log("submitForm111", assetData, assetOptions, paramsData)
