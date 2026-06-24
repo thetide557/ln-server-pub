@@ -23,7 +23,7 @@ import React, { ReactNode, useEffect, useImperativeHandle, useState, useContext 
 import { useTranslation } from 'react-i18next';
 import { getBusiGroups } from '@/services/common';
 import { getMonObjectList } from '@/services/targets';
-import { getAssets1, getAssetsByCondition } from '@/services/assets';
+import { getAssets1, getAssetsByConditionSimple } from '@/services/assets';
 import { Task, TaskType } from '@/store/sxxc/taskInterface';
 import { ColumnsType } from 'antd/lib/table';
 import usePagination from '@/components/usePagination';
@@ -165,7 +165,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
         const query = {
             // query: '',
             // bgid: '-1',
-            group_id: -1,
+            // group_id: -1,
             page: 1,
             limit: 5000,
             groupIds: localStorage.getItem('groupIds')
@@ -187,7 +187,7 @@ const InspectionForm = React.forwardRef<ReactNode, InspectionFormProps>((props, 
 
         //     setIpList(list)
         // })
-        getAssetsByCondition(query).then(res => {
+        getAssetsByConditionSimple(query).then(res => {
             let list = res.dat?.list?.filter(item => {
                 if (item.status == 1) {
                     if (item.type == '物理服务器' || item.type == '虚拟服务器') {
