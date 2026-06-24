@@ -989,7 +989,7 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='IP地址' name='ip' rules={[{ required: true }, { validator: validateIP }]}>
-                    <Input placeholder='请输入IP地址' />
+                    <Input placeholder='请输入IP地址' disabled={currentType === "物理服务器" || currentType === "虚拟服务器"} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
