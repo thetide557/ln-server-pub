@@ -81,6 +81,10 @@ const Resource: React.FC = () => {
       dataIndex: "component_name",
     },
     {
+      title: "组件中文名称",
+      dataIndex: "component_name_zh",
+    },
+    {
       title: "组件版本",
       dataIndex: "component_version",
     },
@@ -259,6 +263,20 @@ const Resource: React.FC = () => {
                     >
                       <Select.Option value="xc">信创</Select.Option>
                       <Select.Option value="non_xc">非信创</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Space>
+                {/* 风险等级筛选 */}
+                <Space style={{ marginRight: 16 }}>
+                  <Form.Item label={"风险等级"} name="risk_level">
+                    <Select
+                      allowClear
+                      placeholder={"风险等级"}
+                      style={{ width: 200 }}
+                    >
+                      <Select.Option value="high">高风险</Select.Option>
+                      <Select.Option value="medium">中风险</Select.Option>
+                      <Select.Option value="low">低风险</Select.Option>
                     </Select>
                   </Form.Item>
                 </Space>

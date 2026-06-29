@@ -26,6 +26,7 @@ interface DetailItem {
   process_name: string;
   component_type: string;
   component_name: string;
+  component_name_zh: string;
   xinchuang_attr: string;
   replace_advice: string;
   vendor: string;
@@ -89,6 +90,7 @@ const XinchuangModal: React.FC<XinchuangModalProps> = ({
       process_name: defaultValues?.process_name || "",
       component_type: defaultValues?.component_type || "",
       component_name: defaultValues?.component_name || "",
+      component_name_zh: defaultValues?.component_name_zh || "",
       xinchuang_attr: defaultValues?.xinchuang_attr || "",
       replace_advice: defaultValues?.replace_advice || "",
       vendor: defaultValues?.vendor || "",
@@ -120,6 +122,7 @@ const XinchuangModal: React.FC<XinchuangModalProps> = ({
           !item.process_name ||
           !item.component_type ||
           !item.component_name ||
+          !item.component_name_zh ||
           !item.xinchuang_attr ||
           !item.replace_advice ||
           !item.vendor ||
@@ -176,6 +179,7 @@ const XinchuangModal: React.FC<XinchuangModalProps> = ({
             process_name: item.process_name,
             component_type: item.component_type,
             component_name: item.component_name,
+            component_name_zh: item.component_name_zh,
             xinchuang_attr: item.xinchuang_attr,
             replace_advice: item.replace_advice,
             vendor: item.vendor,
@@ -312,6 +316,29 @@ const XinchuangModal: React.FC<XinchuangModalProps> = ({
                       );
                     }}
                     placeholder="请输入组件名称"
+                    style={{ width: "100%" }}
+                  />
+                ),
+              },
+              {
+                title: <span><span style={{ color: 'red' }}>*</span>组件中文名称</span>,
+                dataIndex: "component_name_zh",
+                key: "component_name_zh",
+                width: "180px",
+                render: (text, record) => (
+                  <Input
+                    value={record.component_name_zh}
+                    onChange={(e) => {
+                      setAddDetails(
+                        addDetails.map((item) => {
+                          if (item.id === record.id) {
+                            return { ...item, component_name_zh: e.target.value };
+                          }
+                          return item;
+                        }),
+                      );
+                    }}
+                    placeholder="请输入组件中文名称"
                     style={{ width: "100%" }}
                   />
                 ),

@@ -29,6 +29,7 @@ interface DetailItem {
   process_name: string;
   component_type: string;
   component_name: string;
+  component_name_zh: string;
   xinchuang_attr: string;
   replace_advice: string;
   vendor: string;
@@ -86,6 +87,12 @@ const ViewManifestModal: React.FC<ViewManifestModalProps> = ({
       title: "组件名称",
       dataIndex: "component_name",
       key: "component_name",
+      width: "150px",
+    },
+    {
+      title: "组件中文名称",
+      dataIndex: "component_name_zh",
+      key: "component_name_zh",
       width: "150px",
     },
     {
