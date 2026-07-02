@@ -67,10 +67,8 @@ request.interceptors.request.use((url, options) => {
   let headers = {
     ...options.headers,
   };
-  headers["Authorization"] = `Bearer ${Cookies.get("access_token") || ""
-    }`;
-  headers["X-Language"] =
-    localStorage.getItem("language") === "en_US" ? "en" : "zh";
+  headers["Authorization"] = `Bearer ${Cookies.get("access_token") || ""}`;
+  headers["X-Language"] = localStorage.getItem("language") === "en_US" ? "en" : "zh";
   headers["Bg-debug"] = 1;
   return {
     url,
@@ -185,9 +183,9 @@ request.interceptors.response.use(
           message.warning('登录状态已过期，请重新登录');
           setTimeout(() => {
             location.href = `/login${location.pathname != "/"
-                  ? "?redirect=" + location.pathname + location.search
-                  : ""
-            }`;
+              ? "?redirect=" + location.pathname + location.search
+              : ""
+              }`;
           }, 1000);
           throw {
             name: 'UNAUTHORIZED',
@@ -216,7 +214,7 @@ request.interceptors.response.use(
                   location.href = `/login${location.pathname != "/"
                     ? "?redirect=" + location.pathname + location.search
                     : ""
-                  }`;
+                    }`;
                 }, 1000);
               } else {
                 // 刷新成功，更新新的 Token 到 Cookies 和 localStorage
@@ -270,8 +268,8 @@ request.interceptors.response.use(
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           location.href = `/login${location.pathname != "/"
-              ? "?redirect=" + location.pathname + location.search
-              : ""
+            ? "?redirect=" + location.pathname + location.search
+            : ""
             }`;
           throw {
             name: 'UNAUTHORIZED',
