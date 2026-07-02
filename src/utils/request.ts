@@ -60,13 +60,15 @@ const request = extend({
   credentials: "omit",  // 无论是否跨域，都不携带 Cookie。
 });
 
+// 全局变量：缓存正在进行的刷新 Token 请求，防止并发 401 时重复调用 refresh 接口
+let refreshTokenPromise: Promise<any> | null = null;
+
 request.interceptors.request.use((url, options) => {
   let headers = {
     ...options.headers,
   };
-  headers["Authorization"] = `Bearer ${
-    Cookies.get("access_token") || ""
-  }`;
+  headers["Authorization"] = `Bearer ${Cookies.get("access_token") || ""
+    }`;
   headers["X-Language"] =
     localStorage.getItem("language") === "en_US" ? "en" : "zh";
   headers["Bg-debug"] = 1;
@@ -146,85 +148,138 @@ request.interceptors.response.use(
           });
       }
     } else if (status === 401) {
-      // 先检查响应体中的err_code是否为LOGIN_CONFLICT
-      response.clone().json().then((data) => {
+      return response.clone().text().then((text) => {
+        let data: any = null;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          data = { err: text };
+        }
+
         if (data?.err_code === 'LOGIN_CONFLICT') {
-          message.error(data.err || '您已在其他地方登录，请重新登录');
+          message.warning(data.err || '您已在其他地方登录，请重新登录');
+          Cookies.remove("access_token");
+          Cookies.remove("refresh_token");
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
           setTimeout(() => {
-            location.href = `/login${
-              location.pathname != "/"
+            location.href = `/login${location.pathname != "/"
                 ? "?redirect=" + location.pathname + location.search
                 : ""
+              }`;
+          }, 1000);
+          throw {
+            name: 'LOGIN_CONFLICT',
+            message: '',
+            silence: true,
+            data,
+            response,
+          };
+        }
+
+        if (response.url.indexOf("/api/takin/auth/refresh") > 0) {
+          Cookies.remove("access_token");
+          Cookies.remove("refresh_token");
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          message.warning('登录状态已过期，请重新登录');
+          setTimeout(() => {
+            location.href = `/login${location.pathname != "/"
+                  ? "?redirect=" + location.pathname + location.search
+                  : ""
             }`;
           }, 1000);
-          return;
+          throw {
+            name: 'UNAUTHORIZED',
+            message: '',
+            silence: true,
+            data,
+            response,
+          };
         }
-        
-        if (response.url.indexOf("/api/takin/auth/refresh") > 0) {
-          location.href = `/login${
-            location.pathname != "/"
+
+        if (Cookies.get("refresh_token")) {
+          // 检查是否正在进行刷新请求，防止并发 401 时重复调用 refresh 接口
+          if (!refreshTokenPromise) {
+            // 只有第一个 401 请求会发起刷新，后续请求共享同一个 Promise
+            refreshTokenPromise = UpdateAccessToken().then((res) => {
+              // 刷新完成后必须清空缓存，否则下次 Token 过期时无法发起新的刷新
+              refreshTokenPromise = null;
+              if (res.err) {
+                // 刷新失败，清除 Token 并跳转登录页
+                Cookies.remove("access_token");
+                Cookies.remove("refresh_token");
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                message.warning('登录状态已过期，请重新登录');
+                setTimeout(() => {
+                  location.href = `/login${location.pathname != "/"
+                    ? "?redirect=" + location.pathname + location.search
+                    : ""
+                  }`;
+                }, 1000);
+              } else {
+                // 刷新成功，更新新的 Token 到 Cookies 和 localStorage
+                const { access_token, refresh_token } = res.dat;
+                Cookies.set("access_token", access_token);
+                Cookies.set("refresh_token", refresh_token);
+                localStorage.setItem('access_token', access_token);
+                localStorage.setItem('refresh_token', refresh_token);
+              }
+              return res;
+            }).catch(() => {
+              // 刷新异常，清空缓存并抛出错误
+              refreshTokenPromise = null;
+              throw {
+                name: 'UNAUTHORIZED',
+                message: '',
+                silence: true,
+                data,
+                response,
+              };
+            });
+          }
+          // 所有 401 请求共享同一个刷新 Promise 的结果
+          return refreshTokenPromise.then((res) => {
+            // console.log('res1111111111', res);
+            if (res.err) {
+              // 刷新失败，抛出错误中断 Promise 链
+              throw {
+                name: 'UNAUTHORIZED',
+                message: '',
+                silence: true,
+                data,
+                response,
+              };
+            }
+            // 刷新成功，重新发送原始请求（带上新 Token）
+            const { access_token } = res.dat;
+            // console.log('options', options);
+            const newOptions = {
+              ...options,
+              headers: {
+                ...options.headers,
+                Authorization: `Bearer ${access_token}`,
+              },
+            };
+            return request(response.url, newOptions);
+          });
+        } else {
+          Cookies.remove("access_token");
+          Cookies.remove("refresh_token");
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          location.href = `/login${location.pathname != "/"
               ? "?redirect=" + location.pathname + location.search
               : ""
-          }`;
-        } else {
-          Cookies.get("refresh_token")
-            ? UpdateAccessToken().then((res) => {
-                console.log("401 err", res);
-                if (res.err) {
-                  location.href = `/login${
-                    location.pathname != "/"
-                      ? "?redirect=" + location.pathname + location.search
-                      : ""
-                  }`;
-                } else {
-                  const { access_token, refresh_token } = res.dat;
-                  Cookies.set("access_token", access_token);
-                  Cookies.set("refresh_token", refresh_token);
-                  // 嵌入的子项目之前用的local
-                  localStorage.setItem('access_token', access_token);
-                  localStorage.setItem('refresh_token', refresh_token);
-                  location.href = `${location.pathname}${location.search}`;
-                }
-              })
-            : (location.href = `/login${
-                location.pathname != "/"
-                  ? "?redirect=" + location.pathname + location.search
-                  : ""
-              }`);
-        }
-      }).catch(() => {
-        // 如果解析响应体失败，执行默认的401处理逻辑
-        if (response.url.indexOf("/api/takin/auth/refresh") > 0) {
-          location.href = `/login${
-            location.pathname != "/"
-              ? "?redirect=" + location.pathname + location.search
-              : ""
-          }`;
-        } else {
-          Cookies.get("refresh_token")
-            ? UpdateAccessToken().then((res) => {
-                console.log("401 err", res);
-                if (res.err) {
-                  location.href = `/login${
-                    location.pathname != "/"
-                      ? "?redirect=" + location.pathname + location.search
-                      : ""
-                  }`;
-                } else {
-                  const { access_token, refresh_token } = res.dat;
-                  Cookies.set("access_token", access_token);
-                  Cookies.set("refresh_token", refresh_token);
-                  // 嵌入的子项目之前用的local
-                  localStorage.setItem('access_token', access_token);
-                  localStorage.setItem('refresh_token', refresh_token);
-                  location.href = `${location.pathname}${location.search}`;
-                }
-              })
-            : (location.href = `/login${
-                location.pathname != "/"
-                  ? "?redirect=" + location.pathname + location.search
-                  : ""
-              }`);
+            }`;
+          throw {
+            name: 'UNAUTHORIZED',
+            message: '',
+            silence: true,
+            data,
+            response,
+          };
         }
       });
     } else {
