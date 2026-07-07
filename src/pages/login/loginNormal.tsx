@@ -31,6 +31,7 @@ import { useLocalStorage } from 'react-use';
 import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
+import { aesEncrypt, aesDecrypt } from '@/utils/aes';
 
 export interface DisplayName {
   oidc: string;
@@ -78,7 +79,7 @@ export default function LoginNormal() {
   useEffect(() => {
     // 从 localStorage 中读取用户的登录信息
     const username = localStorage.getItem('username');
-    const password = localStorage.getItem('password');
+    const password = aesDecrypt(localStorage.getItem('password') || '');
     const remember = localStorage.getItem('remember') === 'true';
 
 
@@ -142,7 +143,7 @@ export default function LoginNormal() {
     let { username, password, verifyvalue } = form.getFieldsValue();
     // 将用户的登录信息存储到 localStorage 中
     localStorage.setItem('username', username);
-    localStorage.setItem('password', password);
+    localStorage.setItem('password', aesEncrypt(password));
     localStorage.setItem('remember', remember ? 'true' : 'false');
     // const rsaConf = await getRSAConfig();
     // const {
