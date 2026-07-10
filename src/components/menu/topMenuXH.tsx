@@ -407,6 +407,22 @@ const getMenuList = (t) => {
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
         //   label: t('安全认证'),
         // },
+         {
+          key: "/sxxc/deploymentManagement",
+          icon: <ProfileOutlined />,
+          label: t("管理后台"),
+          children: [
+            // {
+            //   key: "/sxxc/deploymentManagement",
+            //   label: "项目管理",
+            // },
+            {
+              key: "/sxxc/dutyManage",
+              // icon: <IconFont type="icon-Menu_Infrastructure" />,
+              label: t("值班管理"),
+            },
+          ],
+        },
       ],
     },
 
