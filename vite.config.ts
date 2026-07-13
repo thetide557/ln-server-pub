@@ -58,6 +58,7 @@ const x6Chunk = [
   "@antv/x6-plugin-transform",
 ];
 const antvChunk = ["@ant-design/graphs", "@ant-design/plots"];
+const baseUrl = "http://172.16.20.11:17000/";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -88,55 +89,55 @@ export default defineConfig(({ mode }) => ({
       //   changeOrigin: true,
       // },
       "/api/takin/xh/": {
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/takin-plus": {
         // target: 'http://10.206.16.17:17001/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/takin/proxy": {
         //target: 'http://192.168.20.19:17000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/takin/datasource": {
         //target: 'http://192.168.20.19:17000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/takin": {
         //target: 'http://192.168.20.19:17000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/fc-brain": {
         // target: 'http://10.206.16.17:28000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/sxxcTask": {
         // target: 'http://10.0.20.212:8086/',
-        target: "http://172.16.20.11:8090/",
+        target: baseUrl,
         // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
         // rewrite: path => path.replace(/^\/sxxcTask/, '')
       },
       "/chat": {
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.23.134:17000/',
         changeOrigin: true,
       },
       "/v1": {
         // target: 'http://10.250.250.24:18000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         changeOrigin: true,
       },
     },

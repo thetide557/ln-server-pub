@@ -65,6 +65,7 @@
     "lezer-promql": "^0.22.0",
     "lodash": "^4.17.21",
     "logfmt": "1.2.x",
+    "lunar-typescript": "^1.8.0",
     "marked": "9.1.6",
     "moment": "^2.29.1",
     "numeral": "^2.0.6",
