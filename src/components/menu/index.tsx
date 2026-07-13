@@ -313,6 +313,7 @@ const SideMenu: FC = () => {
     if (
       location.pathname === '/login' ||
       location.pathname === '/screenView' ||
+      location.pathname === '/portal' ||
       location.pathname.startsWith('/chart/') ||
       location.pathname.startsWith('/dashboards/share/') ||
       location.pathname === '/callback' ||

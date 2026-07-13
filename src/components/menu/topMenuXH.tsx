@@ -538,6 +538,7 @@ export default function () {//{ selectMenu?:any }
       location.pathname === '/login' ||
       location.pathname.startsWith('/chart/') ||
       location.pathname.startsWith('/screenView') ||
+      location.pathname.startsWith('/portal') ||
       location.pathname.startsWith('/dashboards/share/') ||
       location.pathname.startsWith('/callback') ||
       location.pathname.indexOf('/polaris/screen') === 0

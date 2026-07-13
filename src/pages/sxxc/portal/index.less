@@ -1,0 +1,255 @@
+.portal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  // background: url("/public/image/portal/bj.png") no-repeat center center;
+  // background-size: 100% 100%;
+  background-color: rgb(12,13,14);
+}
+
+
+.portal-page {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  background: url("/public/image/portal/bj.png") no-repeat center center;
+  background-size: 100% 100%;
+  z-index: 100;
+}
+
+/* ===== 顶部栏 ===== */
+.portal-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+  padding: 0 60px;
+  font-size: 14px;
+  font-family: Alibaba-PuHuiTi, Alibaba-PuHuiTi;
+  font-weight: normal;
+  color: #c5d6ea;
+  text-shadow: 14px 1px 26px #000000;
+}
+
+.portal-header-left {
+  flex: 1;
+  letter-spacing: 1px;
+}
+
+.portal-header-center {
+  flex: 2;
+  .portal-logo {
+    width: 100%;
+    height: 48px;
+    object-fit: contain;
+  }
+}
+
+.portal-header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.portal-help {
+  cursor: pointer;
+}
+
+.portal-help-icon {
+  width: 20px;
+  height: 20px;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.portal-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  img {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+  }
+}
+
+/* ===== 一级模块区域 ===== */
+.portal-modules {
+  position: relative;
+  z-index: 5;
+  height: 710px;
+  width: 100%;
+  padding: 0 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url("/public/image/portal/modules-bg.png") no-repeat center center;
+  background-size: contain;
+  // background-clip: content-box;  
+}
+
+.portal-modules-list {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 25px;
+  padding: 0 76px;
+}
+
+.portal-module-card {
+  position: relative;
+  width: 212px;
+  height: 277px;
+  background: url("/public/image/portal/module.png") no-repeat center center;
+  background-size: 100% 100%;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+
+  &.is-hovered {
+    background: url("/public/image/portal/sub-module-bg.png") no-repeat center center;
+    background-size: 100% 100%;
+    justify-content: flex-start;
+  }
+  // &:hover,
+  // &.is-hovered {
+  //   transform: translateY(-8px) scale(1.05);
+  // }
+}
+
+.portal-module-icon {
+  width: 107px;
+  height: 104px;
+  display: block;
+  object-fit: contain;
+}
+
+
+
+// .portal-module-title {
+//   display: block;
+  
+// }
+
+/* 二级模块列表 */
+.portal-sub-modules {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 30px 12px 12px 50px;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: rgba(0, 180, 255, 0.4);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.portal-sub-module-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 0.25s;
+  width: 100%;
+
+  &:hover {
+    .portal-sub-module-title {
+      color: #00d4ff;
+    }
+  }
+}
+
+.portal-sub-module-icon {
+  font-size: 18px;
+  color: #00d4ff;
+  flex-shrink: 0;
+}
+
+.portal-sub-module-title {
+  font-weight: bold;
+  font-size: 18px;
+  color: #E9EDF5;
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+
+.portal-sub-module-divider {
+  width: 80%;
+  height: 1px;
+  object-fit: contain;
+}
+
+/* ===== 底部面板 ===== */
+.portal-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  display: flex;
+  gap: 20px;
+  padding: 0 42px 46px;
+  height: 340px;
+}
+
+.portal-panel {
+  flex: 1;
+  border: 1px solid rgba(0, 150, 255, 0.35);
+}
+
+.portal-panel-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #00d4ff;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  border-left: 3px solid #00d4ff;
+}
+
+
+
+/* 下拉菜单样式 */
+.portal-dropdown {
+  .ant-dropdown-menu {
+    background: url("/public/image/portal/help-bg.png") no-repeat center center;
+    background-size: 100% 100%;
+    
+  }
+
+  .ant-dropdown-menu-item {
+    color: #C5D6EA ;
+
+    &:hover {
+      color: #fff;
+      background: transparent;
+    }
+  }
+}
+
+
+
+
