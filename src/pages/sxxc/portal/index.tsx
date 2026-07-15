@@ -1,64 +1,35 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Dropdown, Menu, message } from 'antd';
-import {
-  DownOutlined,
-  DashboardOutlined,
-  AlertOutlined,
-  CloudOutlined,
-  ToolOutlined,
-  LineChartOutlined,
-  ApartmentOutlined,
-  SafetyCertificateOutlined,
-  FileTextOutlined,
-  UnorderedListOutlined,
-  NodeIndexOutlined,
-  BellOutlined,
-} from '@ant-design/icons';
+import { DownOutlined} from '@ant-design/icons';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'react-use';
 import { CommonStateContext, initTheme } from '@/App';
 import { getMyPortrait } from '@/services/log_set';
 import { downloadTemplet } from '@/services/menu';
 import { Logout } from '@/services/login';
 import { getDictDataListByType } from '@/services/system/dict';
+import { getMenuPerm } from '@/services/common';
 import Cookies from 'js-cookie';
 import _ from 'lodash';
 import { portalModules } from './config';
 import { useScale, getScaleWrapperStyle } from '@/utils/useScale';
 import './index.less';
 
-const moduleIconMap: Record<string, React.ReactNode> = {
-  visual: <DashboardOutlined />,
-  monitor: <AlertOutlined />,
-  it: <CloudOutlined />,
-  auto: <ToolOutlined />,
-  operation: <LineChartOutlined />,
-  analysis: <ApartmentOutlined />,
-  security: <SafetyCertificateOutlined />,
-};
-
-const quickIconMap: Record<string, React.ReactNode> = {
-  'alert-rule': <AlertOutlined />,
-  asset: <UnorderedListOutlined />,
-  health: <FileTextOutlined />,
-  inspection: <ToolOutlined />,
-  topology: <NodeIndexOutlined />,
-  alarm: <BellOutlined />,
-};
 
 /**
  * 门户首页
  */
 export default function Portal() {
   const history = useHistory();
+  const location = useLocation();
   const { profile } = useContext(CommonStateContext);
-  const [theme] = useLocalStorage<any>('platform_theme', initTheme);
+  const [theme, setTheme] = useLocalStorage<any>("platform_theme", initTheme);
   const [currentTime, setCurrentTime] = useState(moment().format('YYYY年MM月DD日 HH:mm:ss'));
   const [hoveredModuleId, setHoveredModuleId] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string>();
   const [safeUrl, setSafeUrl] = useState<string>();
-
+  const [filteredModules, setFilteredModules] = useState<any[]>(portalModules); // 模块权限过滤
   const scale = useScale();
 
   useEffect(() => {
@@ -69,51 +40,94 @@ export default function Portal() {
   }, []);
 
   useEffect(() => {
-    getMyPortrait().then((res) => {
-      if (res.dat != null && res.dat !== '') {
-        setImageUrl(_.cloneDeep(`/api/takin/${res.dat}?${Math.random()}`));
-      }
-    });
-    getDictDataListByType('safety_certification').then((res) => {
-      if (res.dat?.length > 0) {
-        setSafeUrl(res.dat[0].dict_value);
-      }
-    });
+    if (location.pathname != '/login' && !location.pathname.startsWith('/callback')) {
+      getMyPortrait().then((res) => {
+        if (res.dat != null && res.dat !== '') {
+          setImageUrl(_.cloneDeep(`/api/takin/${res.dat}?${Math.random()}`));
+        }
+      });
+      getDictDataListByType('safety_certification').then((res) => {
+        if (res.dat?.length > 0) {
+          setSafeUrl(res.dat[0].dict_value);
+        }
+      });
+    }
     
-  }, []);
+    // TODO: 获取权限并过滤模块
+    if (profile?.roles?.length > 0 && profile?.roles.indexOf('Admin') === -1) {
+      getMenuPerm().then((res) => {
+        const { dat } = res;
+        const newModules = _.filter(
+          _.map(portalModules, (module) => {
+            return {
+              ...module,
+              children: _.filter(module.children, (sub) => {
+                return sub.permKey && dat.includes(sub.permKey);
+              }),
+            };
+          }),
+          (module) => {
+            return module.children && module.children.length > 0;
+          },
+        );
+        setFilteredModules(newModules);
+      }).catch(() => {
+        setFilteredModules(portalModules);
+      });
+    } else {
+      setFilteredModules(portalModules);
+    }
+  }, [profile?.roles]);
+
+  /** 清除所有认证信息 */
+  const clearAuthInfo = () => {
+    Cookies.remove('access_token');
+    Cookies.remove('refresh_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('curBusiId');
+    localStorage.removeItem('card5Data');
+    localStorage.removeItem('card7Data');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('left_tissueId');
+    localStorage.removeItem('left_parId');
+    localStorage.removeItem('left_asset_type');
+  };
+
+  /** 退出登录*/
+  const handleLogout = () => {
+    Logout().then((res) => {
+      clearAuthInfo();
+      if (res?.dat?.logout_url) {
+        window.location.href = res.dat.logout_url;
+      } else {
+        window.location.href = '/login';
+      }
+    });
+  };
+
 
   /** 导航到指定路径 */
   const navigateTo = (path: string) => {
-    if (path === '__safety__') {
+    if (!Cookies.get('access_token') && !Cookies.get('refresh_token')) {
+      handleLogout();
+      return;
+    }
+
+    if (path === '/safety/certification') {
       if (!safeUrl) return message.error('请先在数据字典中配置安全认证');
       return window.open(safeUrl);
     }
-    history.push(path);
+
+    if(path.startsWith('/')){
+      history.push(path);
+    }
   };
 
   const topRightMenu = (
     <Menu>
-      <Menu.Item onClick={() => history.push('/account/profile/info')}>个人信息</Menu.Item>
-      <Menu.Item
-        onClick={() => {
-          Logout().then((res) => {
-            Cookies.remove('access_token');
-            Cookies.remove('refresh_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('curBusiId');
-            localStorage.removeItem('card5Data');
-            localStorage.removeItem('card7Data');
-            localStorage.removeItem('userId');
-            localStorage.removeItem('left_tissueId');
-            localStorage.removeItem('left_parId');
-            localStorage.removeItem('left_asset_type');
-            window.location.href = res?.dat?.logout_url || '/login';
-          });
-        }}
-      >
-        退出登录
-      </Menu.Item>
+      <Menu.Item onClick={() => navigateTo('/account/profile/info')}>个人信息</Menu.Item>
+      <Menu.Item onClick={handleLogout}>退出登录</Menu.Item>
     </Menu>
   );
 
@@ -195,10 +209,11 @@ export default function Portal() {
       {/* 一级模块区域 */}
       <section className='portal-modules'>
         <div className='portal-modules-list'>
-          {portalModules.map((module, index) => {
+          {filteredModules.map((module, index) => {
             const isHovered = hoveredModuleId === module.id;
-            const arcOffsets = [0, -32, -50, -61, -50, -32, 0];
-            const arcOffset = arcOffsets[index] || 0;
+            const total = filteredModules.length;
+            const mid = (total - 1) / 2;
+            const arcOffset = mid === 0 ? 0 : Math.round(-61 * (1 - Math.pow((index - mid) / mid, 2)));
             return (
               <div
                 key={module.id}
@@ -210,12 +225,12 @@ export default function Portal() {
                 {isHovered && module.children.length > 0 ? (
                   <div className='portal-sub-modules'>
                     {module.children.map((sub, subIndex) => (
-                      <React.Fragment key={sub.path}>
+                      <React.Fragment key={`${module.id}-${sub.title}-${sub.path}`}>
                         <div
                           className='portal-sub-module-item'
                           onClick={() => navigateTo(sub.path)}
                         >
-                          <span className='portal-sub-module-icon'>{moduleIconMap[module.icon]}</span>
+                          <span className='portal-sub-module-icon'>{sub.icon}</span>
                           <span className='portal-sub-module-title'>{sub.title}</span>
                         </div>
                         {subIndex < module.children.length - 1 && (

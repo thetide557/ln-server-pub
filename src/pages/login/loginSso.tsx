@@ -230,17 +230,20 @@ export default function LoginSso() {
               groupIds = busiGroups.map(item => item.id).toString()
             }
             getBigScreen2(groupIds).then(res => {
-              const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
-              if (list.length > 0) {
-                window.location.href = '/screenView'
-              } else {
-                window.location.href = '/home';
-              }
+              // const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
+              // if (list.length > 0) {
+              //   window.location.href = '/screenView'
+              // } else {
+              //   window.location.href = '/home';
+              // }
+              window.location.href = '/portal';
             }).catch(_ => {
-              window.location.href = '/home';
+              // window.location.href = '/home';
+              window.location.href = '/portal';
             })
           }).catch(_ => {
-            window.location.href = '/home';
+            // window.location.href = '/home';
+            window.location.href = '/portal';
           })
         }
       })
@@ -288,17 +291,20 @@ export default function LoginSso() {
               groupIds = busiGroups.map(item => item.id).toString()
             }
             getBigScreen2(groupIds).then(res => {
-              const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
-              if (list.length > 0) {
-                window.location.href = '/screenView'
-              } else {
-                window.location.href = '/home';
-              }
+              // const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
+              // if (list.length > 0) {
+              //   window.location.href = '/screenView'
+              // } else {
+              //   window.location.href = '/home';
+              // }
+              window.location.href = '/portal';
             }).catch(_ => {
-              window.location.href = '/home';
+              // window.location.href = '/home';
+              window.location.href = '/portal';
             })
           }).catch(_ => {
-            window.location.href = '/home';
+            // window.location.href = '/home';
+            window.location.href = '/portal';
           })
         }
       })
