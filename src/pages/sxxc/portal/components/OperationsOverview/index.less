@@ -1,0 +1,137 @@
+.portal-overview {
+  position: relative;
+  height: 100%;
+  padding: 0 4px;
+
+  &::before {
+    position: absolute;
+    top: 44px;
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
+    border: 1px solid rgba(67, 170, 255, 0.18);
+    background:
+      linear-gradient(180deg, rgba(23, 54, 114, 0.18), rgba(11, 23, 57, 0.08)),
+      repeating-linear-gradient(
+        90deg,
+        rgba(92, 160, 255, 0.03) 0,
+        rgba(92, 160, 255, 0.03) 2px,
+        transparent 2px,
+        transparent 16px
+      );
+    content: '';
+    pointer-events: none;
+  }
+}
+
+.portal-overview-runtime {
+  position: relative;
+  margin: 18px 14px 18px;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(83, 187, 255, 0.65), rgba(83, 187, 255, 0.08));
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  box-shadow: 0 0 18px rgba(32, 122, 255, 0.12);
+}
+
+.portal-overview-runtime-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 96px;
+  padding: 0 30px 0 34px;
+  background: linear-gradient(180deg, rgba(11, 31, 72, 0.95), rgba(13, 28, 60, 0.75));
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  box-shadow: inset 0 0 30px rgba(64, 162, 255, 0.15);
+
+  &::after {
+    position: absolute;
+    right: 18px;
+    bottom: 12px;
+    left: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(115, 210, 255, 0.55), transparent);
+    content: '';
+  }
+}
+
+.portal-overview-runtime-label {
+  font-size: 18px;
+  color: #dcecff;
+}
+
+.portal-overview-runtime-values {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.portal-overview-runtime-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.portal-overview-runtime-number {
+  font-size: 34px;
+  font-weight: 700;
+  color: #bfe6ff;
+  line-height: 1;
+}
+
+.portal-overview-runtime-unit {
+  font-size: 18px;
+  color: rgba(220, 236, 255, 0.85);
+}
+
+.portal-overview-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  padding: 0 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.portal-overview-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+}
+
+.portal-overview-digits {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.portal-overview-digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 52px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #eff8ff;
+  background: linear-gradient(180deg, rgba(3, 65, 138, 0.95), rgba(9, 32, 81, 0.95));
+  border: 1px solid rgba(111, 206, 255, 0.9);
+  box-shadow:
+    inset 0 0 18px rgba(111, 206, 255, 0.2),
+    0 0 18px rgba(18, 109, 255, 0.18);
+  text-shadow: 0 0 10px rgba(179, 231, 255, 0.45);
+}
+
+.portal-overview-digit.is-zero {
+  color: #f5fbff;
+}
+
+.portal-overview-metric-label {
+  margin-top: 12px;
+  font-size: 17px;
+  color: #dcecff;
+  text-align: center;
+  text-shadow: 0 0 12px rgba(57, 153, 255, 0.2);
+}
