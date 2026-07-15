@@ -60,15 +60,17 @@ export default function Portal() {
         const { dat } = res;
         const newModules = _.filter(
           _.map(portalModules, (module) => {
+            const filteredChildren = _.filter(module.children, (sub) => {
+              return sub.permKey && dat.includes(sub.permKey);
+            });
             return {
               ...module,
-              children: _.filter(module.children, (sub) => {
-                return sub.permKey && dat.includes(sub.permKey);
-              }),
+              children: filteredChildren,
             };
           }),
           (module) => {
-            return module.children && module.children.length > 0;
+            return (module.children && module.children.length > 0) || 
+                   (module.permKey && dat.includes(module.permKey));
           },
         );
         setFilteredModules(newModules);
@@ -240,7 +242,7 @@ export default function Portal() {
                       </React.Fragment>
                     ))}
                   </div>
-                ) : isHovered && module.children.length === 0 ? (
+                ) : isHovered && module.children.length === 0 && module.hoverImage ? (
                   <>
                     <img src={module.hoverImage} alt={module.title} className='portal-module-icon' />
                     <img src={module.titleImage} alt={module.title} className='portal-module-title' />
