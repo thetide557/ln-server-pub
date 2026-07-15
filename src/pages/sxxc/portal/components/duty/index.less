@@ -1,0 +1,194 @@
+.duty-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: url("/image/portal/duty-bg.png") no-repeat;
+  background-size: 100% 100%;
+  padding: 0 20px;
+
+  .duty-header {
+    position: relative;
+    height: 48px;
+    display: flex;
+    align-items: center;
+
+    .duty-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ddd;
+      letter-spacing: 1px;
+      font-family: AlibabaPuHuiTi_3_75_SemiBold;
+    }
+  }
+
+  .duty-table {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 10px;
+    .duty-table-header {
+      display: flex;
+      height: 46px;
+      align-items: center;
+      background: url("/image/portal/duty-row-head.png") no-repeat;
+      background-size: cover;
+
+      .duty-table-header-cell {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 16px;
+        color: #b5e2ff;
+        font-weight: 500;
+				text-align: center;
+
+        .duty-help-icon {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .duty-table-body {
+      flex: 1;
+      overflow-y: auto;
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        border-radius: 2px;
+        background: rgba(0, 180, 255, 0.5);
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(0, 30, 70, 0.3);
+      }
+    }
+
+    .duty-table-row {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background: url("/image/portal/duty-row-body.png") no-repeat;
+      background-size: cover;
+      border-radius: 4px;
+      // transition: all 0.2s;
+      margin: 10px 0;
+
+      // &:hover {
+      //   background: rgba(0, 60, 120, 0.5);
+      //   border-color: rgba(0, 150, 255, 0.4);
+      // }
+
+      .duty-table-cell {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+				padding: 0 3px;
+        color: #c9d8f4;
+				text-align: center;
+
+        .duty-cell-text {
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
+        }
+
+        .duty-phone-icon-img {
+          width: 46px;
+          height: 23px;
+          background: url("/image/portal/phone-normal.png") no-repeat;
+          background-size: cover;
+          cursor: pointer;
+          &:hover {
+            background: url("/image/portal/phone-hover.png") no-repeat;
+            background-size: cover;
+          }
+        }
+
+        .duty-type-tag {
+          padding: 2px 8px;
+          background: rgb(16, 50, 119, 0.6);
+          border: 1px solid #00c2f6;
+          border-radius: 4px;
+          font-size: 14px;
+          color: #fff;
+          letter-spacing: 1px;
+        }
+      }
+    }
+  }
+  .duty-empty {
+    width: 100%;
+    height: 178px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url("/image/portal/no-duty.png") no-repeat center center;
+  }
+}
+
+.duty-tooltip-overlay {
+  .ant-tooltip-inner {
+    background: rgb(16, 50, 119, 0.8) !important;
+    border: 1px solid #4c67bf !important;
+    border-radius: 6px !important;
+    padding: 12px 16px !important;
+    max-width: 400px !important;
+    // box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+  }
+  .ant-tooltip-arrow {
+    border-color: rgba(0, 212, 255, 0.8) !important;
+  }
+
+  .duty-tooltip {
+    div {
+      font-size: 12px;
+      color: #e9edf5;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      margin-bottom: 6px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.duty-phone-tooltip {
+  .ant-tooltip-inner {
+    background: rgb(16, 50, 119, 0.8) !important;
+    border: 1px solid #4c67bf !important;
+    border-radius: 6px !important;
+    padding: 6px 8px !important;
+    // box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+  }
+
+  .ant-tooltip-arrow {
+    border-color: rgba(0, 212, 255, 0.8) !important;
+  }
+}
+
+.duty-cell-tooltip {
+  .ant-tooltip-inner {
+    background: rgb(16, 50, 119, 0.9) !important;
+    border: 1px solid #4c67bf !important;
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    color: #c9d8f4 !important;
+  }
+
+  .ant-tooltip-arrow {
+    border-color: #4c67bf !important;
+  }
+}

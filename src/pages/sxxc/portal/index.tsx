@@ -15,6 +15,7 @@ import _ from 'lodash';
 import { portalModules } from './config';
 import { useScale, getScaleWrapperStyle } from '@/utils/useScale';
 import './index.less';
+import Duty from './components/duty';
 
 
 /**
@@ -265,7 +266,8 @@ export default function Portal() {
 
         {/* 今日值班信息 */}
         <div className='portal-panel portal-panel-duty'>
-          <div className='portal-panel-title'>今日值班信息</div>
+          {/* <div className='portal-panel-title'>今日值班信息</div> */}
+          <Duty />
         </div>
 
         {/* 高频功能入口 */}
