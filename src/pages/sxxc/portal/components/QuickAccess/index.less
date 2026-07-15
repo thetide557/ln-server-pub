@@ -1,28 +1,33 @@
 .portal-quick-access {
   position: relative;
   height: 100%;
-  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+  background: url("/image/portal/duty-bg.png") no-repeat;
+  background-size: 100% 100%;
+}
 
-  &::before {
-    position: absolute;
-    top: 44px;
-    right: 10px;
-    left: 10px;
-    bottom: 10px;
-    border: 1px solid rgba(67, 170, 255, 0.18);
-    background:
-      linear-gradient(180deg, rgba(23, 54, 114, 0.12), rgba(11, 23, 57, 0.04)),
-      radial-gradient(circle at 50% 0, rgba(50, 160, 255, 0.08), transparent 58%);
-    content: '';
-    pointer-events: none;
-  }
+.portal-section-header {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.portal-section-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ddd;
+  letter-spacing: 1px;
+  font-family: AlibabaPuHuiTi_3_75_SemiBold;
 }
 
 .portal-quick-access-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px 18px;
-  padding: 18px 14px 0;
+  padding: 10px 0 0;
   position: relative;
   z-index: 1;
 }
@@ -72,4 +77,26 @@
   height: 70px;
   object-fit: contain;
   filter: drop-shadow(0 0 16px rgba(105, 173, 255, 0.4));
+}
+
+.portal-quick-access-empty {
+  position: relative;
+  z-index: 1;
+  height: calc(100% - 42px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10px;
+
+  img {
+    width: 230px;
+    height: auto;
+    object-fit: contain;
+  }
+}
+
+.portal-quick-access-loading {
+  position: relative;
+  z-index: 1;
+  height: calc(100% - 42px);
 }

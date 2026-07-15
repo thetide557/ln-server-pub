@@ -16,6 +16,7 @@ import { portalModules } from './config';
 import { useScale, getScaleWrapperStyle } from '@/utils/useScale';
 import OperationsOverview from './components/OperationsOverview';
 import QuickAccess from './components/QuickAccess';
+import { recordUserFunctionClick } from '@/services/sxxc/portal';
 import './index.less';
 import Duty from './components/duty';
 
@@ -129,6 +130,11 @@ export default function Portal() {
     }
   };
 
+  const handleSubModuleClick = (title: string, path: string) => {
+    recordUserFunctionClick(title).catch(() => {});
+    navigateTo(path);
+  };
+
   const topRightMenu = (
     <Menu>
       <Menu.Item onClick={() => navigateTo('/account/profile/info')}>个人信息</Menu.Item>
@@ -233,7 +239,7 @@ export default function Portal() {
                       <React.Fragment key={`${module.id}-${sub.title}-${sub.path}`}>
                         <div
                           className='portal-sub-module-item'
-                          onClick={() => navigateTo(sub.path)}
+                          onClick={() => handleSubModuleClick(sub.title, sub.path)}
                         >
                           <span className='portal-sub-module-icon'>{sub.icon}</span>
                           <span className='portal-sub-module-title'>{sub.title}</span>

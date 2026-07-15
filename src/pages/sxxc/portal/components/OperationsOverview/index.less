@@ -1,32 +1,31 @@
 .portal-overview {
   position: relative;
   height: 100%;
-  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+  background: url("/image/portal/duty-bg.png") no-repeat;
+  background-size: 100% 100%;
+}
 
-  &::before {
-    position: absolute;
-    top: 44px;
-    right: 10px;
-    left: 10px;
-    bottom: 10px;
-    border: 1px solid rgba(67, 170, 255, 0.18);
-    background:
-      linear-gradient(180deg, rgba(23, 54, 114, 0.18), rgba(11, 23, 57, 0.08)),
-      repeating-linear-gradient(
-        90deg,
-        rgba(92, 160, 255, 0.03) 0,
-        rgba(92, 160, 255, 0.03) 2px,
-        transparent 2px,
-        transparent 16px
-      );
-    content: '';
-    pointer-events: none;
-  }
+.portal-section-header {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.portal-section-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ddd;
+  letter-spacing: 1px;
+  font-family: AlibabaPuHuiTi_3_75_SemiBold;
 }
 
 .portal-overview-runtime {
   position: relative;
-  margin: 18px 14px 18px;
+  margin: 10px 0 18px;
   padding: 1px;
   background: linear-gradient(180deg, rgba(83, 187, 255, 0.65), rgba(83, 187, 255, 0.08));
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
@@ -88,7 +87,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
-  padding: 0 18px;
+  padding: 0;
   position: relative;
   z-index: 1;
 }
