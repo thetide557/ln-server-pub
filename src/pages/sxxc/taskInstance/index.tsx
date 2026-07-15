@@ -38,6 +38,14 @@ interface Param {
 }
 
 const { confirm } = Modal;
+const taskResultLabelMap = {
+  success: '成功',
+  waiting: '等待中',
+  running: '执行中',
+  todo: '待执行',
+  failed: '失败',
+  timeout: '超时',
+};
 
 const Resource: React.FC = () => {
   const { inspectionLogId } = useParams<Param>();
@@ -95,6 +103,7 @@ const Resource: React.FC = () => {
     {
       title: '结果',
       dataIndex: 'taskReslut',
+      render: (value) => taskResultLabelMap[value] || value,
     },
   ];
   const taskColumns: ColumnsType<Log> = [
@@ -342,7 +351,7 @@ const Resource: React.FC = () => {
                   {_.map(resultList, (item) => {
                     return (
                       <Select.Option key={item} value={item}>
-                        {item}
+                        {taskResultLabelMap[item] || item}
                       </Select.Option>
                     );
                   })}

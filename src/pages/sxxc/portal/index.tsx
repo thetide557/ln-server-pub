@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { Dropdown, Menu, message } from 'antd';
 import { DownOutlined} from '@ant-design/icons';
 import moment from 'moment';
@@ -14,6 +14,8 @@ import Cookies from 'js-cookie';
 import _ from 'lodash';
 import { portalModules } from './config';
 import { useScale, getScaleWrapperStyle } from '@/utils/useScale';
+import OperationsOverview from './components/OperationsOverview';
+import QuickAccess from './components/QuickAccess';
 import './index.less';
 import Duty from './components/duty';
 
@@ -261,7 +263,7 @@ export default function Portal() {
       <section className='portal-bottom'>
         {/* 运维监控总览 */}
         <div className='portal-panel portal-panel-overview'>
-          <div className='portal-panel-title'>运维监控总览</div>
+          <OperationsOverview />
         </div>
 
         {/* 今日值班信息 */}
@@ -272,7 +274,7 @@ export default function Portal() {
 
         {/* 高频功能入口 */}
         <div className='portal-panel portal-panel-quick'>
-          <div className='portal-panel-title'>高频功能入口</div>
+          <QuickAccess />
         </div>
       </section>
     </div>

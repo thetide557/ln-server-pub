@@ -1,0 +1,75 @@
+.portal-quick-access {
+  position: relative;
+  height: 100%;
+  padding: 0 4px;
+
+  &::before {
+    position: absolute;
+    top: 44px;
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
+    border: 1px solid rgba(67, 170, 255, 0.18);
+    background:
+      linear-gradient(180deg, rgba(23, 54, 114, 0.12), rgba(11, 23, 57, 0.04)),
+      radial-gradient(circle at 50% 0, rgba(50, 160, 255, 0.08), transparent 58%);
+    content: '';
+    pointer-events: none;
+  }
+}
+
+.portal-quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 18px;
+  padding: 18px 14px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.portal-quick-access-card {
+  position: relative;
+  height: 96px;
+  padding: 14px 16px;
+  cursor: pointer;
+  border: 1px solid rgba(118, 198, 255, 0.26);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(182, 228, 255, 0.12), transparent 42%);
+    content: '';
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(118, 198, 255, 0.5);
+    box-shadow: 0 10px 24px rgba(18, 109, 255, 0.16);
+  }
+}
+
+.portal-quick-access-title {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+  font-weight: 700;
+  color: #e8f2ff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(85, 170, 255, 0.22);
+}
+
+.portal-quick-access-icon {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(105, 173, 255, 0.4));
+}
