@@ -17,6 +17,7 @@ import { useScale, getScaleWrapperStyle } from '@/utils/useScale';
 import OperationsOverview from './components/OperationsOverview';
 import QuickAccess from './components/QuickAccess';
 import { recordUserFunctionClick } from '@/services/sxxc/portal';
+import { ASSET_MONITOR_SCREEN_TITLE, goAssetMonitorScreen } from './navigation';
 import './index.less';
 import Duty from './components/duty';
 
@@ -132,6 +133,14 @@ export default function Portal() {
 
   const handleSubModuleClick = (title: string, path: string) => {
     recordUserFunctionClick(title).catch(() => {});
+    if (title === ASSET_MONITOR_SCREEN_TITLE) {
+      if (!Cookies.get('access_token') && !Cookies.get('refresh_token')) {
+        handleLogout();
+        return;
+      }
+      goAssetMonitorScreen();
+      return;
+    }
     navigateTo(path);
   };
 

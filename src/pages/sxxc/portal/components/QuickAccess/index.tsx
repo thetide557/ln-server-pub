@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getUserFunctionTop } from '@/services/sxxc/portal';
+import { ASSET_MONITOR_SCREEN_TITLE, goAssetMonitorScreen } from '../../navigation';
 import { portalModules } from '../../config';
 import './index.less';
 
@@ -199,12 +200,17 @@ export default function QuickAccess() {
   }, []);
 
   const hasQuickAccessItems = quickAccessItems.length > 0;
-  const handleNavigate = (path: string) => {
-    if (/^https?:\/\//.test(path)) {
-      window.open(path);
+  const handleNavigate = (item: QuickAccessItem) => {
+    if (item.title === ASSET_MONITOR_SCREEN_TITLE) {
+      goAssetMonitorScreen();
       return;
     }
-    history.push(path);
+
+    if (/^https?:\/\//.test(item.path)) {
+      window.open(item.path);
+      return;
+    }
+    history.push(item.path);
   };
 
   return (
@@ -220,7 +226,7 @@ export default function QuickAccess() {
               key={`${item.title}-${item.path}`}
               className='portal-quick-access-card'
               style={{ backgroundImage: `url(${item.background})` }}
-              onClick={() => handleNavigate(item.path)}
+              onClick={() => handleNavigate(item)}
             >
               <div className='portal-quick-access-title'>{item.title}</div>
               <img className='portal-quick-access-icon' src={item.icon} alt={item.title} />
