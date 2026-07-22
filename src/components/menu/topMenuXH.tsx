@@ -623,13 +623,14 @@ export default function () {//{ selectMenu?:any }
   };
 
   const goScreen = () => {
-    let busiGroup = localStorage.getItem('groupIds') || '';
-    getBigScreen2(busiGroup).then(res => {
-      const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
-      if (list.length > 0) {
-        history.push('/screenView')
-      }
-    })
+    // let busiGroup = localStorage.getItem('groupIds') || '';
+    // getBigScreen2(busiGroup).then(res => {
+    //   const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
+    //   if (list.length > 0) {
+    //     history.push('/screenView')
+    //   }
+    // })
+    history.push('/portal')
   }
 
   const topRightMenu = (

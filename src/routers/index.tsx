@@ -299,7 +299,7 @@ export default function Content() {
         <Route exact path='/taskManage/strategy' component={TaskStrategy} />
         <Route exact path='/sxxc/dutyManage' component={DutyManage} />
         <Route path='/portal' component={Portal} exact />
-        <Route exact path='/comingSoon' component={ComingSoon} />
+        <Route path='/comingSoon' component={ComingSoon} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

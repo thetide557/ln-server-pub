@@ -1,0 +1,159 @@
+.sidebar-container {
+  width: 200px;
+  height: calc(100vh - 60px);
+  background: url('/image/menu/left-side-bg.png') center bottom / cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+  overflow-x: hidden;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+
+  &.sidebar-collapsed {
+    width: 60px;
+  }
+  .sidebar-third-level {
+    padding-left: 24px;
+    font-size: 12px;
+  }
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding-left: 14px;
+  height: 46px;
+  flex-shrink: 0;
+}
+
+.sidebar-header-icon {
+  width: 23px;
+  height: 23px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.sidebar-header-title {
+  margin-left: 10px;
+  font-size: 16px;
+  font-family: YouSheBiaoTiHei, YouSheBiaoTiHei;
+  font-weight: 400;
+  color: #E8F1FF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.sidebar-toggle {
+  width: 18px;
+  height: 40px;
+  object-fit: contain;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+  min-height: 0;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.sidebar-menu {
+  background: transparent !important;
+  border: none !important;
+
+  & .ant-menu-item::after,
+  & .ant-menu-submenu-title::after {
+    border-right: none !important;
+    display: none !important;
+  }
+
+  .ant-menu-item,
+  .ant-menu-submenu-title {
+    color: #FFFFFF !important;
+    height: 44px !important;
+    line-height: 44px !important;
+    border-radius: 4px !important;
+    padding: 0 12px !important;
+    font-size: 14px;
+    background: transparent !important;
+  }
+
+  .ant-menu-item-selected,
+  .ant-menu-submenu-title-selected {
+    background: #FFFFFF !important;
+    color: #1C76FD !important;
+  }
+
+  .ant-menu-item-selected .sidebar-third-level,
+  .ant-menu-submenu-title-selected .sidebar-third-level {
+    color: #1C76FD !important;
+  }
+
+  .ant-menu-sub {
+    background: transparent !important;
+    overflow: hidden;
+  }
+
+  .ant-menu-submenu-arrow {
+    color: #FFFFFF !important;
+  }
+}
+
+// 菜单收起状态下弹出子菜单的样式
+.ant-menu-submenu-popup {
+  .ant-menu {
+    background: #FFFFFF !important;
+    padding: 8px !important;
+    border-radius: 4px !important;
+  }
+
+  .ant-menu-item {
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    color: #31373D !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    
+    &.ant-menu-item-selected {
+      background: rgba(47, 130, 255, 0.1) !important;
+      color: #1C76FD !important;
+    }
+  }
+}
+
+
+
+.sidebar-collapsed {
+  .sidebar-header-title {
+    display: none;
+  }
+
+  .sidebar-header {
+    padding-left: 0;
+    justify-content: center;
+  }
+
+  .sidebar-toggle {
+    padding-right: 0;
+  }
+}

@@ -4,16 +4,31 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 
   .page-top-header {
-    width: 100%;
+    // width: 100%;
+    height: 60px;
+    background: url('/image/menu/layout-header-bg.png') 100% 100% / cover;
+    border-radius: 12px;
+    margin: 20px;
+    flex-shrink: 0;
+    // display: none;
 
     .page-header-title {
       display: flex;
       align-items: center;
-      color: #767676;
-      font-weight: bold;
-      font-size: 16px;
+      // color: #767676;
+      // font-weight: bold;
+      // font-size: 16px;
+      color: #165ECA;
+      font-family: Microsoft YaHei, Microsoft YaHei;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 60px;
+      text-align: left;
+      font-style: normal;
+      text-transform: none;
       .anticon {
         margin-right: 10px;
       }
@@ -51,8 +66,10 @@
     .page-header-content {
       flex: 1;
       width: 100%;
-      height: 50px;
-      padding: 10px 16px;
+      // height: 50px;
+      // padding: 10px 16px;
+      height: 100%;
+      padding: 0 32px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -60,7 +77,10 @@
 
     & + div {
       overflow: auto;
-      padding: 10px 6px 12px 12px; // 将原来 paddingRight 10px 拆开，以兼容出现滚动条的时候有距离右侧 6px 的间距
+      // padding: 10px 6px 12px 12px; // 将原来 paddingRight 10px 拆开，以兼容出现滚动条的时候有距离右侧 6px 的间距
+      padding: 20px;
+      padding-top: 0;
+      flex: 1;
       margin-right: 6px;
       height: 100%;
       &:not(.srm) > * {

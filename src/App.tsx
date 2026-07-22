@@ -45,6 +45,7 @@ import { useLocalStorage } from 'react-use';
 import { getAlertEventsById } from '@/services/warning';
 import AiRobotSse from '@/pages/sxxc/aiRobot/sse';
 import WarnModal from '@/pages/sxxc/warnModal';
+import Layout from '@/pages/sxxc/components/Layout/Layout';
 
 interface IProfile {
   admin?: boolean;
@@ -366,9 +367,11 @@ function App() {
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
                 <AiRobotSse />
-                <div className='content-box'>
-                  <Content />
-                </div>
+                <Layout>
+                  <div className='content-box'>
+                    <Content />
+                  </div>
+                </Layout>
               </>
             </Switch>
           </Router>
