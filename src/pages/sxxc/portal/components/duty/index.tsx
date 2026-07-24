@@ -2,22 +2,17 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Tooltip } from 'antd';
 import './index.less';
 import { InfoCircleFilled } from '@ant-design/icons';
+import { getTodayDuty } from '@/services/sxxc/dutyManage';
 
-interface DutyItem {
-	role: string;
-	name: string;
-	phone: string;
-	dutyType: string;
-	businessGroup: string;
-}
+
 export default function Duty() {
-	const [dutyList, setDutyList] = useState<DutyItem[]>([
-		{ role: '值班主任', name: '佟湘玉', phone: '18391098288', dutyType: '日常常规', businessGroup: '业务组名称' },
-		{ role: '值班主任', name: '佟湘玉', phone: '18391098288', dutyType: '备班值班', businessGroup: '业务组名称' },
-		{ role: '一线值班', name: '白展堂', phone: '18391098290', dutyType: '备班值班', businessGroup: '业务组名称' },
-		{ role: '二线值班', name: '李大嘴', phone: '18391098291', dutyType: '重保专项', businessGroup: '业务组名称' },
-		{ role: '三线值班', name: '吕秀才', phone: '18391098292', dutyType: '日常常规', businessGroup: '内部智能化与信产OA门户' },
-	]);
+	const [dutyList, setDutyList] = useState<any[]>([]);
+
+	useEffect(() => {
+		getTodayDuty({}).then(({ dat }) => {
+			setDutyList(dat?.list || []);
+		});
+	}, []);
 
 	return (
 		<div className="duty-container">
@@ -68,7 +63,7 @@ export default function Duty() {
 						{dutyList.map((item, index) => (
 							<div key={index} className="duty-table-row">
 								<div className="duty-table-cell">
-									<div className="duty-cell-text">{item.role}</div>
+									<div className="duty-cell-text">{item.roleName}</div>
 								</div>
 								<div className="duty-table-cell">
 									<div className="duty-cell-text">{item.name}</div>
@@ -79,10 +74,19 @@ export default function Duty() {
 									</Tooltip>
 								</div>
 								<div className="duty-table-cell">
-									<span className="duty-type-tag">{item.dutyType}</span>
+									<span className="duty-type-tag">{item.dutyTypeName}</span>
 								</div>
 								<div className="duty-table-cell">
-									<div className="duty-cell-text">{item.businessGroup}</div>
+									<Tooltip
+										title={
+											<div className="duty-tooltip">
+												{item.busiGroups}
+											</div>
+										}
+										overlayClassName="duty-tooltip-overlay"
+									>
+										<div className="duty-cell-text">{item.busiGroups}</div>
+									</Tooltip>
 								</div>
 							</div>
 						))}
