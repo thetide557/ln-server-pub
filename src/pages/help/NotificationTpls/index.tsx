@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { List, Input, Space, Button, Modal, message } from 'antd';
-import { SoundOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SoundOutlined, SearchOutlined, EditOutlined, DeleteOutlined, MailOutlined, WechatOutlined, DingdingOutlined, MobileOutlined, MessageOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
 import { getNotifyTpls, deleteNotifyTpl } from './services';
 import { NotifyTplsType } from './types';
@@ -13,6 +13,15 @@ import { CommonStateContext } from '@/App';
 import './index.less';
 import { putNotifyTplContent } from './services';
 import './locale';
+
+const channelIconMap: Record<string, React.ReactNode> = {
+  email: <MailOutlined />,
+  feishu: <WechatOutlined />,
+  wecom: <WechatOutlined />,
+  dingtalk: <DingdingOutlined />,
+  sms: <MobileOutlined />,
+  wechat: <WechatOutlined />,
+};
 
 export default function index() {
   const { t } = useTranslation('notificationTpls');
@@ -41,10 +50,13 @@ export default function index() {
   return (
     <PageLayout title={t('title')} icon={<SoundOutlined />}>
       <div className='notice-manage-content'>
-        <div style={{ display: 'flex', height: '100%' }}>
+        <div style={{ display: 'flex', height: '100%',gap: 20 ,backgroundColor: 'transparent',border:'none',boxShadow:'none' }}>
           <div className='left-tree-area'>
             <div className='sub-title'>
-              {t('list')}
+              <div className='sub-title-left'>
+                <div className='sub-title-bar' />
+                {t('list')}
+              </div>
               {
                 (profile.roles?.includes("Admin") || permList.includes("/help/notification-tpls/add")) && <Button
                   size='small'
@@ -78,7 +90,8 @@ export default function index() {
               size='small'
               renderItem={(item: any) => (
                 <List.Item key={item.id} className={active?.id === item.id ? 'is-active' : ''} onClick={() => setActive(item)}>
-                  {item.name}
+                  {channelIconMap[item.channel] || <MessageOutlined />}
+                  <span style={{ marginLeft: 8 }}>{item.name}</span>
                 </List.Item>
               )}
             />
@@ -91,7 +104,7 @@ export default function index() {
                   fontSize: 14,
                 }}
               >
-                <span>{active?.name}</span>
+                <span style={{ color: '#165ECA',fontSize: 18 }}>{active?.name}</span>
                 {
                   (profile.roles?.includes("Admin") || permList.includes("/help/notification-tpls/put")) && <EditOutlined
                     onClick={() => {
@@ -120,12 +133,22 @@ export default function index() {
                   />
                 )}
               </Space>
-              <div>
-                <Space>
-                  <span>
-                    {t('channel')}：{active?.channel || '-'}
-                  </span>
-                </Space>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: '#fff' }}>{t('channel')}：</span>
+                <span style={{
+                  width: 53,
+                  height: 24,
+                  background: '#FFFFFF',
+                  borderRadius: 4,
+                  border: '1px solid #1C76FD',
+                  color: '#1C76FD',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 12,
+                }}>
+                  {active?.channel || '-'}
+                </span>
               </div>
             </div>
             <div
@@ -157,7 +180,7 @@ export default function index() {
               )}
             </div>
             {
-              (profile.roles?.includes("Admin") || permList.includes("/help/notification-tpls/save")) && <Button style={{ right: '0px', position: 'fixed', bottom: '0', margin: '16px' }}
+              (profile.roles?.includes("Admin") || permList.includes("/help/notification-tpls/save")) && <Button style={{ right: '0px', position: 'fixed', bottom: '0', margin: '25px' }}
                 type='primary'
                 onClick={() => {
                   if (active) {

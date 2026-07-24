@@ -237,25 +237,27 @@ export default function List(props: ListProps) {
     {
       title: '操作',
       align: 'center',
-      width: 120,
+      width: 300,
       fixed: 'right',
       render: (val, record: any) => {
         return (
-          <Space>
+          // <Space>
+          <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'row', cursor:'pointer' }}>
             {(profile.roles?.includes("Admin") ||
               permList.includes("/alert-rules/status")) && (
-              <PoweroffOutlined
-                title={
-                  record["disabled"] === AlertRuleStatus.Enable
-                    ? "已启动"
-                    : "未启动"
-                }
-                style={{
-                  color:
-                    record["disabled"] === AlertRuleStatus.Enable
-                      ? "green"
-                      : "red",
-                }}
+              <Tag
+                // title={
+                //   record["disabled"] === AlertRuleStatus.Enable
+                //     ? "已启动"
+                //     : "未启动"
+                // }
+                color={record["disabled"] === AlertRuleStatus.Enable ? "green" : "orange"}
+                // style={{
+                //   color:
+                //     record["disabled"] === AlertRuleStatus.Enable
+                //       ? "green"
+                //       : "red",
+                // }}
                 onClick={(e) => {
                   // const { id, disabled } = record;
                   const { strategy_id, disabled } = record;
@@ -298,7 +300,12 @@ export default function List(props: ListProps) {
                   });
                 }}
                 rev={undefined}
-              />
+              >{
+                record["disabled"] === AlertRuleStatus.Enable
+                  ? "启用"
+                  : "关闭"
+              }
+              </Tag>
             )}
             {(profile.roles?.includes("Admin") ||
               permList.includes("/alert-rules/copy")) && (
@@ -313,13 +320,13 @@ export default function List(props: ListProps) {
                 }}
                 target="_self"
               >
-                <CopyTwoTone rev={undefined} />
+                {/* <CopyTwoTone rev={undefined} /> */}
+                <Tag color='purple'>复制</Tag>
               </Link>
             )}
             {(profile.roles?.includes("Admin") ||
               permList.includes("/alert-rules/detail")) && (
-              <FileSearchOutlined
-                title="查看"
+              <Tag    color="blue"            // title="查看"
                   // onClick={() => {
                   //   history.push(`alert-rules/edit/${record.id}?mode=view`);
                   // }}
@@ -329,12 +336,12 @@ export default function List(props: ListProps) {
                   );
                 }}
                 rev={undefined}
-              />
+              >查看</Tag>
             )}
             {(profile.roles?.includes("Admin") ||
               permList.includes("/alert-rules/put")) && (
-              <EditOutlined
-                title="编辑"
+              <Tag color='#1C76FD'
+                // title="编辑"
                   // onClick={() => {
                   //   history.push(`alert-rules/edit/${record.id}`);
                   // }}
@@ -342,7 +349,7 @@ export default function List(props: ListProps) {
                   history.push(`alert-rules/edit/${record.strategy_id}`);
                 }}
                 rev={undefined}
-              />
+              >编辑</Tag>
             )}
             {(profile.roles?.includes("Admin") ||
               permList.includes("/alert-rules/del")) && (
@@ -378,7 +385,8 @@ export default function List(props: ListProps) {
                   });
                 }}
               >
-                <DeleteOutlined rev={undefined} />
+                {/* <DeleteOutlined rev={undefined} /> */}
+                <Tag color="#F56C6C">删除</Tag>
               </div>
             )}
             {record.prod === "anomaly" && (
@@ -388,7 +396,8 @@ export default function List(props: ListProps) {
                 </Link>
               </div>
             )}
-          </Space>
+          {/* </Space> */}
+          </div>
         );
       },
       onCell: (record) => ({

@@ -4,6 +4,7 @@ import { Cascader, Button } from 'antd';
 import _ from 'lodash';
 import { arrayMoveImmutable } from 'array-move';
 import { SortableContainer } from 'react-sortable-hoc';
+import { PlusOutlined } from '@ant-design/icons';
 import { getOperationDefinitions } from './utils';
 import { PromVisualQuery, QueryBuilderOperationDef } from '../types';
 import Operation from './Operation';
@@ -33,6 +34,8 @@ export default function index(props: IProps) {
 
   return (
     <div className='prom-query-builder-operations-container'>
+      <div className='prom-query-builder-operations-content'>
+      <div className='operations-title'>指标加工</div>
       <div className='prom-query-builder-operations'>
         {!_.isEmpty(operations) && (
           <SortableBody
@@ -76,8 +79,9 @@ export default function index(props: IProps) {
             onChange(operationDef.addOperationHandler(operationDef, query, firstOperationDef));
           }}
         >
-          <Button>添加操作</Button>
+          <Button className='label-filter-add-btn' icon={<PlusOutlined />}>添加操作</Button>
         </Cascader>
+      </div>
       </div>
     </div>
   );

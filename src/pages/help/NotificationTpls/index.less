@@ -46,7 +46,10 @@
     display: flex;
   }
   .is-active {
-     background-color: #92b7d1;
+    //  background-color: #92b7d1;
+    background: rgba(47, 130, 255, 0.1);
+    border-radius: 4px 4px 4px 4px;
+    color: #1C76FD;
   }
   .ant-list-item {
     width: 100%;
@@ -71,7 +74,22 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-bottom: 1px solid #e5e8ef;
+    margin-bottom: 10px;
     // margin-top: 16px;
+    .sub-title-left {
+      display: flex;
+      align-items: center;
+      .sub-title-bar {
+        width: 4px;
+        height: 16px;
+        background: #1C76FD;
+        border-radius: 2px;
+        margin-right: 14px;
+        flex-shrink: 0;
+      }
+    }
+    
   }
   .load-more {
     font-size: 24px;
@@ -90,6 +108,10 @@
     box-sizing: border-box;
     width: 245px;
     padding: 16px;
+    background: #F2F7FD;
+    box-shadow: 2px 2px 8px 0px rgba(82,90,102,0.08), 1px 1px 2px 0px rgba(82,90,102,0.04);
+    border-radius: 12px 12px 12px 12px;
+    border: 1px solid #FFFFFF;
     &:before {
       content: '';
       display: block;
@@ -144,6 +166,15 @@
   .ant-list-split .ant-list-item {
     border: none;
     color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    &.is-active {
+      color: #1C76FD;
+    }
+  }
+  .resource-table-content {
+    padding: 20px;
   }
 }
 .oper-name.ant-btn {
@@ -211,6 +242,17 @@
   // flex: 1;
   width: calc(100% - 10px);
   // overflow: auto;
+  background: #F2F7FD;
+  box-shadow: 2px 2px 8px 0px rgba(82,90,102,0.08), 1px 1px 2px 0px rgba(82,90,102,0.04);
+  border-radius: 12px 12px 12px 12px;
+  border: 1px solid #FFFFFF;
+  .team-info {
+    background: linear-gradient( 270deg, #D2E4FF 0%, rgba(232,241,255,0) 100%), #B7D4FF;
+    border-radius: 6px 6px 6px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 .groups-list {
  .ant-list-item {

@@ -63,8 +63,11 @@ export default function index() {
           }}
           renderHeadExtra={() => {
             return (
-              <div>
-                <div className='left-area-group-title'>预制筛选</div>
+              <div className='alert-rules-left-area-group'>
+                <div className='left-area-group-title'>
+                  <div className='left-area-group-title-bar' />
+                  预制筛选
+                </div>
                 <div
                   className={classNames({
                     'n9e-biz-group-item': true,

@@ -103,7 +103,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
                   }}
                 />
               )}
-              {icon}
+              {/* {icon} */}
               {title}
             </div>
             {/* {desc && <div className={'page-header-desc'}>{desc}</div>} */}

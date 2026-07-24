@@ -26,9 +26,27 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid #e5e8ef;
+      margin-bottom: 10px;
+      .left-area-group-title-left {
+        margin-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        .left-area-group-title-bar {
+        width: 4px;
+        height: 16px;
+        background: #1C76FD;
+        border-radius: 2px;
+        margin-right: 8px;
+        flex-shrink: 0;
+        }
+      }
+     
     }
     &-search {
       margin-bottom: 10px;
+      border-radius: 4px;
     }
     .radio-list {
       flex-shrink: 1;
@@ -74,7 +92,10 @@
   padding: 6px 8px;
   cursor: pointer;
   &.active {
-    background-color: fade(@primary-color, 10%);
+    // background-color: fade(@primary-color, 10%);
+    background: rgba(47, 130, 255, 0.1);
+    border-radius: 4px 4px 4px 4px;
+    color: #1C76FD;
   }
 }
 

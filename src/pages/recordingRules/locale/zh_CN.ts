@@ -1,5 +1,5 @@
 const zh_CN = {
-  title: '记录规则',
+  title: '自定义指标',
   search_placeholder: '搜索名称或标签',
   name: '指标名称',
   name_msg: '指标名称非法',

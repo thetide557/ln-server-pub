@@ -15,7 +15,7 @@
  *
  */
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Input, Table, Tooltip, message, Modal, Switch, Space } from 'antd';
+import { Button, Input, Table, Tooltip, message, Modal, Switch, Space, Tag } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { CloseCircleOutlined, ExclamationCircleOutlined, SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -216,7 +216,7 @@ const Shield: React.FC = () => {
     },
     {
       title: t('common:table.operations'),
-      width: '98px',
+      width: '120px',
       align: 'center',
       dataIndex: 'operation',
       render: (text: undefined, record: shieldItem) => {
@@ -237,7 +237,8 @@ const Shield: React.FC = () => {
                     });
                   }}
                 >
-                  {t('common:btn.clone')}
+                  {/* {t('common:btn.clone')} */}
+                  <Tag color="purple">{t('common:btn.clone')}</Tag>
                 </div>
               }
               {
@@ -259,7 +260,8 @@ const Shield: React.FC = () => {
                     });
                   }}
                 >
-                  {t('common:btn.delete')}
+                  {/* {t('common:btn.delete')} */}
+                  <Tag color="#F56C6C">{t('common:btn.delete')}</Tag>
                 </div>
               }
             </div>
@@ -350,8 +352,11 @@ const Shield: React.FC = () => {
           }}
           renderHeadExtra={() => {
             return (
-              <div>
-                <div className='left-area-group-title'>预制筛选</div>
+              <div className='shield-left-area-group'>
+                <div className='left-area-group-title'>
+                  <div className='left-area-group-title-bar' />
+                  预制筛选
+                </div>
                 <div
                   className={classNames({
                     'n9e-biz-group-item': true,

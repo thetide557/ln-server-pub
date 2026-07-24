@@ -60,7 +60,7 @@ export default function FieldWithEditor(props: IProps) {
     <div className='template-field'>
       <div className='template-field-editor'>
         <div className='template-field-editor-header'>
-          <div>
+          <div style={{ color: '#165ECA' }}>
             <span>{titleExtra}</span>
           </div>
           {renderPreview && (

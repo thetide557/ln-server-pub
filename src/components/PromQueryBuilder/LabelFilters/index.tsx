@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Select, Input, Button, Space } from 'antd';
-import { PlusCircleOutlined, CloseOutlined } from '@ant-design/icons';
+import { PlusOutlined, CloseOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useDynamicList } from 'ahooks';
 import FormItem from '../components/FormItem';
@@ -37,11 +37,12 @@ export default function index(props: IProps) {
 
   return (
     <>
+    <div className='prom-query-builder-labels-container-wrapper'>
       <FormItem
         label={
           <Space>
             标签过滤
-            <PlusCircleOutlined
+            {/* <PlusCircleOutlined
               onClick={() => {
                 insert(list.length, {
                   label: '',
@@ -49,10 +50,13 @@ export default function index(props: IProps) {
                   op: '=',
                 });
               }}
-            />
+            /> */}
           </Space>
         }
-        style={{ width: list.length > 1 ? '100%' : 'calc(50% - 4px)' }}
+        // style={{ width: list.length > 1 ? '100%' : 'calc(50% - 4px)' }}
+        style={{
+          width:'100%',
+        }}
       >
         <div className='prom-query-builder-labels-container'>
           {_.map(list, (item, index) => {
@@ -60,9 +64,9 @@ export default function index(props: IProps) {
               <Input.Group
                 compact
                 key={getKey(index)}
-                style={{
-                  width: list.length > 1 ? 'calc(50% - 4px)' : '100%',
-                }}
+                // style={{
+                //   width: list.length > 1 ? 'calc(50% - 4px)' : '100%',
+                // }}
               >
                 <LabelNameSelect
                   style={{ width: '25%' }}
@@ -98,7 +102,7 @@ export default function index(props: IProps) {
                   datasourceValue={datasourceValue}
                   params={params}
                   style={{
-                    width: `calc(100% - 35% - 60px - 32px)`,
+                    width: `calc(100% - 35% - 60px - 70px)`,
                   }}
                   value={item.value}
                   onChange={(val) => {
@@ -109,16 +113,32 @@ export default function index(props: IProps) {
                   }}
                 />
                 <Button
-                  icon={<CloseOutlined />}
+                  className='label-filter-delete-btn'
                   onClick={() => {
                     remove(index);
                   }}
-                />
+                >
+                  <img src='/image/monitor-alert-center/del-btn.png' alt='删除' style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </Button>
               </Input.Group>
             );
           })}
-        </div>
+          <Button
+            className='label-filter-add-btn'
+            icon={<PlusOutlined />}
+            onClick={() => {
+              insert(list.length, {
+                label: '',
+                value: '',
+                op: '=',
+              });
+            }}
+          >
+            添加
+          </Button>
+      </div>
       </FormItem>
+    </div>
     </>
   );
 }

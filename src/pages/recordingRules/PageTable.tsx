@@ -189,29 +189,34 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
     {
       title: t('common:table.operations'),
       dataIndex: 'operator',
-      width: 120,
+      width: 240,
       fixed: 'right',
       render: (data, record) => {
 
         return (
-          <Space>
+          // <Space>
+          <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'row', cursor:'pointer' }}>
             {
-              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/detail")) && <FileSearchOutlined
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/detail")) && <Tag   color="blue"
                 title="查看"
                 onClick={() => {
                   handleClickEdit(record.id);
                 }}
                 rev={undefined}
-              />
+              >
+                查看
+              </Tag>
             }
             {
-              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/put")) && <EditOutlined
+              (profile.roles?.includes("Admin") || permList.includes("/recording-rules/put")) && <Tag color='#1C76FD'
                 title="编辑"
                 onClick={() => {
                   handleClickEdit(record.id, false, true);
                 }}
                 rev={undefined}
-              />
+              >
+                编辑
+              </Tag>
             }
             {
               (profile.roles?.includes("Admin") || permList.includes("/recording-rules/clone")) && <div
@@ -222,7 +227,8 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
                   handleClickEdit(record.id, true, true);
                 }}
               >
-                <CopyTwoTone rev={undefined} />
+                {/* <CopyTwoTone rev={undefined} /> */}
+                <Tag color='purple'>克隆</Tag>
               </div>
             }
             {
@@ -246,10 +252,12 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
                   });
                 }}
               >
-                <DeleteOutlined rev={undefined} />
+                {/* <DeleteOutlined rev={undefined} /> */}
+                <Tag color='#F56C6C'>删除</Tag>
               </div>
             }
-          </Space>
+          {/* </Space> */}
+          </div>
         );
       },
     },

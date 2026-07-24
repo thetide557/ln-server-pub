@@ -24,7 +24,7 @@ function PromQueryBuilderModal(props: ModalWrapProps & IProps) {
 
   return (
     <Modal
-      width={900}
+      width={600}
       title='PromQL 新手模式'
       visible={visible}
       closable={false}

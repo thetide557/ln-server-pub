@@ -241,7 +241,10 @@ export default function index(props: IProps) {
         </Input.Group>
       </div>
       {/* <div className='key-des'><span className='key-title'>指标关键词说明：</span> {cn_name[value] ? cn_name[value] : en_name[value] ? en_name[value] : ''}</div> */}
-      <div className='key-des'><span className='key-title'>指标关键词说明：</span> {keydes}</div>
+      <div className='key-des'>
+        <img src='/image/monitor-alert-center/key-desc.png' alt='' style={{ width: 16, height: 16, marginRight: 10, flexShrink: 0 }} />
+        <span className='key-title'>指标关键词说明：</span> {keydes}
+      </div>
       {errorContent && <Alert style={{ marginBottom: 16 }} message={errorContent} type='error' />}
       <div style={{ minHeight: 0, height: '100%' }}>
         <Tabs

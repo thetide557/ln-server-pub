@@ -16,7 +16,7 @@ export default function index(props: Props) {
         {_.map(displayData, (item, index) => {
           return (
             <div key={index}>
-              <Tag color='purple'>
+              <Tag color='geekblue'>
                 <div
                   style={{
                     maxWidth: width,

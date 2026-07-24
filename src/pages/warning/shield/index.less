@@ -12,16 +12,20 @@
 }
 .shield-index {
   flex: 1;
+  background: #F2F7FD;
+  box-shadow: 2px 2px 8px 0px rgba(82,90,102,0.08), 1px 1px 2px 0px rgba(82,90,102,0.04);
+  border-radius: 12px 12px 12px 12px;
+  border: 1px solid #FFFFFF;
   .header {
     display: flex;
-    padding: 10px 10px 0;
+    padding: 20px 20px 0;
     justify-content: space-between;
     .searchInput {
       margin-left: 10px;
     }
   }
   .ant-table-wrapper {
-    padding: 0px 10px 10px;
+    padding: 0px 20px 20px;
   }
   .ant-popover {
     .ant-popover-inner-content {
@@ -52,5 +56,24 @@
   .ant-checkbox-wrapper {
     display: inline-flex;
     align-items: flex-start;
+  }
+}
+.shield-left-area-group {
+  background: #FFFFFF;
+  border-radius: 12px 12px 12px 12px;
+  padding: 10px;
+  .left-area-group-title {
+    border-bottom: 1px solid #e5e8ef;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    .left-area-group-title-bar {
+      width: 4px;
+      height: 16px;
+      background: #1C76FD;
+      border-radius: 2px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
   }
 }

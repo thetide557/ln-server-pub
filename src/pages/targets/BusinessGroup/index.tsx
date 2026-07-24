@@ -149,7 +149,9 @@ export default function index(props: IProps) {
         <div className='left-area-group group-shrink'>
           {renderHeadExtra && renderHeadExtra()}
           <div className='left-area-group-title'>
-            {title}
+            <div className='left-area-group-title-left'><div className='left-area-group-title-bar' />
+            {title}</div>
+            
             {/* {title === t('common:business_group') && <SettingOutlined title='业务组管理' onClick={() => history.push(`/busi-groups`)} />} */}
           </div>
           <Input

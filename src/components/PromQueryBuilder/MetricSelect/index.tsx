@@ -47,9 +47,9 @@ export default function index(props: IProps) {
   return (
     <FormItem
       label='指标'
-      style={{
-        width: 'calc(50% - 4px)',
-      }}
+      // style={{
+      //   width: 'calc(50% - 4px)',
+      // }}
     >
       <AutoComplete
         style={{ width: '100%' }}
@@ -95,7 +95,19 @@ export default function index(props: IProps) {
         }}
       />
       {/* <div style={{marginTop: '10px', width: '650px'}}><span style={{color: '#0A4B9D'}}>指标关键词说明：</span> {cn_name[searchValue] ? cn_name[searchValue] : en_name[searchValue] ? en_name[searchValue] : ''}</div> */}
-       <div style={{marginTop: '10px', width: '650px'}}><span style={{color: '#0A4B9D'}}>指标关键词说明：</span> {keydes}</div>
+       <div style={{
+         marginTop: '10px',
+         height: 44,
+         background: '#FCF6EC',
+         boxShadow: 'inset 3px 0px 0px 0px #FFA940',
+         borderRadius: 6,
+         padding: '14px 20px',
+         display: 'flex',
+         alignItems: 'center',
+       }}>
+         <img src='/image/monitor-alert-center/key-desc.png' alt='' style={{ width: 16, height: 16, marginRight: 10, flexShrink: 0 }} />
+         <span style={{color: '#0A4B9D'}}>指标关键词说明：</span> {keydes}
+       </div>
     </FormItem>
   );
 }
