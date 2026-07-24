@@ -1176,7 +1176,7 @@ const ScheduleList: React.FC = () => {
                         <div className="timeline-role-personnel">
                           {validList.map((p, pIndex) => (
                             <span key={p.id || pIndex}>
-                              {pIndex > 0 && <span className="name-separator">、</span>}
+                              {pIndex > 0 && <span className="name-separator"></span>}
                               <PersonnelHoverTag personnelId={p.id} date={dateStr}>
                                 <Tag color="#5eaaf2" style={{ cursor: "pointer" }}>{p.name || p.id}</Tag>
                               </PersonnelHoverTag>
@@ -1204,7 +1204,7 @@ const ScheduleList: React.FC = () => {
                     if (allPersonnel.length === 0) return null;
                     return allPersonnel.map((p, pIndex) => (
                       <span key={p.id || pIndex}>
-                        {pIndex > 0 && <span className="name-separator">、</span>}
+                        {pIndex > 0 && <span className="name-separator"></span>}
                         <PersonnelHoverTag personnelId={p.id} date={dateStr}>
                           <Tag color="#5eaaf2" style={{ cursor: "pointer" }}>{p.name || p.id}</Tag>
                         </PersonnelHoverTag>
