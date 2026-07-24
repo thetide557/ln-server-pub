@@ -31,7 +31,7 @@ export const OperationModal = ({
   reloadList,
   // 导入配置参数
   importConfig = {
-    templateUrl: '/api/takin/busi-group/duty/template',
+    templateUrl: '/api/takin/duty/template',
     importUrl: '/api/takin/xh/duty/import-xls',
     templateTitle: '值班人员'
   }

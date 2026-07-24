@@ -3,7 +3,6 @@
   height: 100%;
   background-color: #fff;
   padding: 20px 16px;
-
 }
 
 // 内容容器样式
@@ -55,22 +54,32 @@
       .lunar-date {
         display: inline-block;
       }
+      .bottom-record {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 70px;
+      }
       .schedule-text {
-        color: #118812;
+        color: #52c41a;
         text-align: right;
+        font-size: 12px;
+      }
+      .unfinished-text {
+        color: #f5222d;
+        text-align: right;
+        font-size: 12px;
       }
       .schedule-detail-info {
         width: 100%;
         color: #118812;
-        .personnel-line{
+        .personnel-line {
           cursor: pointer;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
-        
       }
-
     }
     .calendar-header {
       display: flex;
@@ -90,6 +99,20 @@
       }
     }
   }
+}
+
+.displayUnfinished-tip {
+  max-width: 200px;
+  color: #666;
+  font-size: 12px;
+  .displayUnfinished-header {
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  // .displayUnfinished-desc {
+  //   font-size: 12px;
+  //   font-weight: 400;
+  // }
 }
 
 // 排班详情卡片样式
@@ -117,14 +140,14 @@
       align-items: center;
       margin-bottom: 16px;
     }
-    .dates{
-        margin-bottom: 1rem;
+    .dates {
+      margin-bottom: 1rem;
     }
     .content {
       font-weight: 400;
-      max-height:500px ;
+      // max-height: 800px;
       overflow: auto;
-       .ant-timeline {
+      .ant-timeline {
         .ant-timeline-item {
           font-size: 14px;
           .ant-timeline-item-head-blue {
@@ -133,33 +156,80 @@
           }
         }
         .ant-timeline-item-last > .ant-timeline-item-tail {
-          display: block
+          display: block;
         }
       }
-      .logs-time{
-       padding-top: 2px;
+      .logs-time {
+        padding-top: 2px;
       }
-      .user-logs{
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-        padding:.5rem 1rem;
-        margin: .5rem 1rem 0 0;
+      .user-logs {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem 1rem;
+        margin: 0.5rem 1rem 0 0;
         border-radius: 5px;
-        .heads{
+        .duty-type-log {
+          margin-bottom: 12px;
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+        .duty-type-tag {
+          display: inline-block;
+          font-size: 13px;
+          // font-weight: 600;
+          // margin-bottom: 14px;
+          width: 70px;
+          height: 24px;
+          line-height: 24px;
+          text-align: center;
+          border-radius: 4px;
+          &.type-1 {
+            color: #52c41a;
+            background: #f6ffed;
+          }
+          &.type-2 {
+            color: #fa8c16;
+            background: #fff7e6;
+          }
+          &.type-3 {
+            color: #f5222d;
+            background: #fff1f0;
+          }
+        }
+        .status-label {
+          color: #666;
+          font-size: 13px;
+        }
+        .duty-type-desc {
+          margin-top: 8px;
+          color: #333;
+          font-size: 13px;
+          font-weight: 400;
+          line-height: 1.6;
+          .unfinished-desc {
+            margin-top: 8px;
+            color: #f5222d;
+          }
+          >div {
+            margin-bottom: 6px;
+          }
+        }
+        .heads {
           display: flex;
-          justify-content:space-between;
+          justify-content: space-between;
           color: #000;
           font-weight: 500;
-          .name{
+          .name {
             margin-right: 1rem;
           }
-          .icons{
-            .anticon{
+          .icons {
+            .anticon {
               font-size: 16px;
-              margin: 0 .25rem;
-            } 
+              margin: 0 0.25rem;
+            }
           }
         }
-        .log-cons{
+        .log-cons {
           margin-top: 1rem;
         }
       }
@@ -184,6 +254,33 @@
         gap: 8px;
       }
     }
+  }
+}
 
+// 新增/编辑值班日志弹窗样式
+.schedule-modal-content {
+  .log-no-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    .log-no-label {
+      font-size: 14px;
+      color: #666;
+    }
+    .log-no-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      font-family: monospace;
+    }
+  }
+  .duty-type-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    padding: 12px 12px 0;
+    margin-bottom: 12px;
+    background: #fafafa;
   }
 }

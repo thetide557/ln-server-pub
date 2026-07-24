@@ -31,9 +31,9 @@ export default function () {
           <TabPane tab="值班日志" key="dutyLogs">
             <DutyLogs />
           </TabPane>
-          <TabPane tab="项目支撑" key="projectSupport">
+          {/* <TabPane tab="项目支撑" key="projectSupport">
             <ProjectSupport />
-          </TabPane>
+          </TabPane> */}
         </Tabs>
       </div>
     </PageLayout>

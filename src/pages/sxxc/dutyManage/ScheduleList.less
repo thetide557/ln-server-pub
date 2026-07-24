@@ -1,9 +1,28 @@
+.hover-duty-type {
+  display: inline-block;
+  // font-size: 11px;
+  line-height: 16px;
+  padding: 0 6px;
+  border-radius: 4px;
+  &.type-1 {
+    color: #52c41a;
+    background: #f6ffed;
+  }
+  &.type-2 {
+    color: #fa8c16;
+    background: #fff7e6;
+  }
+  &.type-3 {
+    color: #f5222d;
+    background: #fff1f0;
+  }
+}
+
 // 页面容器样式
 .schedule-management-page {
   height: 100%;
   background-color: #fff;
   padding: 20px 16px;
-
 }
 
 // 内容容器样式
@@ -30,52 +49,185 @@
       color: #767676;
     }
     .ant-picker-cell-selected {
-      background: #2888f7;
+      // background: #2888f7;
+      background: #F2F7FD !important;
       color: #fff;
       &:hover {
-        background: #2888f7;
+        // background: #2888f7;
+        background: #F2F7FD !important;
         opacity: 0.8;
       }
-      .bottom{
-        .schedule-text,.schedule-detail-info{
+      .bottom {
+        .schedule-status.scheduled,
+        .duty-type-title,
+        .role-label,
+        .personnel-hover-name,
+        .schedule-detail-info {
           color: #fff;
+        }
+        .schedule-status.empty {
+          color: rgba(255, 255, 255, 0.7);
         }
       }
     }
     .calendar-cell {
-      height: 80px;
+      min-height: 140px;
+      height: 100%;
       border: 1px solid #e7e7e7;
       padding: 5px;
       text-align: left;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start!important;
+      // overflow: hidden;
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        // margin-bottom: 8px;
+        .date-left {
+          display: flex;
+          align-items: center;
+        }
+      }
+      .bottom {
+        margin-top: 4px;
+        overflow: hidden;
+        height: 100%;
+      }
       .date-number {
         display: inline-block;
-        margin-right: 10px;
+        margin-right: 6px;
         height: 20px;
         width: 20px;
         text-align: center;
+        line-height: 20px;
+        color: #767676;
       }
       .lunar-date {
         display: inline-block;
+        font-size: 12px;
+        color: #767676;
       }
-      .schedule-text {
-        color: #118812;
-        text-align: right;
+      .schedule-status {
+        font-size: 12px;
+        &.scheduled {
+          color: #118812;
+        }
+        &.empty {
+          color: #bfbfbf;
+        }
+      }
+      .no-schedule-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        &::-webkit-scrollbar {
+          width: 4px;
+        }
+        &::-webkit-scrollbar-thumb {
+          border-radius: 2px;
+          background: rgba(0, 0, 0, 0.15);
+        }
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        // padding-top: 20px;
+        img {
+          width: 70px;
+          height: auto;
+          // margin-bottom: 8px;
+        }
+        .no-schedule-text {
+          font-size: 12px;
+          color: #666;
+        }
       }
       .schedule-detail-info {
         width: 100%;
         color: #118812;
-        .personnel-line{
+        .personnel-line {
           cursor: pointer;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
-        
       }
-
+      .schedule-detail-scroll {
+        // margin-top: 8px;
+        height: 100%;
+        overflow-y: auto;
+        &::-webkit-scrollbar {
+          width: 4px;
+        }
+        &::-webkit-scrollbar-thumb {
+          border-radius: 2px;
+          background: rgba(0, 0, 0, 0.15);
+        }
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+      }
+      .duty-type-block {
+        margin-bottom: 4px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      .duty-type-title {
+        display: inline-block;
+        font-size: 11px;
+        line-height: 16px;
+        padding: 0 6px;
+        margin-bottom: 2px;
+        border-radius: 4px;
+        &.type-1 {
+          color: #52c41a;
+          background: #f6ffed;
+        }
+        &.type-2 {
+          color: #fa8c16;
+          background: #fff7e6;
+        }
+        &.type-3 {
+          color: #f5222d;
+          background: #fff1f0;
+        }
+      }
+      .duty-type-personnel-list {
+        font-size: 11px;
+        line-height: 16px;
+        color: #333;
+        word-break: break-all;
+      }
+      .role-line {
+        font-size: 11px;
+        line-height: 1.4;
+        color: #555;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .role-label {
+        color: #767676;
+      }
+      .personnel-name {
+        padding: 0 2px;
+        .personnel-hover-name {
+          cursor: pointer;
+          color: #333;
+          &:hover {
+            color: #2888f7;
+          }
+        }
+      }
+      .name-separator {
+        color: #999;
+      }
     }
     .calendar-header {
       display: flex;
@@ -104,11 +256,10 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
-  // .ant-card-body {
-  //   height: 100%;
-  //   padding: 20px;
-  //   overflow-y: auto;
-  // }
+  .ant-card-body {
+    height: 100%;
+    overflow-y: auto;
+  }
 
   .no-schedule {
     height: 100%;
@@ -121,6 +272,27 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
+    }
+    .schedule-date {
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 16px;
+    }
+    .no-data-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 40px;
+      img {
+        width: 120px;
+        height: auto;
+        margin-bottom: 12px;
+      }
+      .no-data-text {
+        font-size: 14px;
+        color: #999;
+      }
     }
   }
 
@@ -139,21 +311,90 @@
         gap: 8px;
       }
     }
+    .schedule-date {
+      font-weight: 700;
+      color: #555;
+    }
     .content {
       font-weight: 400;
       padding-top: 16px;
-       .ant-timeline {
-        .ant-timeline-item {
-          font-size: 14px;
+      .duty-type-section {
+        margin-bottom: 16px;
+        &:last-child {
+          margin-bottom: 0;
         }
-        li:first-child {
-          .ant-timeline-item-tail {
-            display: none !important;
+        .duty-type-section-title {
+          font-size: 13px;
+          // font-weight: 600;
+          margin-bottom: 14px;
+          width: 70px;
+          height: 24px;
+          line-height: 24px;
+          text-align: center;
+          border-radius: 4px;
+          &.type-1 {
+            color: #52c41a;
+            background: #f6ffed;
+          }
+          &.type-2 {
+            color: #fa8c16;
+            background: #fff7e6;
+          }
+          &.type-3 {
+            color: #f5222d;
+            background: #fff1f0;
           }
         }
-      }
-      .personnel-list {
-        padding-top: 16px;
+        .ant-timeline {
+          .ant-timeline-item {
+            font-size: 13px;
+            padding-bottom: 8px;
+            &:last-child {
+              padding-bottom: 0;
+            }
+          }
+          .ant-timeline-item-tail {
+            border-left-color: #e8e8e8;
+          }
+          .ant-timeline-item-head {
+            background: transparent;
+            border-color: transparent;
+          }
+          .director-role-item {
+            .ant-timeline-item-tail {
+              display: none;
+            }
+          }
+          .timeline-person-icon {
+            font-size: 16px;
+            color: #2888f7;
+          }
+          .timeline-role-name {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 10px;
+          }
+          .timeline-role-personnel {
+            .ant-tag {
+              margin-right: 0;
+            }
+            .name-separator {
+              margin: 0 4px;
+              color: #999;
+            }
+          }
+        }
+        .simple-personnel-list {
+          padding-left: 28px;
+          font-size: 13px;
+          .ant-tag {
+            margin-right: 0;
+          }
+          .name-separator {
+            margin: 0 4px;
+            color: #999;
+          }
+        }
       }
     }
   }
