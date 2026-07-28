@@ -17,7 +17,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Table, Divider, Checkbox, Row, Col, Input, Select, Button } from 'antd';
-import { SearchOutlined, CodeOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, CodeOutlined } from '@ant-design/icons';
 import { ColumnProps } from 'antd/lib/table';
 import _ from 'lodash';
 import moment from 'moment';
@@ -29,6 +29,7 @@ import { BusinessGroup } from '@/pages/targets';
 import PageLayout from '@/components/pageLayout';
 import BlankBusinessPlaceholder from '@/components/BlankBusinessPlaceholder';
 import { CommonStateContext } from '@/App';
+import './style.less';
 
 interface DataItem {
   id: number;
@@ -71,13 +72,13 @@ const index = (_props: any) => {
       width: 150,
       render: (_text, record) => {
         return (
-          <span>
+          <span className='job-task-operation-links'>
             {
-              (profile.roles?.includes("Admin") || permList.includes("/job-tasks/clone")) && <><Link to={{ pathname: '/job-tasks/add', search: `task=${record.id}` }}>{t('task.clone')}</Link><Divider type='vertical' /></>
+              (profile.roles?.includes("Admin") || permList.includes("/job-tasks/clone")) && <><Link className='job-task-op-btn job-task-op-copy' to={{ pathname: '/job-tasks/add', search: `task=${record.id}` }}>{t('task.clone')}</Link><Divider type='vertical' /></>
             }
 
             {
-              (profile.roles?.includes("Admin") || permList.includes("/job-tasks/meta")) && <Link to={{ pathname: `/job-tasks/${record.id}/detail` }}>{t('task.meta')}</Link>
+              (profile.roles?.includes("Admin") || permList.includes("/job-tasks/meta")) && <Link className='job-task-op-btn job-task-op-meta' to={{ pathname: `/job-tasks/${record.id}/detail` }}>{t('task.meta')}</Link>
             }
           </span>
         );
@@ -98,90 +99,96 @@ const index = (_props: any) => {
     },
   ];
   return (
-    <PageLayout
-      title={
-        <>
-          <CodeOutlined />
-          {t('task')}
-        </>
-      }
-    >
-      <div style={{ display: 'flex' }}>
-        <BusinessGroup
-          curBusiId={curBusiId}
-          setCurBusiId={(id) => {
-            setCurBusiId(id);
-          }}
-        />
-        {curBusiId ? (
-          <div style={{ flex: 1, padding: 10 }}>
-            <Row>
-              <Col span={16} className='mb10'>
-                <Input
-                  style={{ width: 200, marginRight: 10 }}
-                  prefix={<SearchOutlined />}
-                  defaultValue={query}
-                  onPressEnter={(e) => {
-                    setQuery(e.currentTarget.value);
-                  }}
-                />
-                <Select
-                  style={{ marginRight: 10 }}
-                  value={days}
-                  onChange={(val: number) => {
-                    setDays(val);
-                  }}
-                >
-                  <Select.Option value={7}>{t('last.7.days')}</Select.Option>
-                  <Select.Option value={15}>{t('last.15.days')}</Select.Option>
-                  <Select.Option value={30}>{t('last.30.days')}</Select.Option>
-                  <Select.Option value={60}>{t('last.60.days')}</Select.Option>
-                  <Select.Option value={90}>{t('last.90.days')}</Select.Option>
-                </Select>
-                <Checkbox
-                  checked={mine}
-                  onChange={(e) => {
-                    setMine(e.target.checked);
-                  }}
-                >
-                  {t('task.only.mine')}
-                </Checkbox>
-              </Col>
-              <Col span={8} style={{ textAlign: 'right' }}>
-                {
-                  (profile.roles?.includes("Admin") || permList.includes("/job-tasks/add")) && <Button
-                    type='primary'
-                    onClick={() => {
-                      history.push('/job-tasks/add');
+    <div className='job-task-page'>
+      <PageLayout
+        title={
+          <>
+            <CodeOutlined />
+            {t('task')}
+          </>
+        }
+      >
+        <div className='job-task-content'>
+          <BusinessGroup
+            curBusiId={curBusiId}
+            setCurBusiId={(id) => {
+              setCurBusiId(id);
+            }}
+          />
+          {curBusiId ? (
+            <div className='job-task-main-card'>
+              <Row className='job-task-toolbar' align='middle'>
+                <Col flex='auto' className='job-task-filters'>
+                  <Input
+                    className='job-task-search'
+                    prefix={<SearchOutlined />}
+                    placeholder='搜索任务标题'
+                    defaultValue={query}
+                    onPressEnter={(e) => {
+                      setQuery(e.currentTarget.value);
+                    }}
+                  />
+                  <Select
+                    className='job-task-days'
+                    value={days}
+                    onChange={(val: number) => {
+                      setDays(val);
                     }}
                   >
-                    {t('task.temporary.create')}
-                  </Button>
+                    <Select.Option value={7}>{t('last.7.days')}</Select.Option>
+                    <Select.Option value={15}>{t('last.15.days')}</Select.Option>
+                    <Select.Option value={30}>{t('last.30.days')}</Select.Option>
+                    <Select.Option value={60}>{t('last.60.days')}</Select.Option>
+                    <Select.Option value={90}>{t('last.90.days')}</Select.Option>
+                  </Select>
+                  <Checkbox
+                    className='job-task-mine'
+                    checked={mine}
+                    onChange={(e) => {
+                      setMine(e.target.checked);
+                    }}
+                  >
+                    {t('task.only.mine')}
+                  </Checkbox>
+                </Col>
+                <Col flex='none' className='job-task-actions'>
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/job-tasks/add")) && <Button
+                      type='primary'
+                      onClick={() => {
+                        history.push('/job-tasks/add');
+                      }}
+                    >
+                      <PlusOutlined />
+                      创建临时任务
+                    </Button>
+                  }
+                </Col>
+              </Row>
+              <Table
+                className='job-task-list-table'
+                size='small'
+                rowKey='id'
+                columns={columns as any}
+                {...(tableProps as any)}
+                pagination={
+                  {
+                    ...tableProps.pagination,
+                    showSizeChanger: true,
+                    pageSizeOptions: ['10', '50', '100', '500', '1000'],
+                    showTotal: (total) => {
+                      return i18n.language == 'en' ? `Total ${total} items` : `共 ${total} 条`;
+                    },
+                  } as any
                 }
-              </Col>
-            </Row>
-            <Table
-              size='small'
-              rowKey='id'
-              columns={columns as any}
-              {...(tableProps as any)}
-              pagination={
-                {
-                  ...tableProps.pagination,
-                  showSizeChanger: true,
-                  pageSizeOptions: ['10', '50', '100', '500', '1000'],
-                  showTotal: (total) => {
-                    return i18n.language == 'en' ? `Total ${total} items` : `共 ${total} 条`;
-                  },
-                } as any
-              }
-            />
-          </div>
-        ) : (
-          <BlankBusinessPlaceholder text={t('task')}></BlankBusinessPlaceholder>
-        )}
-      </div>
-    </PageLayout>
+              />
+            </div>
+          ) : (
+            <BlankBusinessPlaceholder text={t('task')}></BlankBusinessPlaceholder>
+          )}
+        </div>
+      </PageLayout>
+    </div>
   );
 };
 

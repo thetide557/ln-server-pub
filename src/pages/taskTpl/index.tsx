@@ -32,6 +32,7 @@ import BindTags from './bindTags';
 import UnBindTags from './unBindTags';
 import BlankBusinessPlaceholder from '@/components/BlankBusinessPlaceholder';
 import { CommonStateContext } from '@/App';
+import './style.less';
 
 function getTableData(options: any, busiGroup: number | undefined, query: string) {
   if (busiGroup) {
@@ -143,22 +144,22 @@ const index = (_props: any) => {
       width: 220,
       render: (_text, record) => {
         return (
-          <span>
+          <span className='job-tpl-operation-links'>
             {
               (profile.roles?.includes("Admin") || permList.includes("/job-task/add")) && <>
-                <Link to={{ pathname: `/job-tpls/add/task`, search: `tpl=${record.id}` }}>{t('task.create')}</Link>
+                <Link className='job-tpl-op-btn job-tpl-op-view' to={{ pathname: `/job-tpls/add/task`, search: `tpl=${record.id}` }}>{t('task.create')}</Link>
                 <Divider type='vertical' />
               </>
             }
             {
               (profile.roles?.includes("Admin") || permList.includes("/job-tpls/put")) && <>
-                <Link to={{ pathname: `/job-tpls/${record.id}/modify` }}>{t('common:btn.modify')}</Link>
+                <Link className='job-tpl-op-btn job-tpl-op-edit' to={{ pathname: `/job-tpls/${record.id}/modify` }}>{t('common:btn.modify')}</Link>
                 <Divider type='vertical' />
               </>
             }
             {
               (profile.roles?.includes("Admin") || permList.includes("/job-tpls/copy")) && <>
-                <Link to={{ pathname: `/job-tpls/${record.id}/clone` }}>{t('common:btn.clone')}</Link>
+                <Link className='job-tpl-op-btn job-tpl-op-copy' to={{ pathname: `/job-tpls/${record.id}/clone` }}>{t('common:btn.clone')}</Link>
                 <Divider type='vertical' />
               </>
             }
@@ -169,7 +170,7 @@ const index = (_props: any) => {
                   handleDelBtnClick(record.id);
                 }}
               >
-                <a style={{ color: 'red' }}>{t('common:btn.delete')}</a>
+                <a className='job-tpl-op-btn job-tpl-op-delete'>{t('common:btn.delete')}</a>
               </Popconfirm>
             }
           </span>
@@ -178,105 +179,113 @@ const index = (_props: any) => {
     },
   ];
   return (
-    <PageLayout
-      title={
-        <>
-          <CodeOutlined />
-          {t('tpl')}
-        </>
-      }
-    >
-      <div style={{ display: 'flex' }}>
-        <BusinessGroup
-          curBusiId={curBusiId}
-          setCurBusiId={(id) => {
-            setCurBusiId(id);
-          }}
-        />
-        {busiId ? (
-          <div style={{ flex: 1, padding: 10 }}>
-            <Row>
-              <Col span={14} className='mb10'>
-                <Input
-                  style={{ width: 200 }}
-                  ref={searchRef}
-                  prefix={<SearchOutlined />}
-                  defaultValue={query}
-                  onPressEnter={(e) => {
-                    setQuery(e.currentTarget.value);
-                  }}
-                />
-              </Col>
-              <Col span={10} className='textAlignRight'>
-                {
-                  (profile.roles?.includes("Admin") || permList.includes("/job-tpls/add")) && <Link to={{ pathname: `/job-tpls/add` }}>
-                    <Button style={{ marginRight: 10 }} type='primary'>
-                      {t('tpl.create')}
-                    </Button>
-                  </Link>
-                }
-                {
-                  (profile.roles?.includes("Admin") || permList.includes("/job-tpls/ops")) && <Dropdown
-                    overlay={
-                      <Menu>
-                        <Menu.Item>
-                          <Button
-                            type='link'
-                            disabled={selectedIds.length === 0}
-                            onClick={() => {
-                              handleBatchBindTags();
-                            }}
-                          >
-                            {t('tpl.tag.bind')}
-                          </Button>
-                        </Menu.Item>
-                        <Menu.Item>
-                          <Button
-                            type='link'
-                            disabled={selectedIds.length === 0}
-                            onClick={() => {
-                              handleBatchUnBindTags();
-                            }}
-                          >
-                            {t('tpl.tag.unbind')}
-                          </Button>
-                        </Menu.Item>
-                      </Menu>
-                    }
-                  >
-                    <Button icon={<DownOutlined />}>{t('btn.batch_operations')}</Button>
-                  </Dropdown>
-                }
-              </Col>
-            </Row>
-            <Table
-              size='small'
-              rowKey='id'
-              columns={columns}
-              {...(tableProps as any)}
-              rowSelection={{
-                selectedRowKeys: selectedIds,
-                onChange: (selectedRowKeys) => {
-                  setSelectedIds(selectedRowKeys);
-                },
-              }}
-              pagination={
-                {
-                  ...tableProps.pagination,
-                  showSizeChanger: true,
-                  pageSizeOptions: ['10', '50', '100', '500', '1000'],
-                  showTotal: (total) => {
-                    return i18n.language == 'en' ? `Total ${total} items` : `共 ${total} 条`;
+    <div className='job-tpl-page'>
+      <PageLayout
+        title={
+          <>
+            <CodeOutlined />
+            {t('tpl')}
+          </>
+        }
+      >
+        <div className='job-tpl-content'>
+          <BusinessGroup
+            curBusiId={curBusiId}
+            setCurBusiId={(id) => {
+              setCurBusiId(id);
+            }}
+          />
+          {busiId ? (
+            <div className='job-tpl-main-card'>
+              <Row className='job-tpl-toolbar' align='middle'>
+                <Col flex='auto'>
+                  <Input
+                    className='job-tpl-search'
+                    ref={searchRef}
+                    prefix={<SearchOutlined />}
+                    placeholder='搜索名称或标签'
+                    defaultValue={query}
+                    onPressEnter={(e) => {
+                      setQuery(e.currentTarget.value);
+                    }}
+                  />
+                </Col>
+                <Col flex='none' className='job-tpl-actions'>
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/job-tpls/add")) && <Link to={{ pathname: `/job-tpls/add` }}>
+                      <Button type='primary'>
+                        <PlusOutlined />
+                        新增
+                      </Button>
+                    </Link>
+                  }
+                  {
+                    (profile.roles?.includes("Admin") || permList.includes("/job-tpls/ops")) && <Dropdown
+                      overlay={
+                        <Menu>
+                          <Menu.Item>
+                            <Button
+                              type='link'
+                              disabled={selectedIds.length === 0}
+                              onClick={() => {
+                                handleBatchBindTags();
+                              }}
+                            >
+                              {t('tpl.tag.bind')}
+                            </Button>
+                          </Menu.Item>
+                          <Menu.Item>
+                            <Button
+                              type='link'
+                              disabled={selectedIds.length === 0}
+                              onClick={() => {
+                                handleBatchUnBindTags();
+                              }}
+                            >
+                              {t('tpl.tag.unbind')}
+                            </Button>
+                          </Menu.Item>
+                        </Menu>
+                      }
+                    >
+                      <Button>
+                        更多操作
+                        <DownOutlined />
+                      </Button>
+                    </Dropdown>
+                  }
+                </Col>
+              </Row>
+              <Table
+                className='job-tpl-table'
+                size='small'
+                rowKey='id'
+                columns={columns}
+                {...(tableProps as any)}
+                rowSelection={{
+                  selectedRowKeys: selectedIds,
+                  onChange: (selectedRowKeys) => {
+                    setSelectedIds(selectedRowKeys);
                   },
-                } as any
-              }
-            />
-          </div>
-        ) : (
-          <BlankBusinessPlaceholder text={t('tpl')} />
-        )}
-      </div>
-    </PageLayout>
+                }}
+                pagination={
+                  {
+                    ...tableProps.pagination,
+                    showSizeChanger: true,
+                    pageSizeOptions: ['10', '50', '100', '500', '1000'],
+                    showTotal: (total) => {
+                      return i18n.language == 'en' ? `Total ${total} items` : `共 ${total} 条`;
+                    },
+                  } as any
+                }
+              />
+            </div>
+          ) : (
+            <BlankBusinessPlaceholder text={t('tpl')} />
+          )}
+        </div>
+      </PageLayout>
+    </div>
   );
 };
 

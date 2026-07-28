@@ -21,3 +21,338 @@
     }
   }
 }
+
+.job-tpl-page {
+  height: 100%;
+  background: #edf6fd;
+  color: #27364a;
+
+  .page-wrapper {
+    background: #edf6fd;
+  }
+
+  .page-top-header {
+    display: none;
+
+    & + div {
+      height: 100%;
+      margin: 0;
+      padding: 14px 18px 18px;
+      overflow: auto;
+      background: #edf6fd;
+
+      &:not(.srm) > * {
+        background: transparent;
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+.job-tpl-content {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+  min-height: 620px;
+}
+
+.job-tpl-page {
+  .left-area {
+    height: 100%;
+    padding: 16px 12px;
+    background: linear-gradient(180deg, #f7fbff 0%, #edf6ff 100%);
+    border: 1px solid #e4edf7;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(87, 126, 170, 0.1);
+
+    &.collapse {
+      padding: 0;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .collapse-btn {
+      right: -11px;
+      width: 11px;
+      height: 56px;
+      color: #a5b4c7;
+      background: #ffffff;
+      border: 1px solid #dce8f3;
+      border-left: 0;
+      box-shadow: 3px 4px 10px rgba(92, 126, 164, 0.1);
+    }
+  }
+
+  .left-area-group {
+    height: 100%;
+    margin: 0;
+
+    &-title {
+      position: relative;
+      height: 32px;
+      padding-left: 12px;
+      margin-bottom: 12px;
+      color: #26364b;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 32px;
+
+      &::before {
+        position: absolute;
+        top: 8px;
+        left: 0;
+        width: 3px;
+        height: 16px;
+        border-radius: 2px;
+        background: #2f7df6;
+        content: '';
+      }
+    }
+
+    &-search {
+      height: 34px;
+      margin-bottom: 12px;
+      border-color: #d8e5f1;
+      border-radius: 4px;
+      background: #ffffff;
+
+      .ant-input {
+        background: transparent;
+      }
+
+      .anticon {
+        color: #8aa7c7;
+      }
+    }
+
+    .radio-list {
+      padding-right: 4px;
+    }
+  }
+
+  .n9e-biz-group-item {
+    min-height: 34px;
+    padding: 8px 10px;
+    margin-bottom: 2px;
+    color: #536173;
+    border-radius: 0;
+    transition: all 0.18s ease;
+
+    &:hover {
+      color: #2f7df6;
+      background: #eaf3ff;
+    }
+
+    &.active {
+      color: #2f7df6;
+      background: #dbeafe;
+    }
+
+    .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .n9e-biz-group-group {
+    padding-bottom: 0;
+  }
+}
+
+.job-tpl-main-card {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 16px 12px;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf5ff 100%);
+  border: 1px solid #e4edf8;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(87, 126, 170, 0.1);
+}
+
+.job-tpl-toolbar {
+  margin-bottom: 14px;
+}
+
+.job-tpl-search {
+  width: 248px;
+  height: 34px;
+  border-color: #d8e5f1;
+  border-radius: 4px;
+  background: #fff;
+
+  .ant-input {
+    color: #34445a;
+    background: transparent;
+  }
+
+  .ant-input::placeholder {
+    color: #a8b8cc;
+  }
+
+  .anticon {
+    color: #9ab0c8;
+  }
+}
+
+.job-tpl-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  .ant-btn {
+    height: 34px;
+    padding: 0 18px;
+    border-radius: 3px;
+    font-weight: 500;
+    box-shadow: none;
+  }
+
+  .ant-btn-primary {
+    color: #ffffff;
+    background: #2f7df6;
+    border-color: #2f7df6;
+  }
+
+  .ant-btn:not(.ant-btn-primary) {
+    color: #596c84;
+    border-color: #d8e5f1;
+    background: #f8fbff;
+  }
+}
+
+.job-tpl-table {
+  color: #26364b;
+
+  .ant-table {
+    background: transparent;
+  }
+
+  .ant-table-container {
+    border-radius: 0;
+  }
+
+  .ant-table-thead > tr > th {
+    height: 44px;
+    padding: 10px 14px;
+    color: #27364a;
+    font-weight: 600;
+    background: #e7edf9;
+    border-bottom: 1px solid #d9e3f2;
+  }
+
+  .ant-table-thead > tr > th::before {
+    background-color: #d6e0ef !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    height: 46px;
+    padding: 8px 14px;
+    color: #34445a;
+    border-bottom: 1px solid #e1e8f4;
+  }
+
+  .ant-table-tbody > tr:nth-child(odd) > td {
+    background: #f4f8ff;
+  }
+
+  .ant-table-tbody > tr:nth-child(even) > td {
+    background: #edf3fc;
+  }
+
+  .ant-table-tbody > tr:hover > td {
+    background: #e5f0ff !important;
+  }
+
+  .ant-table-selection-column {
+    padding-right: 8px;
+    padding-left: 12px;
+  }
+
+  .ant-checkbox-inner {
+    border-color: #cfdaea;
+    border-radius: 2px;
+  }
+
+  .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #2f7df6;
+    border-color: #2f7df6;
+  }
+
+  .ant-tag {
+    color: #2f7df6;
+    background: #eaf3ff;
+    border: 1px solid #86b9ff;
+    border-radius: 4px;
+  }
+
+  .ant-table-cell a {
+    color: #1f76eb;
+    font-weight: 500;
+  }
+
+.job-tpl-operation-links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.job-tpl-operation-links .ant-divider {
+    display: none;
+}
+
+.job-tpl-op-btn {
+    min-width: 44px;
+    height: 24px;
+    padding: 0 10px;
+    color: #2f7df6;
+    line-height: 22px;
+    text-align: center;
+    background: #eef6ff;
+    border: 1px solid #8fc2ff;
+    border-radius: 3px;
+}
+
+.job-tpl-op-edit {
+    color: #ffffff !important;
+    background: #2f8cff;
+    border-color: #2f8cff;
+}
+
+.job-tpl-op-copy {
+    color: #7c55d9;
+    background: #f4efff;
+    border-color: #bba3ff;
+}
+
+.job-tpl-op-delete {
+    color: #ffffff !important;
+    background: #ff6b72;
+    border-color: #ff6b72;
+}
+
+  .ant-pagination {
+    margin: 14px 0 0;
+    color: #607086;
+  }
+
+  .ant-pagination-item,
+  .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination-next .ant-pagination-item-link,
+  .ant-select-selector {
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .ant-pagination-item-active {
+    background: #2f7df6 !important;
+    border-color: #2f7df6 !important;
+  }
+
+  .ant-pagination-item-active a {
+    color: #ffffff !important;
+  }
+}
