@@ -72,6 +72,7 @@ export default function () {
   const [manufacturerSearch, setManufacturerSearch] = useState('');
   const [manufacturerLoading, setManufacturerLoading] = useState(false);
   const [addingManufacturer, setAddingManufacturer] = useState(false);
+  const addingManufacturerRef = useRef(false);
   // const [assetOptions1, setAssetOptions1] = useState<any[]>([]);
   const [maintenanceRecordModalOpen, setMaintenanceRecordModalOpen] = useState(false);
   const [maintenanceHistoryModalOpen, setMaintenanceHistoryModalOpen] = useState(false);
@@ -176,7 +177,18 @@ export default function () {
     loadManufacturerOptions();
   }, [loadManufacturerOptions]);
 
+  const debouncedSetManufacturerSearch = useMemo(
+    () => _.debounce((value: string) => {
+      setManufacturerSearch(value);
+    }, 300),
+    [],
+  );
+
   const handleAddManufacturer = useCallback(async () => {
+    if (addingManufacturerRef.current) {
+      return;
+    }
+
     const nextManufacturer = _.trim(manufacturerSearch);
     if (!nextManufacturer) {
       return;
@@ -185,9 +197,11 @@ export default function () {
     const exists = manufacturerOptions.some((item) => item.value === nextManufacturer);
     if (exists) {
       form.setFieldsValue({ manufacturers: nextManufacturer });
+      setAssetData((prev) => ({ ...prev, manufacturers: nextManufacturer }));
       return;
     }
 
+    addingManufacturerRef.current = true;
     setAddingManufacturer(true);
     try {
       await addDictDataBySingle({
@@ -202,15 +216,29 @@ export default function () {
         setManufacturerOptions((prev) => prev.concat([{ value: nextManufacturer, label: nextManufacturer }]));
       }
       form.setFieldsValue({ manufacturers: nextManufacturer });
+      setAssetData((prev) => ({ ...prev, manufacturers: nextManufacturer }));
       setManufacturerSearch('');
       message.success('厂商新增成功');
     } catch (error: any) {
       await loadManufacturerOptions(false);
       message.error(error?.message || '厂商新增失败');
     } finally {
+      addingManufacturerRef.current = false;
       setAddingManufacturer(false);
     }
   }, [form, loadManufacturerOptions, manufacturerOptions, manufacturerSearch]);
+
+  const debouncedAddManufacturer = useMemo(
+    () => _.debounce(handleAddManufacturer, 300, { leading: true, trailing: false }),
+    [handleAddManufacturer],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSetManufacturerSearch.cancel();
+      debouncedAddManufacturer.cancel();
+    };
+  }, [debouncedAddManufacturer, debouncedSetManufacturerSearch]);
 
   const manufacturerNotFoundContent = useMemo(() => {
     if (manufacturerLoading) {
@@ -234,12 +262,12 @@ export default function () {
         }}
       >
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='没有匹配的厂商' />
-        <Button type='link' icon={<PlusOutlined />} loading={addingManufacturer} onClick={handleAddManufacturer}>
+        <Button type='link' icon={<PlusOutlined />} loading={addingManufacturer} disabled={addingManufacturer} onClick={debouncedAddManufacturer}>
           新增厂商 "{nextManufacturer}"
         </Button>
       </div>
     );
-  }, [addingManufacturer, handleAddManufacturer, manufacturerLoading, manufacturerSearch]);
+  }, [addingManufacturer, debouncedAddManufacturer, manufacturerLoading, manufacturerSearch]);
 
   useEffect(() => {
     // 根据选择资产类型生成表单
@@ -462,28 +490,35 @@ export default function () {
     }
   };
 
-  const submitForm = async () => {
+  const submitForm = async (values = {}) => {
+    const submitData = {
+      ...assetData,
+      ...form.getFieldsValue(true),
+      ...values,
+    };
+
     //  检查管理状态，如果是上架状态则清空下架原因
-    if (assetData.is_shelf === true) {
-      assetData.shelf_reason = ''
+    if (submitData.is_shelf === true) {
+      submitData.shelf_reason = ''
     }
-    console.log("submitForm111", assetData, assetOptions)
+    console.log("submitForm111", submitData, assetOptions)
 
     if (editType !== 'edit') {
-      await insertXHAsset(assetData);
+      await insertXHAsset(submitData);
       message.success('添加成功');
       backToAssetList();
     } else {
       const keys = Object.keys(map)
+      submitData.params = submitData.params || {};
       keys.forEach(key => {
-        assetData.params[key] = map[key]
+        submitData.params[key] = map[key]
       })
-      delete assetData['tags']; // 更新信息不包括tag，格式不符
-      assetData.id = _.toNumber(id);
-      await updateXHAsset(assetData);
+      delete submitData['tags']; // 更新信息不包括tag，格式不符
+      submitData.id = _.toNumber(id);
+      await updateXHAsset(submitData);
       await formItems.map(async (v) => {
         const subItem: any[] = [];
-        const expData = assetData[v.name]; //[{item}]
+        const expData = submitData[v.name]; //[{item}]
         expData &&
           await expData.map((item) => {
             const groupId = uuidv4();
@@ -976,9 +1011,10 @@ export default function () {
                       filterOption
                       optionFilterProp={"label"}
                       onSearch={(value) => {
-                        setManufacturerSearch(value);
+                        debouncedSetManufacturerSearch(value);
                       }}
                       onBlur={() => {
+                        debouncedSetManufacturerSearch.cancel();
                         setManufacturerSearch('');
                       }}
                       notFoundContent={manufacturerNotFoundContent}
