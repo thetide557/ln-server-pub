@@ -27,7 +27,7 @@ function AddModal(props: ModalWrapProps & IProps) {
         });
       }}
     >
-      {/* <Form layout='vertical' form={form}>
+      <Form layout='vertical' form={form}>
         <Form.Item
           label={t('channels.name')}
           name='name'
@@ -67,7 +67,7 @@ function AddModal(props: ModalWrapProps & IProps) {
         <Form.Item name='built_in' hidden noStyle initialValue={false}>
           <div />
         </Form.Item>
-      </Form> */}
+      </Form>
     </Modal>
   );
 }
