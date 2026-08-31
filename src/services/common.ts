@@ -20,7 +20,7 @@ import { RequestMethod } from '@/store/common';
 
 // 获取数据源列表
 export function getDatasourceList(pluginTypes?: string[]): Promise<{ name: string; id: number; plugin_type: string }[]> {
-  let url = '/api/takin/datasource/list';
+  let url = '/api/n9e/datasource/list';
   // if (import.meta.env.VITE_IS_ENT === 'true') {
   //   url = '/api/v1/datasource/list';
   // }
@@ -52,7 +52,7 @@ export function getDatasourceList(pluginTypes?: string[]): Promise<{ name: strin
 
 // 匿名获取数据源列表
 export function getDatasourceBriefList(): Promise<{ name: string; id: number; plugin_type: string }[]> {
-  const url = '/api/takin/datasource/brief';
+  const url = '/api/n9e/datasource/brief';
   return request(url, {
     method: RequestMethod.Get,
   })
@@ -65,7 +65,7 @@ export function getDatasourceBriefList(): Promise<{ name: string; id: number; pl
 }
 
 export function getBusiGroups(query = '', limit: number = 5000) {
-  return request(`/api/takin/busi-groups`, {
+  return request(`/api/n9e/busi-groups`, {
     method: RequestMethod.Get,
     params: Object.assign(
       {
@@ -81,20 +81,20 @@ export function getBusiGroups(query = '', limit: number = 5000) {
 }
 
 export function getPerm(busiGroup: string, perm: 'ro' | 'rw') {
-  return request(`/api/takin/busi-group/${busiGroup}/perm/${perm}`, {
+  return request(`/api/n9e/busi-group/${busiGroup}/perm/${perm}`, {
     method: RequestMethod.Get,
   });
 }
 
 export function getMenuPerm() {
-  return request(`/api/takin/self/perms`, {
+  return request(`/api/n9e/self/perms`, {
     method: RequestMethod.Get,
   });
 }
 
 // ai机器人显示隐藏
 export function getShowDeepSeek() {
-  return request(`/api/takin/auth/ifshowdeepseek`, {
+  return request(`/api/n9e/auth/ifshowdeepseek`, {
     method: RequestMethod.Get,
   });
 }

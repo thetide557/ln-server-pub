@@ -22,7 +22,7 @@ export function getDictData(dictCode: number, options?: { [key: string]: any }) 
   });
 }
 export async function updateDictDataSingle(params, options?: { [key: string]: any }) {
-  return request('/api/takin/dict-data/one', {
+  return request('/api/n9e/dict-data/one', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -33,7 +33,7 @@ export async function updateDictDataSingle(params, options?: { [key: string]: an
 }
 
 export async function addDictDataBySingle(params, options?: { [key: string]: any }) {
-  return request('/api/takin/dict-data/one', {
+  return request('/api/n9e/dict-data/one', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -44,7 +44,7 @@ export async function addDictDataBySingle(params, options?: { [key: string]: any
 }
 // 新增字典数据
 export async function addDictData(params, options?: { [key: string]: any }) {
-  return request('/api/takin/dict-data', {
+  return request('/api/n9e/dict-data', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -56,7 +56,7 @@ export async function addDictData(params, options?: { [key: string]: any }) {
 
 // 修改字典数据
 export async function updateDictData(params, options?: { [key: string]: any }) {
-  return request('/api/takin/dict-data', {
+  return request('/api/n9e/dict-data', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',

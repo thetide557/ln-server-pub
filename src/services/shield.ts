@@ -18,35 +18,35 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getShieldList = function (params: { id: number }, queryParams: any) {
-  return request(`/api/takin/busi-group/${params.id}/alert-mutes`, {
+  return request(`/api/n9e/busi-group/${params.id}/alert-mutes`, {
     method: RequestMethod.Get,
     params: queryParams
   });
 };
 
 export const addShield = function (data: any, busiId: number) {
-  return request(`/api/takin/busi-group/${busiId}/alert-mutes`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-mutes`, {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const deleteShields = function (data: { ids: number[] }, busiId: number) {
-  return request(`/api/takin/busi-group/${busiId}/alert-mutes`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-mutes`, {
     method: RequestMethod.Delete,
     data,
   });
 };
 
 export const editShield = function (data: any[], busiId: number, shiedId: number) {
-  return request(`/api/takin/busi-group/${busiId}/alert-mute/${shiedId}`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-mute/${shiedId}`, {
     method: RequestMethod.Put,
     data: data,
   });
 };
 
 export const updateShields = function (data: { ids: React.Key[]; fields: any }, busiId: number) {
-  return request(`/api/takin/busi-group/${busiId}/alert-mutes/fields`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-mutes/fields`, {
     method: RequestMethod.Put,
     data: data,
   });

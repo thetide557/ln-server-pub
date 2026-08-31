@@ -12,7 +12,7 @@ import { DictValueEnumObj } from '@/components/DictTag';
 
 // 查询字典类型列表
 export async function getDictTypeList(params) {
-  return request(`/api/takin/dict-type/list`, {
+  return request(`/api/n9e/dict-type/list`, {
     params: {
       ...params,
     },
@@ -26,7 +26,7 @@ export async function getDictTypeList(params) {
 
 export async function getDictValueEnum(keys:string) {
   let key = keys.split(",");
-  const resp = await  request(`/api/takin/dict-data/`+key, {
+  const resp = await  request(`/api/n9e/dict-data/`+key, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -59,7 +59,7 @@ export async function getDictValueEnum(keys:string) {
 }
 
 export async function getDictDataListByType(code,params?:any){
-  return request(`/api/takin/dict-data/`+code, {
+  return request(`/api/n9e/dict-data/`+code, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -68,7 +68,7 @@ export async function getDictDataListByType(code,params?:any){
   });
 }
 export async function getDictDataExpByType(params?:any){
-  return request(`/api/takin/dict-data/exp`, {
+  return request(`/api/n9e/dict-data/exp`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -77,7 +77,7 @@ export async function getDictDataExpByType(params?:any){
   });
 }
 export async function deleteDictDatas(params) {
-  return request('/api/takin/dict-data/asset-batch', {
+  return request('/api/n9e/dict-data/asset-batch', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -90,7 +90,7 @@ export async function deleteDictDatas(params) {
 
 // 新增字典类型
 export async function addDictType(params) {
-  return request('/api/takin/dict-type', {
+  return request('/api/n9e/dict-type', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -102,7 +102,7 @@ export async function addDictType(params) {
 // 修改字典类型
 
 export async function updateDictData(typeCode :string,params :any) {
-  return request('/api/takin/dict-data?typeCode='+typeCode, {
+  return request('/api/n9e/dict-data?typeCode='+typeCode, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -112,7 +112,7 @@ export async function updateDictData(typeCode :string,params :any) {
 }
 
 export async function updateDictType(params) {
-  return request('/api/takin/dict-type', {
+  return request('/api/n9e/dict-type', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
@@ -124,7 +124,7 @@ export async function updateDictType(params) {
 
 // 删除字典类型
 export async function removeDictType(ids: string) {
-  return request(`/api/takin/dict-type/${ids}`, {
+  return request(`/api/n9e/dict-type/${ids}`, {
     method: 'DELETE'
   });
 }

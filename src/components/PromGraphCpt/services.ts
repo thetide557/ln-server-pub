@@ -27,7 +27,7 @@ export const getPromData = (url: string, params) => {
 };
 
 export const setTmpChartData = function (data: { configs: string }[]) {
-  return request(`/api/takin/share-charts`, {
+  return request(`/api/n9e/share-charts`, {
     method: RequestMethod.Post,
     data,
   });

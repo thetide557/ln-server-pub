@@ -54,7 +54,7 @@ export interface CMExpressionInputProps {
 
 const ExpressionInput = (
   {
-    url = '/api/takin/proxy',
+    url = '/api/n9e/proxy',
     headers,
     value,
     onChange,

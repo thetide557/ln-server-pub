@@ -20,7 +20,7 @@ import { RequestMethod } from '@/store/common';
 import { RuleCateType, RuleType } from './types';
 
 export const getRuleCates = function (): Promise<RuleCateType[]> {
-  return request('/api/takin/alert-rules/builtin/list', {
+  return request('/api/n9e/alert-rules/builtin/list', {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;
@@ -28,7 +28,7 @@ export const getRuleCates = function (): Promise<RuleCateType[]> {
 };
 
 export const createRule = function (id: number, data: RuleType[]) {
-  return request(`/api/takin/busi-group/${id}/alert-rules/import`, {
+  return request(`/api/n9e/busi-group/${id}/alert-rules/import`, {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -38,7 +38,7 @@ export const createRule = function (id: number, data: RuleType[]) {
 };
 
 export const postBuiltinCateFavorite = function (name: string): Promise<any[]> {
-  return request('/api/takin/builtin-cate-favorite', {
+  return request('/api/n9e/builtin-cate-favorite', {
     method: RequestMethod.Post,
     data: { name },
   }).then((res) => {
@@ -47,7 +47,7 @@ export const postBuiltinCateFavorite = function (name: string): Promise<any[]> {
 };
 
 export const deleteBuiltinCateFavorite = function (name: string): Promise<any[]> {
-  return request(`/api/takin/builtin-cate-favorite/${name}`, {
+  return request(`/api/n9e/builtin-cate-favorite/${name}`, {
     method: RequestMethod.Delete,
   }).then((res) => {
     return res.dat;
