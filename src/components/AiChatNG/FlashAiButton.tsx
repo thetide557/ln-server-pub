@@ -144,6 +144,8 @@ export function CustomAiButtonWrap({
   ...rest
 }: // 这里 any 是因为作为 Wrap 会接受很多未知的 props，暂时不想一个个列举
 { children: React.ReactElement } & Record<string, any>) {
+  // 第六步迁移备注：下面这个分支里在条件内调用了 hook（useAiEntClickHandler），违反 React hook 规则；
+  // 羚牛 IS_ENT 恒为 false（src/utils/constant.ts），永远走不到，为了和上游文件保持一致不改。
   if (IS_ENT) {
     const handleEntClick = useAiEntClickHandler({ queryAction, queryPageFrom, promptList, onExecuteQueryForQueryContent });
 
