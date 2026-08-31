@@ -40,9 +40,13 @@ import Host from './Detail/Host';
 import './detail.less';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import Solution from './Solution'
+import { AiButton } from '@/components/AiChatNG/FlashAiButton';
+import { buildPageFrom, getAlertEventDetailPrompts } from '@/components/AiChatNG/recommend';
+import { NAME_SPACE as AI_CHAT_NS } from '@/components/AiChatNG/constants';
 const { Paragraph } = Typography;
 const EventDetailPage: React.FC = () => {
-  const { t } = useTranslation('AlertCurEvents');
+  const { t, i18n } = useTranslation('AlertCurEvents');
+  const { t: tAiChat } = useTranslation(AI_CHAT_NS);
   const { busiId, eventId } = useParams<{ busiId: string; eventId: string }>();
   const tagsHelpDescription = '告警发生时，系统自动采集并附加在告警事件上的结构化标签信息，用于完整描述告警的上下文环境、关联资产和监控指标维度。';
   const renderHelpLabel = (label: React.ReactNode, field: React.ReactNode, description: React.ReactNode) => (
@@ -86,9 +90,28 @@ const EventDetailPage: React.FC = () => {
       label: '告警规则名称',
       key: 'rule_name',
       render(content, { rule_id }) {
-        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
-        }}>{content}</div>;
+        const eventIdNum = Number(eventId);
+        return (
+          <Space>
+            <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+              history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
+            }}>{content}</div>
+            <AiButton
+              size='small'
+              queryPageFrom={buildPageFrom({ param: { event_id: eventIdNum } })}
+              queryAction={{
+                content: tAiChat('flash_button.event_analysis_content'),
+                prefillOnly: false,
+                key: 'troubleshooting',
+                param: { event_id: eventIdNum },
+              }}
+              promptList={getAlertEventDetailPrompts(i18n.language)}
+              initialMessage={getAlertEventDetailPrompts(i18n.language)[0]}
+            >
+              {tAiChat('flash_button.event_analysis')}
+            </AiButton>
+          </Space>
+        );
       },
     },
     // 告警策略名称
