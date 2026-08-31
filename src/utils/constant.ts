@@ -68,3 +68,8 @@ export const DatasourceCateEnum = { ...BaseDatasourceCateEnum, ...AdvancedDataso
 export type DatasourceCateEnum = BaseDatasourceCateEnum | AdvancedDatasourceCateEnum;
 
 export const WebSocketURL =`ws://${location.host}/alert/ws/`;
+
+// ---- 第六步：夜莺 AI 浮窗（AiChatNG）需要的两个常量。羚牛不是 FlashCat 企业版，IS_ENT 恒为 false；
+// pub 的 token 存在名为 access_token 的 Cookie 里（src/utils/request.ts:70），这里只是给闭包一个同名常量。
+export const IS_ENT = false;
+export const AccessTokenKey = 'access_token';
