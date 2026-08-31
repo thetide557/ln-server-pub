@@ -39,6 +39,7 @@ import { getSystemTheme } from '@/services/login';
 import useIsPlus from 'plus:/components/useIsPlus';
 import './App.less';
 import './theme/ai-chat/index.less';
+import { AiChatProvider, AiChatContainer } from '@/components/AiChatNG';
 import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
@@ -359,6 +360,7 @@ function App() {
       <audio ref={audioRef} src='/music/y2168.mp3' />
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
+          <AiChatProvider>
           <Router>
             <Switch>
               <Route exact path='/job-task/:busiId/output/:taskId/:outputType' component={TaskOutput} />
@@ -373,6 +375,8 @@ function App() {
               </>
             </Switch>
           </Router>
+          <AiChatContainer />
+          </AiChatProvider>
         </ConfigProvider>
       </CommonStateContext.Provider>
 

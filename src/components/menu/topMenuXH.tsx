@@ -19,6 +19,7 @@ import { getDictDataListByType } from '@/services/system/dict';
 import { downloadTemplet } from '@/services/menu';
 import Cookies from 'js-cookie';
 import moment from 'moment';
+import FlashAiButton from '@/components/AiChatNG/FlashAiButton';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -687,6 +688,7 @@ export default function () {//{ selectMenu?:any }
         {profile.roles?.includes("临时用户") && (
           <div className={'top-header-desc'}>剩余使用时长：{profile?.temp_remaining_days}天</div>
         )}
+        <FlashAiButton />
         {/* 帮助文档 - 临时用户和有使用期限的用户不显示 */}
         {/* {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
           <Dropdown 
