@@ -132,7 +132,7 @@ export function CurStepBlock({ curStep }: { curStep: string }) {
 export function ResponseBlocks(props: IAiChatResponseBlocksProps) {
   const { t } = useTranslation(NAME_SPACE);
   const { message, isStreaming, onExecuteQueryForQueryContent, onActionClick, onOKForFormSelectContent, maybeScrollToBottom } = props;
-  const curStep = message.cur_step?.trim() || t('message.generating');
+  const curStep = (message.cur_step?.trim() || t('message.generating')) ?? ''; // step6: react-i18next 11 的 t() 类型为 string|undefined
   const shouldShowCurStep = !message.is_finish && !message.err_code;
 
   const getActionDisplayLabel = React.useCallback(
