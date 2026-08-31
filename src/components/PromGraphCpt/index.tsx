@@ -19,7 +19,7 @@
  */
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
-import { Input, Tabs, Button, Alert, Checkbox } from 'antd';
+import { Input, Tabs, Button, Alert, Checkbox, Space } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +52,9 @@ interface IProps {
   };
   headerExtra?: HTMLDivElement | null;
   executeQuery?: (promQL?: string) => void;
+  // 第六步：AI 浮窗回填用，不传则不生效
+  extra?: React.ReactNode;
+  fillPromQL?: { value: string; seq: number };
 }
 
 const TabPane = Tabs.TabPane;
@@ -75,6 +78,8 @@ export default function index(props: IProps) {
     },
     headerExtra,
     executeQuery,
+    extra,
+    fillPromQL,
   } = props;
   const [value, setValue] = useState<any>(promQL); // for promQLInput
   const [promql, setPromql] = useState<string | undefined>(promQL);
@@ -139,11 +144,35 @@ export default function index(props: IProps) {
     setPromql(promql);
   }, [promql]);
 
+  // 第六步：外部（AI 浮窗）回填 PromQL；fillPromQL 不传时永不触发
+  useEffect(() => {
+    if (!fillPromQL) return;
+    setValue(fillPromQL.value);
+    setPromql(fillPromQL.value);
+  }, [fillPromQL?.seq]);
+
   return (
     <div className='prom-graph-container'>
       {headerExtra && globalOperates.enabled ? (
         createPortal(
           <div className='prom-graph-global-operate' style={{ marginTop: 5 }}>
+            <Space size={8}>
+              <Checkbox
+                checked={completeEnabled}
+                onChange={(e) => {
+                  setCompleteEnabled(e.target.checked);
+                }}
+              >
+                启用自动完成
+              </Checkbox>
+              {extra}
+            </Space>
+          </div>,
+          headerExtra,
+        )
+      ) : (
+        <div className='prom-graph-global-operate'>
+          <Space size={8}>
             <Checkbox
               checked={completeEnabled}
               onChange={(e) => {
@@ -152,19 +181,8 @@ export default function index(props: IProps) {
             >
               启用自动完成
             </Checkbox>
-          </div>,
-          headerExtra,
-        )
-      ) : (
-        <div className='prom-graph-global-operate'>
-          <Checkbox
-            checked={completeEnabled}
-            onChange={(e) => {
-              setCompleteEnabled(e.target.checked);
-            }}
-          >
-            启用自动完成
-          </Checkbox>
+            {extra}
+          </Space>
         </div>
       )}
 
