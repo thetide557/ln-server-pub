@@ -1,6 +1,7 @@
 const zh_CN = {
   flash_button: {
     label: 'AI 助手',
+    dashboard_analysis: 'AI 分析',
   },
   toolbar: {
     current_chat: '当前会话',

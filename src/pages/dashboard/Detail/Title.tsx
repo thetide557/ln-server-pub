@@ -36,6 +36,7 @@ import { updateBoards } from '@/services/sxxc/bigScreen';
 import { useTimeout, useTimeoutFn } from 'react-use';
 import { AiButton } from '@/components/AiChatNG/FlashAiButton';
 import { getDashboardDetailPrompts } from '@/components/AiChatNG/recommend';
+import { NAME_SPACE as AI_CHAT_NS } from '@/components/AiChatNG/constants';
 
 interface IProps {
   dashboard: any;
@@ -58,6 +59,7 @@ const cachePageTitle = document.title;
 
 export default function Title(props: IProps) {
   const { t, i18n } = useTranslation('dashboard');
+  const { t: tAiChat } = useTranslation(AI_CHAT_NS);
   const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome, handlePanelChange } = props;
   const showAiAnalysis = !isPreview && !isBuiltin && !!dashboard?.id;
   const history = useHistory();
@@ -171,7 +173,7 @@ export default function Title(props: IProps) {
               promptList={getDashboardDetailPrompts(i18n.language)}
               initialMessage={getDashboardDetailPrompts(i18n.language)[0]}
             >
-              {t('detail.ai_analysis')}
+              {tAiChat('flash_button.dashboard_analysis')}
             </AiButton>
           </span>
         )}
