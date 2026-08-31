@@ -1,4 +1,7 @@
 const en_US = {
+  flash_button: {
+    label: 'AI Assistant',
+  },
   toolbar: {
     current_chat: 'Current chat',
     new_chat: 'New chat',

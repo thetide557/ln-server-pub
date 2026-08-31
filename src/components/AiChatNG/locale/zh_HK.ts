@@ -1,4 +1,7 @@
 const zh_HK = {
+  flash_button: {
+    label: 'AI 助手',
+  },
   toolbar: {
     current_chat: '當前會話',
     new_chat: '新建會話',

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { IS_ENT } from '@/utils/constant';
 import LayoutHeaderAiBtn from '@/components/AiChat/AiBtn/LayoutHeaderAiBtn';
 
+import { NAME_SPACE } from './constants';
 import { useAiChatContext } from './context';
 import { buildPageFrom, getCurrentPageUrl, getRecommendByUrl } from './recommend';
 import { IAiChatPageInfo, IAiChatAction, AiChatExecuteQueryForQueryContent } from './types';
@@ -59,6 +60,7 @@ function useAiEntClickHandler(options?: {
 }
 
 function FlashAiButtonContent() {
+  const { t } = useTranslation(NAME_SPACE);
   const handleClick = useFlashAiClickHandler();
 
   return (
@@ -68,7 +70,7 @@ function FlashAiButtonContent() {
       size='small'
       onClick={handleClick}
     >
-      Nightingale AI
+      {t('flash_button.label')}
     </Button>
   );
 }
