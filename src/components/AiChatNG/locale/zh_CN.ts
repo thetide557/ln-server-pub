@@ -2,6 +2,8 @@ const zh_CN = {
   flash_button: {
     label: 'AI 助手',
     dashboard_analysis: 'AI 分析',
+    event_analysis: 'AI 分析',
+    event_analysis_content: '分析这条告警事件的根因',
   },
   toolbar: {
     current_chat: '当前会话',

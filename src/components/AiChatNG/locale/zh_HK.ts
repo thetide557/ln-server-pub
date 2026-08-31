@@ -2,6 +2,8 @@ const zh_HK = {
   flash_button: {
     label: 'AI 助手',
     dashboard_analysis: 'AI 分析',
+    event_analysis: 'AI 分析',
+    event_analysis_content: '分析這條告警事件的根因',
   },
   toolbar: {
     current_chat: '當前會話',

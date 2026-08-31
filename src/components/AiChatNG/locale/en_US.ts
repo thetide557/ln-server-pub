@@ -2,6 +2,8 @@ const en_US = {
   flash_button: {
     label: 'AI Assistant',
     dashboard_analysis: 'AI Analysis',
+    event_analysis: 'AI Analysis',
+    event_analysis_content: 'Analyze the root cause of this alert event',
   },
   toolbar: {
     current_chat: 'Current chat',
