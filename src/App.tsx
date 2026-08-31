@@ -38,6 +38,7 @@ import { getSystemTheme } from '@/services/login';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
 import './App.less';
+import './theme/ai-chat/index.less';
 import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
