@@ -292,7 +292,6 @@ const en_US = {
   detail: {
     datasource_empty: 'Please configure the data source first',
     invalidTimeRange: 'Invalid __from and __to values',
-    ai_analysis: 'AI Analysis',
   },
   customized: 'customized',
 };
