@@ -20,6 +20,6 @@ module.exports = (ctx) => ({
     plugins: {
       'postcss-nested': {},
       tailwindcss: {},
-      autoprefixer: {},
+      autoprefixer: { remove: false },
     }
   })
