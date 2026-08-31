@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Spin } from 'antd';
-import { LoadingOutlined, PauseCircleOutlined } from '@ant-design/icons';
+import { LoadingOutlined, PauseCircleOutlined, SendOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import IconFont from '@/components/IconFont';
 
 import { cancelMessage, createChat, getMessageDetail, getMessageHistory, sendMessage } from './services';
 import { NAME_SPACE } from './constants';
@@ -367,7 +366,7 @@ export default function ChatPanel(props: IAiChatProps) {
                 type='primary'
                 shape='circle'
                 disabled={shareReadonly}
-                icon={submitting ? <PauseCircleOutlined /> : <IconFont type='icon-ic_send' style={{ color: '#fff', fontSize: 14 }} />}
+                icon={submitting ? <PauseCircleOutlined /> : <SendOutlined style={{ color: '#fff', fontSize: 14 }} />}
                 onClick={() => {
                   if (submitting) {
                     handleStop();
