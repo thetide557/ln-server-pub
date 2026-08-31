@@ -3,6 +3,7 @@ const zh_CN = {
   search_placeholder: "搜索",
   nodata: "暂无数据",
   btn: {
+    copy2: "复制",
     add: "新增",
     create: "创建",
     modify: "修改",

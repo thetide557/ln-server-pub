@@ -3,6 +3,7 @@ const en_US = {
   search_placeholder: 'Search',
   nodata: 'No Data',
   btn: {
+    copy2: 'Copy',
     add: 'Add',
     create: 'Create',
     modify: 'Modify',

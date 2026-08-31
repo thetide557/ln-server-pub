@@ -3,6 +3,7 @@ const zh_HK = {
   search_placeholder: '搜尋',
   nodata: '暫無資料',
   btn: {
+    copy2: '複製',
     add: '新增',
     create: '建立',
     modify: '修改',
