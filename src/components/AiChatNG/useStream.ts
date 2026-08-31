@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import i18next from 'i18next';
-import { basePrefix } from '@/App';
-import { AccessTokenKey } from '@/utils/constant';
+import Cookies from 'js-cookie';
+import { basePrefix } from '@/utils/basePrefix';
 import { IAiChatStreamChunk } from './types';
 import { normalizeStreamChunk } from './utils';
 
@@ -33,12 +32,13 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
       try {
         const response = await fetch(`${basePrefix}/api/n9e/stream`, {
           method: 'POST',
-          credentials: 'include',
+          credentials: 'omit',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'text/event-stream',
-            Authorization: `Bearer ${localStorage.getItem(AccessTokenKey) || ''}`,
-            'X-Language': i18next.language,
+            Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
+            'X-Language': localStorage.getItem('language') === 'en_US' ? 'en' : 'zh',
+            'Bg-debug': '1',
           },
           body: JSON.stringify({ stream_id: streamId }),
           signal: controller.signal,
