@@ -12,6 +12,10 @@
       ],
       "@/*": ["src/*"],
       "plus:/*": ["src/plus/*"],
+      // step6d(P2)：jest 引入的 jsdom 带上 parse5@7，它的 .d.ts 用了 TS4.4+ 语法，
+      // 本仓库 typescript 是 4.3.2 读不懂。hast-util-raw 运行时用的其实是嵌套的 parse5@6，
+      // 所以把类型指回本来就在的 @types/parse5@6，与运行时一致。
+      "parse5": ["node_modules/@types/parse5"],
     },
     "skipLibCheck": true,
     "esModuleInterop": false,
@@ -33,5 +37,5 @@
     "esm": true
   },
   "include": ["./src"],
-  "exclude": ["./src/Packages/", "./node_modules/**/*", "**/*.test.ts"]
+  "exclude": ["./src/Packages/", "./node_modules/**/*", "**/*.test.ts", "**/*.test.tsx", "./src/__tests__/"]
 }
