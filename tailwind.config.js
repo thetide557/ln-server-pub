@@ -20,6 +20,9 @@ module.exports = {
     './src/pages/datasource/**/*.{ts,tsx}',
     './src/pages/aiConfig/**/*.{ts,tsx}',
     './src/components/DBSettings/**/*.{ts,tsx}',
+    // ---- 第六步 B1（多数据源补搬轮）：victorialogs 即时查询的图表用的是新的 TimeSeriesNG 渲染器，
+    // 它的 Legend/Annotation 两个组件用了 flex / gap-2 / mt-2 这些 tailwind 类。
+    './src/pages/dashboard/Renderer/Renderer/TimeSeriesNG/**/*.{ts,tsx}',
   ],
   // 添加下面的代码,禁用 `清除浏览器默认样式`, 解决和antd的样式冲突
   // (这样 `@tailwind base` 就只会添加一些默认的 tw 变量.不会去清除浏览器默认样式了.)

@@ -94,3 +94,25 @@ export const AccessTokenKey = 'access_token';
 // ---- 第六步 L1：fe v9.1.0 src/utils/constant.ts:87 的 SIZE（间距基数，单位 px），
 // victorialogs 数据源表单的 Row gutter 用它。
 export const SIZE = 8;
+
+// ---- 第六步 B1（多数据源补搬轮）：照抄 fe v9.1.0 src/utils/constant.ts:88-102 的 FONT_FAMILY 与 THEME。
+// victorialogs 即时查询的直方图（src/components/UPlotChart/utils/axisBuilder.ts:6）用它们画坐标轴的字体与网格线颜色。
+// getFontFamily.ts 与 fontFamilyConstant.ts 也是本轮从 fe v9.1.0 原样复制进来的；羚牛不是 ENT 形态，
+// FONT_FAMILY 取值就是 NORMAL_FONT_FAMILY。import 写在文件末尾是为了让 git diff 保持 0 行删除（import 会被提升）。
+import getFontFamily from './getFontFamily';
+
+export const FONT_FAMILY = getFontFamily();
+export const THEME = {
+  light: {
+    text: {
+      primary: '#333',
+    },
+    gridColor: 'rgba(0, 10, 23, 0.09)',
+  },
+  dark: {
+    text: {
+      primary: '#fff',
+    },
+    gridColor: 'rgba(240, 250, 255, 0.09)',
+  },
+};

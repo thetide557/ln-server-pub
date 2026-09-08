@@ -86,6 +86,19 @@ export const baseCates: Cate[] = [
     graphPro: true,
     alertPro: false,
   },
+  // ---- 第六步 B1（多数据源补搬轮）：只追加 victorialogs 一条数组元素，照 fe v9.1.0
+  // src/components/AdvancedWrap/utils.ts:151-162 抄 value / label / type / dashboard / graphPro / alertPro；
+  // alertRule 改成 false（拍板-14：L4 告警规则这一层本轮跳过，别让告警页下拉出现没有表单的类型）。
+  // fe 那边的 label_en / logo / dashboardVariable 三个字段 pub 的 Cate 接口没有，不抄。
+  {
+    value: 'victorialogs',
+    label: 'VictoriaLogs',
+    type: ['logging'],
+    alertRule: false,
+    dashboard: false,
+    graphPro: false,
+    alertPro: false,
+  },
 ];
 
 export const allCates = [...baseCates, ...advancedCates];
