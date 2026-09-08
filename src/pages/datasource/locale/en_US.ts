@@ -43,7 +43,10 @@ const en_US = {
       url_tip: 'Common time series database configuration examples (compatible with Prometheus query API):',
     },
     es: {
+      enable_write: 'Enable write',
       version: 'Version',
+      version_placeholder: 'Leave blank to auto-detect the version. To specify one, use x.y.z format (e.g. 7.10.2)',
+      version_tip: 'Leave blank to auto-detect the version. To specify one, use x.y.z format (e.g. 7.10.2)',
       max_shard: 'Max concurrent Shard Requests',
       min_interval: 'Min time interval(s)',
       min_interval_tip:

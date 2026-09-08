@@ -55,7 +55,7 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
   it('填完必填项点「测试并保存」，会带着 plugin_type=elasticsearch 打到 datasource/upsert', async () => {
     const { container } = renderForm();
 
-    // 表单确实渲染出来了（ES 表单独有的「版本」下拉，name=['settings','version']）
+    // 表单确实渲染出来了（ES 表单独有的「版本」输入框，name=['settings','version']；待用户-04 起由下拉改成自由输入）
     expect(container.querySelector('#name')).toBeTruthy();
     expect(container.querySelector('#http_url')).toBeTruthy();
     expect(container.querySelector('#settings_version')).toBeTruthy();
@@ -64,6 +64,12 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     setInput(container, 'http_url', 'http://127.0.0.1:9200');
     setInput(container, 'auth_basic_auth_user', 'elastic');
     setInput(container, 'auth_basic_auth_password', 'p@ssw0rd');
+    // 待用户-04：版本改成自由输入（没有默认值了），另加「允许写入」开关
+    setInput(container, 'settings_version', '7.10.2');
+    // 表单里不止一个 Switch（SkipTLSVerify 也有），按 Form.Item 生成的 id 精确取
+    const enableWriteSwitch = container.querySelector('#settings_enable_write') as HTMLButtonElement;
+    expect(enableWriteSwitch).toBeTruthy();
+    fireEvent.click(enableWriteSwitch);
 
     const submitBtn = container.querySelector('button[type="submit"]') as HTMLButtonElement;
     expect(submitBtn).toBeTruthy();
@@ -104,7 +110,7 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     // 密码由 src/pages/datasource/services.ts 的 aesEncrypt 加密后再发
     expect(typeof body.auth.basic_auth_password).toBe('string');
     expect(body.auth.basic_auth_password.startsWith('{{cipher}}')).toBe(true);
-    expect(body.settings).toEqual({ version: '7.0+', max_shard: 5, min_interval: 10 });
+    expect(body.settings).toEqual({ version: '7.10.2', max_shard: 5, min_interval: 10, enable_write: true });
     expect(body.is_test).toBe(true);
     expect(body.is_enable).toBe(true);
   });
