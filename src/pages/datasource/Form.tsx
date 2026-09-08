@@ -48,6 +48,23 @@ export default function FormCpt() {
         ),
       );
     }
+    // ---- 第六步 L1（多数据源）：opensearch / victorialogs 用新套 itemsNG/Headers，
+    // header 填在 settings['<type>.headers'] 里、形状是 [{key,value}] 数组，提交前要转成对象。
+    // 照 fe v9.1.0 src/pages/datasource/Form.tsx:59-71；这里另起一个 if（不动上面的 if/else），
+    // 现有类型（prometheus / elasticsearch / jaeger / influxdb）没有这个字段，走不到这块。
+    if (_.get(values, ['settings', `${type}.headers`])) {
+      _.set(
+        values,
+        ['settings', `${type}.headers`],
+        _.transform(
+          values?.settings?.[`${type}.headers`],
+          (result, item) => {
+            result[item.key] = item.value;
+          },
+          {},
+        ),
+      );
+    }
     return submitRequest({
       ...values,
       plugin_type: type,
@@ -73,6 +90,15 @@ export default function FormCpt() {
     if (action === 'edit' && id !== undefined) {
       getDataSourceDetailById(id).then((res: any) => {
         _.set(res, 'http.headers', _.map(res?.http?.headers, (value, key) => ({ key, value })) || []);
+        // ---- 第六步 L1（多数据源）：与提交时那块对称，把 settings['<type>.headers'] 从对象转回数组，
+        // 否则编辑 opensearch / victorialogs 时 header 显示不出来。照 fe v9.1.0 同文件 :111-113。
+        if (_.get(res, ['settings', `${res.plugin_type}.headers`])) {
+          _.set(
+            res,
+            ['settings', `${res.plugin_type}.headers`],
+            _.map(_.get(res, ['settings', `${res.plugin_type}.headers`]), (value, key) => ({ key, value })) || [],
+          );
+        }
         const pwd = _.get(res, ['auth', 'basic_auth_password']);
         if (_.isString(pwd) && pwd && pwd.startsWith(CIPHER_PREFIX)) {
           _.set(res, ['auth', 'basic_auth_password'], aesDecrypt(pwd));
@@ -113,6 +139,9 @@ export default function FormCpt() {
         ) : (
           <Form
             key={formRenderKey}
+            // ---- 第六步 L1：九张新表单的卡片标题是 t(`${action}_title`)，需要这个 prop；
+            // 照 fe v9.1.0 src/pages/datasource/Form.tsx:147。pub 原有的三张表单不读它，没有行为变化。
+            action={action}
             data={data}
             onFinish={(values, clusterInstance) => {
               if (
