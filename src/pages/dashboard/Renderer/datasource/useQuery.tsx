@@ -28,6 +28,12 @@ import elasticsearchQuery from './elasticsearch';
 // @ts-ignore
 import plusDatasource from 'plus:/parcels/Dashboard/datasource';
 import apiServicequery from './apiservice';
+// ---- 第六步 L3（多数据源）：三行只加的 import，走直达路径不 import 裸目录（拍板-02）。
+// fe 走的是 `import { datasource as iotdbQuery } from '@/plugins/iotdb'`
+// （fe src/pages/dashboard/Renderer/datasource/useQuery.tsx:23-25），那是裸目录，会把 AlertRule / Explorer 带进来。
+import iotdbQuery from '@/plugins/iotdb/Dashboard/datasource';
+import tdengineQuery from '@/plugins/TDengine/Dashboard/datasource';
+import ckQuery from '@/plugins/clickHouse/Dashboard/datasource';
 
 interface IProps {
   id?: string;
@@ -55,6 +61,13 @@ export default function useQuery(props: IProps) {
     prometheus: prometheusQuery,
     elasticsearch: elasticsearchQuery,
     api: apiServicequery,
+    // ---- 第六步 L3（多数据源）：三条只加的 map 项，key 就是守卫，对现有类型恒假。
+    // fe 的 plugins/<t>/Dashboard/datasource 返回的是 { series, query } 对象（fe 同文件 :77 解构了它），
+    // 而 pub 这里的 .then((res: any[]) => setSeries(res)) 期望的是数组，所以每条都用 .then 取出 series
+    // （顾问意见 X-6 (b)）。query 是给「查询详情」面板看的，pub 没有那个面板，丢掉。
+    iotdb: (p) => iotdbQuery(p).then((r: any) => r.series),
+    tdengine: (p) => tdengineQuery(p).then((r: any) => r.series),
+    ck: (p) => ckQuery(p).then((r: any) => r.series),
     ...plusDatasource,
   };
   const { run: fetchData } = useDebounceFn(

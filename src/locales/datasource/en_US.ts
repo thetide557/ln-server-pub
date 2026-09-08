@@ -52,5 +52,14 @@ const en_US = {
       groupBy: `Group by {{field}}, number of matches {{size}}, document minimum value {{min_value}}`,
     },
   },
+  // ---- 第六步 L1（多数据源）：见 zh_CN 同段说明；取自 fe v9.1.0 src/locales/datasource/locale/en_US.ts。
+  datasource: {
+    max_query_rows: 'Maximum number of rows allowed to be retrieved in a single request',
+    max_idle_conns: 'Maximum idle connections',
+    max_open_conns: 'Maximum open connections',
+    conn_max_lifetime: 'Maximum connection lifetime (unit: seconds)',
+    timeout: 'Timeout (unit: seconds)',
+    timeout_ms: 'Timeout (unit: milliseconds)',
+  },
 };
 export default en_US;

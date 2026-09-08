@@ -4,6 +4,9 @@ const en_US = {
   nodata: 'No Data',
   btn: {
     copy2: 'Copy',
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/en_US.ts:68-69 两条。
+    expand: 'Expand',
+    collapse: 'Collapse',
     add: 'Add',
     create: 'Create',
     modify: 'Modify',
@@ -172,5 +175,8 @@ const en_US = {
   'msg.clone.success': 'Successfully cloned',
   'msg.clone.error': 'Cloning failed',
   'msg.sort.success': 'Successfully sorted',
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/en_US.ts。
+  advanced_settings: 'Advanced settings',
 };
 export default en_US;

@@ -4,6 +4,9 @@ const zh_HK = {
   nodata: '暫無資料',
   btn: {
     copy2: '複製',
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/zh_HK.ts:67-68 两条。
+    expand: '展開',
+    collapse: '收起',
     add: '新增',
     create: '建立',
     modify: '修改',
@@ -161,6 +164,9 @@ const zh_HK = {
   'msg.clone.success': '克隆成功',
   'msg.clone.error': '克隆失敗',
   'msg.sort.success': '排序成功',
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/zh_HK.ts。
+  advanced_settings: '高級設定',
 };
 
 export default zh_HK;

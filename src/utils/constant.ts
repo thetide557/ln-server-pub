@@ -16,6 +16,12 @@
  */
 // @ts-ignore
 import { AdvancedDatasourceCateEnum } from 'plus:/types';
+// ---- 第六步 L3（多数据源）：照 fe v9.1.0 src/utils/constant.ts:82,83,103 只加三个 pub 没有的导出。
+// IS_PLUS / N9E_PATHNAME 被 fe 的 iotdb / TDengine Dashboard/datasource.tsx 与 AddQueryButtons 用到；
+// alphabet 被 fe 的 iotdb Dashboard/QueryBuilder.tsx 与 components/QueryName/utils.ts 用到。
+export const IS_PLUS = import.meta.env.VITE_IS_ENT === 'true' || import.meta.env.VITE_IS_PRO === 'true';
+export const N9E_PATHNAME = IS_PLUS ? 'n9e-plus' : 'n9e';
+export const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 export const PAGE_SIZE = 15;
 export const PAGE_SIZE_MAX = 100000;
 export const PAGE_SIZE_OPTION = 20;
@@ -62,6 +68,17 @@ export const chartDefaultOptions = {
 enum BaseDatasourceCateEnum {
   prometheus = 'prometheus',
   elasticsearch = 'elasticsearch',
+  // ---- 第六步 L1（多数据源）：照 fe v9.1.0 src/utils/constant.ts:66-78 的写法补九种类型。
+  // 值必须与后端 models/alert_rule.go:29-41 的常量一字不差（postgresql 叫 pgsql、clickhouse 叫 ck）。
+  opensearch = 'opensearch',
+  iotdb = 'iotdb',
+  tdengine = 'tdengine',
+  loki = 'loki',
+  ck = 'ck',
+  mysql = 'mysql',
+  pgsql = 'pgsql',
+  doris = 'doris',
+  victorialogs = 'victorialogs',
 }
 
 export const DatasourceCateEnum = { ...BaseDatasourceCateEnum, ...AdvancedDatasourceCateEnum };
@@ -73,3 +90,7 @@ export const WebSocketURL =`ws://${location.host}/alert/ws/`;
 // pub 的 token 存在名为 access_token 的 Cookie 里（src/utils/request.ts:70），这里只是给闭包一个同名常量。
 export const IS_ENT = false;
 export const AccessTokenKey = 'access_token';
+
+// ---- 第六步 L1：fe v9.1.0 src/utils/constant.ts:87 的 SIZE（间距基数，单位 px），
+// victorialogs 数据源表单的 Row gutter 用它。
+export const SIZE = 8;
