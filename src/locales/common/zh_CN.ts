@@ -4,6 +4,10 @@ const zh_CN = {
   nodata: "暂无数据",
   btn: {
     copy2: "复制",
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/zh_CN.ts:67-68 两条；
+    // 新搬的 Loki 日志行组件 t('common:btn.expand') / t('common:btn.collapse') 用。
+    expand: '展开',
+    collapse: '收起',
     add: "新增",
     create: "创建",
     modify: "修改",

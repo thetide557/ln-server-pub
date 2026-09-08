@@ -4,6 +4,9 @@ const en_US = {
   nodata: 'No Data',
   btn: {
     copy2: 'Copy',
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/en_US.ts:68-69 两条。
+    expand: 'Expand',
+    collapse: 'Collapse',
     add: 'Add',
     create: 'Create',
     modify: 'Modify',

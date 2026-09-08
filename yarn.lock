@@ -1860,6 +1860,13 @@
   resolved "https://registry.npmmirror.com/@esbuild/linux-loong64/-/linux-loong64-0.14.54.tgz#de2a4be678bd4d0d1ffbb86e6de779cde5999028"
   integrity sha512-bZBrLAIX1kpWelV0XemxBZllyRmM6vgFQQG2GdNb+r3Fkp0FOh1NJSvekXDs7jq70k4euu1cryLMfU+mTXlEpw==
 
+"@fc-components/codemirror-promql@^0.19.13":
+  version "0.19.13"
+  resolved "https://registry.npmmirror.com/@fc-components/codemirror-promql/-/codemirror-promql-0.19.13.tgz#e1873e2e0459e982d2aa75931b07a78548edaf73"
+  integrity sha512-iI7v/bk4t+dgyeshTSjkQygEwBUCjULDte5OjuhwDK4n/mSMBKJCDHOII/qs6kJSuZizLa9iez/Ds0ohqiWAYw==
+  dependencies:
+    lru-cache "^6.0.0"
+
 "@fc-components/menu@~1.1.17":
   version "1.1.23"
   resolved "https://registry.npmmirror.com/@fc-components/menu/-/menu-1.1.23.tgz#8f946dd9d41d5054eda3c857d639e53281d462b9"
@@ -3087,6 +3094,11 @@ ansi-styles@^5.0.0, ansi-styles@^5.2.0:
   version "5.2.0"
   resolved "https://registry.npmmirror.com/ansi-styles/-/ansi-styles-5.2.0.tgz#07449690ad45777d1924ac2abb2fc8895dba836b"
   integrity sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==
+
+ansi_up@^6.0.2:
+  version "6.0.6"
+  resolved "https://registry.npmmirror.com/ansi_up/-/ansi_up-6.0.6.tgz#804faf31f0385e562d2f71275ea8cff0d9dcf6dc"
+  integrity sha512-yIa1x3Ecf8jWP4UWEunNjqNX6gzE4vg2gGz+xqRGY+TBSucnYp6RRdPV4brmtg6bQ1ljD48mZ5iGSEj7QEpRKA==
 
 antd@4.21.0:
   version "4.21.0"

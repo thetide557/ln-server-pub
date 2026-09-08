@@ -4,6 +4,9 @@ const zh_HK = {
   nodata: '暫無資料',
   btn: {
     copy2: '複製',
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/zh_HK.ts:67-68 两条。
+    expand: '展開',
+    collapse: '收起',
     add: '新增',
     create: '建立',
     modify: '修改',

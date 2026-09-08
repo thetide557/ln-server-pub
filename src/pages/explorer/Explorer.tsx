@@ -34,6 +34,13 @@ import Prometheus from './Prometheus';
 import Elasticsearch from './Elasticsearch';
 // @ts-ignore
 import PlusExplorer from 'plus:/parcels/Explorer';
+// ---- 第六步 L2（多数据源）：只在 import 块末尾追加四行直达 import（不 import `@/plugins/<t>` 裸目录，
+// 那会把该类型的告警规则 / 仪表盘 / Event 整套都拖进包里，见拍板-02）。
+// 对应 fe v9.1.0 src/pages/explorer/Explorer.tsx:34-36（IotDB / TDengine / CK）与 :43（Loki）。
+import IotDB from '@/plugins/iotdb/Explorer';
+import TDengine from '@/plugins/TDengine/Explorer';
+import CK from '@/plugins/clickHouse/Explorer';
+import Loki from '@/pages/explorer/Loki';
 import './index.less';
 
 type Type = 'logging' | 'metric';
@@ -152,6 +159,18 @@ const Panel = ({ type, defaultCate }: IProps) => {
                     return <Elasticsearch key={datasourceValue} headerExtra={headerExtraRef.current} datasourceValue={datasourceValue} form={form} />;
                   } else if (datasourceCate === DatasourceCateEnum.prometheus) {
                     return <Prometheus key={datasourceCate} headerExtra={headerExtraRef.current} datasourceValue={datasourceValue} form={form} />;
+                  } else if (datasourceCate === DatasourceCateEnum.iotdb) {
+                    // ---- 第六步 L2（多数据源）：以下四个分支照抄 fe v9.1.0 src/pages/explorer/Explorer.tsx:383-392，
+                    // 只在 prometheus 分支之后、PlusExplorer 兜底之前追加，pub 原有的两个分支一个字没动。
+                    // fe 还给 Elasticsearch / Loki 传了 defaultFormValuesControl（视图收藏用），pub 没有这套东西，
+                    // 而它在 fe 的 Loki 里本来就是可选参数（fe src/pages/explorer/Loki/index.tsx:30-35，:119 有空值保护），所以不传。
+                    return <IotDB datasourceValue={datasourceValue} form={form} />;
+                  } else if (datasourceCate === DatasourceCateEnum.tdengine) {
+                    return <TDengine datasourceValue={datasourceValue} form={form} />;
+                  } else if (datasourceCate === DatasourceCateEnum.loki) {
+                    return <Loki datasourceValue={datasourceValue} headerExtra={headerExtraRef.current} form={form} />;
+                  } else if (datasourceCate === DatasourceCateEnum.ck) {
+                    return <CK datasourceValue={datasourceValue} headerExtra={headerExtraRef.current} />;
                   }
                   return <PlusExplorer key={datasourceValue} datasourceCate={datasourceCate} datasourceValue={datasourceValue} headerExtraRef={headerExtraRef} form={form} />;
                 }}
