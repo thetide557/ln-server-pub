@@ -41,6 +41,8 @@ interface IPageLayoutProps {
   backState?: Record<string, unknown>;
   docFn?: Function;
   desc?: string;
+  /** 第六步d：fe v9.1.0 的 PageLayout 实为 PageLayoutWithTabs、认这个文档链接属性；pub 这版只接受不渲染，现有页面 0 处传它 */
+  doc?: string;
 }
 
 const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introIcon, children, customArea, showBack, backPath, backState, docFn, desc }) => {

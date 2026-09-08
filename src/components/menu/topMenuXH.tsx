@@ -380,6 +380,20 @@ const getMenuList = (t) => {
             //   key: '/system/upgrade',
             //   label: t('系统升级'),
             // },
+            // 第六步d：AI 配置三页。key 必须与后端权限点字符串一字不差（ln:center/router/router.go:1307,1314；ops.yaml），
+            // 非 Admin 由本文件 :471-489 已有的 permList 过滤自动显隐；/ai-config/agents 不是权限点，非 Admin 自动被滤掉（后端是 rt.admin()）。
+            {
+              key: '/ai-config/llm-configs',
+              label: t('AI 模型'),
+            },
+            {
+              key: '/ai-config/skills',
+              label: t('AI 技能'),
+            },
+            {
+              key: '/ai-config/agents',
+              label: t('AI Agent'),
+            },
           ],
         },
         {
