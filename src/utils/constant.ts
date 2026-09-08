@@ -16,6 +16,12 @@
  */
 // @ts-ignore
 import { AdvancedDatasourceCateEnum } from 'plus:/types';
+// ---- 第六步 L3（多数据源）：照 fe v9.1.0 src/utils/constant.ts:82,83,103 只加三个 pub 没有的导出。
+// IS_PLUS / N9E_PATHNAME 被 fe 的 iotdb / TDengine Dashboard/datasource.tsx 与 AddQueryButtons 用到；
+// alphabet 被 fe 的 iotdb Dashboard/QueryBuilder.tsx 与 components/QueryName/utils.ts 用到。
+export const IS_PLUS = import.meta.env.VITE_IS_ENT === 'true' || import.meta.env.VITE_IS_PRO === 'true';
+export const N9E_PATHNAME = IS_PLUS ? 'n9e-plus' : 'n9e';
+export const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 export const PAGE_SIZE = 15;
 export const PAGE_SIZE_MAX = 100000;
 export const PAGE_SIZE_OPTION = 20;
