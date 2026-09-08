@@ -73,3 +73,7 @@ export const WebSocketURL =`ws://${location.host}/alert/ws/`;
 // pub 的 token 存在名为 access_token 的 Cookie 里（src/utils/request.ts:70），这里只是给闭包一个同名常量。
 export const IS_ENT = false;
 export const AccessTokenKey = 'access_token';
+
+// ---- 第六步d：AI 配置三页（aiConfig）用的栅格间距常量，照抄 fe v9.1.0 src/utils/constant.ts:87。
+// pub 原来没有这个导出，现有代码 0 处引用，只给新搬进来的 aiConfig 用。
+export const SIZE = 8;
