@@ -52,6 +52,15 @@ const zh_HK = {
       groupBy: `根據 {{field}} 分組，匹配個數 {{size}}, 文檔最小值 {{min_value}}`,
     },
   },
+  // ---- 第六步 L1（多数据源）：见 zh_CN 同段说明；取自 fe v9.1.0 src/locales/datasource/locale/zh_HK.ts。
+  datasource: {
+    max_query_rows: '單次請求允許檢索的最大行數',
+    max_idle_conns: '最大空閒連接數',
+    max_open_conns: '最大打開連接數',
+    conn_max_lifetime: '連接最大生存時間 （單位: 秒）',
+    timeout: '超時時間 （單位: 秒）',
+    timeout_ms: '超時時間 （單位: 毫秒）',
+  },
 };
 
 export default zh_HK;

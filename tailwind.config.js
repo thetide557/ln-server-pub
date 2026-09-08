@@ -10,7 +10,17 @@ function withOpacityValue(variable) {
 module.exports = {
   darkMode: 'class',
   important: true,
-  content: ['./src/components/AiChatNG/**/*.{ts,tsx}', './src/components/AiChat/**/*.{ts,tsx}', './src/components/Markdown/**/*.tsx'],
+  content: [
+    './src/components/AiChatNG/**/*.{ts,tsx}',
+    './src/components/AiChat/**/*.{ts,tsx}',
+    './src/components/Markdown/**/*.tsx',
+    // ---- 第六步（多数据源）：搬进来的数据源表单、AI 配置页大量用 tailwind 类名，
+    // 不列进 content 这些类不会被生成（fe v9.1.0 tailwind.config.js:13 是 './src/**/*'）。
+    './src/plugins/**/*.{ts,tsx}',
+    './src/pages/datasource/**/*.{ts,tsx}',
+    './src/pages/aiConfig/**/*.{ts,tsx}',
+    './src/components/DBSettings/**/*.{ts,tsx}',
+  ],
   // 添加下面的代码,禁用 `清除浏览器默认样式`, 解决和antd的样式冲突
   // (这样 `@tailwind base` 就只会添加一些默认的 tw 变量.不会去清除浏览器默认样式了.)
   corePlugins: {

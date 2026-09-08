@@ -193,5 +193,8 @@ const zh_CN = {
   failed: "失败",
   killfailed: "终止失败",
   timeout: "超时",
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/zh_CN.ts。
+  advanced_settings: '高级设置',
 };
 export default zh_CN;

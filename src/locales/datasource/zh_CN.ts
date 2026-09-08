@@ -52,5 +52,15 @@ const zh_CN = {
       groupBy: `根据 {{field}} 分组，匹配个数 {{size}}, 文档最小值 {{min_value}}`,
     },
   },
+  // ---- 第六步 L1（多数据源）：doris / clickHouse 数据源表单的高级设置用 t('datasource:datasource.xxx')，
+  // 键值原样取自 fe v9.1.0 src/locales/datasource/locale/zh_CN.ts:81-88。
+  datasource: {
+    max_query_rows: '单次请求允许检索的最大行数',
+    max_idle_conns: '最大空闲连接数',
+    max_open_conns: '最大打开连接数',
+    conn_max_lifetime: '连接最大生存时间（单位: 秒）',
+    timeout: '超时时间（单位: 秒）',
+    timeout_ms: '超时时间（单位: 毫秒）',
+  },
 };
 export default zh_CN;

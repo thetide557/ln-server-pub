@@ -62,6 +62,17 @@ export const chartDefaultOptions = {
 enum BaseDatasourceCateEnum {
   prometheus = 'prometheus',
   elasticsearch = 'elasticsearch',
+  // ---- 第六步 L1（多数据源）：照 fe v9.1.0 src/utils/constant.ts:66-78 的写法补九种类型。
+  // 值必须与后端 models/alert_rule.go:29-41 的常量一字不差（postgresql 叫 pgsql、clickhouse 叫 ck）。
+  opensearch = 'opensearch',
+  iotdb = 'iotdb',
+  tdengine = 'tdengine',
+  loki = 'loki',
+  ck = 'ck',
+  mysql = 'mysql',
+  pgsql = 'pgsql',
+  doris = 'doris',
+  victorialogs = 'victorialogs',
 }
 
 export const DatasourceCateEnum = { ...BaseDatasourceCateEnum, ...AdvancedDatasourceCateEnum };
@@ -73,3 +84,7 @@ export const WebSocketURL =`ws://${location.host}/alert/ws/`;
 // pub 的 token 存在名为 access_token 的 Cookie 里（src/utils/request.ts:70），这里只是给闭包一个同名常量。
 export const IS_ENT = false;
 export const AccessTokenKey = 'access_token';
+
+// ---- 第六步 L1：fe v9.1.0 src/utils/constant.ts:87 的 SIZE（间距基数，单位 px），
+// victorialogs 数据源表单的 Row gutter 用它。
+export const SIZE = 8;

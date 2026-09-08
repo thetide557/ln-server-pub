@@ -161,6 +161,9 @@ const zh_HK = {
   'msg.clone.success': '克隆成功',
   'msg.clone.error': '克隆失敗',
   'msg.sort.success': '排序成功',
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/zh_HK.ts。
+  advanced_settings: '高級設定',
 };
 
 export default zh_HK;
