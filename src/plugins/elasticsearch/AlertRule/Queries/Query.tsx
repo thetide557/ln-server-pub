@@ -4,14 +4,15 @@ import { Row, Col, Form, Tooltip, AutoComplete, InputNumber, Select, Space } fro
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 
-// 第六步 第4段 W1：本文件用到了 InputGroupWithFormItem 的 `addonAfter`（本文件 :122 的索引模式设置按钮、
-// :186 的 'Lucene' 角标、:206 的时间单位下拉），而羚牛公共版 `@/components/InputGroupWithFormItem`
-// 只有 children / label / labelWidth / noStyle 四个 prop（`src/components/InputGroupWithFormItem/index.tsx:6-11`），
-// 少了 addonAfter，直接用会报 error TS2322。pub 现有共享组件按纪律不许改，
-// 所以改指向 ES 升级轮（step6f）已经放在 pub 里的那份 fe v9.1.0 本地副本——
-// `src/pages/explorer/Elasticsearch/components/InputGroupWithFormItem.tsx`（它的文件头注释写了来历），
-// 那份就是 fe v9.1.0 的原文，addonAfter 等四个 prop 都在。本组只读它、不改它。
-import InputGroupWithFormItem from '@/pages/explorer/Elasticsearch/components/InputGroupWithFormItem';
+// 第六步 第4段 W1：import 路径与 fe v9.1.0 原文一字不变，别改。
+// 本文件三处用到 InputGroupWithFormItem 的 `addonAfter`（:123 的索引模式设置按钮、:187 的 'Lucene' 角标、
+// :207 的时间单位下拉）。本组 worktree 的起点 a3e5b0e8 上，羚牛公共版还只有
+// children / label / labelWidth / noStyle 四个 prop，单独在这里跑 tsc 会报三条
+// 「error TS2322: Property 'addonAfter' does not exist」——**这不是本组的漏改**：
+// lead 已在主分支 step6g/alert-rule-types 的 commit 83557c79 按 fe v9.1.0 覆盖了这个公共件
+//（index.tsx + style.less，新增 addonAfter / size 等 6 个可选 prop），合并回去这三条就没了。
+// 详见 第六步-流水线/第4段/拿不准-ES组.md 的 U-ES-07。
+import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
 import QueryName from '@/components/QueryName';
 import DocumentDrawer from '@/components/DocumentDrawer';
 import { CommonStateContext } from '@/App';
