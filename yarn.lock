@@ -1947,6 +1947,11 @@
   dependencies:
     lru-cache "^6.0.0"
 
+"@fc-components/es-query@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.npmmirror.com/@fc-components/es-query/-/es-query-0.0.3.tgz#cd2ae3dfb18f94d51baedc9f761a20f343c62635"
+  integrity sha512-9phnbOD/79LMkh/CBCr2ALw2CVROwgGYLp4OHdmisltoStvQD+zupuSZdAGJYq/KfovgjexKOlhbhHQpHsW1JQ==
+
 "@fc-components/lezer-metricsql@^0.0.2":
   version "0.0.2"
   resolved "https://registry.npmmirror.com/@fc-components/lezer-metricsql/-/lezer-metricsql-0.0.2.tgz#1ab880ebd94a9d8f8146f4cd2b56e663a6249d5a"

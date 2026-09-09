@@ -36,7 +36,11 @@ const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/step6d/setupTests.ts'],
 
   transform: {
-    '^.+\\.(ts|tsx)$': [
+    // step6f（ES 升级轮）：正则里加了 js|jsx。搬进来的 src/components/KQLInput/grammar/parser.js
+    // 是一个用 ESM 语法写的 .js 文件（`import { LRParser } from '@lezer/lr'`），
+    // 原来的 `^.+\\.(ts|tsx)$` 不匹配它，jest 直接按 CommonJS 读就报
+    // 「Cannot use import statement outside a module」。ts-jest 的 allowJs 已经是开的。
+    '^.+\\.(ts|tsx|js|jsx)$': [
       '<rootDir>/src/__tests__/step6d/transformers/tsJestImportMeta.js',
       {
         // 注意：这份配置由 tsJestImportMeta.js 取出来喂给 ts-jest 的 createTransformer()，

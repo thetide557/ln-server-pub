@@ -4,7 +4,7 @@ import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useDebounceFn } from 'ahooks';
 import { useTranslation } from 'react-i18next';
-import { getFields } from '@/pages/explorer/Elasticsearch/services';
+import { getFields, getFullFields } from '@/pages/explorer/Elasticsearch/services';
 import Filters from './Filters';
 import Terms from './Terms';
 import Histgram from './Histgram';
@@ -15,20 +15,23 @@ interface IProps {
   prefixFieldNames?: (string | number)[]; // 前缀字段名路径
   datasourceValue: number;
   index: string; // ES 索引
-  backgroundVisible?: boolean;
   disabled?: boolean;
 }
 
-export default function index({ prefixField = {}, prefixFieldNames = [], parentNames = [], datasourceValue, index, backgroundVisible = true, disabled }: IProps) {
+export default function index({ prefixField = {}, prefixFieldNames = [], parentNames = [], datasourceValue, index, disabled }: IProps) {
   const { t } = useTranslation('alertRules');
   const [fieldsOptions, setFieldsOptions] = useState<any[]>([]);
   const { run } = useDebounceFn(
     () => {
-      getFields(datasourceValue, index).then((res) => {
+      // step6f（ES 升级轮）：fe v9.1.0 这里传 `{ includeSubFields: true }`，
+      // 羚牛 pub 的 getFullFields 第三个参数还是老的字符串 type，没有 includeSubFields
+      //（pub `src/pages/explorer/Elasticsearch/services.ts:76`）；pub 现有共享文件不许改，
+      // 这里退成只传前两个参数，差别是分组字段下拉里不出现 `xxx.keyword` 这类子字段。已登记。
+      getFullFields(datasourceValue, index).then((res) => {
         setFieldsOptions(
           _.map(res.allFields, (item) => {
             return {
-              value: item,
+              value: item.name,
             };
           }),
         );
@@ -69,7 +72,7 @@ export default function index({ prefixField = {}, prefixFieldNames = [], parentN
           </div>
           {fields.map((field) => {
             return (
-              <div key={field.key} style={{ marginBottom: backgroundVisible ? 16 : 0 }}>
+              <div key={field.key} style={{ marginBottom: 0 }}>
                 <Form.Item shouldUpdate noStyle>
                   {({ getFieldValue }) => {
                     const cate = getFieldValue([...parentNames, ...prefixFieldNames, 'group_by', field.name, 'cate']);
@@ -78,16 +81,7 @@ export default function index({ prefixField = {}, prefixFieldNames = [], parentN
                     return (
                       <Row gutter={10} align='top'>
                         <Col flex='auto'>
-                          <div
-                            style={
-                              backgroundVisible
-                                ? {
-                                    backgroundColor: '#FAFAFA',
-                                    padding: 16,
-                                  }
-                                : {}
-                            }
-                          >
+                          <div>
                             {cate === 'filters' && <Filters prefixField={field} />}
                             {cate === 'terms' && <Terms prefixField={field} fieldsOptions={fieldsOptions} values={valuesWithoutCount} />}
                             {cate === 'histgram' && <Histgram prefixField={field} />}

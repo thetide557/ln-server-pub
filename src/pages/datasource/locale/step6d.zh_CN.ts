@@ -12,6 +12,12 @@ const zh_CN = {
   endpoint_title: "服务入口",
   skip_tls_verify: "跳过 TLS 检查",
   form: {
+    // ---- 第六步 ES 升级轮（step6f）：L1 的 Detail.tsx 按 fe v9.1.0 覆盖后要用这两个键，
+    //      pub 的 datasourceManage 词条里没有；值原样取自 fe v9.1.0 src/pages/datasource/locale/zh_CN.ts。
+    es: {
+      write_config: "写配置",
+      disable_write: "不允许写入"
+    },
     cluster_tip: "在多个机房的架构下，有时会部署多个告警引擎集群，对应边缘机房的数据源，需要关联相应机房的告警引擎集群，如果只有一个集群，保持默认即可",
     logs_max_query_rows: "返回的最大日志条数",
     protocol: "协议",

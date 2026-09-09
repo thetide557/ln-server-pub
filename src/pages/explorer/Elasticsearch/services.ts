@@ -18,7 +18,10 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import _ from 'lodash';
-import { mappingsToFields, mappingsToFullFields, flattenHits } from './utils';
+import { mappingsToFields, mappingsToFullFields, flattenHits, Field, typeMap, Filter } from './utils';
+import { N9E_PATHNAME } from '@/utils/constant';
+export type { Field, Filter };
+export { typeMap };
 
 export function getIndices(datasourceValue: number, allow_hide_system_indices = false) {
   const params: any = {
@@ -28,7 +31,7 @@ export function getIndices(datasourceValue: number, allow_hide_system_indices = 
   if (allow_hide_system_indices) {
     params.expand_wildcards = 'all';
   }
-  return request(`/api/n9e/proxy/${datasourceValue}/_cat/indices`, {
+  return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_cat/indices`, {
     method: RequestMethod.Get,
     params,
   }).then((res) => {
@@ -36,26 +39,44 @@ export function getIndices(datasourceValue: number, allow_hide_system_indices = 
   });
 }
 
-export function getFullIndices(datasourceValue: number, target = '*', allow_hide_system_indices = false) {
+export function getFullIndices(datasourceValue: number, target = '*', allow_hide_system_indices = false, crossClusterEnabled = false) {
   const params: any = {
     format: 'json',
     s: 'index',
   };
-  if (allow_hide_system_indices) {
-    params.expand_wildcards = 'all';
+  if (crossClusterEnabled) {
+    return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_field_caps`, {
+      method: RequestMethod.Get,
+      params: {
+        fields: '*',
+        index: target,
+      },
+      silence: true,
+    }).then((res) => {
+      return _.map(_.get(res, 'indices'), (name) => {
+        return {
+          index: name,
+          uuid: name,
+        };
+      });
+    });
+  } else {
+    if (allow_hide_system_indices) {
+      params.expand_wildcards = 'all';
+    }
+    return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_cat/indices/${target}`, {
+      method: RequestMethod.Get,
+      params,
+      silence: true,
+    }).then((res) => {
+      return res;
+    });
   }
-  return request(`/api/n9e/proxy/${datasourceValue}/_cat/indices/${target}`, {
-    method: RequestMethod.Get,
-    params,
-    silence: true,
-  }).then((res) => {
-    return res;
-  });
 }
 
 export function getFields(datasourceValue: number, index?: string, type?: string, allow_hide_system_indices = false) {
   const url = index ? `/${index}/_mapping` : '/_mapping';
-  return request(`/api/n9e/proxy/${datasourceValue}${url}`, {
+  return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}${url}`, {
     method: RequestMethod.Get,
     params: _.omit(
       {
@@ -73,55 +94,129 @@ export function getFields(datasourceValue: number, index?: string, type?: string
   });
 }
 
-export function getFullFields(datasourceValue: number, index?: string, type?: string, allow_hide_system_indices = false) {
-  const url = index ? `/${index}/_mapping` : '/_mapping';
-  return request(`/api/n9e/proxy/${datasourceValue}${url}`, {
-    method: RequestMethod.Get,
-    params: _.omit(
-      {
-        expand_wildcards: 'all',
-        pretty: true,
+export function getFullFields(
+  datasourceValue: number,
+  index?: string,
+  options: {
+    type?: string;
+    allowHideSystemIndices?: boolean;
+    includeSubFields?: boolean;
+    crossClusterEnabled?: boolean;
+  } = {
+    allowHideSystemIndices: false,
+    includeSubFields: false,
+    crossClusterEnabled: false,
+  },
+) {
+  if (options.crossClusterEnabled) {
+    return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_field_caps`, {
+      method: RequestMethod.Get,
+      params: {
+        fields: '*',
+        index,
       },
-      allow_hide_system_indices ? [] : ['expand_wildcards'],
-    ),
-    silence: true,
-  }).then((res) => {
-    return {
-      allFields: _.unionBy(mappingsToFullFields(res), (item) => {
-        return item.name + item.type;
-      }),
-      fields: type
-        ? _.unionBy(mappingsToFullFields(res, type), (item) => {
+      silence: true,
+    }).then((res) => {
+      const allFields = _.map(_.get(res, 'fields'), (fieldObject, name) => {
+        const keys = _.keys(fieldObject);
+        return {
+          name: name,
+          type: keys[0],
+        };
+      });
+      return {
+        allFields,
+        fields: options.type ? _.filter(allFields, { type: options.type }) : [],
+      };
+    });
+  } else {
+    const url = index ? `/${index}/_mapping` : '/_mapping';
+
+    return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}${url}`, {
+      method: RequestMethod.Get,
+      params: _.omit(
+        {
+          expand_wildcards: 'all',
+          pretty: true,
+        },
+        options.allowHideSystemIndices ? [] : ['expand_wildcards'],
+      ),
+      silence: true,
+    }).then((res) => {
+      return {
+        allFields: _.unionBy(
+          mappingsToFullFields(res, {
+            includeSubFields: options.includeSubFields,
+          }),
+          (item) => {
             return item.name + item.type;
-          })
-        : [],
-    };
-  });
+          },
+        ),
+        fields: options.type
+          ? _.unionBy(
+              mappingsToFullFields(res, {
+                type: options.type,
+                includeSubFields: options.includeSubFields,
+              }),
+              (item) => {
+                return item.name + item.type;
+              },
+            )
+          : [],
+      };
+    });
+  }
 }
 
-export function getLogsQuery(datasourceValue: number, requestBody) {
-  return request(`/api/n9e/proxy/${datasourceValue}/_msearch`, {
+const queryControllerMap = new Map();
+
+export function getLogsQuery(datasourceValue: number, requestBody: any, requestId: string) {
+  if (queryControllerMap.has(requestId)) {
+    queryControllerMap.get(requestId).abort();
+    queryControllerMap.delete(requestId);
+  }
+
+  const controller = new AbortController();
+  queryControllerMap.set(requestId, controller);
+  return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_msearch`, {
     method: RequestMethod.Post,
     data: requestBody,
     headers: {
       'Content-Type': 'application/json',
     },
-  }).then((res) => {
-    const dat = _.get(res, 'responses[0].hits', { hits: [], total: 0 });
-    const { docs } = flattenHits(dat.hits || []);
-    let total = 0;
-    if (typeof dat.total === 'object' && dat.total !== null) {
-      total = dat.total.value || 0;
-    }
-    return {
-      total,
-      list: docs,
-    };
-  });
+    signal: controller.signal,
+  })
+    .then((res) => {
+      // ---- 羚牛补丁（来源 pub 提交 50763f9「修复监控日志-即时查询不同索引根据过滤条件检视数据不更新问题」，2025-07-11）。
+      // 本文件按 fe v9.1.0 整体覆盖，这一处是覆盖后手工贴回来的。上游到 v9.1.0 仍写成：
+      //   const dat = _.get(res, 'responses[0].hits');
+      //   const { docs } = flattenHits(dat.hits);
+      //   total: dat.total.value ?? dat.total,
+      // 查询返回为空时 responses[0].hits 是 undefined，取 dat.hits 会直接抛错。
+      // total 在 ES 6.x 是数字、7.x 起是 { value, relation } 对象，两种都要接住
+      //（羚牛原补丁只处理了对象那种、数字那种会被算成 0，这里补上 else 分支，等于把上游的 `?? dat.total` 也留着）。
+      const dat = _.get(res, 'responses[0].hits', { hits: [], total: 0 });
+      const { docs } = flattenHits(dat.hits || []);
+      let total = 0;
+      if (typeof dat.total === 'object' && dat.total !== null) {
+        total = dat.total.value || 0;
+      } else {
+        total = dat.total || 0;
+      }
+      return {
+        total,
+        list: docs,
+      };
+    })
+    .finally(() => {
+      if (queryControllerMap.has(requestId)) {
+        queryControllerMap.delete(requestId);
+      }
+    });
 }
 
 export function getDsQuery(datasourceValue: number, requestBody) {
-  return request(`/api/n9e/proxy/${datasourceValue}/_msearch`, {
+  return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_msearch`, {
     method: RequestMethod.Post,
     data: requestBody,
     headers: {
@@ -134,7 +229,7 @@ export function getDsQuery(datasourceValue: number, requestBody) {
 }
 
 export function getESVersion(datasourceValue: number) {
-  return request(`/api/n9e/proxy/${datasourceValue}`, {
+  return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/`, {
     method: RequestMethod.Get,
   }).then((res) => {
     const dat = _.get(res, 'version.number');
@@ -142,8 +237,8 @@ export function getESVersion(datasourceValue: number) {
   });
 }
 
-export function getFieldValues(datasourceValue, requestBody, field) {
-  return request(`/api/n9e/proxy/${datasourceValue}/_msearch`, {
+export function getFieldValues(datasourceValue, requestBody, field, n = 5) {
+  return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_msearch`, {
     method: RequestMethod.Post,
     data: requestBody,
     headers: {
@@ -172,7 +267,58 @@ export function getFieldValues(datasourceValue, requestBody, field) {
         ['desc'],
       ),
       0,
-      5,
+      n,
     );
   });
+}
+
+export function getFieldTopTerms(
+  datasourceValue: number,
+  requestBody: any,
+  params: {
+    aggName?: string;
+    field: string;
+    size: number;
+  },
+) {
+  const aggName = params.aggName || `top${params.size}_${String(params.field).replace(/[^A-Za-z0-9_]/g, '_')}`;
+  return request(`/api/${N9E_PATHNAME}/proxy/${datasourceValue}/_msearch`, {
+    method: RequestMethod.Post,
+    data: requestBody,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }).then((res) => {
+    const resp = _.get(res, 'responses[0]');
+    const total = _.get(resp, 'hits.total.value') ?? _.get(resp, 'hits.total') ?? 0;
+    const buckets = _.get(resp, ['aggregations', aggName, 'buckets'], []);
+    return _.map(buckets, (b) => {
+      const docCount = _.get(b, 'doc_count', 0);
+      return {
+        label: _.get(b, 'key'),
+        value: total ? docCount / total : 0,
+      };
+    });
+  });
+}
+
+export function addLogsDownloadTask(requestBody) {
+  return request(`/api/${N9E_PATHNAME}/logs/download/task`, {
+    method: RequestMethod.Post,
+    data: requestBody,
+  }).then((res) => res.dat);
+}
+
+export function getLogsDownloadTasks(params) {
+  return request(`/api/${N9E_PATHNAME}/logs/download/tasks`, {
+    method: RequestMethod.Get,
+    params,
+  }).then((res) => res.dat);
+}
+
+export function delDownloadTask(data: { ids: number[] }) {
+  return request(`/api/${N9E_PATHNAME}/logs/download/task`, {
+    method: RequestMethod.Delete,
+    data,
+  }).then((res) => res.dat);
 }

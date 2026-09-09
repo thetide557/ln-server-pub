@@ -12,6 +12,12 @@ const en_US = {
   endpoint_title: "Service entry",
   skip_tls_verify: "Skip TLS verification",
   form: {
+    // ---- 第六步 ES 升级轮（step6f）：L1 的 Detail.tsx 按 fe v9.1.0 覆盖后要用这两个键，
+    //      pub 的 datasourceManage 词条里没有；值原样取自 fe v9.1.0 src/pages/datasource/locale/en_US.ts。
+    es: {
+      write_config: "Write settings",
+      disable_write: "Disable write"
+    },
     cluster_tip: "In a multi-datacenter architecture, multiple alerting engine clusters are sometimes deployed. A data source of an edge datacenter must be associated with the alerting engine cluster of that datacenter. If there is only one cluster, keep the default",
     logs_max_query_rows: "Maximum number of returned log entries",
     protocol: "Protocol",

@@ -12,6 +12,12 @@ const zh_HK = {
   endpoint_title: "服務入口",
   skip_tls_verify: "跳過 TLS 驗證",
   form: {
+    // ---- 第六步 ES 升级轮（step6f）：L1 的 Detail.tsx 按 fe v9.1.0 覆盖后要用这两个键，
+    //      pub 的 datasourceManage 词条里没有；值原样取自 fe v9.1.0 src/pages/datasource/locale/zh_HK.ts。
+    es: {
+      write_config: "寫配置",
+      disable_write: "不允許寫入"
+    },
     cluster_tip: "在多個機房的架構下，有時會部署多個告警引擎叢集，對應邊緣機房的數據源，需要關聯相應機房的告警引擎叢集，如果只有一個叢集，保持默認即可",
     logs_max_query_rows: "返回的最大日誌條數",
     protocol: "協議",
