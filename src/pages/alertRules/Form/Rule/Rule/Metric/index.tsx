@@ -33,6 +33,16 @@ import XhPrometheus from './Prometheus/XHindex';
 // 第六步 第4段 W0（阶段 0 · ck 试点）：直达路径 import，不写 '@/plugins/clickHouse' 这种裸目录
 //（裸目录的 index 会把 Explorer / ExplorerNG / Dashboard 整套一起拖进来；多数据源轮拍板-02）。
 import ClickHouseAlertRule from '@/plugins/clickHouse/AlertRule';
+// 第六步 第4段 W3a（阶段 1 收尾）：其余九种编辑器，同样走直达路径（大顾问 Q4 第 5.1 节）。
+import MySQLAlertRule from '@/plugins/mysql/AlertRule';
+import PgSQLAlertRule from '@/plugins/pgsql/AlertRule';
+import DorisAlertRule from '@/plugins/doris/AlertRule';
+import ElasticsearchAlertRule from '@/plugins/elasticsearch/AlertRule'; // opensearch 也用它（fe v9.1.0 Form/Rule/Rule/index.tsx:45）
+import TDengineAlertRule from '@/plugins/TDengine/AlertRule';
+import IotDBAlertRule from '@/plugins/iotdb/AlertRule';
+import VictorialogsAlertRule from '@/plugins/victorialogs/AlertRule';
+// loki 的编辑器是老表单自带的（fe v9.1.0 Form/Rule/Rule/index.tsx:22 也是从这里引），不在 src/plugins 下。
+import LokiAlertRule from '../Log/Loki';
 import { FormStateContext } from '@/pages/alertRules/Form';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
@@ -222,25 +232,33 @@ export default function index({ form, type, assets ,field }) {
                 />
               );
             }
-            // 第六步 第4段 W0（阶段 0 · ck 试点）：在 PlusAlertRule 兜底之前加 ck 分支。
-            // 只传 field —— ck 的 AlertRule/index.tsx 自己把它拼成
-            // 相对路径 [field.name, 'rule_config']（给 Form.Item / Form.List 用）和
-            // 绝对路径 ['strategies', field.name, 'rule_config']（给 getFieldValue / useWatch 用，这两个 API 不吃 Form.List 前缀）。
-            // 其余 9 种类型阶段 1 一次性照这个样子挂上来。
-            if (cate === "ck") {
-              // key={field.key} 让编辑器随策略整体重新挂载：antd 的 useWatch 只在挂载时订阅一次
-              //（node_modules/rc-field-form/lib/useWatch.js:56-83 的 useEffect 依赖数组是空的），
-              // 删掉前面的策略、后面策略下标前移时，不重挂就会短暂读到旧策略的值。
-              return (
-                <ClickHouseAlertRule
-                  key={field.key}
-                  field={field}
-                  cate={cate}
-                  datasourceValue={datasourceValue}
-                  disabled={disabled}
-                />
-              );
-            }
+            // ---- 第六步 第4段 W3a（阶段 1 收尾）：十种 v9 编辑器类型的分发，放在 PlusAlertRule 兜底之前。----
+            // 契约 = fe v9.1.0 老表单 Form/Rule/Rule/index.tsx:40-49 的 props + 阶段 0 定的规矩 B（key / field / cate / disabled）。
+            // 依据：第六步-流水线/第4段/顾问答案/大顾问-Q4.md 第 5.2 节。
+            //
+            // 三件要留心的事：
+            // 1) 只传 field —— 每个编辑器的 AlertRule/index.tsx 自己把它拼成相对路径 [field.name, 'rule_config']
+            //    （给 Form.Item / Form.List 用）和绝对路径 ['strategies', field.name, 'rule_config']
+            //    （给 getFieldValue / useWatch 用，这两个 API 不吃 Form.List 前缀）。
+            // 2) key={field.key} 让编辑器随策略整体重新挂载：antd 的 useWatch 只在挂载时订阅一次
+            //    （node_modules/rc-field-form/lib/useWatch.js:56-83 的 useEffect 依赖数组是空的），
+            //    删掉前面的策略、后面策略下标前移时，不重挂就会短暂读到旧策略的值。key 不能放进 common 里 spread——
+            //    React 17 对 spread 里带 key 会告警，所以每行单独写。
+            // 3) datasourceValue 的形状：老类型是 datasource_ids 数组，新 8 种是上面本地算出来的单个 id（W2）；
+            //    doris 和 loki 的 props 要求数组，所以给它们用 dsArr 兜住两种情况。
+            //    fe 在 :44 / :45 / :48 写死的 disabled={false} 不照抄——羚牛一律用 FormStateContext 里的 disabled（阶段 0 ck 已如此）。
+            const dsArr: number[] = _.isArray(datasourceValue) ? datasourceValue : [datasourceValue];
+            const common = { field, cate, disabled };
+            if (cate === "ck") return <ClickHouseAlertRule key={field.key} {...common} datasourceValue={datasourceValue} />;
+            if (cate === "mysql") return <MySQLAlertRule key={field.key} {...common} datasourceValue={datasourceValue} />;
+            if (cate === "pgsql") return <PgSQLAlertRule key={field.key} {...common} datasourceValue={datasourceValue} />;
+            if (cate === "tdengine") return <TDengineAlertRule key={field.key} {...common} datasourceValue={datasourceValue} />;
+            if (cate === "iotdb") return <IotDBAlertRule key={field.key} {...common} datasourceValue={datasourceValue} />;
+            if (cate === "elasticsearch") return <ElasticsearchAlertRule key={field.key} {...common} datasourceValue={datasourceValue} />; // fe:44
+            if (cate === "opensearch") return <ElasticsearchAlertRule key={field.key} {...common} datasourceValue={datasourceValue} hideIndexPattern />; // fe:45，复用 ES 编辑器、只是不显示索引模式
+            if (cate === "doris") return <DorisAlertRule key={field.key} {...common} datasourceValue={dsArr} />; // fe:48 的 datasourceCate={cate} 可省：doris/AlertRule/index.tsx:63 会回落到 cate
+            if (cate === "victorialogs") return <VictorialogsAlertRule key={field.key} {...common} datasourceValue={datasourceValue} />; // fe:49
+            if (cate === "loki") return <LokiAlertRule key={field.key} {...common} datasourceCate={cate} datasourceValue={dsArr} />; // fe:43，IProps 里 datasourceCate / datasourceValue 都是必填
             return (
               <PlusAlertRule
                 cate={cate}
