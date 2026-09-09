@@ -32,7 +32,18 @@ interface IProps {
   datasourceList: { id: number; name: string }[];
   reloadGroupedDatasourceList: () => void;
   datasourceCate?: string;
-  names?: string[];
+  names?: (string | number)[];
+  // ---- 第六步 第4段 W2（阶段 2）改动 1/3：新增 absNames，默认等于 names，fe 自己调用时两者相同、行为不变。
+  // 为什么要分两条路径：羚牛一条规则下可以有多个策略，表单里是 <Form.List name="strategies">
+  //（src/pages/alertRules/Form/index.tsx:198,341-346），Metric/index.tsx 就渲染在它的 children 里。
+  // rc-field-form 的 List 会把父 List 的前缀接在自己的 name 前面
+  //（node_modules/rc-field-form/lib/List.js:40-43），所以下面 <Form.List name={names}> 只能收**相对**路径
+  // [field.name, 'datasource_queries']；而 Form.useWatch / form.getFieldValue / form.setFieldsValue
+  // 反过来不吃这个前缀（node_modules/rc-field-form/lib/useWatch.js:53,69,78 直接按原路径从整份 store 取），
+  // 必须收**绝对**路径 ['strategies', field.name, 'datasource_queries']。
+  // 同一件事 W0 在 ck 编辑器上已经踩过（Form/Rule/Rule/Metric/index.tsx:178-182 的注释）。
+  // 登记：第六步-流水线/第4段/拿不准-W2.md 第 2 条。
+  absNames?: (string | number)[];
   required?: boolean;
   disabled?: boolean;
   showExtra?: boolean;
@@ -185,14 +196,14 @@ function Query({ idx, names, field, remove, invalidDatasourceIds, datasourceList
 }
 
 export default function index(props: IProps) {
-  const { datasourceList, reloadGroupedDatasourceList, datasourceCate, names = ['datasource_queries'], disabled, showExtra } = props;
+  const { datasourceList, reloadGroupedDatasourceList, datasourceCate, names = ['datasource_queries'], absNames = names, disabled, showExtra } = props;
   const { t } = useTranslation('alertRules');
   const [fullDatasourceList, setFullDatasourceList] = useState<any[]>([]);
   const [datasources, setDatasources] = useState<any[]>([]);
   const [invalidDatasourceIds, setInvalidDatasourceIds] = useState<number[]>([]);
   const form = Form.useFormInstance();
   const datasource_cate = datasourceCate || Form.useWatch(['cate']);
-  const datasource_queries = Form.useWatch(names);
+  const datasource_queries = Form.useWatch(absNames); // 第六步 W2：绝对路径，见 IProps 上的注释
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const autoDefaultCheckedCateRef = useRef<string>();
   const fetchDatasourceList = () => {
@@ -230,22 +241,29 @@ export default function index(props: IProps) {
       return;
     }
 
-    const queries = form.getFieldValue(names) || [];
+    const queries = form.getFieldValue(absNames) || [];
     if (!isEmptyExactMatchQuery(queries)) {
       return;
     }
 
     const firstQuery = queries[0] || {};
-    form.setFieldsValue(
-      _.set({}, names, [
-        {
-          ...firstQuery,
-          match_type: 0,
-          op: firstQuery.op || 'in',
-          values: [datasourceList[0].id],
-        },
-      ]),
-    );
+    // ---- 第六步 第4段 W2（阶段 2）改动 2/3：fe 原文是 form.setFieldsValue(_.set({}, names, [ … ]))。
+    // 在羚牛的多策略表单里这句会造出 { strategies: [ { datasource_queries: […] } ] }，
+    // 而 rc-field-form 合并新值时只对「纯对象」递归、数组整体替换
+    //（node_modules/rc-field-form/lib/utils/valueUtil.js:70-71,90-91），
+    // 结果是整条 strategies 被换成只剩一项、那一项只剩 datasource_queries——别的策略和别的字段全丢。
+    // 改成 V2 自己在 Query 的 onChange 里已经用的写法（本文件 :109-111）：先整份克隆表单值，再按绝对路径改一项。
+    // 登记：第六步-流水线/第4段/拿不准-W2.md 第 3 条。
+    const nextValues = _.cloneDeep(form.getFieldsValue());
+    _.set(nextValues, absNames, [
+      {
+        ...firstQuery,
+        match_type: 0,
+        op: firstQuery.op || 'in',
+        values: [datasourceList[0].id],
+      },
+    ]);
+    form.setFieldsValue(nextValues);
   }, [datasource_cate, JSON.stringify(datasourceList)]);
 
   useEffect(() => {
@@ -357,7 +375,10 @@ export default function index(props: IProps) {
                 <Query
                   key={field.name}
                   idx={index}
-                  names={names}
+                  // 第六步 W2：Query 内部两处用法都是按整份表单值取的
+                  //（本文件 :64 的 Form.useWatch([...names, field.name,'match_type'])、
+                  //  :109-111 的 _.set(整份表单值, [...names, field.name,'values'], [])），所以给绝对路径。
+                  names={absNames}
                   field={field}
                   remove={remove}
                   invalidDatasourceIds={invalidDatasourceIds}
