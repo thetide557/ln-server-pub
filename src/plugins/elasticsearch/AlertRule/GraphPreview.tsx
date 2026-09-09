@@ -188,8 +188,13 @@ export default function GraphPreview(props: IProps) {
                 }) as any[],
                 {
                   title: 'Value',
-                  render: (record) => {
-                    return _.last(record.data)?.[1] ?? '-';
+                  // 第六步 第4段 W1：fe 用 TypeScript 4.9.4、pub 锁的是 4.3.2
+                  //（`node -p "require('./node_modules/typescript/package.json').version"`）。
+                  // 4.3 里 `_.last(x)`（x 是 any）的返回类型推成 unknown，接着 `?.[1]` 就报
+                  // 「error TS2571: Object is of type 'unknown'」；4.9 推成 any 所以 fe 不报。
+                  // 这里只补类型标注（record 显式 any + 结果 as any），运行时行为一字不变。
+                  render: (record: any) => {
+                    return (_.last(record.data) as any)?.[1] ?? '-';
                   },
                 },
               )}
