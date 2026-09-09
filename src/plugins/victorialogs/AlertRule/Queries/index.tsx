@@ -25,7 +25,10 @@ interface IProps {
 }
 
 export default function index({ prefixField = {}, fullPrefixName = [], prefixName = [], disabled, datasourceValue }: IProps) {
-  const { t, i18n } = useTranslation(NAME_SPACE);
+  // step6d(B1) 的老问题，本文件同样撞上：NAME_SPACE 是 DatasourceCateEnum 的枚举成员、不是字符串字面量，
+  // 本仓库的 TS 4.3 会报 TS2589「类型实例化过深」（fe 用 TS 4.9 不报）。照 pub 已有先例标成 string 即可，
+  // 先例：src/plugins/victorialogs/Explorer/index.tsx:30、Explorer/Graph.tsx:157（登记在 拿不准-B1 B1-8）。
+  const { t, i18n } = useTranslation(NAME_SPACE as string);
   // 第六步 第4段 W1-日志组：fe 的 ICommonState 里有 darkMode（暗色模式开关），pub 的没有（src/App.tsx 不改），
   // 照 pub 已有先例加 as any，取到 undefined = 浅色（写法同 src/components/LogQL/index.tsx:78，与阶段 0 的 ck 一致）。
   const { darkMode } = useContext(CommonStateContext) as any;
@@ -57,7 +60,7 @@ export default function index({ prefixField = {}, fullPrefixName = [], prefixNam
                       const query = getFieldValue([...fullPrefixName, ...prefixName, 'queries', field.name]);
                       const queryValue = query?.query;
                       if (!queryValue || _.includes(queryValue, '_time')) return null;
-                      return <Alert className='mb-2' type='warning' message={<Trans ns={NAME_SPACE} i18nKey='alert.query_warning_no_time' components={{ b: <strong /> }} />} />;
+                      return <Alert className='mb-2' type='warning' message={<Trans ns={NAME_SPACE as string} i18nKey='alert.query_warning_no_time' components={{ b: <strong /> }} />} />;
                     }}
                   </Form.Item>
                   <CardContainerHeader>
