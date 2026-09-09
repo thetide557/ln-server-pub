@@ -306,10 +306,54 @@ export function processFormValues(values) {
     datasource_ids: _.isArray(values.datasource_ids) ? values.datasource_ids : values.datasource_ids ? [values.datasource_ids] : [],
     annotations: _.chain(values.annotations).keyBy('key').mapValues('value').value(),
   };
+  // ---- 第六步 第4段 W2（阶段 2）：数据源字段。上面那段构造 data 的原文一行没改
+  // （尤其是 datasource_ids 那一行：它把 undefined 变成 []、把单个值包成数组，host 与老类型都靠它）。
+  // 判据：顾问答案/大顾问-Q3.md 第六节第 5 条 + 顾问问答.md Q3 拍板-14。
+  //   * host 规则：后端根本不看数据源（ln-server/alert/eval/alert_rule.go:120-127），一个字节都不加；
+  //   * 老类型：提交体 = 原来的全部字段 + datasource_queries 这一个字段，其余逐字节不变。
+  //     为什么必须补：羚牛的求值引擎对 ck / elasticsearch 这些「内置类型」只看 datasource_queries
+  //     （ln-server/alert/eval/alert_rule.go:132、models/alert_rule.go:1233-1244），
+  //     而后端任何入口都不会把 datasource_ids 翻译成 datasource_queries，
+  //     所以现在从 pub 表单建的 ck / es 规则其实一个数据源都匹配不上（大顾问 Q3 第 1.1 节末段）。
+  //   * 新 8 种：只发 datasource_queries，老字段删掉（照 fe v9.1.0 Form/utils.ts:184-187 的精神）。
+  // dataOut 和 data 是同一个对象，只是换一个 any 类型的名字：datasource_queries 不在上面那个字面量里，
+  // TypeScript 会拦「给不存在的属性赋值」和「delete 非可选属性」（tsconfig.json:23,34 开了 strict / strictNullChecks）。
+  const dataOut = data as any;
+  if (values.prod !== 'host') {
+    if (isLegacyCate(cate)) {
+      const legacyQueries = datasourceIdsToQueries(data.datasource_ids);
+      if (legacyQueries) {
+        dataOut.datasource_queries = legacyQueries;
+      } else {
+        // 数据源一个都没选（老选择器的 required 一般先拦住了）：不发空条件，
+        // 因为后端拿到空条件会当成「一个数据源都不匹配」（models/alert_rule.go:1626-1628）。
+        delete dataOut.datasource_queries;
+      }
+    } else {
+      delete dataOut.datasource_ids;
+      dataOut.datasource_queries = values.datasource_queries?.length ? values.datasource_queries : getDefaultDatasourceQueries();
+    }
+  }
   return data;
 }
 
 export function processInitialValues(values) {
+  // ---- 第六步 第4段 W2（阶段 2）：回填时两个数据源字段要分开走。
+  // pub 的编辑页拿的是 GET /api/n9e/alert-rule/strategy/:id（src/services/warning.ts:141-145），
+  // 后端那条链路把 datasource_ids 和 datasource_queries **原样**返回、不做任何翻译
+  //（ln-server/center/router/router_alert_rule.go:1146-1179），所以两个字段都可能有值。
+  //   * host / 老类型：表单只认 datasource_ids，把 datasource_queries 从表单值里删掉，
+  //     免得一份用不上的旧值跟着提交出去；提交时会由 ids 重新算一份等价的。
+  //   * 新 8 种：删掉 datasource_ids（照 fe v9.1.0 Form/utils.ts:184-187），
+  //     datasource_queries 为空时给一份 fe 的默认值，免得筛选器空着。
+  if (values?.prod === 'host' || isLegacyCate(values?.cate)) {
+    delete values.datasource_queries;
+  } else {
+    delete values.datasource_ids;
+    if (_.isEmpty(values.datasource_queries)) {
+      values.datasource_queries = getDefaultDatasourceQueries();
+    }
+  }
   if (values.cate === 'elasticsearch' || values.cate === 'opensearch') {
     values.rule_config.queries = _.map(values.rule_config.queries, (item) => {
       return {
