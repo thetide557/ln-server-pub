@@ -1,4 +1,7 @@
 import moment from 'moment';
+import _ from 'lodash';
+
+import { allCates } from '@/components/AdvancedWrap/utils'; // 第六步 第4段 W3a：给下面的 getDefaultRuleConfig 用（fe:constants.ts:5 同样引法）
 
 export const defaultRuleConfig = {
   host: {
@@ -121,3 +124,58 @@ export const selectTypeOptions = [
   //   pro: false,
   // },
 ];
+
+// ================= 第六步 第4段 W3a（阶段 1 收尾 · 挂点）=================
+// 照 fe v9.1.0 `src/pages/alertRules/Form/constants.ts:7-48` 搬过来，**只改常量名**：
+// fe 那份叫 `defaultRuleConfig`，pub 本文件 :3 已经有一个「按 prod 分」的同名对象（host / metric / logging / anomaly），
+// 两者不是一回事，所以 fe 的那份在这里改名 `v9DefaultRuleConfig`。
+// 依据：第六步-流水线/第4段/顾问答案/大顾问-Q4.md 第 4.1 节。
+// 循环引用核过：`@/components/AdvancedWrap/utils` 只 import react / lodash / plus: / constants，不回头引 alertRules（fe 同样引法）。
+
+// v9 新编辑器共用的 rule_config 骨架。
+// 注意 `exp_trigger_disable: false` 不能少：FormNG/components/Triggers/Triggers.tsx:66 判 `=== false` 才渲染「触发条件」块，
+// 缺了这个键（undefined）整块不显示。
+export const v9DefaultRuleConfig = {
+  queries: [{}],
+  triggers: [
+    {
+      mode: 0,
+      expressions: [
+        {
+          ref: 'A',
+          comparisonOperator: '>',
+          value: 0,
+          logicalOperator: '&&',
+        },
+      ],
+      severity: 2,
+      recover_config: {
+        judge_type: 1,
+      },
+    },
+  ],
+  exp_trigger_disable: false,
+  nodata_trigger: {
+    enable: false,
+    severity: 2,
+    resolve_after_enable: false,
+    resolve_after: undefined,
+  },
+};
+
+// 日志类数据源（allCates 里 type 含 'logging'）的恢复判断默认值是 0，其它类型是 1（fe:constants.ts:35-48）。
+export const getDefaultRuleConfig = (cate: string) => {
+  const isLogging = _.includes(_.find(allCates, { value: cate })?.type, 'logging');
+  return {
+    ...v9DefaultRuleConfig,
+    triggers: _.map(v9DefaultRuleConfig.triggers, (triggerItem) => {
+      return {
+        ...triggerItem,
+        recover_config: {
+          judge_type: isLogging ? 0 : 1, // 日志类数据源默认值改为 0，其他类型数据源默认值为 1
+        },
+      };
+    }),
+  };
+};
+// ================= 第六步 第4段 W3a 结束 =================

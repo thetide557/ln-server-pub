@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { defaultRuleConfig, defaultValues } from './constants';
+import { defaultRuleConfig, defaultValues, getDefaultRuleConfig } from './constants';
+// 第六步 第4段 W3a：victorialogs 的查询默认值（fe:utils.ts:9 同样引法），pub 已有这个常量。
+import { DEFAULT_QUERY as VICTORIALOGS_DEFAULT_QUERY } from '@/plugins/victorialogs/constants';
 import { DATASOURCE_ALL, alphabet } from '../constants';
 import { mapOptionToRelativeTimeRange, mapRelativeTimeRangeToOption } from '@/components/TimeRangePicker';
 
@@ -116,6 +118,10 @@ export const getDatasourceValueByQueries = (
 ) => _.head(resolveDatasourceIdsByQueries(queries, datasourceList));
 // ================= 第六步 第4段 W2 结束 =================
 
+// 第六步 第4段 W3a（拍板-27，大顾问 Q4 第三节末）：整段换成 fe v9.1.0 src/pages/alertRules/Form/utils.ts:17-43 的版本（逐字）。
+// 原 pub 版先除 60、单位只有 min / hour / day：存 30 秒会回填成「0.5 min」，存 86400 会回填成「1 day」，
+// 而 v9 编辑器（ES / TDengine / iotdb / doris）的单位下拉只有 second / min / hour，day 显示成空。
+// ≥ 60 秒且 < 1 天的取值两版结果相同，所以老 ck 规则的回填不变；prometheus 不经过这个函数。
 export const parseTimeToValueAndUnit = (value?: number) => {
   if (!value) {
     return {
@@ -123,7 +129,14 @@ export const parseTimeToValueAndUnit = (value?: number) => {
       unit: 'min',
     };
   }
-  let time = value / 60;
+  let time = value;
+  if (time < 60) {
+    return {
+      value,
+      unit: 'second',
+    };
+  }
+  time = time / 60;
   if (time < 60) {
     return {
       value: time,
@@ -131,16 +144,9 @@ export const parseTimeToValueAndUnit = (value?: number) => {
     };
   }
   time = time / 60;
-  if (time < 24) {
-    return {
-      value: time,
-      unit: 'hour',
-    };
-  }
-  time = time / 24;
   return {
     value: time,
-    unit: 'day',
+    unit: 'hour',
   };
 };
 
@@ -187,8 +193,13 @@ export const stringifyExpressions = (
 // 「v9 新编辑器类型」= 用夜莺 v9 那套 AlertRule 编辑器（src/plugins/<t>/AlertRule/）配置的数据源类型。
 // 它们的 rule_config.queries 形状和羚牛老 ck 编辑器不一样（没有 range 字段、keys 下三个键都是数组），
 // 所以下面 processFormValues / processInitialValues 里给它们单开一个分支，照 fe v9.1.0 的写法处理。
-// 本阶段只放 ck 一个；阶段 1 把其余类型接上编辑器之后，由 lead 往这个数组里加。
-export const V9_EDITOR_CATES = ['ck'];
+// 第六步 第4段 W3a（阶段 1 收尾）：由阶段 0 的一个 ck 扩到十种。
+// 十种 = fe v9.1.0 老表单 Form/Rule/Rule/index.tsx:40-49 分发到的全部非 prometheus 类型；
+// fe 对它们不分类型、统一走 utils.ts:98-140 / :188-214 那段通用处理，这里照抄。
+// loki 用的是老表单自带的 Log/Loki 编辑器、rule_config 只有 queries[].{prom_ql,severity}（fe utils.ts:392-407），
+// 通用段对它只会多出几个 undefined 键（interval/from/to/cumulative_window_*），JSON 序列化时自动丢掉，与 fe 行为一致。
+// 依据：第六步-流水线/第4段/顾问答案/大顾问-Q4.md 第二节。
+export const V9_EDITOR_CATES = ['ck', 'mysql', 'pgsql', 'tdengine', 'iotdb', 'elasticsearch', 'opensearch', 'doris', 'victorialogs', 'loki'];
 
 export function processFormValues(values) {
   let cate = values.cate;
@@ -196,7 +207,9 @@ export function processFormValues(values) {
     cate = 'host';
   } else if (values.prod === 'anomaly') {
     cate = 'prometheus';
-  } else if (values.cate === 'elasticsearch' || values.cate === 'opensearch') {
+    // 第六步 第4段 W3a：这一段是 fork 点 c65a5fdf9 上游 fe 的 v6 代码（逐字相同），fe 已在 725ad443b 并入通用段；
+    // ES / opensearch 进 V9_EDITOR_CATES 之后条件永假，留作对照不删（大顾问 Q4 第三节）。
+  } else if ((values.cate === 'elasticsearch' || values.cate === 'opensearch') && !_.includes(V9_EDITOR_CATES, values.cate)) {
     values.rule_config.queries = _.map(values.rule_config.queries, (item) => {
       return {
         ..._.omit(item, 'interval_unit'),
@@ -354,7 +367,8 @@ export function processInitialValues(values) {
       values.datasource_queries = getDefaultDatasourceQueries();
     }
   }
-  if (values.cate === 'elasticsearch' || values.cate === 'opensearch') {
+  // 第六步 第4段 W3a：同上，fork 点上游 v6 回填分支，条件永假，留作对照（大顾问 Q4 第三节）。
+  if ((values.cate === 'elasticsearch' || values.cate === 'opensearch') && !_.includes(V9_EDITOR_CATES, values.cate)) {
     values.rule_config.queries = _.map(values.rule_config.queries, (item) => {
       return {
         ...item,
@@ -461,30 +475,28 @@ export function getDefaultValuesByProd(prod, defaultBrainParams) {
     };
   }
   if (prod === 'logging') {
-    return {
-      prod,
-      cate: 'elasticsearch',
-      datasource_ids: undefined,
-      rule_config: defaultRuleConfig.logging,
-    };
+    // 第六步 第4段 W3a（大顾问 Q4 第 4.3 节）：原来直接返回 constants.ts 里 v6 形状的 defaultRuleConfig.logging，
+    // 那份没有 exp_trigger_disable，用户在产品类型点「Log」的那一刻拿到它，v9 ES 编辑器的「触发条件」块
+    // 会整块不显示（FormNG/components/Triggers/Triggers.tsx:66 判 === false）。改成委托给切类型走的同一份默认值。
+    // datasource_ids 两边都是 undefined，提交体不变；constants.ts 的 defaultRuleConfig.logging 留着不删。
+    return getDefaultValuesByCate(prod, 'elasticsearch');
   }
 }
 
 export function getDefaultValuesByCate(prod, cate) {
-  // ---- 第六步 第4段 W2（阶段 2）：新 8 种切过来时，给一份空的数据源筛选条件（形状照
+  // ---- 第六步 第4段 W2（阶段 2）当时的说明，留作沿革；这一段的写法已由下面的 W3a 改掉 ----
+  // 新 8 种切过来时，给一份空的数据源筛选条件（形状照
   // fe v9.1.0 src/pages/alertRules/Form/constants.ts:50-59），别的什么都不给：
   //   * 不给 datasource_ids —— 新 8 种的提交体里不该有这个老字段；
   //   * rule_config 留给阶段 1 —— 谁把某个类型的编辑器挂上来，谁在这里补它自己的 rule_config 默认值
   //     （照阶段 0 的 ck 分支那样单开一支，或在这里按 cate 分流）。
   // 老类型（prometheus / elasticsearch / ck / influxdb / aliyun-sls …）一个字不动：
   // 它们的提交体必须逐字节保持原样，只在提交时追加一个等价的 datasource_queries。
-  if (!isLegacyCate(cate)) {
-    return {
-      prod,
-      cate,
-      datasource_queries: getDefaultDatasourceQueries(),
-    };
-  }
+  // 第六步 第4段 W3a（阶段 1 收尾）：W2 原来在这里直接返回「只有 datasource_queries、没有 rule_config」，
+  // 并留了一句「rule_config 留给阶段 1」。阶段 1 把十种编辑器都挂上了，所以改成下面统一的写法：
+  //   数据源字段  —— 新 8 种给 datasource_queries、老类型给 datasource_ids（isLegacyCate 判，W2 的口径一字不改）；
+  //   rule_config —— 照 fe v9.1.0 的 getDefaultValuesByCate 给（大顾问 Q4 第 4.2 节）。
+  const datasourceDefaults = isLegacyCate(cate) ? { datasource_ids: undefined } : { datasource_queries: getDefaultDatasourceQueries() };
   if (cate === 'prometheus') {
     return {
       prod,
@@ -493,58 +505,68 @@ export function getDefaultValuesByCate(prod, cate) {
       rule_config: defaultRuleConfig.metric,
     };
   }
-  // ---- 第六步 第4段 W0（阶段 0 · ck 试点）：给 ck 单开一个分支，放在原来的 `ck || influxdb` 之前。
-  // 为什么要单开：fe v9.1.0 的 ck 告警编辑器（src/plugins/clickHouse/AlertRule/）要的 rule_config 形状，
-  // 比下面这个羚牛存量默认值多四样东西，缺了界面会不对：
-  //   1) queries: [{ ref: 'A' }]  —— 查询卡片列表；缺了虽然 Form.List 的 initialValue 兜得住，但显式给更稳
-  //   2) exp_trigger_disable: false —— **最要紧的一个**。搬进来的 Triggers.tsx:58 判的是 `exp_trigger_disable === false`
-  //      （严格等于 false 才展开「触发条件」那块），undefined 会让整块触发条件静默不显示。
-  //   3) nodata_trigger: {...} —— 「无数据告警」那块开关的初值（Triggers.tsx:112 读它）
-  //   4) triggers[].recover_config.judge_type —— 恢复判断方式。照 fe 的 getDefaultRuleConfig
-  //      （fe:src/pages/alertRules/Form/constants.ts:35-48）：日志类数据源给 0、其余给 1；
-  //      ck 在本仓 src/components/AdvancedWrap/utils.ts 里 type 含 'logging'，所以给 0。
-  // fe 自己没有 ck 的专门分支，ck 落到 fe utils.ts:445-452 的兜底，拿的就是完整的 defaultRuleConfig
-  //（fe:src/pages/alertRules/Form/constants.ts:7-33）——下面这份就是照它抄的。
-  // influxdb 走原来那条分支，一个字不动。
-  if (cate === 'ck') {
+  // ---- 第六步 第4段 W3a（阶段 1 收尾，大顾问 Q4 第 4.2 节）----
+  // 阶段 0 给 ck 手写过一段完整默认值；阶段 1 十种类型都要，写十遍没必要，改成「骨架 + 各自的 queries」：
+  //   骨架 = getDefaultRuleConfig(cate)（constants.ts，照 fe v9.1.0 constants.ts:7-48 搬），它管
+  //          triggers / exp_trigger_disable / nodata_trigger，并按数据源是不是日志型决定 recover_config.judge_type（0 / 1）；
+  //   queries = 下面这张表，每一行的出处写在行尾（fe v9.1.0 src/pages/alertRules/Form/utils.ts 的行号）。
+  // ck 原来手写的那份与「骨架 + [{ ref: 'A' }]」逐字段相同（ck 在 AdvancedWrap/utils.ts:83 的 type 含 'logging'，
+  // 所以 judge_type 同样是 0），所以这次替换对 ck 的提交体没有任何改变。
+  // loki 不走这张表：它用的是老表单自带的 Log/Loki 编辑器，rule_config 里只有 queries，没有触发条件块（见下）。
+  const V9_DEFAULT_QUERIES: Record<string, any[]> = {
+    elasticsearch: [{ ref: 'A', interval_unit: 'min', interval: 5, date_field: '@timestamp', value: { func: 'count' } }], // fe :312-332
+    opensearch: [{ ref: 'A', interval_unit: 'min', interval: 5, date_field: '@timestamp', value: { func: 'count' } }], // fe :333-353
+    tdengine: [{ ref: 'A', interval: 1, interval_unit: 'min' }], // fe :354-370
+    iotdb: [{ ref: 'A', interval: 1, interval_unit: 'min', keys: { timeKey: 'time', timeFormat: '2006-01-02T15:04:05' } }], // fe :371-391
+    doris: [{ ref: 'A', interval: 1, interval_unit: 'min' }], // fe :408-424
+    victorialogs: [{ ref: 'A', query: VICTORIALOGS_DEFAULT_QUERY }], // fe :425-440
+    ck: [{ ref: 'A' }], // fe 无专门分支，走 :445-452 兜底的 queries: [{}]；阶段 0 已用 [{ ref: 'A' }]，保留
+    mysql: [{ ref: 'A' }], // 同上
+    pgsql: [{ ref: 'A' }], // 同上
+  };
+
+  // loki：fe :392-407 只给 queries，不带 triggers / exp_trigger_disable / nodata_trigger
+  //（老表单自带的 Loki 编辑器没有触发条件块，每条查询自己带 severity）。
+  if (cate === 'loki') {
     return {
       prod,
       cate,
-      datasource_ids: undefined,
+      ...datasourceDefaults,
       rule_config: {
         queries: [
           {
-            ref: 'A',
-          },
-        ],
-        triggers: [
-          {
-            mode: 0,
-            expressions: [
-              {
-                ref: 'A',
-                comparisonOperator: '>',
-                value: 0,
-                logicalOperator: '&&',
-              },
-            ],
+            prom_ql: '',
             severity: 2,
-            recover_config: {
-              judge_type: 0,
-            },
           },
         ],
-        exp_trigger_disable: false,
-        nodata_trigger: {
-          enable: false,
-          severity: 2,
-          resolve_after_enable: false,
-          resolve_after: undefined,
-        },
       },
     };
   }
-  if (cate === 'ck' || cate === 'influxdb') {
+
+  if (_.includes(V9_EDITOR_CATES, cate)) {
+    return {
+      prod,
+      cate,
+      ...datasourceDefaults,
+      rule_config: {
+        ...getDefaultRuleConfig(cate),
+        queries: V9_DEFAULT_QUERIES[cate] ?? [{ ref: 'A' }],
+      },
+    };
+  }
+
+  // 兜底：将来冒出没见过的新类型（不在老 5 种里、也还没挂编辑器）时，仍按 W2 的口径只给数据源筛选条件。
+  if (!isLegacyCate(cate)) {
+    return {
+      prod,
+      cate,
+      datasource_queries: getDefaultDatasourceQueries(),
+    };
+  }
+
+  // ---- 下面这段是羚牛存量的 influxdb 默认值，一个字不动；只把原来一起写在条件里的 `cate === 'ck' ||` 去掉
+  // （ck 已由上面的 V9 分支接管，走不到这里）。
+  if (cate === 'influxdb') {
     return {
       prod,
       cate,

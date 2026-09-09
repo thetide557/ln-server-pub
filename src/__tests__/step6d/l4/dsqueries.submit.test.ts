@@ -192,10 +192,15 @@ describe('阶段 2 · 新 8 种的提交体：只发 datasource_queries', () => 
     expect(data.datasource_queries).toEqual([{ match_type: 2, op: 'in', values: [0] }]);
   });
 
-  it('切到新 8 种时给的默认值只有 prod / cate / datasource_queries 三项（不带老字段）', () => {
+  // 第六步 第4段 W3a（阶段 1 收尾）改：W2 写这条时新 8 种还没挂编辑器，默认值里只有三项、没有 rule_config
+  //（当时 utils.ts 里就写着「rule_config 留给阶段 1」）。阶段 1 把十种编辑器都挂上了，默认值里多了 rule_config，
+  // 所以期望的键从三项变四项；这条断言真正要守的是「不带老字段 datasource_ids、datasource_queries 是那份空条件」，
+  // 这两点一字未改。
+  it('切到新 8 种时给的默认值带 prod / cate / datasource_queries / rule_config，不带老字段 datasource_ids', () => {
     _.forEach(NEW_CATES, (cate) => {
       const def: any = getDefaultValuesByCate('metric', cate);
-      expect(_.keys(def).sort()).toEqual(['cate', 'datasource_queries', 'prod']);
+      expect(_.keys(def).sort()).toEqual(['cate', 'datasource_queries', 'prod', 'rule_config']);
+      expect(def.datasource_ids).toBeUndefined();
       expect(def.datasource_queries).toEqual([{ match_type: 0, op: 'in', values: [] }]);
     });
   });
