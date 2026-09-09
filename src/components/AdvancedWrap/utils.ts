@@ -81,7 +81,10 @@ export const baseCates: Cate[] = [
     value: 'ck',
     label: 'ClickHouse',
     type: ['metric', 'logging'],
-    alertRule: false,
+    // 第六步 第4段 W0（阶段 0 · ck 试点）：alertRule 从 false 翻回 true——
+    // 本轮已把 fe v9.1.0 的 ck 告警规则编辑器（src/plugins/clickHouse/AlertRule/）接进 pub 老表单的分发点
+    // （src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx 的 cate === 'ck' 分支），下拉里选得到、点进去有表单。
+    alertRule: true,
     dashboard: true,
     graphPro: true,
     alertPro: false,
@@ -108,6 +111,38 @@ export const baseCates: Cate[] = [
   {
     value: 'doris',
     label: 'Doris',
+    type: ['logging'],
+    alertRule: false,
+    dashboard: true,
+    graphPro: true,
+    alertPro: false,
+  },
+  // ---- 第六步 第4段 W0（阶段 0 · ck 试点）：补上 fe 有而 pub 缺的三条数据源类型，
+  // 照 fe v9.1.0 src/components/AdvancedWrap/utils.ts:103-114（opensearch）、:127-138（mysql）、:139-150（pgsql）
+  // 抄 value / label / type / dashboard / graphPro / alertPro；
+  // fe 那边的 label_en / logo / dashboardVariable 三个字段 pub 的 Cate 接口（本文件 :6-14）没有，不抄。
+  // 这三条的 alertRule 本阶段先写 false（编辑器还没接到分发点上），阶段 1 收尾由 lead 翻开。
+  {
+    value: 'mysql',
+    label: 'MySQL',
+    type: ['metric'],
+    alertRule: false,
+    dashboard: true,
+    graphPro: true,
+    alertPro: false,
+  },
+  {
+    value: 'pgsql',
+    label: 'PostgreSQL',
+    type: ['metric'],
+    alertRule: false,
+    dashboard: true,
+    graphPro: true,
+    alertPro: false,
+  },
+  {
+    value: 'opensearch',
+    label: 'OpenSearch',
     type: ['logging'],
     alertRule: false,
     dashboard: true,
