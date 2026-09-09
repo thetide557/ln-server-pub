@@ -1,16 +1,17 @@
 /**
- * 第六步 · ES 升级轮（step6f）的冒烟测试。
+ * 第六步 · ES 升级轮（step6f）的冒烟与行为测试。
  *
- * 分两类，看注释里的标记：
- *   【本轮覆盖】L1 数据源详情页 —— 按 fe v9.1.0 覆盖过，这里要证「覆盖后还能渲染」，
- *              并且把覆盖带进来的两处新东西（多地址列表、写配置一栏）钉住。
- *   【本轮未覆盖·基线】L2 即时查询经典页 / L3 仪表盘 ES 查询编辑器 / L3b 仪表盘 ES 取数
- *              —— 这三层按任务书的判定规则本轮没覆盖（原因见
- *              `第六步-流水线/多数据源/ES升级轮-拿不准.md` 第 2、3、4 条）。
- *              先把 pub 现在的样子用冒烟测试钉下来，将来那一轮再覆盖时好对照。
+ * 本轮把四层都按 fe v9.1.0 覆盖了（L1 数据源表单 / L2 即时查询经典页 /
+ * L3 仪表盘 ES 查询编辑器 / L3b 仪表盘 ES 取数），这份文件挡的是「白屏级」的低级错，
+ * 外加把三处「羚牛这边特意补的胶水」用断言钉住：
+ *   1. L1 详情页的多地址列表与「写配置」一栏（覆盖带进来的新内容）；
+ *   2. L3 编辑器的薄适配（pub 的 QueryEditor 传 chartForm/variableConfig/dashboardId，
+ *      fe 新版只收 datasourceValue，适配层负责从表单里取）；
+ *   3. L3b 取数的两件事——返回值取成数组（pub 的 useQuery 期望数组）、
+ *      仪表盘变量在进 fe 取数函数之前先替换掉（顾问意见 X-8 补核②）。
  *
  * 写法照 `../l2/explorers.render.test.tsx`、`../l3/queryBuilders.render.test.tsx` 与 `../README.md` 第三节：
- * 一律 renderToString（不跑 useEffect，最干净），services 全部 mock 成空数据。
+ * 渲染一律用 renderToString（不跑 useEffect，最干净），services 全部 mock 成空数据。
  */
 import React from 'react';
 import { renderToString } from 'react-dom/server';
@@ -21,17 +22,22 @@ import { StaticRouter } from 'react-router-dom';
 jest.mock('antd/es/form/context', () => require('antd/lib/form/context'));
 jest.mock('rc-picker/es/generate/moment', () => require('rc-picker/lib/generate/moment'));
 // @ant-design/plots 会拖进 @antv/g2plot -> d3-interpolate，那是纯 ESM，jest 读不了。
-// pub 的 explorer/Elasticsearch/utils.tsx:4 只用它的 measureTextWidth 算列宽，与本测试要证的事无关。
 jest.mock('@ant-design/plots', () => ({
   __esModule: true,
   measureTextWidth: () => 100,
+}));
+// 「查询语法说明」抽屉 import 了 @uiw/react-md-editor（再拖进只发 ESM 的 react-markdown），
+// 与本测试要证的事无关，整个 mock 掉（同 l2/l3 两份测试的做法）。
+jest.mock('@/components/DocumentDrawer', () => ({
+  __esModule: true,
+  default: () => null,
 }));
 jest.mock('@/App', () => require('../helpers/appMock'));
 jest.mock('@/utils/request', () => ({
   __esModule: true,
   default: jest.fn(() => Promise.resolve({ dat: {}, data: {} })),
 }));
-// ES 经典页一进来就会拉索引 / 字段 / 日志，全部换成空数据。
+// ES 页面一进来就会拉索引 / 字段 / 日志，全部换成空数据。
 jest.mock('@/pages/explorer/Elasticsearch/services', () => ({
   __esModule: true,
   getIndices: jest.fn(() => Promise.resolve([])),
@@ -40,6 +46,7 @@ jest.mock('@/pages/explorer/Elasticsearch/services', () => ({
   getLogsQuery: jest.fn(() => Promise.resolve({ total: 0, list: [] })),
   getDsQuery: jest.fn(() => Promise.resolve([])),
   getESVersion: jest.fn(() => Promise.resolve('7.10.2')),
+  cancelQuery: jest.fn(),
 }));
 jest.mock('@/pages/log/IndexPatterns/services', () => ({
   __esModule: true,
@@ -55,9 +62,8 @@ import '@/pages/dashboard/locale';
 import ESDetail from '@/pages/datasource/Datasources/ElasticSearch/Detail';
 import ESExplorer from '@/pages/explorer/Elasticsearch';
 import ESQueryEditor from '@/pages/dashboard/Editor/QueryEditor/Elasticsearch';
-import { getLogsQuery as buildLogsQuery, getSeriesQuery as buildSeriesQuery } from '@/pages/dashboard/Renderer/datasource/elasticsearch/queryBuilder';
 
-describe('ES 升级轮 · L1 数据源详情页（本轮已按 fe v9.1.0 覆盖）', () => {
+describe('ES 升级轮 · L1 数据源详情页', () => {
   it('renderToString 不抛；多地址逐行列出，且有「写配置」一栏', () => {
     const data = {
       http: { urls: ['http://10.0.0.1:9200', 'http://10.0.0.2:9200'], timeout: 10000 },
@@ -89,8 +95,8 @@ describe('ES 升级轮 · L1 数据源详情页（本轮已按 fe v9.1.0 覆盖�
   });
 });
 
-describe('ES 升级轮 · 本轮未覆盖的三层，先钉一条基线', () => {
-  it('L2 即时查询经典页：renderToString 不抛（headerExtra 给 null 时跳过 portal）', () => {
+describe('ES 升级轮 · L2 即时查询经典页', () => {
+  it('renderToString 不抛（headerExtra 给 null 时跳过 portal）', () => {
     const Wrapper = () => {
       const [form] = Form.useForm();
       return (
@@ -107,12 +113,21 @@ describe('ES 升级轮 · 本轮未覆盖的三层，先钉一条基线', () => 
     }).not.toThrow();
     expect(html.length).toBeGreaterThan(0);
   });
+});
 
-  it('L3 仪表盘 ES 查询编辑器：renderToString 不抛，能渲染出一条查询', () => {
+describe('ES 升级轮 · L3 仪表盘 ES 查询编辑器', () => {
+  it('renderToString 不抛；薄适配层照 pub 的老 props 也能挂起来', () => {
     const Wrapper = () => {
       const [chartForm] = Form.useForm();
       return (
-        <Form form={chartForm} initialValues={{ targets: [{ refId: 'A', query: { index: 'logstash-*', date_field: '@timestamp' } }] }}>
+        <Form
+          form={chartForm}
+          initialValues={{
+            datasourceValue: 7,
+            targets: [{ refId: 'A', query: { index: 'logstash-*', date_field: '@timestamp', values: [{ func: 'count' }] } }],
+          }}
+        >
+          {/* pub 的 QueryEditor/index.tsx:61 就是这么传的，一个字没改 */}
           <ESQueryEditor chartForm={chartForm} variableConfig={[]} dashboardId='1' />
         </Form>
       );
@@ -123,22 +138,57 @@ describe('ES 升级轮 · 本轮未覆盖的三层，先钉一条基线', () => 
     }).not.toThrow();
     expect(html.length).toBeGreaterThan(0);
   });
+});
 
-  it('L3b 仪表盘 ES 取数：queryBuilder 生成的请求体形状', () => {
-    const target: any = {
-      index: 'logstash-*',
-      filter: 'level:error',
-      date_field: '@timestamp',
-      limit: 100,
-      values: [{ func: 'count' }],
-      group_by: [],
-    };
-    const logs: any = buildLogsQuery(target);
-    expect(logs.size).toBe(100);
-    expect(JSON.stringify(logs)).toContain('level:error');
+describe('ES 升级轮 · L3b 仪表盘 ES 取数的目录内 shim', () => {
+  // 这一组不渲染组件，只测 shim 那一层：变量替换 + 返回值取成数组。
+  // 把 fe 的取数函数（./query）整个换掉，好看清 shim 到底送了什么进去。
+  const queryMock = jest.fn(() => Promise.resolve({ series: [{ id: 'a', name: 'n', metric: {}, data: [] }], query: [{ some: 'raw' }] }));
+  jest.doMock('@/pages/dashboard/Renderer/datasource/elasticsearch/query', () => ({
+    __esModule: true,
+    default: queryMock,
+  }));
 
-    const series: any = buildSeriesQuery({ ...target, interval: 60 } as any, 'interval');
-    expect(series.size).toBe(0);
-    expect(series.query).toBeTruthy();
+  beforeEach(() => {
+    queryMock.mockClear();
+  });
+
+  it('返回的是 series 数组，不是 {series, query} 对象（pub 的 useQuery.tsx:82 期望数组）', async () => {
+    const elasticSearchQuery = require('@/pages/dashboard/Renderer/datasource/elasticsearch').default;
+    const res = await elasticSearchQuery({
+      datasourceCate: 'elasticsearch',
+      datasourceValue: 7,
+      time: { start: 'now-1h', end: 'now' },
+      targets: [{ refId: 'A', query: { index: 'a', date_field: '@timestamp' } }],
+    });
+    expect(_isArray(res)).toBe(true);
+    expect(res).toHaveLength(1);
+    expect(res[0].id).toBe('a');
+  });
+
+  it('带 $变量的 filter 与 datasourceValue，在进 fe 取数函数之前已经替换好（X-8 补核②）', async () => {
+    const elasticSearchQuery = require('@/pages/dashboard/Renderer/datasource/elasticsearch').default;
+    const variableConfig = [
+      { name: 'app', type: 'custom', value: 'nginx', options: [] },
+      { name: 'ds', type: 'datasource', value: 7, options: [] },
+    ];
+    await elasticSearchQuery({
+      dashboardId: '1',
+      datasourceCate: 'elasticsearch',
+      datasourceValue: '$ds',
+      time: { start: 'now-1h', end: 'now' },
+      targets: [{ refId: 'A', query: { index: 'a', date_field: '@timestamp', filter: 'service:$app' } }],
+      variableConfig,
+    });
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    const passed: any = (queryMock.mock.calls[0] as any[])[0];
+    expect(passed.targets[0].query.filter).toBe('service:nginx');
+    expect(String(passed.datasourceValue)).toBe('7');
+    // 原来的 options 对象没被就地改坏：filter 是新对象上的值
+    expect(passed.targets[0].query.index).toBe('a');
   });
 });
+
+function _isArray(v: any) {
+  return Object.prototype.toString.call(v) === '[object Array]';
+}
