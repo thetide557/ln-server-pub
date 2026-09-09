@@ -145,7 +145,7 @@ export default defineConfig(({ mode }) => ({
     exclude: x6Chunk,
   },
   build: {
-    target: "chrome58",
+    target: "chrome63",
     outDir: "pub",
     chunkSizeWarningLimit: 650,
     sourcemap: true,
