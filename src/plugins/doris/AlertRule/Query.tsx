@@ -11,11 +11,9 @@ import { Wand2 as WandSparkles } from 'lucide-react';
 
 import { CommonStateContext } from '@/App';
 import { IS_PLUS } from '@/utils/constant';
-// 第六步 第4段 W1-SQL组：原文指向 '@/components/InputGroupWithFormItem'。pub 那个公共组件是老版、
-// 不支持 addonAfter（下面 query.interval 那一组要用它挂单位下拉），按纪律不许覆盖共享件，
-// 改指向本目录下的本地副本（做法照 step6f 的 src/pages/explorer/Elasticsearch/components/InputGroupWithFormItem.tsx）。
-// 登记：拿不准-SQL组.md U-06。
-import InputGroupWithFormItem from './InputGroupWithFormItem';
+// 第六步 第4段 W3a（拍板-21）：主分支 83557c79 已按 fe v9.1.0 覆盖公共件 '@/components/InputGroupWithFormItem'
+// （已支持 addonAfter），SQL 组当时建的本地副本 ./InputGroupWithFormItem.tsx 随之删除，这里改回公共件。
+import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
 import QueryName, { generateQueryName } from '@/components/QueryName';
 import { normalizeTime } from '@/pages/alertRules/Form/utils';
 import { FormStateContext } from '@/pages/alertRules/Form';
