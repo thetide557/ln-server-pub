@@ -11,7 +11,11 @@ import { Wand2 as WandSparkles } from 'lucide-react';
 
 import { CommonStateContext } from '@/App';
 import { IS_PLUS } from '@/utils/constant';
-import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
+// 第六步 第4段 W1-SQL组：原文指向 '@/components/InputGroupWithFormItem'。pub 那个公共组件是老版、
+// 不支持 addonAfter（下面 query.interval 那一组要用它挂单位下拉），按纪律不许覆盖共享件，
+// 改指向本目录下的本地副本（做法照 step6f 的 src/pages/explorer/Elasticsearch/components/InputGroupWithFormItem.tsx）。
+// 登记：拿不准-SQL组.md U-06。
+import InputGroupWithFormItem from './InputGroupWithFormItem';
 import QueryName, { generateQueryName } from '@/components/QueryName';
 import { normalizeTime } from '@/pages/alertRules/Form/utils';
 import { FormStateContext } from '@/pages/alertRules/Form';
@@ -41,12 +45,17 @@ interface Props {
 
 export default function Query(props: Props) {
   const { t } = useTranslation(NAME_SPACE);
-  const { darkMode } = useContext(CommonStateContext);
+  // 第六步 第4段 W1-SQL组：fe 的 ICommonState 里有 darkMode（暗色模式开关），pub 的没有（src/App.tsx 不改），
+  // 照 pub 已有先例加 as any，取到 undefined = 浅色（写法同 src/components/LogQL/index.tsx:78、阶段 0 的 ck 样板）。
+  const { darkMode } = useContext(CommonStateContext) as any;
   // 第六步 第4段 W1-SQL组：fe 的 FormStateContext 有 { disabled, type }（fe Form/index.tsx:42-45），
   // 羚牛那份只有 { disabled }（pub src/pages/alertRules/Form/index.tsx:45-47，本轮不许改挂点）。
   // 这里加 as any 让编译过；运行时 type 取到 undefined，下面 showDatabase 恒为 false —— 后果登记在 拿不准-SQL组.md U-01。
   const { type } = useContext(FormStateContext) as any;
-  const { datasourceId, field, dbList, disabled, onClose, fullPrefixName = ['rule_config'], cate } = props;
+  // 第六步 第4段 W1-SQL组：cate 给个 '' 缺省值，类型才是 string——GraphPreview 的 cate 是必填 string
+  // （src/plugins/doris/AlertRule/GraphPreview.tsx:22，它拿去做 groupedDatasourceList[cate] 索引）。
+  // 实际传进来的一定有值：index.tsx 传的是那边算好的 datasourceCate（datasourceCate ?? cate ?? ''）。
+  const { datasourceId, field, dbList, disabled, onClose, fullPrefixName = ['rule_config'], cate = '' } = props;
   const [sqlWarningI18nKey, setSqlWarningI18nKey] = useState<string>('');
   const [builderModalVisible, setBuilderModalVisible] = useState(false);
   const form = Form.useFormInstance();

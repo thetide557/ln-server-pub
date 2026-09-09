@@ -105,7 +105,7 @@ export default function index(props: IProps) {
                   // 第六步 第4段 W1-SQL组：Query.tsx 里 14 处是绝对路径调用（useWatch / setFields / getFieldValue），
                   // 把 rule_config 的绝对路径整段传下去（含义 = absPrefix），它内部只做 [...fullPrefixName, 'queries', ...]。
                   fullPrefixName={absPrefix}
-                  cate={cate}
+                  cate={datasourceCate}
                   onClose={fields.length > 1 ? () => remove(field.name) : undefined}
                 />
               ))}
