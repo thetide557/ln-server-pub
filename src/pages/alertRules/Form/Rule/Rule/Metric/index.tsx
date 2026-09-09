@@ -21,9 +21,13 @@ import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { CommonStateContext } from '@/App';
 import DatasourceValueSelect from '@/pages/alertRules/Form/components/DatasourceValueSelect';
+// 第六步 第4段 W2（阶段 2）：新 8 种（mysql / pgsql / doris / opensearch / loki / victorialogs / tdengine / iotdb）
+// 用夜莺 v9 的数据源筛选器 V2（发新字段 datasource_queries）；老类型仍用上面那个老选择器（发 datasource_ids）。
+import DatasourceValueSelectV2 from '@/pages/alertRules/Form/components/DatasourceValueSelect/V2';
+import { getDatasourceBriefList } from '@/services/common';
 import IntervalAndDuration from '@/pages/alertRules/Form/components/IntervalAndDuration';
 import { DatasourceCateSelect } from '@/components/DatasourceSelect';
-import { getDefaultValuesByCate } from '../../../utils';
+import { getDefaultValuesByCate, isLegacyCate, getDatasourceValueByQueries } from '../../../utils';
 import Prometheus from './Prometheus';
 import XhPrometheus from './Prometheus/XHindex';
 // 第六步 第4段 W0（阶段 0 · ck 试点）：直达路径 import，不写 '@/plugins/clickHouse' 这种裸目录
@@ -35,14 +39,29 @@ import PlusAlertRule from 'plus:/parcels/AlertRule';
 
 export default function index({ form, type, assets ,field }) {
   const { t } = useTranslation('alertRules');
-  const { groupedDatasourceList } = useContext(CommonStateContext);
+  // 第六步 第4段 W2：V2 有个「刷新数据源列表」的小按钮，fe 传的是 CommonStateContext.reloadGroupedDatasourceList，
+  // pub 的 context 里没有这个方法（只有 setDatasourceList，src/App.tsx:147-156），
+  // 所以按大顾问 Q3 第 3.3 节的建议，用 getDatasourceBriefList().then(setDatasourceList) 现包一个。
+  const { groupedDatasourceList, setDatasourceList } = useContext(CommonStateContext);
+  const reloadGroupedDatasourceList = () => {
+    getDatasourceBriefList().then((res) => {
+      setDatasourceList(res as any);
+    });
+  };
   // 第六步 第4段 W0：整张表单是不是只读，pub 放在 FormStateContext 里（Form/index.tsx:45-47 定义，
   // Metric/Prometheus/index.tsx:43 同样用法）。搬来的编辑器要靠它决定输入框禁不禁用。
   const { disabled } = useContext(FormStateContext);
   // if (form.getFieldValue('datasource_ids')?.length == 0) {
   //   form.setFieldsValue({datasource_ids: [0]});
   // }
+  // ---- 第六步 第4段 W2（阶段 2）：这段「datasource_ids 空了就强设成 [0]（全部）」只对**老类型**做。
+  // 新 8 种根本没有 datasource_ids（回填时删掉、提交时也不发），要是让它塞回一个 [0]，
+  // 提交体里就会多出这个老字段，违反「新 8 种只发 datasource_queries」。
+  // 条件必须用 isLegacyCate 而不是收窄成 cate === 'prometheus'：收窄了会让 ck / elasticsearch
+  // 这些老类型的提交体从现在的 [0] 变成 []，那是改了存量行为（大顾问 Q3 第六节坑 4）。
+  const forceAllCate = form.getFieldValue(["strategies", field.name, "cate"]);
   if (
+    isLegacyCate(forceAllCate) &&
     form.getFieldValue(["strategies", field.name, "datasource_ids"])?.length ==
     0
   ) {
@@ -119,6 +138,24 @@ export default function index({ form, type, assets ,field }) {
             {({ getFieldValue, setFieldsValue }) => {
               // const cate = getFieldValue('cate');
               const cate = getFieldValue(["strategies", field.name, "cate"]);
+              // ---- 第六步 第4段 W2（阶段 2）：老类型这一支一个字没改（提交体要逐字节不变）；
+              // 新 8 种换成 v9 的筛选器 V2，绑的是 datasource_queries。
+              // names 给**相对**路径、absNames 给**绝对**路径：Form.List 会自动接上外层
+              // <Form.List name="strategies"> 的前缀，而 useWatch / getFieldValue 不会
+              //（rc-field-form/lib/List.js:40-43 与 lib/useWatch.js:53,69,78；拿不准-W2.md 第 2 条）。
+              // datasourceCate 必须传：不传的话 V2 会去读**表单顶层**的 cate（V2.tsx:205），羚牛顶层没有这个字段。
+              if (!isLegacyCate(cate)) {
+                return (
+                  <DatasourceValueSelectV2
+                    names={[field.name, "datasource_queries"]}
+                    absNames={["strategies", field.name, "datasource_queries"]}
+                    datasourceList={groupedDatasourceList[cate] || []}
+                    datasourceCate={cate}
+                    reloadGroupedDatasourceList={reloadGroupedDatasourceList}
+                    disabled={disabled}
+                  />
+                );
+              }
               return (
                 <DatasourceValueSelect
                   setFieldsValue={setFieldsValue}
@@ -145,6 +182,12 @@ export default function index({ form, type, assets ,field }) {
             !_.isEqual(
               prevValues.strategies[field.name].datasource_ids,
               curValues.strategies[field.name].datasource_ids
+            ) ||
+            // 第六步 第4段 W2（阶段 2）：只加不删。新 8 种的数据源改在 datasource_queries 上，
+            // 不比它的话，换了数据源下面的编辑器不会重新渲染（大顾问 Q3 第 3.3 节）。
+            !_.isEqual(
+              prevValues?.strategies[field.name]?.datasource_queries,
+              curValues?.strategies[field.name]?.datasource_queries
             )
           }
         >
@@ -152,11 +195,15 @@ export default function index({ form, type, assets ,field }) {
             // const cate = form.getFieldValue('cate');
             // const datasourceValue = form.getFieldValue('datasource_ids')
             const cate = form.getFieldValue(["strategies", field.name, "cate"]);
-            const datasourceValue = form.getFieldValue([
-              "strategies",
-              field.name,
-              "datasource_ids",
-            ]);
+            // ---- 第六步 第4段 W2（阶段 2）：老类型照旧取 datasource_ids（数组，Prometheus 编辑器里再取第一个）；
+            // 新 8 种没有 datasource_ids，按 datasource_queries 在本地算出命中的数据源、取第一个，
+            // 语义与夜莺的 datasource_value 一致（fe:.../V2.tsx:206-217 那份是调后端接口拿的，羚牛没有那条接口）。
+            const datasourceValue = isLegacyCate(cate)
+              ? form.getFieldValue(["strategies", field.name, "datasource_ids"])
+              : getDatasourceValueByQueries(
+                  form.getFieldValue(["strategies", field.name, "datasource_queries"]),
+                  groupedDatasourceList[cate] || []
+                );
             if (cate === "prometheus" && type == 0) {
               return (
                 <Prometheus

@@ -1,120 +1,32 @@
+/**
+ * 第六步 第 4 段 · 阶段 2（W2）的**回归比对底本**：`Form/utils.ts` 在 W2 动手之前的原样副本。
+ *
+ * 取法（可重跑）：
+ *   git -C /home/mcpops/Programs/frontend-AI-move/pub-step6g-dq show 68a09e9c:src/pages/alertRules/Form/utils.ts
+ * 68a09e9c 是本分支的起点（阶段 0 收官 + 修复轮）。**只改了下面两行相对 import 的写法**
+ * （因为文件挪了位置，`./constants` / `../constants` 会指错地方），其余一个字没动：
+ *   -import { defaultRuleConfig, defaultValues } from '@/pages/alertRules/Form/constants';
+ *   +import { defaultRuleConfig, defaultValues } from '@/pages/alertRules/Form/constants';
+ *   -import { DATASOURCE_ALL, alphabet } from '@/pages/alertRules/constants';
+ *   +import { DATASOURCE_ALL, alphabet } from '@/pages/alertRules/constants';
+ *
+ * 用它干嘛：老类型（prometheus / elasticsearch / ck …）的提交体必须逐字节不变，
+ * 只允许多出 `datasource_queries` 一个字段。测试里拿这份老逻辑算一遍期望值，
+ * 再和现在的 `processFormValues` 结果去掉 `datasource_queries` 之后做深比较。
+ *
+ * 注：任务书原文写的底本是 `pub-step6g` 的 a705b6a。这里改用 68a09e9c，理由见
+ * `第六步-流水线/第4段/拿不准-W2.md` 第 4 条——a705b6a 在阶段 0（W0 的 ck 试点）之前，
+ * 拿它当底本会把 W0 有意改掉的 ck rule_config 也算成「变了」。
+ */
 import _ from 'lodash';
 import moment from 'moment';
-import { defaultRuleConfig, defaultValues } from './constants';
-import { DATASOURCE_ALL, alphabet } from '../constants';
+import { defaultRuleConfig, defaultValues } from '@/pages/alertRules/Form/constants';
+import { DATASOURCE_ALL, alphabet } from '@/pages/alertRules/constants';
 import { mapOptionToRelativeTimeRange, mapRelativeTimeRangeToOption } from '@/components/TimeRangePicker';
 
 export function getFirstDatasourceId(datasourceIds = [], datasourceList: { id: number }[] = []) {
   return _.isEqual(datasourceIds, [DATASOURCE_ALL]) && datasourceList.length > 0 ? datasourceList[0]?.id : datasourceIds[0];
 }
-
-// ================= 第六步 第4段 W2（阶段 2 · datasource_queries）=================
-// 术语先解释一句：
-//   `datasource_ids`     —— 老字段，一串数据源 id，`[0]` 表示「全部数据源」。
-//   `datasource_queries` —— 夜莺 v9 的新字段，用「匹配条件」描述这条规则挑哪些数据源，
-//                           形状 [{ match_type, op, values }]：
-//                           match_type 0 = 按 id 精确、1 = 按名字通配、2 = 全部；op = 'in' / 'not in'。
-// 判据正本：第六步-流水线/第4段/顾问答案/大顾问-Q3.md（第一、三、四、六节）
-//           与 顾问问答.md Q3 的「lead 采纳情况（拍板-14）」。
-//
-// 口径（用户 M36 ① 拍板 + 拍板-14）：
-//   * **新 8 种**（mysql / pgsql / doris / opensearch / loki / victorialogs / tdengine / iotdb）
-//     —— 数据源筛选器换成 fe 的 V2，提交体**只发** `datasource_queries`；
-//   * **其余（老类型）** —— 选择器、UI、提交体一个字不动，只在提交时**追加**一份等价的
-//     `datasource_queries`，其余字段逐字节不变。
-//   下面的 isLegacyCate 特意写成「不在新 8 种里就算老的」，而不是列一张老类型白名单：
-//   这样将来冒出没见过的 cate（aliyun-sls / influxdb / host / 空值 …）都会走「老路 + 追加一个字段」，
-//   永远不会意外改到存量类型的提交体。
-export const NEW_DATASOURCE_QUERY_CATES = ['mysql', 'pgsql', 'doris', 'opensearch', 'loki', 'victorialogs', 'tdengine', 'iotdb'];
-
-export const isLegacyCate = (cate?: string) => !_.includes(NEW_DATASOURCE_QUERY_CATES, cate);
-
-// 与后端常量 models.DataSourceQueryAll 逐字段一致（ln-server/models/alert_rule.go:207-211，
-// DatasourceIdAll = 0 见 models/common.go:13）；注意 values 是 [0]，不是 []。
-export const DATASOURCE_QUERY_ALL = { match_type: 2, op: 'in', values: [DATASOURCE_ALL] };
-
-// fe 的默认值，照 fe v9.1.0 src/pages/alertRules/Form/constants.ts:50-59（只取 datasource_queries 这一项）。
-export const getDefaultDatasourceQueries = () => [{ match_type: 0, op: 'in', values: [] as number[] }];
-
-/**
- * 老类型提交时：由 datasource_ids 单向生成等价的 datasource_queries（大顾问 Q3 第 1.2 节）。
- * 含 0（全部）  -> [{ match_type: 2, op: 'in', values: [0] }]
- * 非空不含 0    -> [{ match_type: 0, op: 'in', values: ids }]
- * 空            -> undefined（**不发**这个字段；后端 GetDatasourceIDsByDatasourceQueries 对空条件直接返回
- *                  nil（alert_rule.go:1626-1628），发一条空 query 反而会得到一条谁都匹配不上的哑规则）
- */
-export function datasourceIdsToQueries(ids?: number[] | number) {
-  const list = _.isArray(ids) ? ids : _.isNil(ids) ? [] : [ids];
-  if (_.isEmpty(list)) return undefined;
-  if (_.includes(list, DATASOURCE_ALL)) return [_.cloneDeep(DATASOURCE_QUERY_ALL)];
-  return [{ match_type: 0, op: 'in', values: list }];
-}
-
-// tidwall/match 的通配符：* 匹配任意长度（含 0）的串，? 匹配单个字符（后端 models/alert_rule.go:15 引的库）。
-function globToRegExp(pattern: string) {
-  const esc = pattern
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*/g, '.*')
-    .replace(/\?/g, '.');
-  return new RegExp(`^${esc}$`);
-}
-
-/**
- * 把 datasource_queries 算成实际命中的数据源 id 列表。
- *
- * 为什么要在前端算：夜莺是调后端接口 POST /api/n9e/datasource/query 拿这个结果的
- *（fe:.../DatasourceValueSelect/V2.tsx:204-218），羚牛后端漏搬了这条路由
- *（基线 4f150ab7:center/router/router.go:290,327 有；羚牛 center/router/router.go 零命中），
- * 所以照后端同一套算法（ln-server/models/alert_rule.go:1625-1746）在前端复刻一份。
- * 逐条 query 取交集，初始集合是该类型的全部数据源（1630-1634）；某一轮空了就提前结束（1736-1738）。
- */
-export function resolveDatasourceIdsByQueries(
-  queries: { match_type: number; op: string; values: any[] }[] | undefined,
-  datasourceList: { id: number; name: string }[] = [],
-): number[] {
-  if (_.isEmpty(queries) || _.isEmpty(datasourceList)) return [];
-  let cur = _.map(datasourceList, 'id');
-  for (const q of queries!) {
-    let next: number[] = [];
-    if (q?.match_type === 2) {
-      next = cur; // 全部：不看 values（后端 1728-1732）
-    } else if (q?.match_type === 0) {
-      // values 里可能是数字 id，也可能是数据源名字：先按名字找，找不到再按数字解析（后端 1660-1673）
-      const vals = _.filter(
-        _.map(q.values, (v) => {
-          const byName = _.find(datasourceList, { name: String(v) });
-          return byName ? byName.id : Number(v);
-        }),
-        (n) => !_.isNaN(n),
-      );
-      if (q.op === 'not in') {
-        next = _.difference(cur, vals); // 后端 1692-1697
-      } else if (vals.length === 1 && vals[0] === DATASOURCE_ALL) {
-        next = cur; // values 就是 [0] 时当「全部」（后端 1681-1685）
-      } else {
-        next = _.filter(vals, (v) => _.includes(cur, v)); // 保留用户选的顺序；已被删掉的 id 自然掉出
-      }
-    } else if (q?.match_type === 1) {
-      const res = _.map(_.filter(q.values, _.isString), globToRegExp);
-      const hitIds = _.map(
-        _.filter(datasourceList, (ds) => _.includes(cur, ds.id) && _.some(res, (re) => re.test(ds.name))),
-        'id',
-      );
-      next = q.op === 'not in' ? _.difference(cur, hitIds) : hitIds; // 后端 1698-1727
-    }
-    cur = next;
-    if (_.isEmpty(cur)) break;
-  }
-  return cur;
-}
-
-// 新 8 种的编辑器要一个「单个数据源 id」（fe 里叫 datasource_value，是接口返回列表的第一个，
-// fe:.../V2.tsx:206-217）。羚牛没有那条接口，就用上面本地算出来的列表取第一个，语义一致。
-export const getDatasourceValueByQueries = (
-  queries: { match_type: number; op: string; values: any[] }[] | undefined,
-  datasourceList: { id: number; name: string }[] = [],
-) => _.head(resolveDatasourceIdsByQueries(queries, datasourceList));
-// ================= 第六步 第4段 W2 结束 =================
 
 export const parseTimeToValueAndUnit = (value?: number) => {
   if (!value) {
@@ -306,54 +218,10 @@ export function processFormValues(values) {
     datasource_ids: _.isArray(values.datasource_ids) ? values.datasource_ids : values.datasource_ids ? [values.datasource_ids] : [],
     annotations: _.chain(values.annotations).keyBy('key').mapValues('value').value(),
   };
-  // ---- 第六步 第4段 W2（阶段 2）：数据源字段。上面那段构造 data 的原文一行没改
-  // （尤其是 datasource_ids 那一行：它把 undefined 变成 []、把单个值包成数组，host 与老类型都靠它）。
-  // 判据：顾问答案/大顾问-Q3.md 第六节第 5 条 + 顾问问答.md Q3 拍板-14。
-  //   * host 规则：后端根本不看数据源（ln-server/alert/eval/alert_rule.go:120-127），一个字节都不加；
-  //   * 老类型：提交体 = 原来的全部字段 + datasource_queries 这一个字段，其余逐字节不变。
-  //     为什么必须补：羚牛的求值引擎对 ck / elasticsearch 这些「内置类型」只看 datasource_queries
-  //     （ln-server/alert/eval/alert_rule.go:132、models/alert_rule.go:1233-1244），
-  //     而后端任何入口都不会把 datasource_ids 翻译成 datasource_queries，
-  //     所以现在从 pub 表单建的 ck / es 规则其实一个数据源都匹配不上（大顾问 Q3 第 1.1 节末段）。
-  //   * 新 8 种：只发 datasource_queries，老字段删掉（照 fe v9.1.0 Form/utils.ts:184-187 的精神）。
-  // dataOut 和 data 是同一个对象，只是换一个 any 类型的名字：datasource_queries 不在上面那个字面量里，
-  // TypeScript 会拦「给不存在的属性赋值」和「delete 非可选属性」（tsconfig.json:23,34 开了 strict / strictNullChecks）。
-  const dataOut = data as any;
-  if (values.prod !== 'host') {
-    if (isLegacyCate(cate)) {
-      const legacyQueries = datasourceIdsToQueries(data.datasource_ids);
-      if (legacyQueries) {
-        dataOut.datasource_queries = legacyQueries;
-      } else {
-        // 数据源一个都没选（老选择器的 required 一般先拦住了）：不发空条件，
-        // 因为后端拿到空条件会当成「一个数据源都不匹配」（models/alert_rule.go:1626-1628）。
-        delete dataOut.datasource_queries;
-      }
-    } else {
-      delete dataOut.datasource_ids;
-      dataOut.datasource_queries = values.datasource_queries?.length ? values.datasource_queries : getDefaultDatasourceQueries();
-    }
-  }
   return data;
 }
 
 export function processInitialValues(values) {
-  // ---- 第六步 第4段 W2（阶段 2）：回填时两个数据源字段要分开走。
-  // pub 的编辑页拿的是 GET /api/n9e/alert-rule/strategy/:id（src/services/warning.ts:141-145），
-  // 后端那条链路把 datasource_ids 和 datasource_queries **原样**返回、不做任何翻译
-  //（ln-server/center/router/router_alert_rule.go:1146-1179），所以两个字段都可能有值。
-  //   * host / 老类型：表单只认 datasource_ids，把 datasource_queries 从表单值里删掉，
-  //     免得一份用不上的旧值跟着提交出去；提交时会由 ids 重新算一份等价的。
-  //   * 新 8 种：删掉 datasource_ids（照 fe v9.1.0 Form/utils.ts:184-187），
-  //     datasource_queries 为空时给一份 fe 的默认值，免得筛选器空着。
-  if (values?.prod === 'host' || isLegacyCate(values?.cate)) {
-    delete values.datasource_queries;
-  } else {
-    delete values.datasource_ids;
-    if (_.isEmpty(values.datasource_queries)) {
-      values.datasource_queries = getDefaultDatasourceQueries();
-    }
-  }
   if (values.cate === 'elasticsearch' || values.cate === 'opensearch') {
     values.rule_config.queries = _.map(values.rule_config.queries, (item) => {
       return {
@@ -471,20 +339,6 @@ export function getDefaultValuesByProd(prod, defaultBrainParams) {
 }
 
 export function getDefaultValuesByCate(prod, cate) {
-  // ---- 第六步 第4段 W2（阶段 2）：新 8 种切过来时，给一份空的数据源筛选条件（形状照
-  // fe v9.1.0 src/pages/alertRules/Form/constants.ts:50-59），别的什么都不给：
-  //   * 不给 datasource_ids —— 新 8 种的提交体里不该有这个老字段；
-  //   * rule_config 留给阶段 1 —— 谁把某个类型的编辑器挂上来，谁在这里补它自己的 rule_config 默认值
-  //     （照阶段 0 的 ck 分支那样单开一支，或在这里按 cate 分流）。
-  // 老类型（prometheus / elasticsearch / ck / influxdb / aliyun-sls …）一个字不动：
-  // 它们的提交体必须逐字节保持原样，只在提交时追加一个等价的 datasource_queries。
-  if (!isLegacyCate(cate)) {
-    return {
-      prod,
-      cate,
-      datasource_queries: getDefaultDatasourceQueries(),
-    };
-  }
   if (cate === 'prometheus') {
     return {
       prod,
