@@ -34,6 +34,9 @@ import apiServicequery from './apiservice';
 import iotdbQuery from '@/plugins/iotdb/Dashboard/datasource';
 import tdengineQuery from '@/plugins/TDengine/Dashboard/datasource';
 import ckQuery from '@/plugins/clickHouse/Dashboard/datasource';
+// ---- 第六步 B1（多数据源补搬轮）：doris 一行，写法同上。开源 fe v9.1.0 的 useQuery.tsx 里没有 doris
+// （doris 落在 plus:/parcels/Dashboard/datasource），这条是用户拍板要补的，照 ck 的写法加。
+import dorisQuery from '@/plugins/doris/Dashboard/datasource';
 
 interface IProps {
   id?: string;
@@ -68,6 +71,7 @@ export default function useQuery(props: IProps) {
     iotdb: (p) => iotdbQuery(p).then((r: any) => r.series),
     tdengine: (p) => tdengineQuery(p).then((r: any) => r.series),
     ck: (p) => ckQuery(p).then((r: any) => r.series),
+    doris: (p) => dorisQuery(p).then((r: any) => r.series), // 第六步 B1：同上，用户拍板要补
     ...plusDatasource,
   };
   const { run: fetchData } = useDebounceFn(

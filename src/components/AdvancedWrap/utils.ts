@@ -99,6 +99,21 @@ export const baseCates: Cate[] = [
     graphPro: false,
     alertPro: false,
   },
+  // ---- 第六步 B1（多数据源补搬轮）：只追加 doris 一条数组元素，照 fe v9.1.0 src/components/AdvancedWrap/utils.ts:115-126
+  // 抄 value / label / type / graphPro / alertPro；alertRule 改成 false（拍板-14：L4 告警规则这一层本轮跳过），
+  // dashboard 保持 true（本轮接了 doris 的仪表盘查询编辑器）。
+  // fe 那边的 label_en / logo / dashboardVariable 三个字段 pub 的 Cate 接口没有，不抄。
+  // 注：即时查询页 Explorer.tsx 不加 doris 分支（开源 fe v9.1.0 自己就没有，拍板-13「基线没接线的不自造」），
+  // 所以 type: ['logging'] 会让 Doris 出现在日志页签的类型下拉里、点进去落到 PlusExplorer 占位——与开源 fe 行为一致。
+  {
+    value: 'doris',
+    label: 'Doris',
+    type: ['logging'],
+    alertRule: false,
+    dashboard: true,
+    graphPro: true,
+    alertPro: false,
+  },
 ];
 
 export const allCates = [...baseCates, ...advancedCates];

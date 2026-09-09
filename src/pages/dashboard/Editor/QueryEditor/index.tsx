@@ -19,6 +19,11 @@ import CK from '@/plugins/clickHouse/Dashboard/QueryBuilder';
 import '@/plugins/iotdb/locale';
 import '@/plugins/TDengine/locale';
 import '@/plugins/clickHouse/locale';
+// ---- 第六步 B1（多数据源补搬轮）：doris 的仪表盘查询编辑器，写法与上面三个一字不差。
+// 开源 fe v9.1.0 的 QueryBuilder.tsx 里没有 doris 分支（doris 走 plus:/parcels/Dashboard/QueryBuilder），
+// 这条接线是用户拍板要补的，照 ck 的写法加，见 第六步-流水线/多数据源/任务书/B1-补搬三单元.md「先读」第 4 条。
+import Doris from '@/plugins/doris/Dashboard/QueryBuilder';
+import '@/plugins/doris/locale';
 
 export default function index({ chartForm, type, variableConfig, dashboardId }) {
   const { t } = useTranslation('dashboard');
@@ -79,6 +84,13 @@ export default function index({ chartForm, type, variableConfig, dashboardId }) 
               return (
                 <Form.Item shouldUpdate noStyle>
                   {({ getFieldValue: getFieldValue2 }) => <CK datasourceValue={getFieldValue2('datasourceValue')} />}
+                </Form.Item>
+              );
+            }
+            if (cate === 'doris') {
+              return (
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue: getFieldValue2 }) => <Doris datasourceValue={getFieldValue2('datasourceValue')} />}
                 </Form.Item>
               );
             }
