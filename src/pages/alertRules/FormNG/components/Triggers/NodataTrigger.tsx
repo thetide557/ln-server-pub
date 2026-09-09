@@ -5,17 +5,19 @@ import { useTranslation } from 'react-i18next';
 interface Props {
   disabled?: boolean;
   prefixName?: (string | number)[]; // 列表字段名
-  // 第六步 第4段 W0（阶段 0 · ck 试点）：给 useWatch 用的绝对路径，不传默认等于 prefixName（fe 原样）
+  // 第六步 第4段 W0：绝对路径的前半段。name= 仍用相对的 prefixName，useWatch 用 [...fullPrefixName, ...names]。
+  // 不传时等于 fe 原状。
   fullPrefixName?: (string | number)[];
   hideSwitch?: boolean; // 在卡片模式下隐藏开关，由父组件控制
 }
 
 export default function NodataTrigger(props: Props) {
   const { t } = useTranslation('alertRules');
-  const { disabled, prefixName = [], fullPrefixName = prefixName, hideSwitch } = props;
+  const { disabled, prefixName = [], fullPrefixName = [], hideSwitch } = props;
   const names = [...prefixName, 'nodata_trigger'];
-  const fullNames = [...fullPrefixName, 'nodata_trigger'];
-  const enable = Form.useWatch([...fullNames, 'enable']);
+  // 第六步 第4段 W0（规矩 A）：fe 原文是 Form.useWatch([...names, 'enable'])——names 是相对路径，
+  // 在羚牛的多策略表单里取到 undefined，会让下面 :27 那块整块 display:none。改成拼绝对路径。
+  const enable = Form.useWatch([...fullPrefixName, ...names, 'enable']);
 
   return (
     <div>

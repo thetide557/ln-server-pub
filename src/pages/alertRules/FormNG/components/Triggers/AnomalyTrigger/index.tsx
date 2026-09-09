@@ -9,17 +9,17 @@ import { getAlgorithms } from './services';
 interface Props {
   active: boolean;
   disabled?: boolean;
+  // 第六步 第4段 W0：类型从 string[] 放宽到 (string|number)[]——羚牛的前缀里带策略下标（数字）。
+  // 本组件的取值路径**没改**：它只在 cate === 'prometheus' 且开了 fcBrain 时才渲染（Triggers.tsx:35），
+  // pub 的分发走不到这里，登记不改（拿不准-W0.md U-06）。
   prefixName?: (string | number)[]; // 列表字段名
-  // 第六步 第4段 W0（阶段 0 · ck 试点）：给 useWatch 用的绝对路径，不传默认等于 prefixName（fe 原样）
-  fullPrefixName?: (string | number)[];
   hideSwitch?: boolean; // 在卡片模式下隐藏开关，由父组件控制
 }
 
 export default function index(props: Props) {
   const { t } = useTranslation('alertRules');
-  const { active, disabled, prefixName = [], fullPrefixName = prefixName, hideSwitch } = props;
+  const { active, disabled, prefixName = [], hideSwitch } = props;
   const names = [...prefixName, 'anomaly_trigger'];
-  const fullNames = [...fullPrefixName, 'anomaly_trigger'];
   const [algorithms, setAlgorithms] = useState<{ [key: string]: string }[]>([]);
   const [algorithmsLoading, setAlgorithmsLoading] = useState(true);
 
@@ -35,7 +35,7 @@ export default function index(props: Props) {
     }
   }, [active]);
 
-  const enable = Form.useWatch([...fullNames, 'enable']);
+  const enable = Form.useWatch([...names, 'enable']);
 
   return (
     <Spin spinning={algorithmsLoading}>

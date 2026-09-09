@@ -29,12 +29,16 @@ import XhPrometheus from './Prometheus/XHindex';
 // 第六步 第4段 W0（阶段 0 · ck 试点）：直达路径 import，不写 '@/plugins/clickHouse' 这种裸目录
 //（裸目录的 index 会把 Explorer / ExplorerNG / Dashboard 整套一起拖进来；多数据源轮拍板-02）。
 import ClickHouseAlertRule from '@/plugins/clickHouse/AlertRule';
+import { FormStateContext } from '@/pages/alertRules/Form';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
 
 export default function index({ form, type, assets ,field }) {
   const { t } = useTranslation('alertRules');
   const { groupedDatasourceList } = useContext(CommonStateContext);
+  // 第六步 第4段 W0：整张表单是不是只读，pub 放在 FormStateContext 里（Form/index.tsx:45-47 定义，
+  // Metric/Prometheus/index.tsx:43 同样用法）。搬来的编辑器要靠它决定输入框禁不禁用。
+  const { disabled } = useContext(FormStateContext);
   // if (form.getFieldValue('datasource_ids')?.length == 0) {
   //   form.setFieldsValue({datasource_ids: [0]});
   // }
@@ -169,10 +173,16 @@ export default function index({ form, type, assets ,field }) {
             // 绝对路径 ['strategies', field.name, 'rule_config']（给 getFieldValue / useWatch 用，这两个 API 不吃 Form.List 前缀）。
             // 其余 9 种类型阶段 1 一次性照这个样子挂上来。
             if (cate === "ck") {
+              // key={field.key} 让编辑器随策略整体重新挂载：antd 的 useWatch 只在挂载时订阅一次
+              //（node_modules/rc-field-form/lib/useWatch.js:56-83 的 useEffect 依赖数组是空的），
+              // 删掉前面的策略、后面策略下标前移时，不重挂就会短暂读到旧策略的值。
               return (
                 <ClickHouseAlertRule
-                  datasourceValue={datasourceValue}
+                  key={field.key}
                   field={field}
+                  cate={cate}
+                  datasourceValue={datasourceValue}
+                  disabled={disabled}
                 />
               );
             }

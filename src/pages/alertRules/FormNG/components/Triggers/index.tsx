@@ -8,7 +8,8 @@ interface IProps {
   queries: any[];
   disabled?: boolean;
   initialValue?: any;
-  catePath?: (string | number)[]; // 第六步 第4段 W0：cate 字段的绝对路径，不传默认 ['cate']（fe 原样）
+  // 第六步 第4段 W0：cate 在 fe 里是顶层字段，羚牛在每条策略上，所以改成可以由上层传进来（{...props} 直接透传）
+  cate?: string;
 }
 
 export default function index(props: IProps) {

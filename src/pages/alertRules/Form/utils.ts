@@ -75,6 +75,13 @@ export const stringifyExpressions = (
   return exp;
 };
 
+// ---- 第六步 第4段 W0（lead 拍板-10，出处 第4段/顾问问答-大顾问.md Q1 第六节）----
+// 「v9 新编辑器类型」= 用夜莺 v9 那套 AlertRule 编辑器（src/plugins/<t>/AlertRule/）配置的数据源类型。
+// 它们的 rule_config.queries 形状和羚牛老 ck 编辑器不一样（没有 range 字段、keys 下三个键都是数组），
+// 所以下面 processFormValues / processInitialValues 里给它们单开一个分支，照 fe v9.1.0 的写法处理。
+// 本阶段只放 ck 一个；阶段 1 把其余类型接上编辑器之后，由 lead 往这个数组里加。
+export const V9_EDITOR_CATES = ['ck'];
+
 export function processFormValues(values) {
   let cate = values.cate;
   if (values.prod === 'host') {
@@ -97,7 +104,60 @@ export function processFormValues(values) {
       }
       return trigger;
     });
-  } else if (_.includes(['aliyun-sls', 'ck', 'influxdb'], values.cate)) {
+  } else if (_.includes(V9_EDITOR_CATES, values.cate)) {
+    // ---- 第六步 第4段 W0（拍板-10）：v9 新编辑器类型走这一支，内容照抄
+    // fe v9.1.0 src/pages/alertRules/Form/utils.ts:98-140（queries 段 + triggers 段）。
+    // 为什么必须单开：下面那条老分支对每条 query 无条件调 mapOptionToRelativeTimeRange(query.range)，
+    // 而该函数第一行就读 option.start（src/components/TimeRangePicker/RelativeTimeRangePicker/utils.ts:14-17）；
+    // v9 的 ck 编辑器（src/plugins/clickHouse/AlertRule/Queries/index.tsx）根本没有 range 字段，
+    // 新建一条 ck 规则点保存就会 TypeError: Cannot read properties of undefined (reading 'start')。
+    // 另外老分支的 `ref: alphabet[index]` 会把用户在 QueryName 里改过的查询别名按下标重写成 A/B/C，
+    // 而触发条件的表达式是按 $别名 引用的，改名后会对不上——照 fe 抄就没有这一条。
+    if (values?.rule_config?.queries) {
+      values.rule_config.queries = _.map(values.rule_config.queries, (item) => {
+        let parsedRange;
+        if (item.range) {
+          parsedRange = mapOptionToRelativeTimeRange(item.range);
+        }
+        // keys 下这三个键在编辑器里是 mode='tags' 的数组，提交给后端时拼成空格分隔的字符串
+        if (_.isArray(item?.keys?.labelKey)) {
+          item.keys.labelKey = _.join(item.keys.labelKey, ' ');
+        }
+        if (_.isArray(item?.keys?.valueKey)) {
+          item.keys.valueKey = _.join(item.keys.valueKey, ' ');
+        }
+        if (_.isArray(item?.keys?.metricKey)) {
+          item.keys.metricKey = _.join(item.keys.metricKey, ' ');
+        }
+        return {
+          ..._.omit(item, ['interval_unit', 'range']),
+          interval: item.interval_unit ? normalizeTime(item.interval, item.interval_unit) : undefined,
+          from: parsedRange?.start,
+          to: parsedRange?.end,
+          cumulative_window_from: parsedRange?.cumulative_window_from,
+          cumulative_window_to: parsedRange?.cumulative_window_to,
+        };
+      });
+    }
+    if (values?.rule_config?.triggers) {
+      values.rule_config.triggers = _.map(values.rule_config.triggers, (trigger) => {
+        if (trigger.mode === 0) {
+          return {
+            ...trigger,
+            exp: stringifyExpressions(trigger.expressions),
+          };
+        }
+        // 如果是表达式模式 mode=1 则清理掉 expressions 字段值
+        if (trigger.mode === 1) {
+          return {
+            ...trigger,
+            expressions: [{ ref: 'A', comparisonOperator: '>' }],
+          };
+        }
+        return trigger;
+      });
+    }
+  } else if (_.includes(['aliyun-sls', 'influxdb'], values.cate)) {
     values.rule_config.queries = _.map(values.rule_config.queries, (query, index) => {
       const parsedRange = mapOptionToRelativeTimeRange(query.range);
       if (cate === 'aliyun-sls') {
@@ -150,12 +210,40 @@ export function processInitialValues(values) {
         interval_unit: parseTimeToValueAndUnit(item.interval).unit,
       };
     });
-  } else if (_.includes(['aliyun-sls', 'ck', 'influxdb'], values.cate)) {
+  } else if (_.includes(V9_EDITOR_CATES, values.cate)) {
+    // ---- 第六步 第4段 W0（拍板-10）：v9 新编辑器类型的回填，照抄
+    // fe v9.1.0 src/pages/alertRules/Form/utils.ts:188-214（queries 段）。
+    // 与下面那条老分支的差别：三个 keys 都拆回数组（老分支只拆 labelKey），
+    // range 只在 from / to 都有值时才拼（老分支无条件拼，from/to 为空时会拼出垃圾值）。
+    if (values?.rule_config?.queries) {
+      values.rule_config.queries = _.map(values.rule_config.queries, (item) => {
+        if (item?.keys?.labelKey !== undefined) {
+          _.set(item, 'keys.labelKey', item?.keys?.labelKey ? _.split(item.keys.labelKey, ' ') : []);
+        }
+        if (item?.keys?.valueKey !== undefined) {
+          _.set(item, 'keys.valueKey', item?.keys?.valueKey ? _.split(item.keys.valueKey, ' ') : []);
+        }
+        if (item?.keys?.metricKey !== undefined) {
+          _.set(item, 'keys.metricKey', item?.keys?.metricKey ? _.split(item.keys.metricKey, ' ') : []);
+        }
+        return {
+          ..._.omit(item, ['from', 'to']),
+          interval: item.interval ? parseTimeToValueAndUnit(item.interval).value : undefined,
+          interval_unit: item.interval ? parseTimeToValueAndUnit(item.interval).unit : undefined,
+          range:
+            item.from !== undefined && item.to !== undefined
+              ? mapRelativeTimeRangeToOption({
+                  start: item.from,
+                  end: item.to,
+                })
+              : undefined,
+        };
+      });
+    }
+  } else if (_.includes(['aliyun-sls', 'influxdb'], values.cate)) {
     values.rule_config.queries = _.map(values.rule_config.queries, (query) => {
       if (values.cate === 'aliyun-sls') {
         _.set(query, 'keys.valueKey', query?.keys?.valueKey ? _.split(query.keys.valueKey, ' ') : []);
-      } else if (values.cate === 'ck') {
-        _.set(query, 'keys.labelKey', query?.keys?.labelKey ? _.split(query.keys.labelKey, ' ') : []);
       }
       return {
         ..._.omit(query, ['from', 'to']),

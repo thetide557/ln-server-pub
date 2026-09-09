@@ -4,51 +4,51 @@ import { Form } from 'antd';
 import Queries from './Queries';
 import Triggers from '@/pages/alertRules/FormNG/components/Triggers';
 
+// 第六步 第4段 W0（阶段 0 · ck 试点）：把这个编辑器接进羚牛的多策略告警表单。
+// 羚牛一条告警规则最多 5 个策略，外面套了一层 `<Form.List name="strategies">`
+//（src/pages/alertRules/Form/index.tsx:198），每个策略自己一份 rule_config；
+// 夜莺 fe 的表单是平铺的，所以原文里字段路径写死 ['rule_config', ...]。
+//
+// 两条规矩（出处：第六步-流水线/第4段/顾问问答-大顾问.md Q1 第二节）：
+//   规矩 A · 按调用种类分路径：
+//     - Form.Item / Form.List 的 name= 用**相对**路径（antd 会自动补上外层 Form.List 的前缀，
+//       见 node_modules/rc-field-form/lib/List.js:40-48）
+//     - Form.useWatch / getFieldValue / setFields / setFieldsValue 用**绝对**路径
+//       （它们直接拿路径去整棵表单数据上取值，不吃 Form.List 前缀，见 lib/useWatch.js:69,78）
+//   规矩 B · 顶层编辑器多收三个 prop：field（策略级 Form.List 的 field）、cate、disabled，
+//     并在函数体开头派生出 prefixField / prefixName / fullPrefixName / absPrefix；
+//     三个 prop 都不传时全部退回 fe 原状，组件在 fe 里原样能跑。
 interface IProps {
   datasourceValue: number | number[];
-  // ---- 第六步 第4段 W0（阶段 0 · ck 试点）加的两个**可选**参数 ----
-  // 不传这两个的时候，本组件的行为与 fe v9.1.0 原文一字不差（字段路径就是顶层的 ['rule_config', ...]）。
-  // 羚牛的告警表单外面套了一层多策略列表 `<Form.List name='strategies'>`（src/pages/alertRules/Form/index.tsx:198），
-  // 一条规则最多 5 个策略，每个策略自己一份 rule_config。所以从分发点
-  // （src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx 的 cate === 'ck' 分支）把该策略的 field 传进来，
-  // 本组件负责把两种路径都拼好：
-  //   - 相对路径（给 Form.Item / Form.List 用）：[field.name, 'rule_config']，antd 会自动补上外层的 'strategies'
-  //   - 绝对路径（给 Form.useWatch / getFieldValue 用）：['strategies', field.name, 'rule_config']
-  // 之所以要分两种：antd 的 useWatch / getFieldValue 都是拿路径直接去表单根上取值的
-  //（node_modules/rc-field-form/lib/useWatch.js 里 getValue(store, namePathRef.current)），**不吃 Form.List 的相对前缀**。
-  field?: any; // 外层 Form.List 给的 field（含 name / key / fieldKey）
-  listName?: string; // 外层 Form.List 的名字，默认 'strategies'
+  field?: any; // 羚牛策略级 Form.List 给的 field（含 name / key / fieldKey）；不传 = fe 原状
+  cate?: string; // 数据源类型。fe 里是表单顶层字段，羚牛在每条策略上，所以改成由分发处传进来
+  disabled?: boolean;
 }
 
-export default function index({ datasourceValue, field, listName = 'strategies' }: IProps) {
+export default function index({ datasourceValue, field, cate, disabled }: IProps) {
   const form = Form.useFormInstance();
-  const inList = !!field && field.name !== undefined;
-
-  // 相对路径：给 Form.Item / Form.List 用
-  const prefixName: (string | number)[] = inList ? [field.name, 'rule_config'] : ['rule_config'];
-  // Queries 的约定是「绝对路径 = fullPrefixName + prefixName」（见 Queries/index.tsx 的 :94）
-  const queriesFullPrefixName: (string | number)[] = inList ? [listName] : [];
-  // Triggers 的约定是「fullPrefixName 本身就是绝对路径」（见 FormNG/components/Triggers/Triggers.tsx 的 useWatch）
-  const ruleConfigFullName: (string | number)[] = inList ? [listName, field.name, 'rule_config'] : ['rule_config'];
-  // cate 不在 rule_config 里，是策略自己的字段
-  const catePath: (string | number)[] = inList ? [listName, field.name, 'cate'] : ['cate'];
+  const prefixField = field ? _.omit(field, 'key') : {}; // 给 Form.List / Form.Item 展开用（key 在分发处显式写）
+  const prefixName: (string | number)[] = field ? [field.name, 'rule_config'] : ['rule_config']; // 相对路径
+  const fullPrefixName: (string | number)[] = field ? ['strategies'] : []; // 绝对路径的前半段
+  const absPrefix = [...fullPrefixName, ...prefixName]; // 绝对路径 = ['strategies', n, 'rule_config']
 
   return (
     <>
       <div className='mb-4'>
         <Queries
           form={form}
-          prefixField={inList ? field : {}}
+          prefixField={prefixField}
+          fullPrefixName={fullPrefixName}
           prefixName={prefixName}
-          fullPrefixName={queriesFullPrefixName}
-          catePath={catePath}
+          cate={cate}
+          disabled={disabled}
           datasourceValue={datasourceValue}
         />
       </div>
       <Form.Item shouldUpdate noStyle>
         {({ getFieldValue }) => {
-          const queries = getFieldValue([...ruleConfigFullName, 'queries']);
-          return <Triggers prefixField={inList ? field : {}} prefixName={prefixName} fullPrefixName={ruleConfigFullName} catePath={catePath} queries={queries} />;
+          const queries = getFieldValue([...absPrefix, 'queries']);
+          return <Triggers prefixField={prefixField} fullPrefixName={fullPrefixName} prefixName={prefixName} cate={cate} disabled={disabled} queries={queries} />;
         }}
       </Form.Item>
     </>

@@ -20,30 +20,25 @@ interface IProps {
   queries: any[];
   disabled?: boolean;
   initialValue?: any;
-  // ---- 第六步 第4段 W0（阶段 0 · ck 试点）新增的一个可选参数 ----
-  // cate（数据源类型）在 fe 的告警表单里是顶层字段，在羚牛的多策略表单里在 ['strategies', n, 'cate']。
-  // 不传时默认 ['cate']，与 fe 原样。
-  catePath?: (string | number)[];
+  // 第六步 第4段 W0：cate 在 fe 里是顶层字段，羚牛在每条策略上，所以改成可以由上层传进来
+  cate?: string;
 }
 
 export default function index(props: IProps) {
   const { t } = useTranslation('alertRules');
   const { feats } = useContext(CommonStateContext);
-  const { prefixField = {}, prefixName = [], queries, disabled, initialValue, catePath = ['cate'] } = props;
-  // 第六步 第4段 W0（阶段 0 · ck 试点）：fullPrefixName 不传时默认等于 prefixName——
-  // fe 的告警表单是平铺的，两者本来就一样，所以这个默认值保证 fe 原有调用方行为一字不变。
-  // 羚牛的表单外面套了一层 Form.List name='strategies'，两者就分开了：
-  //   prefixName     = [n, 'rule_config']              —— 相对路径，给 Form.Item / Form.List 用（antd 会自动补上 'strategies'）
-  //   fullPrefixName = ['strategies', n, 'rule_config'] —— 绝对路径，给 Form.useWatch / getFieldValue 用
-  // 为什么必须分开：antd 的 useWatch 是拿 namePath 直接去表单根上取值的
-  //（见 node_modules/rc-field-form/lib/useWatch.js 里 getValue(store, namePathRef.current)），
-  // **不吃 Form.List 的相对前缀**；只传相对路径会取到 undefined，下面三块 UI 会静默不显示。
-  const { fullPrefixName = prefixName } = props;
+  const { prefixField = {}, fullPrefixName = [], prefixName = [], queries, disabled, initialValue, cate: cateProp } = props;
+  // 第六步 第4段 W0（规矩 A，出处 第4段/顾问问答-大顾问.md Q1 第二、三节）：
+  // Form.Item / Form.List 的 name= 用相对路径 prefixName；useWatch / getFieldValue 用绝对路径 absPrefix。
+  // 不传 fullPrefixName 时 absPrefix === prefixName，fe 原有调用方行为一字不变。
+  const absPrefix = [...fullPrefixName, ...prefixName];
 
-  const cate = Form.useWatch(catePath);
-  const exp_trigger_disable = Form.useWatch([...fullPrefixName, 'exp_trigger_disable']);
-  const nodata_trigger_enable = Form.useWatch([...fullPrefixName, 'nodata_trigger', 'enable']);
-  const anomaly_trigger_enable = Form.useWatch([...fullPrefixName, 'anomaly_trigger', 'enable']);
+  // hook 不能条件调用，所以先照 fe 原样 watch 顶层 cate，再优先用上层传进来的 cate
+  const watchedCate = Form.useWatch(['cate']);
+  const cate = cateProp ?? watchedCate;
+  const exp_trigger_disable = Form.useWatch([...absPrefix, 'exp_trigger_disable']);
+  const nodata_trigger_enable = Form.useWatch([...absPrefix, 'nodata_trigger', 'enable']);
+  const anomaly_trigger_enable = Form.useWatch([...absPrefix, 'anomaly_trigger', 'enable']);
 
   const showAnomalyTrigger = cate === 'prometheus' && feats?.fcBrain === true;
 
@@ -71,7 +66,7 @@ export default function index(props: IProps) {
         {exp_trigger_disable === false && (
           <div className='mt-4'>
             <div className='mb-4'>
-              <Inhibit triggersKey='triggers' />
+              <Inhibit triggersKey='triggers' prefixName={absPrefix} />
             </div>
             <Form.List {...prefixField} name={[...prefixName, 'triggers']} initialValue={initialValue}>
               {(fields, { add, remove }) => (
@@ -81,8 +76,8 @@ export default function index(props: IProps) {
                       <div key={field.key} className='relative'>
                         <Trigger
                           prefixField={_.omit(field, 'key')}
-                          fullPrefixName={[...fullPrefixName, 'triggers', field.name]}
-                          rootFullPrefixName={fullPrefixName}
+                          fullPrefixName={[...absPrefix, 'triggers', field.name]}
+                          expTriggerDisable={exp_trigger_disable}
                           prefixName={[field.name]}
                           queries={queries}
                           disabled={disabled}
@@ -131,7 +126,7 @@ export default function index(props: IProps) {
         </div>
         {nodata_trigger_enable === true && (
           <div className='mt-4'>
-            <NodataTrigger prefixName={prefixName} fullPrefixName={fullPrefixName} hideSwitch />
+            <NodataTrigger prefixName={prefixName} fullPrefixName={fullPrefixName} disabled={disabled} hideSwitch />
           </div>
         )}
       </CardContainer>
@@ -150,7 +145,7 @@ export default function index(props: IProps) {
           </div>
           {anomaly_trigger_enable === true && (
             <div className='mt-4'>
-              <AnomalyTrigger prefixName={prefixName} fullPrefixName={fullPrefixName} active hideSwitch />
+              <AnomalyTrigger prefixName={prefixName} active hideSwitch />
             </div>
           )}
         </CardContainer>
