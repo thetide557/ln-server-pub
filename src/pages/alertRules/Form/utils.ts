@@ -235,6 +235,8 @@ export function processInitialValues(values) {
               ? mapRelativeTimeRangeToOption({
                   start: item.from,
                   end: item.to,
+                  cumulative_window_from: item.cumulative_window_from,
+                  cumulative_window_to: item.cumulative_window_to,
                 })
               : undefined,
         };
