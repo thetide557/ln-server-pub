@@ -19,12 +19,16 @@ interface IProps {
   queries: any[];
   disabled?: boolean;
   onClose?: () => void;
+  // 第六步 第4段 W0（阶段 0 · ck 试点）：rule_config 这一层的**绝对**路径。
+  // 下面那句 exp_trigger_disable 原来写死 ['rule_config', ...]，在羚牛的多策略表单里应是
+  // ['strategies', n, 'rule_config', ...]。不传时默认 ['rule_config']，与 fe 原样。
+  rootFullPrefixName?: (string | number)[];
 }
 
 export default function Trigger(props: IProps) {
   const { t } = useTranslation('alertRules');
-  const { prefixField = {}, fullPrefixName = [], prefixName = [], queries, disabled, onClose } = props;
-  const exp_trigger_disable = Form.useWatch(['rule_config', 'exp_trigger_disable']);
+  const { prefixField = {}, fullPrefixName = [], prefixName = [], queries, disabled, onClose, rootFullPrefixName = ['rule_config'] } = props;
+  const exp_trigger_disable = Form.useWatch([...rootFullPrefixName, 'exp_trigger_disable']);
   const validateDisabled = disabled || exp_trigger_disable !== false;
   const [expanded, setExpanded] = React.useState(false);
 

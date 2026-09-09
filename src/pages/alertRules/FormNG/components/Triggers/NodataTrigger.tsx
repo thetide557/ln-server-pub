@@ -4,15 +4,18 @@ import { useTranslation } from 'react-i18next';
 
 interface Props {
   disabled?: boolean;
-  prefixName?: string[]; // 列表字段名
+  prefixName?: (string | number)[]; // 列表字段名
+  // 第六步 第4段 W0（阶段 0 · ck 试点）：给 useWatch 用的绝对路径，不传默认等于 prefixName（fe 原样）
+  fullPrefixName?: (string | number)[];
   hideSwitch?: boolean; // 在卡片模式下隐藏开关，由父组件控制
 }
 
 export default function NodataTrigger(props: Props) {
   const { t } = useTranslation('alertRules');
-  const { disabled, prefixName = [], hideSwitch } = props;
+  const { disabled, prefixName = [], fullPrefixName = prefixName, hideSwitch } = props;
   const names = [...prefixName, 'nodata_trigger'];
-  const enable = Form.useWatch([...names, 'enable']);
+  const fullNames = [...fullPrefixName, 'nodata_trigger'];
+  const enable = Form.useWatch([...fullNames, 'enable']);
 
   return (
     <div>

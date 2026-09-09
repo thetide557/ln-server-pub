@@ -35,7 +35,9 @@ interface IProps {
 }
 
 export default function Code(props: IProps) {
-  const { darkMode } = React.useContext(CommonStateContext);
+  // 第六步 第4段 W0：fe 的 ICommonState 里有 darkMode（暗色模式开关），pub 的没有（src/App.tsx 不改），
+  // 照 pub 已有先例加 as any，取到 undefined = 浅色（写法同 src/components/LogQL/index.tsx:78）。
+  const { darkMode } = React.useContext(CommonStateContext) as any;
   const { t } = useTranslation('alertRules');
   const { prefixField = {}, fullPrefixName = [], prefixName = [], disabled, placeholder = '$A > 0 && $B < $A', validateDisabled } = props;
 
