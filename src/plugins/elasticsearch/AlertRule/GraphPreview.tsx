@@ -14,6 +14,12 @@ interface IProps {
   datasourceValue: number;
   data: any;
   disabled?: boolean;
+  // 第六步 第4段 W1（规矩 A，出处 第4段/顾问问答-大顾问.md Q1 第二节）：
+  // 下面这两个值 fe 原来是直接从表单**顶层**读的（:32 的 cate、:33 的 datasource_values）。
+  // 羚牛的 cate 在每条策略上（['strategies', n, 'cate']），datasource_values 这个字段羚牛压根没有
+  //（全仓 grep 只有本文件这一处），所以都改成由上层传进来；不传时退回 fe 原样从顶层读。
+  cate?: string;
+  datasourceValues?: number[];
 }
 
 const getSerieName = (metric: Object) => {
@@ -27,10 +33,14 @@ const getSerieName = (metric: Object) => {
 export default function GraphPreview(props: IProps) {
   const { t } = useTranslation('alertRules');
   const { groupedDatasourceList } = useContext(CommonStateContext);
-  const { data, disabled } = props;
+  const { data, disabled, cate: cateProp, datasourceValues: datasourceValuesProp } = props;
   const divRef = useRef<HTMLDivElement>(null);
-  const cate = Form.useWatch('cate');
-  const datasource_values = Form.useWatch('datasource_values');
+  // hook 不能条件调用，所以先照 fe 原样 watch 顶层字段，再优先用上层传进来的值
+  //（写法同 pub 已有的 src/pages/alertRules/FormNG/components/Triggers/Triggers.tsx:35-37）
+  const watchedCate = Form.useWatch('cate');
+  const cate = cateProp ?? watchedCate;
+  const watchedDatasourceValues = Form.useWatch('datasource_values');
+  const datasource_values = datasourceValuesProp ?? watchedDatasourceValues;
   const [visible, setVisible] = useState(false);
   const [series, setSeries] = useState<any[]>([]);
   const [columnKeys, setColumnKeys] = useState<string[]>([]);

@@ -26,25 +26,40 @@ interface Props {
   hideIndexPattern?: boolean;
   field: any;
   datasourceValue: number;
+  // 第六步 第4段 W1：数据源 id 列表，只往下透给 GraphPreview 的「换数据源」下拉框
+  datasourceValues?: number[];
   indexOptions: any[];
   disabled?: boolean;
+  // 第六步 第4段 W1（规矩 A/B，出处 第4段/顾问问答-大顾问.md Q1 第二、三节）：
+  fullPrefixName?: (string | number)[]; // 绝对路径的前半段（羚牛是 ['strategies']；fe 是 []）
+  prefixName?: (string | number)[]; // 相对路径（羚牛是 [n, 'rule_config']；fe 是 ['rule_config']）
+  cate?: string; // 数据源类型；fe 在表单顶层读，羚牛在每条策略上，改成传进来
   onClose?: () => void;
 }
 
 export default function Query(props: Props) {
   const { t, i18n } = useTranslation('alertRules');
-  const { darkMode } = useContext(CommonStateContext);
+  // 第六步 第4段 W1：fe 的 ICommonState 里有 darkMode（暗色模式开关），pub 的没有（src/App.tsx 不改），
+  // 照 pub 已有先例加 as any，取到 undefined = 浅色（写法同 src/components/LogQL/index.tsx:78）。
+  const { darkMode } = useContext(CommonStateContext) as any;
   const { field } = props;
-  const { hideIndexPattern, datasourceValue, indexOptions, disabled, onClose } = props;
+  const { hideIndexPattern, datasourceValue, datasourceValues, indexOptions, disabled, onClose, fullPrefixName = [], prefixName = ['rule_config'], cate } = props;
   const indexPatternsAuthorized = useIsAuthorized(['/log/index-patterns']);
   const [indexSearch, setIndexSearch] = useState('');
   const [indexPatternsRefreshFlag, setIndexPatternsRefreshFlag] = useState(_.uniqueId('indexPatternsRefreshFlag_'));
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
-  const names = ['rule_config', 'queries'];
-  const queries = Form.useWatch(names);
-  const indexType = Form.useWatch([...names, field.name, 'index_type']);
-  const indexValue = Form.useWatch([...names, field.name, 'index']);
-  const indexPatternId = Form.useWatch([...names, field.name, 'index_pattern']);
+  // 第六步 第4段 W1：fe 原文 :43 是 `const names = ['rule_config', 'queries']`。
+  // 按规矩 A 要把「相对路径」和「绝对路径」拆成两个变量；本文件里这个变量的**每一处**用法都是绝对路径调用——
+  //   :44-47 四个 Form.useWatch；:178 传给 DateField 的 preName（DateField.tsx:35,38 拿它做 _.get / _.set 整棵表单值）；
+  //   :203 传给 Value 的 preName（Value.tsx:36 的 useWatch）；:212 传给 GroupBy 的 parentNames（GroupBy/index.tsx:62,63 的 getFieldValue）——
+  // 相对路径那一侧在本文件里没有用到（所有 Form.Item / Form.List 都是 `{...field} name={[field.name, …]}`，
+  // 前缀由外层 Form.List 自动补），所以这里只留绝对路径的那一个，改名叫 absNames，免得留一个没人用的变量。
+  // 两个 prop 都不传时 absNames = ['rule_config','queries']，fe 行为一字不变。
+  const absNames = [...fullPrefixName, ...prefixName, 'queries']; // 绝对路径
+  const queries = Form.useWatch(absNames);
+  const indexType = Form.useWatch([...absNames, field.name, 'index_type']);
+  const indexValue = Form.useWatch([...absNames, field.name, 'index']);
+  const indexPatternId = Form.useWatch([...absNames, field.name, 'index_pattern']);
   const curIndexValue = useMemo(() => {
     if (indexType === 'index') {
       return indexValue;
@@ -175,7 +190,7 @@ export default function Query(props: Props) {
       <Row gutter={8}>
         {indexType === 'index' && (
           <Col span={6}>
-            <DateField disabled={disabled} datasourceValue={datasourceValue} index={indexValue} field={field} preName={names} />
+            <DateField disabled={disabled} datasourceValue={datasourceValue} index={indexValue} field={field} preName={absNames} />
           </Col>
         )}
         <Col span={6}>
@@ -202,17 +217,17 @@ export default function Query(props: Props) {
             datasourceValue={datasourceValue}
             index={curIndexValue}
             field={field}
-            preName={names}
+            preName={absNames}
             disabled={disabled}
             functions={['count', 'avg', 'sum', 'max', 'min', 'p90', 'p95', 'p99']}
           />
         </Col>
       </Row>
       <div>
-        <GroupBy datasourceValue={datasourceValue} index={curIndexValue} parentNames={names} prefixField={field} prefixFieldNames={[field.name]} disabled={disabled} />
+        <GroupBy datasourceValue={datasourceValue} index={curIndexValue} parentNames={absNames} prefixField={field} prefixFieldNames={[field.name]} disabled={disabled} />
       </div>
       <AdvancedSettings field={field} />
-      <GraphPreview datasourceValue={datasourceValue} data={queries?.[field.name]} />
+      <GraphPreview datasourceValue={datasourceValue} datasourceValues={datasourceValues} cate={cate} data={queries?.[field.name]} disabled={disabled} />
     </CardContainer>
   );
 }
