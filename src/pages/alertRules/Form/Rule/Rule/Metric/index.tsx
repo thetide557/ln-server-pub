@@ -88,9 +88,17 @@ export default function index({ form, type, assets ,field }) {
                 // form.setFieldsValue(getDefaultValuesByCate('metric', val));
                 const strategies = form.getFieldValue("strategies") || [];
                 const newStrategies = [...strategies];
+                // ---- 第六步 第4段 W0（lead 拍板-13，依据 顾问答案/大顾问-Q2.md 第三、五节）----
+                // 原文这里写死传 "metric"，而 getDefaultValuesByCate 的第一个参数就是要写回 prod 的值；
+                // 于是用户在产品类型里选了 Log（prod='logging'）之后，只要再动一下类型下拉，
+                // prod 就被悄悄打回 'metric'。改成按该策略当前的 prod 传。
+                const curProd = strategies[field.name]?.prod;
                 newStrategies[field.name] = {
                   ...newStrategies[field.name],
-                  ...getDefaultValuesByCate("metric", val),
+                  ...getDefaultValuesByCate(
+                    curProd === "logging" ? "logging" : "metric",
+                    val
+                  ),
                 };
                 form.setFieldsValue({
                   strategies: newStrategies,

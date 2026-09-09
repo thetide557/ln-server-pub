@@ -94,8 +94,14 @@ export const ruleTypeOptions = [
 
 export const selectTypeOptions = [
   {
+    // ---- 第六步 第4段 W0（lead 拍板-13，依据 顾问答案/大顾问-Q2.md 第三、五节）----
+    // 原文是 `value: 1`（数字），改成 `value: 'metric'`（字符串）。
+    // 理由：这一项的值会经 ProdSelect 写进该策略的 prod 字段，prod 原样进提交体；
+    // 后端的 Prod 是 string 类型、而且靠它分流，收到数字 1 会在 BindJSON 那一层直接 400。
+    // 另外本文件 :77 的默认值本来就是字符串 'metric'，改完两边才对得上。
+    // （上一轮 lead 拍板-01「羚牛这里是数字 1，不去纠正」作废。）
     label: 'Metric',
-    value: 1,
+    value: 'metric',
     pro: false,
   },
   // ---- 第六步 第4段 W0（阶段 0 · ck 试点）：追加「日志型」这一项，值照 fe v9.1.0
