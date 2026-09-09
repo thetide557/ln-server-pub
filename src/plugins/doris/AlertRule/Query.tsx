@@ -4,7 +4,10 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useTranslation, Trans } from 'react-i18next';
 import { SqlMonacoEditor, SqlMonacoPreview } from '@fc-components/monaco-editor';
-import { WandSparkles } from 'lucide-react';
+// 第六步 第4段 W1-SQL组：pub 锁的 lucide-react 是 0.294.0，里面还没有 WandSparkles 这个名字
+// （node_modules/lucide-react/dist/lucide-react.d.ts 里只有 Wand / Wand2），换成同类的 Wand2。
+// 升 lucide-react 属依赖升级，本轮不做（做法与阶段 0 的 ck 样板一致，登记在 拿不准-SQL组.md U-02）。
+import { Wand2 as WandSparkles } from 'lucide-react';
 
 import { CommonStateContext } from '@/App';
 import { IS_PLUS } from '@/utils/constant';
@@ -25,18 +28,30 @@ interface Props {
   field: any;
   dbList: string[];
   disabled?: boolean;
+  // 第六步 第4段 W1-SQL组：rule_config 的**绝对**路径（含义 = 上层的 absPrefix，
+  // 羚牛下是 ['strategies', n, 'rule_config']，fe 下是 ['rule_config']）。
+  // 本文件里 useWatch / setFields / getFieldValue 全是绝对路径调用（规矩 A），一律从它拼。
+  // 缺省值 ['rule_config'] = fe 原状，不传就和 fe 一字不差。
+  fullPrefixName?: (string | number)[];
+  // 第六步 第4段 W1-SQL组：fe 原文在下面 shouldUpdate 里读**顶层** cate 字段；
+  // 羚牛的 cate 在每条策略上，改成由上层传进来。
+  cate?: string;
   onClose?: () => void;
 }
 
 export default function Query(props: Props) {
   const { t } = useTranslation(NAME_SPACE);
   const { darkMode } = useContext(CommonStateContext);
-  const { type } = useContext(FormStateContext);
-  const { datasourceId, field, dbList, disabled, onClose } = props;
+  // 第六步 第4段 W1-SQL组：fe 的 FormStateContext 有 { disabled, type }（fe Form/index.tsx:42-45），
+  // 羚牛那份只有 { disabled }（pub src/pages/alertRules/Form/index.tsx:45-47，本轮不许改挂点）。
+  // 这里加 as any 让编译过；运行时 type 取到 undefined，下面 showDatabase 恒为 false —— 后果登记在 拿不准-SQL组.md U-01。
+  const { type } = useContext(FormStateContext) as any;
+  const { datasourceId, field, dbList, disabled, onClose, fullPrefixName = ['rule_config'], cate } = props;
   const [sqlWarningI18nKey, setSqlWarningI18nKey] = useState<string>('');
   const [builderModalVisible, setBuilderModalVisible] = useState(false);
   const form = Form.useFormInstance();
-  const queries = Form.useWatch(['rule_config', 'queries']);
+  // 第六步 第4段 W1-SQL组（规矩 A）：useWatch 走绝对路径，从 fullPrefixName 拼。
+  const queries = Form.useWatch([...fullPrefixName, 'queries']);
   const query = queries?.[field.name];
   const editMode = query?.editMode ?? 'code';
   const sql = query?.sql;
@@ -93,15 +108,15 @@ export default function Query(props: Props) {
                         onOk: () => {
                           form.setFields([
                             {
-                              name: ['rule_config', 'queries', field.name, 'editMode'],
+                              name: [...fullPrefixName, 'queries', field.name, 'editMode'],
                               value: 'builder',
                             },
                             {
-                              name: ['rule_config', 'queries', field.name, 'sql'],
+                              name: [...fullPrefixName, 'queries', field.name, 'sql'],
                               value: undefined,
                             },
                             {
-                              name: ['rule_config', 'queries', field.name, 'builderConfig'],
+                              name: [...fullPrefixName, 'queries', field.name, 'builderConfig'],
                               value: undefined,
                             },
                           ]);
@@ -112,7 +127,7 @@ export default function Query(props: Props) {
                   }
                   form.setFields([
                     {
-                      name: ['rule_config', 'queries', field.name, 'editMode'],
+                      name: [...fullPrefixName, 'queries', field.name, 'editMode'],
                       value,
                     },
                   ]);
@@ -199,20 +214,20 @@ export default function Query(props: Props) {
             onConfirm={(builderConfig, res) => {
               form.setFields([
                 {
-                  name: ['rule_config', 'queries', field.name, 'sql'],
+                  name: [...fullPrefixName, 'queries', field.name, 'sql'],
                   value: res.sql,
                 },
                 {
-                  name: ['rule_config', 'queries', field.name, 'builderConfig'],
+                  name: [...fullPrefixName, 'queries', field.name, 'builderConfig'],
                   value: builderConfig,
                   errors: [],
                 },
                 {
-                  name: ['rule_config', 'queries', field.name, 'keys', 'valueKey'],
+                  name: [...fullPrefixName, 'queries', field.name, 'keys', 'valueKey'],
                   value: res.value_key,
                 },
                 {
-                  name: ['rule_config', 'queries', field.name, 'keys', 'labelKey'],
+                  name: [...fullPrefixName, 'queries', field.name, 'keys', 'labelKey'],
                   value: res.label_key,
                 },
               ]);
@@ -287,13 +302,14 @@ export default function Query(props: Props) {
       <AdvancedSettings prefixField={field} prefixName={[field.name]} disabled={disabled} showUnit={IS_PLUS} showOffset span={6} expanded />
       <Form.Item shouldUpdate noStyle>
         {({ getFieldValue }) => {
-          const cate = getFieldValue('cate');
-          const sql = getFieldValue(['rule_config', 'queries', field.name, 'sql']);
-          const database = getFieldValue(['rule_config', 'queries', field.name, 'database']);
-          const interval = getFieldValue(['rule_config', 'queries', field.name, 'interval']);
-          const interval_unit = getFieldValue(['rule_config', 'queries', field.name, 'interval_unit']);
+          // 第六步 第4段 W1-SQL组：fe 原文这里是从表单**顶层**取 cate 字段，
+          // 羚牛的 cate 在每条策略上，改成用上面传进来的 cate prop。
+          const sql = getFieldValue([...fullPrefixName, 'queries', field.name, 'sql']);
+          const database = getFieldValue([...fullPrefixName, 'queries', field.name, 'database']);
+          const interval = getFieldValue([...fullPrefixName, 'queries', field.name, 'interval']);
+          const interval_unit = getFieldValue([...fullPrefixName, 'queries', field.name, 'interval_unit']);
           const intervalValue = normalizeTime(interval, interval_unit);
-          const offset = getFieldValue(['rule_config', 'queries', field.name, 'offset']);
+          const offset = getFieldValue([...fullPrefixName, 'queries', field.name, 'offset']);
 
           return <GraphPreview cate={cate} datasourceValue={datasourceId} sql={sql} database={database} interval={intervalValue} offset={offset} />;
         }}
