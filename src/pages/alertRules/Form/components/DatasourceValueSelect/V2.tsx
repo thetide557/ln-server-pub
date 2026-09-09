@@ -205,6 +205,15 @@ export default function index(props: IProps) {
   const datasource_cate = datasourceCate || Form.useWatch(['cate']);
   const datasource_queries = Form.useWatch(absNames); // 第六步 W2：绝对路径，见 IProps 上的注释
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
+  // ---- 第六步 第4段 W2（阶段 2）改动 3/3：预览降级。
+  // 「这条规则会命中哪几个数据源」是问后端要的（POST /api/n9e/datasource/query），
+  // 羚牛把这条路由漏搬了（夜莺基线 4f150ab7:center/router/router.go:290,327 有；
+  // 羚牛 ln-server/center/router/router.go 零命中），后端待办 R1。
+  // 所以这里兜一个失败状态：预览区改显示「预览不可用」，**不弹全局错误、也不挡保存**。
+  // services.ts 里的请求本来就带 silence: true，pub 的 @/utils/request 认这个开关
+  //（src/utils/request.ts:17,26：silence 时不 message.error，但仍然把错误抛出来），
+  // 所以必须在这里 .catch 住，否则是一个没人接的 Promise 拒绝。
+  const [previewUnavailable, setPreviewUnavailable] = useState(false);
   const autoDefaultCheckedCateRef = useRef<string>();
   const fetchDatasourceList = () => {
     getDatasourceBriefList().then((res) => {
@@ -217,16 +226,26 @@ export default function index(props: IProps) {
       getDatasourcesByQueries({
         datasource_cate,
         datasource_queries,
-      }).then((res) => {
-        setDatasources(res);
-        const datasourceIds = _.map(res, 'id');
-        const invalidDatasourceIds = getInvalidDatasourceIds(datasourceIds, fullDatasourceList);
-        setInvalidDatasourceIds(invalidDatasourceIds);
-        form.setFieldsValue({
-          datasource_value: _.head(datasourceIds), // 取第一个数据用于数据预览等地方
-          datasource_values: datasourceIds, // 保存所有查询的数据源 id
+      })
+        .then((res) => {
+          setPreviewUnavailable(false);
+          setDatasources(res);
+          const datasourceIds = _.map(res, 'id');
+          const invalidDatasourceIds = getInvalidDatasourceIds(datasourceIds, fullDatasourceList);
+          setInvalidDatasourceIds(invalidDatasourceIds);
+          form.setFieldsValue({
+            datasource_value: _.head(datasourceIds), // 取第一个数据用于数据预览等地方
+            datasource_values: datasourceIds, // 保存所有查询的数据源 id
+          });
+        })
+        // 第六步 W2：接口不存在（404）或报错时只把预览标成不可用，别的什么都不做——
+        // 表单里的 datasource_queries 照样能保存，编辑器要的那个「单个数据源 id」由
+        // Form/utils.ts 的 resolveDatasourceIdsByQueries 在本地按后端同一套算法算。
+        .catch(() => {
+          setPreviewUnavailable(true);
+          setDatasources([]);
+          setInvalidDatasourceIds([]);
         });
-      });
     }
   }, [datasource_cate, JSON.stringify(datasource_queries), JSON.stringify(fullDatasourceList)]);
 
@@ -316,6 +335,12 @@ export default function index(props: IProps) {
                 >
                   {t('common:datasource.preview')}
                 </Button>
+                {/* 第六步 W2：后端没有 POST /api/n9e/datasource/query 时，这里给一句话说明，不影响保存 */}
+                {previewUnavailable && (
+                  <span className='alert-rule-datasource-preview-unavailable' style={{ color: 'var(--fc-text-3, #8c8c8c)' }}>
+                    {t('common:datasource.queries.preview_unavailable')}
+                  </span>
+                )}
                 {showExtra && <DatasourceSelectExtra />}
                 {!_.isEmpty(invalidDatasourceIds) && (
                   <span style={{ color: '#ff4d4f' }}>
@@ -399,22 +424,27 @@ export default function index(props: IProps) {
           setPreviewModalVisible(false);
         }}
       >
-        <Table
-          size='small'
-          pagination={false}
-          rowKey='id'
-          columns={[
-            {
-              title: 'ID',
-              dataIndex: 'id',
-            },
-            {
-              title: t('common:datasource.name'),
-              dataIndex: 'name',
-            },
-          ]}
-          dataSource={datasources}
-        />
+        {/* 第六步 W2：取不到预览数据时，弹窗里显示同一句「预览不可用」，不显示一张空表 */}
+        {previewUnavailable ? (
+          <div className='alert-rule-datasource-preview-unavailable'>{t('common:datasource.queries.preview_unavailable')}</div>
+        ) : (
+          <Table
+            size='small'
+            pagination={false}
+            rowKey='id'
+            columns={[
+              {
+                title: 'ID',
+                dataIndex: 'id',
+              },
+              {
+                title: t('common:datasource.name'),
+                dataIndex: 'name',
+              },
+            ]}
+            dataSource={datasources}
+          />
+        )}
       </Modal>
     </>
   );
