@@ -43,6 +43,20 @@ import IotDBAlertRule from '@/plugins/iotdb/AlertRule';
 import VictorialogsAlertRule from '@/plugins/victorialogs/AlertRule';
 // loki 的编辑器是老表单自带的（fe v9.1.0 Form/Rule/Rule/index.tsx:22 也是从这里引），不在 src/plugins 下。
 import LokiAlertRule from '../Log/Loki';
+// 第六步 第4段 W3a（拍板-23）：上面这些编辑器里的文案，有几种是各自插件自带的语言包
+//（`src/plugins/<t>/locale/index.ts`，pub 的惯例是在那个文件里调 i18next.addResourceBundle 把词条挂上去）。
+// pub 的 i18n 是静态 resources（src/i18n.ts:19-22）、不像 fe 那样自动扫描 **/locale/index.ts，
+// 谁用谁 import。有几个语言包确实已经在别的页面被 import 过（dashboard 的 QueryEditor、数据源表单、即时查询页），
+// 但那是别人的页面、别人的 import，哪天那边改了这边就跟着掉词条；addResourceBundle 重复调是幂等的，
+// 所以这里把告警表单用得到的七个一起 import 一遍，谁都不依赖谁。
+// elasticsearch / opensearch / loki 三种没有自己的语言包目录，它们的文案走全局的 'alertRules' 命名空间，不用 import。
+import '@/plugins/clickHouse/locale';
+import '@/plugins/mysql/locale';
+import '@/plugins/pgsql/locale';
+import '@/plugins/doris/locale';
+import '@/plugins/TDengine/locale';
+import '@/plugins/iotdb/locale';
+import '@/plugins/victorialogs/locale';
 import { FormStateContext } from '@/pages/alertRules/Form';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
