@@ -4,8 +4,8 @@ import { Row, Col, Form, Tooltip, AutoComplete, InputNumber, Select, Space } fro
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 
-// 第六步 第4段 W1：本文件用到了 InputGroupWithFormItem 的 `addonAfter`（:115 的索引模式设置按钮、
-// :179 的 'Lucene' 角标、:199 的时间单位下拉），而羚牛公共版 `@/components/InputGroupWithFormItem`
+// 第六步 第4段 W1：本文件用到了 InputGroupWithFormItem 的 `addonAfter`（本文件 :122 的索引模式设置按钮、
+// :186 的 'Lucene' 角标、:206 的时间单位下拉），而羚牛公共版 `@/components/InputGroupWithFormItem`
 // 只有 children / label / labelWidth / noStyle 四个 prop（`src/components/InputGroupWithFormItem/index.tsx:6-11`），
 // 少了 addonAfter，直接用会报 error TS2322。pub 现有共享组件按纪律不许改，
 // 所以改指向 ES 升级轮（step6f）已经放在 pub 里的那份 fe v9.1.0 本地副本——
