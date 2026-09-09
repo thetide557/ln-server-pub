@@ -26,6 +26,9 @@ import { DatasourceCateSelect } from '@/components/DatasourceSelect';
 import { getDefaultValuesByCate } from '../../../utils';
 import Prometheus from './Prometheus';
 import XhPrometheus from './Prometheus/XHindex';
+// 第六步 第4段 W0（阶段 0 · ck 试点）：直达路径 import，不写 '@/plugins/clickHouse' 这种裸目录
+//（裸目录的 index 会把 Explorer / ExplorerNG / Dashboard 整套一起拖进来；多数据源轮拍板-02）。
+import ClickHouseAlertRule from '@/plugins/clickHouse/AlertRule';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
 
@@ -63,9 +66,18 @@ export default function index({ form, type, assets ,field }) {
             <DatasourceCateSelect
               scene="alert"
               filterCates={(cates) => {
+                // 第六步 第4段 W0（阶段 0 · ck 试点）：原来这里写死只列指标型（_.includes(item.type, 'metric')）。
+                // 现在按该策略自己的产品类型（prod）分流：选了「Log」就列日志型，其余（'metric' / 数字 1 / 没设）一律照旧列指标型。
+                // 羚牛的多策略结构下 prod 在 ['strategies', field.name, 'prod']，不是顶层。
+                const prod = form.getFieldValue([
+                  "strategies",
+                  field.name,
+                  "prod",
+                ]);
+                const wantType = prod === "logging" ? "logging" : "metric";
                 return _.filter(
                   cates,
-                  (item) => _.includes(item.type, "metric") && !!item.alertRule
+                  (item) => _.includes(item.type, wantType) && !!item.alertRule
                 );
               }}
               onChange={(val) => {
@@ -148,6 +160,19 @@ export default function index({ form, type, assets ,field }) {
                 <XhPrometheus
                   datasourceCate={cate}
                   datasourceValue={datasourceValue}
+                />
+              );
+            }
+            // 第六步 第4段 W0（阶段 0 · ck 试点）：在 PlusAlertRule 兜底之前加 ck 分支。
+            // 只传 field —— ck 的 AlertRule/index.tsx 自己把它拼成
+            // 相对路径 [field.name, 'rule_config']（给 Form.Item / Form.List 用）和
+            // 绝对路径 ['strategies', field.name, 'rule_config']（给 getFieldValue / useWatch 用，这两个 API 不吃 Form.List 前缀）。
+            // 其余 9 种类型阶段 1 一次性照这个样子挂上来。
+            if (cate === "ck") {
+              return (
+                <ClickHouseAlertRule
+                  datasourceValue={datasourceValue}
+                  field={field}
                 />
               );
             }

@@ -97,6 +97,17 @@ export const selectTypeOptions = [
     label: 'Metric',
     value: 1,
     pro: false,
+  },
+  // ---- 第六步 第4段 W0（阶段 0 · ck 试点）：追加「日志型」这一项，值照 fe v9.1.0
+  // src/pages/alertRules/Form/constants.ts:103-107（label 'Log' / value 'logging' / pro false）。
+  // 加它是为了让日志型数据源（elasticsearch / ck 的 logging 面 / 后续的 loki 等）能在
+  // src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx 的类型下拉里被筛出来。
+  // 上面 Metric 那条羚牛写的是数字 1、而默认值（本文件 :77）是字符串 'metric'——两者对不上是羚牛存量写法，
+  // 本轮不去纠正（lead 拍板-01），只在筛子里按「prod === 'logging' 才走日志分支、其余一律走指标分支」兜住。
+  {
+    label: 'Log',
+    value: 'logging',
+    pro: false,
   }
   // {
   //   label: '资产类型',

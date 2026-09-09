@@ -237,6 +237,57 @@ export function getDefaultValuesByCate(prod, cate) {
       rule_config: defaultRuleConfig.metric,
     };
   }
+  // ---- 第六步 第4段 W0（阶段 0 · ck 试点）：给 ck 单开一个分支，放在原来的 `ck || influxdb` 之前。
+  // 为什么要单开：fe v9.1.0 的 ck 告警编辑器（src/plugins/clickHouse/AlertRule/）要的 rule_config 形状，
+  // 比下面这个羚牛存量默认值多四样东西，缺了界面会不对：
+  //   1) queries: [{ ref: 'A' }]  —— 查询卡片列表；缺了虽然 Form.List 的 initialValue 兜得住，但显式给更稳
+  //   2) exp_trigger_disable: false —— **最要紧的一个**。搬进来的 Triggers.tsx:58 判的是 `exp_trigger_disable === false`
+  //      （严格等于 false 才展开「触发条件」那块），undefined 会让整块触发条件静默不显示。
+  //   3) nodata_trigger: {...} —— 「无数据告警」那块开关的初值（Triggers.tsx:112 读它）
+  //   4) triggers[].recover_config.judge_type —— 恢复判断方式。照 fe 的 getDefaultRuleConfig
+  //      （fe:src/pages/alertRules/Form/constants.ts:35-48）：日志类数据源给 0、其余给 1；
+  //      ck 在本仓 src/components/AdvancedWrap/utils.ts 里 type 含 'logging'，所以给 0。
+  // fe 自己没有 ck 的专门分支，ck 落到 fe utils.ts:445-452 的兜底，拿的就是完整的 defaultRuleConfig
+  //（fe:src/pages/alertRules/Form/constants.ts:7-33）——下面这份就是照它抄的。
+  // influxdb 走原来那条分支，一个字不动。
+  if (cate === 'ck') {
+    return {
+      prod,
+      cate,
+      datasource_ids: undefined,
+      rule_config: {
+        queries: [
+          {
+            ref: 'A',
+          },
+        ],
+        triggers: [
+          {
+            mode: 0,
+            expressions: [
+              {
+                ref: 'A',
+                comparisonOperator: '>',
+                value: 0,
+                logicalOperator: '&&',
+              },
+            ],
+            severity: 2,
+            recover_config: {
+              judge_type: 0,
+            },
+          },
+        ],
+        exp_trigger_disable: false,
+        nodata_trigger: {
+          enable: false,
+          severity: 2,
+          resolve_after_enable: false,
+          resolve_after: undefined,
+        },
+      },
+    };
+  }
   if (cate === 'ck' || cate === 'influxdb') {
     return {
       prod,
