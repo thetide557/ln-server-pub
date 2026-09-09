@@ -38,6 +38,19 @@ jest.mock('@/components/DatasourceSelect', () => ({
 jest.mock('@/pages/alertRules/Form/Rule/Rule/Metric/Prometheus', () => ({ __esModule: true, default: () => null }));
 jest.mock('@/pages/alertRules/Form/Rule/Rule/Metric/Prometheus/XHindex', () => ({ __esModule: true, default: () => null }));
 jest.mock('@/plugins/clickHouse/AlertRule', () => ({ __esModule: true, default: () => null }));
+// 第六步 第4段 W3a（阶段 1 收尾）：分发点 Metric/index.tsx 现在还 import 了另外九种编辑器。
+// 它们和本文件要证的事（数据源筛选器 V2 与 datasource_queries）没关系，但会顺着 import 链
+// 把整包 monaco 拉进来（<插件>/AlertRule → FormNG/components/Triggers → Code.tsx:23 →
+// @fc-components/monaco-editor，那个包只发 ESM、jest 默认不转译 node_modules，直接报
+// 「Cannot use import statement outside a module」）。照上面 clickHouse 那行的样子一并换成空组件。
+jest.mock('@/plugins/mysql/AlertRule', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/plugins/pgsql/AlertRule', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/plugins/doris/AlertRule', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/plugins/elasticsearch/AlertRule', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/plugins/TDengine/AlertRule', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/plugins/iotdb/AlertRule', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/plugins/victorialogs/AlertRule', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/pages/alertRules/Form/Rule/Rule/Log/Loki', () => ({ __esModule: true, default: () => null }));
 // V2 里 showExtra 为真才会渲染它，羚牛不传；换成空组件，免得把 clickHouse 的元数据弹窗整包拉进来
 jest.mock('@/pages/alertRules/Form/components/DatasourceSelectExtra', () => ({ __esModule: true, default: () => null }));
 // 数据源列表接口：V2 挂载时会拉一次全量数据源

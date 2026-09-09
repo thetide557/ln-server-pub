@@ -188,8 +188,14 @@ describe('阶段 1 · doris 告警规则编辑器接进羚牛多策略表单', (
         queries: [{ ...dorisStrategy.rule_config.queries[0], editMode: 'builder' }],
       },
     });
-    // builder 模式下不渲染那个 SQL 代码框（Query.tsx:224 的 editMode === 'code' 分支）
-    expect(container.querySelector('#strategies_0_rule_config_queries_0_sql')).toBeNull();
+    // builder 模式下不渲染那个 SQL 代码框（Query.tsx:246 的 editMode === 'code' 分支）。
+    // 第六步 第4段 W3a 改：不能直接按 id 断言「元素不存在」——builder 分支自己还留着一个同名字段的隐藏项
+    //（Query.tsx:211 `<Form.Item name={[field.name,'sql']} hidden><input type='hidden' /></Form.Item>`，
+    // 提交前要靠它校验 SQL 非空），它拿到的是同一个 id、只是 type="hidden"。原来那条断言是 SQL 组只写没跑写下的，
+    // 一跑就红。改成按「代码框那个组件」断言：上面把 SqlMonacoEditor mock 成了带 data-testid='sql-editor' 的 div。
+    expect(container.querySelector('[data-testid="sql-editor"]')).toBeNull();
+    // 同时把「隐藏项还在、且确实是隐藏的」也钉住，免得将来 builder 分支少了那个校验项没人发现
+    expect(container.querySelector('#strategies_0_rule_config_queries_0_sql')?.getAttribute('type')).toBe('hidden');
   });
 
   it('触发条件那一整块出得来，且字段同样落在 strategies[0].rule_config 下', () => {
