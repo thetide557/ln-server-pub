@@ -47,6 +47,8 @@ const zh_HK = {
     operations: '操作',
     total: '共 {{total}} 條',
   },
+  // ---- 第六步 第4段 W2（阶段 2）：fe v9.1.0 src/locales/common/locale/zh_HK.ts:25 的 and（V2.tsx:70 用）。
+  and: '且',
   datasource: {
     prod: '監控型別',
     name: '資料來源',
@@ -58,6 +60,22 @@ const zh_HK = {
       btn1: '前往配置',
       btn2: '知道了',
     },
+    // ---- 第六步 第4段 W2（阶段 2）：只追加下面这一段，上面一个字没动。
+    // 来源 fe v9.1.0 src/locales/common/locale/zh_HK.ts:101,108-118；
+    // preview_unavailable 是羚牛自己加的（后端缺 POST /api/n9e/datasource/query，见 zh_CN.ts 同段注释）。
+    preview: '資料來源預覽',
+    queries: {
+      label: '資料來源篩選',
+      match_type_0: '精確匹配',
+      match_type_1: '模糊匹配',
+      match_type_1_tip: `支持兩種通配符<br>* 可以匹配 0 個或多個任意字符<br>? 只能匹配一個任意字符`,
+      match_type_2: '全部資料來源',
+      op_in: '包含',
+      op_not_in: '不包含',
+      preview: '資料預覽',
+      preview_unavailable: '預覽不可用',
+    },
+    managePageLink: '點選前往資料來源管理',
   },
   confirm: {
     delete: '確認刪除嗎？',
