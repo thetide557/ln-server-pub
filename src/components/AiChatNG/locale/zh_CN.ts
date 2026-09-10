@@ -60,6 +60,7 @@ const zh_CN = {
     skill_scope: '可见范围',
     placeholder_select: '请选择',
     confirm: '确定',
+    cancel: '取消',
   },
   alert_rule: {
     title: '告警规则',

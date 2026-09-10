@@ -60,6 +60,7 @@ const en_US = {
     skill_scope: 'Visibility',
     placeholder_select: 'Please select',
     confirm: 'Confirm',
+    cancel: 'Cancel',
   },
   alert_rule: {
     title: 'Alert rule',

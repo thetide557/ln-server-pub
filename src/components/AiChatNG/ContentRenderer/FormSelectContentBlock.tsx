@@ -29,6 +29,7 @@ interface IFormSelectPayload {
 // approval 确认通道：对齐后端 aiagent.ApprovalParamKey 与候选 ID（1=确认，2=取消）。
 const APPROVAL_FIELD_KEY = 'approval';
 const APPROVAL_CANDIDATE_APPROVE = 1;
+const APPROVAL_CANDIDATE_CANCEL = 2;
 
 function safeParsePayload(raw: string): IFormSelectPayload | undefined {
   if (!raw) return undefined;
@@ -241,7 +242,19 @@ function FormFieldsView(props: { payload?: IFormSelectPayload; onConfirm: (resul
         ) : null}
       </div>
 
-      <div className='mt-4 flex justify-end'>
+      <div className='mt-4 flex justify-end gap-2'>
+        {/* 羚牛自加（上游 fe v9.1.0 这里只有「确定」一个按钮）：补信息表单也给一个「取消」。
+            后端 message/new 收到 action.param.approval=2 就按取消处理（aiagent.ApprovalParamKey，
+            1=确认 2=取消，同本文件 :110-120 审批门的写法）；content 不能为空，空的后端返 400
+            `query.content is required`。出处：ln-server 阶段5b 点击测试《前端交接-2026-09-06》第 2 节 OBS-5、
+            判定门《缺口清单-AI面》5.1 表 R6 行。取消不受 disabled（表单没填完）约束。 */}
+        <Button
+          onClick={() => {
+            props.onConfirm({ param: { approval: APPROVAL_CANDIDATE_CANCEL }, content: t('form_select.cancel') });
+          }}
+        >
+          {t('form_select.cancel')}
+        </Button>
         <Button
           type='primary'
           disabled={disabled}
