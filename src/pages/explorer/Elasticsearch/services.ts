@@ -195,6 +195,18 @@ export function getLogsQuery(datasourceValue: number, requestBody: any, requestI
       // 查询返回为空时 responses[0].hits 是 undefined，取 dat.hits 会直接抛错。
       // total 在 ES 6.x 是数字、7.x 起是 { value, relation } 对象，两种都要接住
       //（羚牛原补丁只处理了对象那种、数字那种会被算成 0，这里补上 else 分支，等于把上游的 `?? dat.total` 也留着）。
+      // ---- 阶段 II W0 小修③（判定门 G8 第三节、主 session 拍板 M38）：兜底之前先看 ES 有没有报错。
+      // `/_msearch` 出错时 HTTP 仍是 200，错误装在 responses[0].error 里；而 pub 的 request.ts:106-111
+      // 对 /api/n9e/proxy 这类地址是「HTTP 200 就原样返回、不查任何错误字段」，所以这里不主动判，
+      // 下面的兜底会把它当成「查到 0 条」，页面显示「暂无数据」、错误横幅还被 index.tsx:291 清空，
+      // ES 说的真实原因（比如排序字段不存在）一个字都看不到。上游 fe v9.1.0 / main 至今也没判 error
+      //（那边是 dat.hits 直接抛 TypeError，报错但文案难看），属「未查到官方修复」，本条是羚牛自加。
+      // reason 优先取 root_cause[0].reason：ES 顶层 reason 常是「all shards failed」这种没信息量的话，
+      // 真正原因在 root_cause 里，先给具体的。
+      const esError = _.get(res, 'responses[0].error');
+      if (esError) {
+        throw new Error(_.get(esError, 'root_cause[0].reason') || _.get(esError, 'reason') || JSON.stringify(esError));
+      }
       const dat = _.get(res, 'responses[0].hits', { hits: [], total: 0 });
       const { docs } = flattenHits(dat.hits || []);
       let total = 0;
