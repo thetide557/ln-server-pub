@@ -60,6 +60,7 @@ const zh_HK = {
     skill_scope: '可見範圍',
     placeholder_select: '請選擇',
     confirm: '確定',
+    cancel: '取消',
   },
   alert_rule: {
     title: '告警規則',
