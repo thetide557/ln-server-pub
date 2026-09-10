@@ -1,5 +1,6 @@
 import React from 'react';
-import { Empty, Spin } from 'antd';
+import { Button, Empty, Popconfirm, Spin } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
@@ -142,7 +143,7 @@ export default function ChatHistory(props: IChatHistoryPageProps) {
 
                             <div className='ml-4 flex shrink-0 items-center gap-2'>
                               <div className='font-normal text-hint'>{formatHistoryItemTime(chat.last_update, t)}</div>
-                              {/* <Popconfirm
+                              <Popconfirm
                                 title={<span className='whitespace-nowrap'>{t('history.delete_confirm')}</span>}
                                 overlayStyle={{ minWidth: 220 }}
                                 onConfirm={(event) => {
@@ -160,7 +161,7 @@ export default function ChatHistory(props: IChatHistoryPageProps) {
                                   )}
                                   onClick={(event) => event.stopPropagation()}
                                 />
-                              </Popconfirm> */}
+                              </Popconfirm>
                             </div>
                           </div>
                         );
