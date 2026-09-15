@@ -16,10 +16,25 @@ export default function Cluster({ form, clusterRef }) {
       if (values?.cluster_name === undefined) {
         form.setFieldsValue({ cluster_name: res?.[0] });
       }
+      form.validateFields(['cluster_name']);
     });
   }, []);
   return (
-    <Form.Item label={t('form.cluster')} name='cluster_name'>
+    <Form.Item
+      label={t('form.cluster')}
+      name='cluster_name'
+      rules={[
+        {
+          validator: (_field, value) => {
+            const invalidCluster = !_.find(clusters, (item) => item === value) && value !== 'no_assigned_engine';
+            if (invalidCluster) {
+              return Promise.reject(t('form.cluster_not_found'));
+            }
+            return Promise.resolve();
+          },
+        },
+      ]}
+    >
       <Select ref={clusterRef} allowClear>
         {_.map(clusters, (item) => {
           return (

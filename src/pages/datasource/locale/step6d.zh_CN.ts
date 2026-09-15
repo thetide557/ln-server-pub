@@ -19,6 +19,7 @@ const zh_CN = {
       disable_write: "不允许写入"
     },
     cluster_tip: "在多个机房的架构下，有时会部署多个告警引擎集群，对应边缘机房的数据源，需要关联相应机房的告警引擎集群，如果只有一个集群，保持默认即可",
+    cluster_not_found: "关联告警引擎已停用，当前数据源的告警不再生效。请检查告警引擎配置或重新修改数据源关联的告警引擎",
     logs_max_query_rows: "返回的最大日志条数",
     protocol: "协议",
     secure_connection: "安全连接（SSL/TLS）",
