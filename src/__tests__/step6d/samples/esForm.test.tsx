@@ -95,7 +95,7 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     });
 
     // step6f：原来取的是 requestMock.mock.calls[0]。覆盖后 <Cluster> 不再被 AdvancedWrap 包住，
-    // 一挂载就先打了一次 GET /api/n9e/server-clusters，upsert 不再是第 0 次调用，所以按 url 找。
+    // 一挂载就先打了一次 GET /api/takin/server-clusters，upsert 不再是第 0 次调用，所以按 url 找。
     const [url, options] = requestMock.mock.calls.find((c: any[]) => String(c[0]).includes('datasource/upsert')) as any[];
     const body = options.data;
 
@@ -106,7 +106,7 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     console.log('[step6d][样板A] upsert body =', JSON.stringify(body, null, 2));
 
     expect(url).toContain('datasource/upsert');
-    expect(url).toBe('/api/n9e/datasource/upsert');
+    expect(url).toBe('/api/takin/datasource/upsert');
     // RequestMethod.Post 的字面量是 'Post'（首字母大写），见 src/store/common.ts
     expect(options.method).toBe('Post');
 
@@ -137,11 +137,11 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     // step6f：原来这里断的是 `expect(requestMock).not.toHaveBeenCalled()`。
     // 覆盖后 <Cluster> 不再被 <AdvancedWrap var='VITE_IS_PRO,VITE_IS_ENT'> 包住
     //（fork 点 c65a5fdf9 的 Form.tsx:73 有这层包装，fe v9.1.0 已去掉，属上游改动），
-    // 于是它一挂载就会去拉告警引擎集群列表 GET /api/n9e/server-clusters，requestMock 必然被调用过一次。
+    // 于是它一挂载就会去拉告警引擎集群列表 GET /api/takin/server-clusters，requestMock 必然被调用过一次。
     // 这条用例真正要守的是「校验没过就不发保存请求」，所以改成断言没有任何一次调用打到 datasource/upsert。
     expect(requestMock).toHaveBeenCalled();
     const calledUrls = requestMock.mock.calls.map((c: any[]) => c[0]);
-    expect(calledUrls).toContain('/api/n9e/server-clusters');
+    expect(calledUrls).toContain('/api/takin/server-clusters');
     expect(calledUrls.some((u: string) => String(u).includes('datasource/upsert'))).toBe(false);
   });
 });

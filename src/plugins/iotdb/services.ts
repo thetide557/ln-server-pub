@@ -6,7 +6,7 @@ import { BaseParams } from './types';
 const getDatasourceCate = (cate?: string) => encodeURIComponent(cate || DatasourceCateEnum.iotdb);
 
 export function getDatabases(data: BaseParams): Promise<string[]> {
-  return request(`/api/n9e/${getDatasourceCate(data.cate)}-databases`, {
+  return request(`/api/takin/${getDatasourceCate(data.cate)}-databases`, {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -19,7 +19,7 @@ export function getTables(
     db: string;
   },
 ): Promise<string[]> {
-  return request(`/api/n9e/${getDatasourceCate(data.cate)}-tables`, {
+  return request(`/api/takin/${getDatasourceCate(data.cate)}-tables`, {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -39,7 +39,7 @@ export function getColumns(
     size: number;
   }[]
 > {
-  return request(`/api/n9e/${getDatasourceCate(data.cate)}-columns`, {
+  return request(`/api/takin/${getDatasourceCate(data.cate)}-columns`, {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -62,7 +62,7 @@ export function getDsQuery(
     }[];
   },
 ): Promise<any> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -82,7 +82,7 @@ export function getLogsQuery(
     }[];
   },
 ): Promise<any> {
-  return request('/api/n9e/logs-query', {
+  return request('/api/takin/logs-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {

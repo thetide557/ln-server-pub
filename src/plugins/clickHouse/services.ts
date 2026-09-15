@@ -8,14 +8,14 @@ import { BaseParams } from './types';
 export type { Field };
 
 export const getCKDatabases = (data: BaseParams): Promise<string[]> => {
-  return request('/api/n9e/db-databases', {
+  return request('/api/takin/db-databases', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
 };
 
 export const getCKTables = (data: BaseParams & { query: string[] }): Promise<string[]> => {
-  return request('/api/n9e/db-tables', {
+  return request('/api/takin/db-tables', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
@@ -33,14 +33,14 @@ export function getColumns(
     }[];
   },
 ): Promise<{ field: string; type: string; type2: string }[]> {
-  return request('/api/n9e/db-desc-table', {
+  return request('/api/takin/db-desc-table', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
 }
 
 export const logQuery = function (data: any) {
-  return request('/api/n9e/logs-query', {
+  return request('/api/takin/logs-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
@@ -60,14 +60,14 @@ export function getDsQuery(
     }[];
   },
 ): Promise<any> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
 }
 
 export function getLogsQuery(data: any): Promise<any[]> {
-  return request('/api/n9e/log-query-batch', {
+  return request('/api/takin/log-query-batch', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -75,7 +75,7 @@ export function getLogsQuery(data: any): Promise<any[]> {
 }
 
 export function getDsQuery2(data: any): Promise<any[]> {
-  return request('/api/n9e-plus/query-batch', {
+  return request('/api/takin-plus/query-batch', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -83,14 +83,14 @@ export function getDsQuery2(data: any): Promise<any[]> {
 }
 
 export function getCKFields(data: BaseParams & { database: string; table: string }): Promise<string[]> {
-  return request('/api/n9e-plus/ck-fields', {
+  return request('/api/takin-plus/ck-fields', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
 }
 
 export function getCKIndex(data: BaseParams & { database: string; table: string }): Promise<Field[]> {
-  return request('/api/n9e-plus/ck-index', {
+  return request('/api/takin-plus/ck-index', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
@@ -109,7 +109,7 @@ export function getCKHistogram(
     group_by?: string;
   }>,
 ): Promise<any[]> {
-  return request('/api/n9e-plus/ck-histogram', {
+  return request('/api/takin-plus/ck-histogram', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -140,7 +140,7 @@ export function getCKLogsQuery(
     field_filter?: unknown;
   }>,
 ): Promise<{ list: Record<string, any>[]; total: number }> {
-  return request('/api/n9e-plus/ck-logs-query', {
+  return request('/api/takin-plus/ck-logs-query', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -165,7 +165,7 @@ export function getCKSQLFormat(
     reverse?: boolean;
   }>,
 ): Promise<string> {
-  return request('/api/n9e-plus/ck-sql-format', {
+  return request('/api/takin-plus/ck-sql-format', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -209,7 +209,7 @@ export function getCKSQLsPreview(
     };
   };
 }> {
-  return request('/api/n9e-plus/ck-sqls-preview', {
+  return request('/api/takin-plus/ck-sqls-preview', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -223,7 +223,7 @@ export function getCKSQLsPreview(
 
 export function getFiledSample(data: FieldSampleParams & { field: string }): Promise<string[]> {
   const { filters, ...rest } = data;
-  return request('/api/n9e-plus/ck-field-sample', {
+  return request('/api/takin-plus/ck-field-sample', {
     method: RequestMethod.Post,
     data: {
       ...rest,
@@ -256,7 +256,7 @@ export function buildSql(
   time_key?: string;
   label_key: string[];
 }> {
-  return request('/api/n9e-plus/ck-query-builder', {
+  return request('/api/takin-plus/ck-query-builder', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -272,7 +272,7 @@ export function getCKTableConfig(data: BaseParams & { database: string; table: s
   histogram_stack_field?: string;
   default_time_field?: string;
 }> {
-  return request('/api/n9e-plus/ck-table-config', {
+  return request('/api/takin-plus/ck-table-config', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || {});

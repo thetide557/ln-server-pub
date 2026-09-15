@@ -37,7 +37,7 @@ describe('L5：LLM 配置新建抽屉提交', () => {
     requestMock.mockImplementation(() => Promise.resolve({ dat: {}, data: {} }));
   });
 
-  it('填完必填项点保存，POST /api/n9e/ai-llm-configs 的请求体带后端认的六个字段', async () => {
+  it('填完必填项点保存，POST /api/takin/ai-llm-configs 的请求体带后端认的六个字段', async () => {
     const onOk = jest.fn();
     render(
       <MemoryRouter initialEntries={['/ai-config/llm-configs']}>
@@ -76,7 +76,7 @@ describe('L5：LLM 配置新建抽屉提交', () => {
     // eslint-disable-next-line no-console
     console.log('[step6d][L5] llm-config body =', JSON.stringify(body, null, 2));
 
-    expect(url).toBe('/api/n9e/ai-llm-configs');
+    expect(url).toBe('/api/takin/ai-llm-configs');
     // RequestMethod.Post 的字面量是 'Post'（src/store/common.ts:63 起）
     expect(options.method).toBe('Post');
 

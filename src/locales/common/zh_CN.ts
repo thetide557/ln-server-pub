@@ -66,7 +66,7 @@ const zh_CN = {
     // ---- 第六步 第4段 W2（阶段 2）：只追加下面这一段，上面一个字没动。
     // 来源 fe v9.1.0 src/locales/common/locale/zh_CN.ts:101,108-118（preview / queries / managePageLink），
     // 给新搬进来的数据源筛选器 DatasourceValueSelect/V2.tsx 用。
-    // preview_unavailable 是羚牛自己加的一条：后端没有 POST /api/n9e/datasource/query
+    // preview_unavailable 是羚牛自己加的一条：后端没有 POST /api/takin/datasource/query
     //（基线 4f150ab7:center/router/router.go:290,327 有、羚牛漏搬，后端待办 R1），
     // 预览取不到数据时显示它，不弹全局错误、不挡保存。
     preview: "数据源预览",

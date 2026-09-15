@@ -25,7 +25,7 @@ export const authLogin = function (
   captchaid?: string,
   verifyvalue?: string
 ) {
-  return request(`/api/n9e/auth/login`, {
+  return request(`/api/takin/auth/login`, {
     method: RequestMethod.Post,
     data: { username, password, captchaid, verifyvalue },
   });
@@ -38,7 +38,7 @@ export const authLoginLdap = function (
   captchaid?: string,
   verifyvalue?: string
 ) {
-  return request(`/api/n9e/auth/login/ldap`, {
+  return request(`/api/takin/auth/login/ldap`, {
     method: RequestMethod.Post,
     data: { username, password, captchaid, verifyvalue },
   });
@@ -46,19 +46,19 @@ export const authLoginLdap = function (
 
 
 export const getCaptcha = function () {
-  return request("/api/n9e/auth/captcha", {
+  return request("/api/takin/auth/captcha", {
     method: RequestMethod.Post,
   });
 };
 export const getSystemTheme = function () {
-  return request("/api/n9e/auth/login/title", {
+  return request("/api/takin/auth/login/title", {
     method: RequestMethod.Get,
     silence: true,
   });
 };
 
 export const ifShowCaptcha = function () {
-  return request("/api/n9e/auth/ifshowcaptcha", {
+  return request("/api/takin/auth/ifshowcaptcha", {
     method: RequestMethod.Get,
     silence: true,
   });
@@ -66,7 +66,7 @@ export const ifShowCaptcha = function () {
 
 // 刷新accessToken
 export const UpdateAccessToken = function () {
-  return request(`/api/n9e/auth/refresh`, {
+  return request(`/api/takin/auth/refresh`, {
     method: RequestMethod.Post,
     data: {
       refresh_token: Cookies.get("refresh_token"),
@@ -76,7 +76,7 @@ export const UpdateAccessToken = function () {
 
 // 更改密码
 export const UpdatePwd = function (oldpass: string, newpass: string) {
-  return request(`/api/n9e/self/password`, {
+  return request(`/api/takin/self/password`, {
     method: RequestMethod.Put,
     data: { oldpass, newpass },
   });
@@ -84,79 +84,79 @@ export const UpdatePwd = function (oldpass: string, newpass: string) {
 
 // 获取csrf token
 export const GenCsrfToken = function () {
-  return request(`/api/n9e/csrf`, {
+  return request(`/api/takin/csrf`, {
     method: RequestMethod.Get,
   });
 };
 
 // 退出
 export const Logout = function () {
-  return request(`/api/n9e/auth/logout`, {
+  return request(`/api/takin/auth/logout`, {
     method: RequestMethod.Post,
   });
 };
 
 export const getRedirectURL = function () {
-  return request("/api/n9e/auth/redirect", {
+  return request("/api/takin/auth/redirect", {
     method: RequestMethod.Get,
   });
 };
 
 export const authCallback = function (params) {
-  return request("/api/n9e/auth/callback", {
+  return request("/api/takin/auth/callback", {
     method: RequestMethod.Get,
     params,
   });
 };
 
 export const getRedirectURLCAS = function () {
-  return request("/api/n9e/auth/redirect/cas", {
+  return request("/api/takin/auth/redirect/cas", {
     method: RequestMethod.Get,
   });
 };
 
 export const authCallbackCAS = function (params) {
-  return request("/api/n9e/auth/callback/cas", {
+  return request("/api/takin/auth/callback/cas", {
     method: RequestMethod.Get,
     params,
   });
 };
 
 export const getRedirectURLOAuth = function () {
-  return request("/api/n9e/auth/redirect/oauth", {
+  return request("/api/takin/auth/redirect/oauth", {
     method: RequestMethod.Get,
   });
 };
 
 export const authCallbackOAuth = function (params) {
-  return request("/api/n9e/auth/callback/oauth", {
+  return request("/api/takin/auth/callback/oauth", {
     method: RequestMethod.Get,
     params,
   });
 };
 
 export const getSsoConfig = function () {
-  return request("/api/n9e/auth/sso-config", {
+  return request("/api/takin/auth/sso-config", {
     method: RequestMethod.Get,
   });
 };
 
 export const getRSAConfig = function () {
-  return request("/api/n9e/auth/rsa-config", {
+  return request("/api/takin/auth/rsa-config", {
     method: RequestMethod.Get,
   });
 };
 
 // ai的token
 export function getDeepseektoken() {
-  return request(`/api/n9e/auth/deepseektoken`, {
+  return request(`/api/takin/auth/deepseektoken`, {
     method: RequestMethod.Get,
   });
 }
 
 // 是否开启sso
 export const ifShowSso = function () {
-  return request("/api/n9e/auth/ifShowSso", {
+  return request("/api/takin/auth/ifShowSso", {
     method: RequestMethod.Get,
     silence: true,
   });

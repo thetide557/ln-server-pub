@@ -19,45 +19,45 @@ import { RequestMethod } from '@/store/common';
 import { RoleType, RolePostType, OperationType } from './types';
 
 export const getRoles = function (): Promise<RoleType[]> {
-  return request('/api/n9e/roles', {
+  return request('/api/takin/roles', {
     method: RequestMethod.Get,
   }).then((res) => res.dat);
 };
 
 export const postRoles = function (params: RolePostType) {
-  return request('/api/n9e/roles', {
+  return request('/api/takin/roles', {
     method: RequestMethod.Post,
     data: params,
   });
 };
 
 export const putRoles = function (params: RoleType) {
-  return request('/api/n9e/roles', {
+  return request('/api/takin/roles', {
     method: RequestMethod.Put,
     data: params,
   });
 };
 
 export const deleteRoles = function (id: number) {
-  return request(`/api/n9e/role/${id}`, {
+  return request(`/api/takin/role/${id}`, {
     method: RequestMethod.Delete,
   });
 };
 
 export const getOperations = function (): Promise<OperationType[]> {
-  return request('/api/n9e/operation', {
+  return request('/api/takin/operation', {
     method: RequestMethod.Get,
   }).then((res) => res.dat);
 };
 
 export const getOperationsByRole = function (roleId: number): Promise<string[]> {
-  return request(`/api/n9e/role/${roleId}/ops`, {
+  return request(`/api/takin/role/${roleId}/ops`, {
     method: RequestMethod.Get,
   }).then((res) => res.dat);
 };
 
 export const putOperationsByRole = function (roleId: number, ops: string[]) {
-  return request(`/api/n9e/role/${roleId}/ops`, {
+  return request(`/api/takin/role/${roleId}/ops`, {
     method: RequestMethod.Put,
     data: ops,
   });

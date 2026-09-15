@@ -3,14 +3,14 @@ import { RequestMethod } from "@/store/common";
 
 // 获取所有iot设备的类型
 export const getIotTypeList = function () {
-  return request("/api/n9e/iot/type/list", {
+  return request("/api/takin/iot/type/list", {
     method: RequestMethod.Get,
   });
 };
 
 //   新增设备类型
 export const addIotType = function (data) {
-  return request("/api/n9e/iot/type", {
+  return request("/api/takin/iot/type", {
     method: RequestMethod.Post,
     data,
   });
@@ -18,7 +18,7 @@ export const addIotType = function (data) {
 
 // 获取字段列表
 export const getIotAttributeList = function (params) {
-  return request('/api/n9e/iot/attribute/list', {
+  return request('/api/takin/iot/attribute/list', {
     method: RequestMethod.Get,
     params,
   });
@@ -26,7 +26,7 @@ export const getIotAttributeList = function (params) {
 
 // 获取分页字段配置
 export const getIotPage = function (params) {
-  return request('/api/n9e/iot/page', {
+  return request('/api/takin/iot/page', {
     method: RequestMethod.Get,
     params,
   });
@@ -34,7 +34,7 @@ export const getIotPage = function (params) {
 
 // 分页字段配置
 export const IotPageEdit = function (data, typeId) {
-  return request(`/api/n9e/iot/page/edit?typeId=${typeId}`, {
+  return request(`/api/takin/iot/page/edit?typeId=${typeId}`, {
     method: RequestMethod.Post,
     data,
   });
@@ -43,7 +43,7 @@ export const IotPageEdit = function (data, typeId) {
 
 // 获取资产清单数据
 export const getIotDeviceList = function (params) {
-  return request('/api/n9e/iot/device/list', {
+  return request('/api/takin/iot/device/list', {
     method: RequestMethod.Get,
     params,
   });
@@ -51,7 +51,7 @@ export const getIotDeviceList = function (params) {
 
 // 获取资产详情
 export const getIotDeviceDetail = function (params) {
-  return request('/api/n9e/iot/device', {
+  return request('/api/takin/iot/device', {
     method: RequestMethod.Get,
     params,
   });
@@ -59,14 +59,14 @@ export const getIotDeviceDetail = function (params) {
 
 // 获取物联网资产组织树列表
 export const getIotTreeList = function () {
-  return request('/api/n9e/iot/tree/get', {
+  return request('/api/takin/iot/tree/get', {
     method: RequestMethod.Get,
     // params,
   });
 };
 // 新增/编辑物联网资产分组
 export const addIotTree = function (data) {
-  return request('/api/n9e/iot/tree/node', {
+  return request('/api/takin/iot/tree/node', {
     method: RequestMethod.Post,
     data,
   });
@@ -74,7 +74,7 @@ export const addIotTree = function (data) {
 
 // 删除物联网资产分组
 export const delIotTreeNode = function (params) {
-  return request('/api/n9e/iot/tree/node/delete', {
+  return request('/api/takin/iot/tree/node/delete', {
     method: RequestMethod.Post,
     params,
   });
@@ -82,7 +82,7 @@ export const delIotTreeNode = function (params) {
 
 // 删除设备类型
 export const delIotType = function (data) {
-  return request('/api/n9e/iot/type/delete', {
+  return request('/api/takin/iot/type/delete', {
     method: RequestMethod.Post,
     data,
   });

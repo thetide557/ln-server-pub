@@ -83,35 +83,35 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     proxy: {
-      // "/api/n9e/bigscreen": {
+      // "/api/takin/bigscreen": {
       //   target: "http://7.59.10.66:17000/",
       //   // target: 'http://10.0.20.164:17000/',
       //   changeOrigin: true,
       // },
-      "/api/n9e/xh/": {
+      "/api/takin/xh/": {
         target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      "/api/n9e-plus": {
+      "/api/takin-plus": {
         // target: 'http://10.206.16.17:17001/',
         target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      "/api/n9e/proxy": {
+      "/api/takin/proxy": {
         //target: 'http://192.168.20.19:17000/',
         target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      "/api/n9e/datasource": {
+      "/api/takin/datasource": {
         //target: 'http://192.168.20.19:17000/',
         target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
-      "/api/n9e": {
+      "/api/takin": {
         //target: 'http://192.168.20.19:17000/',
         target: baseUrl,
         // target: 'http://10.0.20.164:17000/',

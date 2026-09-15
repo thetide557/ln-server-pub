@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { BaseParams } from './types';
 
 export function getDatabases(data: BaseParams): Promise<string[]> {
-  return request('/api/n9e/tdengine-databases', {
+  return request('/api/takin/tdengine-databases', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -35,7 +35,7 @@ export function getTables(
     is_stable: boolean;
   },
 ): Promise<string[]> {
-  return request('/api/n9e/tdengine-tables', {
+  return request('/api/takin/tdengine-tables', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -55,7 +55,7 @@ export function getColumns(
     size: number;
   }[]
 > {
-  return request('/api/n9e/tdengine-columns', {
+  return request('/api/takin/tdengine-columns', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -77,7 +77,7 @@ export function getDsQuery(
     }[];
   },
 ): Promise<any> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -97,7 +97,7 @@ export function getLogsQuery(
     }[];
   },
 ): Promise<any> {
-  return request('/api/n9e/logs-query', {
+  return request('/api/takin/logs-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -106,7 +106,7 @@ export function getLogsQuery(
 }
 
 export function getSqlTemplate(): Promise<{ [index: string]: string }> {
-  return request('/api/n9e/sql-template?cate=tdengine', {
+  return request('/api/takin/sql-template?cate=tdengine', {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;

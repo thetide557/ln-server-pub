@@ -7,28 +7,28 @@ import { getEnabledFilters } from './ExplorerNG/utils/filters';
 export type { Field };
 
 export const getDorisDatabases = (data: DorisDBParams): Promise<string[]> => {
-  return request('/api/n9e/db-databases', {
+  return request('/api/takin/db-databases', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
 };
 
 export const getDorisTables = (data: DorisDBTableParams): Promise<string[]> => {
-  return request('/api/n9e/db-tables', {
+  return request('/api/takin/db-tables', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
 };
 
 export const logQuery = function (data: any) {
-  return request('/api/n9e/logs-query', {
+  return request('/api/takin/logs-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
 };
 
 export const dsQuery = function (data: any) {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
@@ -52,7 +52,7 @@ export function getDsQuery(
     }[];
   },
 ): Promise<any> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -80,7 +80,7 @@ export function getLogsQuery(data: {
     data: { [index: string]: string | number }[];
   }[]
 > {
-  return request('/api/n9e/log-query-batch', {
+  return request('/api/takin/log-query-batch', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -90,14 +90,14 @@ export function getLogsQuery(data: {
 }
 
 export function getDorisFields(data: BaseParams & { database: string; table: string }): Promise<string[]> {
-  return request('/api/n9e-plus/doris-fields', {
+  return request('/api/takin-plus/doris-fields', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
 }
 
 export function getDorisIndex(data: BaseParams & { database: string; table: string }): Promise<Field[]> {
-  return request('/api/n9e-plus/doris-index', {
+  return request('/api/takin-plus/doris-index', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -122,7 +122,7 @@ export function getDorisHistogram(data: {
     },
   ];
 }): Promise<any[]> {
-  return request('/api/n9e-plus/doris-histogram', {
+  return request('/api/takin-plus/doris-histogram', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -155,7 +155,7 @@ export function getDorisLogsQuery(data: {
   list: { [index: string]: string }[];
   total: number;
 }> {
-  return request('/api/n9e-plus/doris-logs-query', {
+  return request('/api/takin-plus/doris-logs-query', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -192,7 +192,7 @@ export const getDsQuery2 = function (data: {
     values: [number, number][];
   }[]
 > {
-  return request('/api/n9e-plus/query-batch', {
+  return request('/api/takin-plus/query-batch', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -218,7 +218,7 @@ export function getDorisSQLFormat(data: {
     },
   ];
 }): Promise<string> {
-  return request('/api/n9e-plus/doris-sql-format', {
+  return request('/api/takin-plus/doris-sql-format', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -264,7 +264,7 @@ export function getDorisSQLsPreview(data: {
     };
   };
 }> {
-  return request('/api/n9e-plus/doris-sqls-preview', {
+  return request('/api/takin-plus/doris-sqls-preview', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -281,7 +281,7 @@ export function getFiledSample(
     field: string;
   },
 ): Promise<string[]> {
-  return request('/api/n9e-plus/doris-field-sample', {
+  return request('/api/takin-plus/doris-field-sample', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -317,7 +317,7 @@ export function buildSql(data: {
   value_key: string[];
   label_key: string[];
 }> {
-  return request('/api/n9e-plus/doris-query-builder', {
+  return request('/api/takin-plus/doris-query-builder', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -333,7 +333,7 @@ export function getDorisTableConfig(data: { cate: string; datasource_id: number;
   histogram_stack_field?: string;
   default_time_field?: string;
 }> {
-  return request('/api/n9e-plus/doris-table-config', {
+  return request('/api/takin-plus/doris-table-config', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);

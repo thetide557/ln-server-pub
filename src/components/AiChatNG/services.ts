@@ -12,7 +12,7 @@ import {
 } from './types';
 import _ from 'lodash';
 
-const apiPrefix = IS_ENT ? '/api/fc-model/assistant' : '/api/n9e/assistant';
+const apiPrefix = IS_ENT ? '/api/fc-model/assistant' : '/api/takin/assistant';
 const dataPathName = IS_ENT ? 'data' : 'dat';
 
 export const createChat = (data: IAiChatCreateChatRequest): Promise<IAiChatHistoryItem> => {

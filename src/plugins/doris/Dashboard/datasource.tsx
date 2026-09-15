@@ -165,7 +165,7 @@ export default async function dorisQuery(options: IOptions): Promise<Result> {
         resolveData.query.push({
           type: 'TimeSeries',
           request: {
-            url: `/api/n9e-plus/ds-query`,
+            url: `/api/takin-plus/ds-query`,
             method: 'POST',
             data: batchTimeSeriesParams,
           },
@@ -176,7 +176,7 @@ export default async function dorisQuery(options: IOptions): Promise<Result> {
         resolveData.query.push({
           type: 'Logs',
           request: {
-            url: `/api/n9e-plus/logs-query`,
+            url: `/api/takin-plus/logs-query`,
             method: 'POST',
             data: batchRawParams,
           },
