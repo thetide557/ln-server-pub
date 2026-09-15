@@ -3,7 +3,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export function getEvents(params) {
-  return request('/api/takin/alert-his-events/list', {
+  return request('/api/n9e/alert-his-events/list', {
     method: RequestMethod.Get,
     params,
   });
@@ -11,14 +11,14 @@ export function getEvents(params) {
 
 
 export function solveEvents(id,data) {
-  return request('/api/takin/alert-his-event/solve/'+id, {
+  return request('/api/n9e/alert-his-event/solve/'+id, {
     method: RequestMethod.Post,
     data,
   });
 }
 
 export function closeEvents(id,data) {
-  return request('/api/takin/alert-his-event/close/'+id, {
+  return request('/api/n9e/alert-his-event/close/'+id, {
     method: RequestMethod.Post,
     data,
   });

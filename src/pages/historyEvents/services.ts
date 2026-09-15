@@ -3,7 +3,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export function getEvents(params) {
-  return request('/api/takin/alert-events/list/xh', {
+  return request('/api/n9e/alert-events/list/xh', {
     method: RequestMethod.Get,
     params,
   });
@@ -25,7 +25,7 @@ export const exportTempletZip = function (url,params,body) {
   });
 }
 export function deleteHistoryEvents(data: any) {
-  return request('/api/takin/alert-his-events/batch-del', {
+  return request('/api/n9e/alert-his-events/batch-del', {
     method: RequestMethod.Post,
     data:{ids:data}
   });

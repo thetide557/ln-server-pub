@@ -16,7 +16,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 //添加资产
 export const saveLog = function (data) {
-  return request('/api/takin/user-config/logo', {
+  return request('/api/n9e/user-config/logo', {
     method: RequestMethod.Put,
     data
   });
@@ -24,14 +24,14 @@ export const saveLog = function (data) {
 
 
 export const getLogInfo = function () {
-  return request('/api/takin/user-config/getInfo', {
+  return request('/api/n9e/user-config/getInfo', {
     method: RequestMethod.Get
   });
 };
 
 
 export const getMyPortrait = function () {
-  return request('/api/takin/xh/users/photo', {
+  return request('/api/n9e/xh/users/photo', {
     method: RequestMethod.Get
   });
 };

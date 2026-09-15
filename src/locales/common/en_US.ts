@@ -3,6 +3,10 @@ const en_US = {
   search_placeholder: 'Search',
   nodata: 'No Data',
   btn: {
+    copy2: 'Copy',
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/en_US.ts:68-69 两条。
+    expand: 'Expand',
+    collapse: 'Collapse',
     add: 'Add',
     create: 'Create',
     modify: 'Modify',
@@ -44,6 +48,8 @@ const en_US = {
     operations: 'Actions',
     total: 'Total {{total}} items',
   },
+  // ---- 第六步 第4段 W2（阶段 2）：fe v9.1.0 src/locales/common/locale/en_US.ts:25 的 and（V2.tsx:70 用）。
+  and: 'And',
   datasource: {
     prod: 'Type',
     name: 'Datasource',
@@ -55,6 +61,22 @@ const en_US = {
       btn1: 'Go to configure',
       btn2: 'OK',
     },
+    // ---- 第六步 第4段 W2（阶段 2）：只追加下面这一段，上面一个字没动。
+    // 来源 fe v9.1.0 src/locales/common/locale/en_US.ts:102,110-120；
+    // preview_unavailable 是羚牛自己加的（后端缺 POST /api/n9e/datasource/query，见 zh_CN.ts 同段注释）。
+    preview: 'Data source preview',
+    queries: {
+      label: 'Data source filter',
+      match_type_0: 'Exact match',
+      match_type_1: 'Fuzzy match',
+      match_type_1_tip: `Supports two wildcards<br>* can match 0 or more arbitrary characters<br>? can only match one arbitrary character`,
+      match_type_2: 'All data sources',
+      op_in: 'In',
+      op_not_in: 'Not in',
+      preview: 'Preview',
+      preview_unavailable: 'Preview unavailable',
+    },
+    managePageLink: 'Click to manage data sources',
   },
   confirm: {
     delete: 'Are you sure to delete?',
@@ -171,5 +193,8 @@ const en_US = {
   'msg.clone.success': 'Successfully cloned',
   'msg.clone.error': 'Cloning failed',
   'msg.sort.success': 'Successfully sorted',
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/en_US.ts。
+  advanced_settings: 'Advanced settings',
 };
 export default en_US;

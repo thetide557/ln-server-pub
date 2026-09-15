@@ -24,7 +24,7 @@ import queryString from 'query-string';
 
 // 获得策略分组列表
 export const getStrategyGroupList = function (query?: string, p = 1) {
-  return request(`/api/takin/alert-rule-groups`, {
+  return request(`/api/n9e/alert-rule-groups`, {
     method: RequestMethod.Get,
     params: {
       query,
@@ -36,7 +36,7 @@ export const getStrategyGroupList = function (query?: string, p = 1) {
 
 // 添加策略分组
 export const addStrategyGroup = function (data: strategyGroup) {
-  return request(`/api/takin/alert-rule-groups`, {
+  return request(`/api/n9e/alert-rule-groups`, {
     method: RequestMethod.Post,
     data,
   });
@@ -44,21 +44,21 @@ export const addStrategyGroup = function (data: strategyGroup) {
 
 // 获取策略分组
 export const getStrategyGroup = function (id: number) {
-  return request(`/api/takin/alert-rule-group/${id}`, {
+  return request(`/api/n9e/alert-rule-group/${id}`, {
     method: RequestMethod.Get,
   });
 };
 
 // 删除策略分组
 export const deleteStrategyGroup = function (id: number) {
-  return request(`/api/takin/alert-rule-group/${id}`, {
+  return request(`/api/n9e/alert-rule-group/${id}`, {
     method: RequestMethod.Delete,
   });
 };
 
 // 更新策略分组
 export const updateStrategyGroup = function (data: Partial<strategyGroup> & { id: number }) {
-  return request(`/api/takin/alert-rule-group/${data.id}`, {
+  return request(`/api/n9e/alert-rule-group/${data.id}`, {
     method: RequestMethod.Put,
     data,
   });
@@ -68,7 +68,7 @@ export const updateStrategyGroup = function (data: Partial<strategyGroup> & { id
 export const getStrategyGroupSubList = function (params) {
   let groupId = params["id"].toString();
   delete params["id"];
-  return request(`/api/takin/busi-group/${groupId}/alert-rules/xh`, {
+  return request(`/api/n9e/busi-group/${groupId}/alert-rules/xh`, {
     method: RequestMethod.Get,
     params
   });
@@ -76,14 +76,14 @@ export const getStrategyGroupSubList = function (params) {
 
 // 获取收藏分组
 export const getFavoritesStrategyGroups = function () {
-  return request(`/api/takin/alert-rule-groups/favorites`, {
+  return request(`/api/n9e/alert-rule-groups/favorites`, {
     method: RequestMethod.Get,
   });
 };
 
 // 添加收藏分组
 export const addFavoriteGroup = function (id: number) {
-  return request(`/api/takin/alert-rule-group/${id}/favorites`, {
+  return request(`/api/n9e/alert-rule-group/${id}/favorites`, {
     method: RequestMethod.Post,
     data: {
       id,
@@ -93,7 +93,7 @@ export const addFavoriteGroup = function (id: number) {
 
 // 删除收藏分组
 export const deleteFavoriteGroup = function (id: number) {
-  return request(`/api/takin/alert-rule-group/${id}/favorites`, {
+  return request(`/api/n9e/alert-rule-group/${id}/favorites`, {
     method: RequestMethod.Delete,
     data: {
       id,
@@ -102,7 +102,7 @@ export const deleteFavoriteGroup = function (id: number) {
 };
 
 export const getMetrics = function (params = {}) {
-  return request(`/api/takin/prometheus/api/v1/label/__name__/values`, {
+  return request(`/api/n9e/prometheus/api/v1/label/__name__/values`, {
     method: RequestMethod.Get,
     params,
     paramsSerializer: function (params) {
@@ -112,103 +112,103 @@ export const getMetrics = function (params = {}) {
 };
 
 export const getMetricsDesc = function (data = []) {
-  return request(`/api/takin/metrics/desc`, {
+  return request(`/api/n9e/metrics/desc`, {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const getTagKeys = function (params): Promise<TagKeysRes> {
-  return request(`/api/takin/tag-keys`, {
+  return request(`/api/n9e/tag-keys`, {
     method: RequestMethod.Post,
     data: params,
   });
 };
 
 export const getTagValuesByKey = function (params): Promise<TagValuesRes> {
-  return request(`/api/takin/tag-values`, {
+  return request(`/api/n9e/tag-values`, {
     method: RequestMethod.Post,
     data: params,
   });
 };
 
 export const getWarningStrategy = function (id): Promise<any> {
-  return request(`/api/takin/alert-rule/${id}`, {
+  return request(`/api/n9e/alert-rule/${id}`, {
     method: RequestMethod.Get,
   });
 };
 // 获取告警规则
 export const getWarningRule = function (strategyid): Promise<any> {
-  return request(`/api/takin/alert-rule/strategy/${strategyid}`, {
+  return request(`/api/n9e/alert-rule/strategy/${strategyid}`, {
     method: RequestMethod.Get,
   });
 };
 
 // export const addStrategy = function (data: any[], busiId: number) {
-//   return request(`/api/takin/busi-group/${busiId}/alert-rules`, {
+//   return request(`/api/n9e/busi-group/${busiId}/alert-rules`, {
 //     method: 'POST',
 //     data: data,
 //   });
 // };
 // 新增告警规则
 export const addStrategy = function (data: any[], busiId: number) {
-  return request(`/api/takin/busi-group/${busiId}/strategy`, {
+  return request(`/api/n9e/busi-group/${busiId}/strategy`, {
     method: 'POST',
     data: data,
   });
 };
 
 export const getStrategiesByRuleIds = function (data: any[]) {
-  return request(`/api/takin/alert-rule/arid`, {
+  return request(`/api/n9e/alert-rule/arid`, {
     method: 'POST',
     data: {ids:data},
   });
 };
 
 export const importStrategy = function (data: any[], busiId: number) {
-  return request(`/api/takin/busi-group/${busiId}/alert-rules/import`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-rules/import`, {
     method: 'POST',
     data: data,
   });
 };
 
 export const EditStrategy = function (data: any[], busiId: number, strategyId: number) {
-  return request(`/api/takin/busi-group/${busiId}/alert-rule/${strategyId}`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-rule/${strategyId}`, {
     method: RequestMethod.Put,
     data: data,
   });
 };
 // 编辑告警规则
 export const EditAlertRule = function (data: any[], busiId: number, strategyId: number) {
-  return request(`/api/takin/busi-group/${busiId}/strategy/${strategyId}`, {
+  return request(`/api/n9e/busi-group/${busiId}/strategy/${strategyId}`, {
     method: RequestMethod.Put,
     data: data,
   });
 };
 
 export const deleteStrategy = function (ids: number[], strategyId: number) {
-  return request(`/api/takin/busi-group/${strategyId}/alert-rules`, {
+  return request(`/api/n9e/busi-group/${strategyId}/alert-rules`, {
     method: RequestMethod.Delete,
     data: { ids },
   });
 };
 // 删除告警规则
 export const deleteAlertRules = function (strategyid: string, strategyId: number) {
-  return request(`/api/takin/busi-group/${strategyId}/strategy`, {
+  return request(`/api/n9e/busi-group/${strategyId}/strategy`, {
     method: RequestMethod.Delete,
     data: { strategyid },
   });
 };
 
 export const batchDeleteStrategy = function (ruleId, ids: Array<number>) {
-  return request(`/api/takin/alert-rule-group/${ruleId}/alert-rules`, {
+  return request(`/api/n9e/alert-rule-group/${ruleId}/alert-rules`, {
     method: RequestMethod.Delete,
     data: { ids },
   });
 };
 
 export const prometheusQuery = function (data, datasourceValue): Promise<any> {
-  return request(`/api/takin/proxy/${datasourceValue}/api/v1/query`, {
+  return request(`/api/n9e/proxy/${datasourceValue}/api/v1/query`, {
     method: RequestMethod.Get,
     params: data,
   });
@@ -222,7 +222,7 @@ export const updateAlertRulesStatus = function (
   },
   busiId: number,
 ) {
-  return request(`/api/takin/busi-group/${busiId}/alert-rules/strategy/fields`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-rules/strategy/fields`, {
     method: RequestMethod.Put,
     data: data,
   });
@@ -238,7 +238,7 @@ export const updateAlertRules = function (
   },
   busiId: number,
 ) {
-  return request(`/api/takin/busi-group/${busiId}/alert-rules/fields`, {
+  return request(`/api/n9e/busi-group/${busiId}/alert-rules/fields`, {
     method: RequestMethod.Put,
     data: data,
   });
@@ -248,14 +248,14 @@ export const updateAlertRules = function (
  * 获取未恢复告警列表
  */
 export function getBusiGroupsCurAlerts(ids: number[]) {
-  return request(`/api/takin/busi-groups/alertings`, {
+  return request(`/api/n9e/busi-groups/alertings`, {
     method: RequestMethod.Get,
     params: { ids: ids.join(',') },
   });
 }
 
 export const getAlertEvents = function (data) {
-  return request(`/api/takin/alert-events`, {
+  return request(`/api/n9e/alert-events`, {
     method: RequestMethod.Get,
     params: data,
   });
@@ -264,16 +264,16 @@ export const getAlertEvents = function (data) {
  * 获取全量告警历史页面
  */
 export const getHistoryEvents = function (data) {
-  return request(`/api/takin/history-alert-events`, {
+  return request(`/api/n9e/history-alert-events`, {
     method: RequestMethod.Get,
     params: data,
   });
 };
 // 获取告警详情
 export function getAlertEventsById(eventId) {
-  let url = '/api/takin/alert-cur-event';
+  let url = '/api/n9e/alert-cur-event';
   if (import.meta.env.VITE_IS_ENT === 'true') {
-    url = '/api/takin-plus/alert-cur-event';
+    url = '/api/n9e-plus/alert-cur-event';
   }
   return request(`${url}/${eventId}`, {
     method: RequestMethod.Get,
@@ -281,9 +281,9 @@ export function getAlertEventsById(eventId) {
 }
 
 export function getHistoryEventsById(eventId) {
-  let url = '/api/takin/alert-his-event';
+  let url = '/api/n9e/alert-his-event';
   if (import.meta.env.VITE_IS_ENT === 'true') {
-    url = '/api/takin-plus/alert-his-event';
+    url = '/api/n9e-plus/alert-his-event';
   }
   return request(`${url}/${eventId}`, {
     method: RequestMethod.Get,
@@ -293,7 +293,7 @@ export function getHistoryEventsById(eventId) {
  * 批量删除(忽略)告警历史
  */
 export const deleteAlertEvents = function (ids: Array<number | string>) {
-  return request(`/api/takin/alert-cur-events/batch-del`, {
+  return request(`/api/n9e/alert-cur-events/batch-del`, {
     method: RequestMethod.Post,
     data: {
       ids,
@@ -305,7 +305,7 @@ export const deleteAlertEvents = function (ids: Array<number | string>) {
  * 批量更新告警策略状态
  */
 export const updateAlertEventsStatus = function (ids: Array<number>, status: strategyStatus) {
-  return request(`/api/takin/alert-rules/status`, {
+  return request(`/api/n9e/alert-rules/status`, {
     method: RequestMethod.Put,
     data: {
       ids,
@@ -317,7 +317,7 @@ export const updateAlertEventsStatus = function (ids: Array<number>, status: str
  * 批量更新告警通知接收组+接收人
  */
 export const updateAlertEventsNotifyGroups = function (ids: Array<number>, notify_groups: string, notify_users: string) {
-  return request(`/api/takin/alert-rules/notify-groups`, {
+  return request(`/api/n9e/alert-rules/notify-groups`, {
     method: RequestMethod.Put,
     data: {
       ids,
@@ -330,7 +330,7 @@ export const updateAlertEventsNotifyGroups = function (ids: Array<number>, notif
  * 批量更新告警通知接收人
  */
 export const updateAlertEventsNotifyUsers = function (ids: Array<number>, notify_users: string) {
-  return request(`/api/takin/alert-rules/notify-users`, {
+  return request(`/api/n9e/alert-rules/notify-users`, {
     method: RequestMethod.Put,
     data: {
       ids,
@@ -342,7 +342,7 @@ export const updateAlertEventsNotifyUsers = function (ids: Array<number>, notify
  * 批量更新告警通知媒介
  */
 export const updateAlertEventsNotifyChannels = function (ids: Array<number>, notify_channels: string) {
-  return request(`/api/takin/alert-rules/notify-channels`, {
+  return request(`/api/n9e/alert-rules/notify-channels`, {
     method: RequestMethod.Put,
     data: {
       ids,
@@ -354,7 +354,7 @@ export const updateAlertEventsNotifyChannels = function (ids: Array<number>, not
  * 批量更新告警附加标签
  */
 export const updateAlertEventsAppendTags = function (ids: Array<number>, append_tags: string) {
-  return request(`/api/takin/alert-rules/append-tags`, {
+  return request(`/api/n9e/alert-rules/append-tags`, {
     method: RequestMethod.Put,
     data: {
       ids,
@@ -364,56 +364,56 @@ export const updateAlertEventsAppendTags = function (ids: Array<number>, append_
 };
 
 export const getBuiltinAlerts = function () {
-  return request('/api/takin/alert-rules/builtin/list', {
+  return request('/api/n9e/alert-rules/builtin/list', {
     method: RequestMethod.Get,
   });
 };
 
 export const createBuiltinAlerts = function (name: string, cluster: string, id: number) {
-  return request(`/api/takin/busi-group/${id}/alert-rules/builtin`, {
+  return request(`/api/n9e/busi-group/${id}/alert-rules/builtin`, {
     method: RequestMethod.Post,
     data: { name, cluster },
   });
 };
 
 export const getAggrAlerts = function () {
-  return request('/api/takin/alert-aggr-views', {
+  return request('/api/n9e/alert-aggr-views', {
     method: RequestMethod.Get,
   });
 };
 
 export const AddAggrAlerts = function (data) {
-  return request('/api/takin/alert-aggr-views', {
+  return request('/api/n9e/alert-aggr-views', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const updateAggrAlerts = function (data) {
-  return request('/api/takin/alert-aggr-views', {
+  return request('/api/n9e/alert-aggr-views', {
     method: RequestMethod.Put,
     data,
   });
 };
 
 export const deleteAggrAlerts = function (ids: number[]) {
-  return request('/api/takin/alert-aggr-views', {
+  return request('/api/n9e/alert-aggr-views', {
     method: RequestMethod.Delete,
     data: { ids },
   });
 };
 
 export const getAlertCards = function (params) {
-  return request('/api/takin/alert-cur-events/card/xh', {
+  return request('/api/n9e/alert-cur-events/card/xh', {
     method: RequestMethod.Get,
     params,
   });
 };
 
 export const getCardDetail = function (ids) {
-  let url = '/api/takin/alert-cur-events/card/details';
+  let url = '/api/n9e/alert-cur-events/card/details';
   if (import.meta.env.VITE_IS_PRO === 'true') {
-    url = '/api/takin-plus/alert-cur-events/card/details';
+    url = '/api/n9e-plus/alert-cur-events/card/details';
   }
   return request(url, {
     method: RequestMethod.Post,
@@ -458,7 +458,7 @@ export const getBrainJobs = function (id) {
 };
 
 export function getDsQuery(datasourceValue: number, requestBody) {
-  return request(`/api/takin/proxy/${datasourceValue}/_msearch`, {
+  return request(`/api/n9e/proxy/${datasourceValue}/_msearch`, {
     method: RequestMethod.Post,
     data: requestBody,
     headers: {
@@ -472,7 +472,7 @@ export function getDsQuery(datasourceValue: number, requestBody) {
 }
 
 export function getLogQuery(params) {
-  return request('/api/takin-plus/log-query', {
+  return request('/api/n9e-plus/log-query', {
     method: RequestMethod.Post,
     data: params,
     headers: {
@@ -483,7 +483,7 @@ export function getLogQuery(params) {
 }
 
 export function getIndices(datasourceValue: number) {
-  return request(`/api/takin/proxy/${datasourceValue}/_cat/indices`, {
+  return request(`/api/n9e/proxy/${datasourceValue}/_cat/indices`, {
     method: RequestMethod.Get,
     params: {
       format: 'json',
@@ -494,7 +494,7 @@ export function getIndices(datasourceValue: number) {
 }
 
 export function getESVersion(datasourceValue: number) {
-  return request(`/api/takin/proxy/${datasourceValue}/`, {
+  return request(`/api/n9e/proxy/${datasourceValue}/`, {
     method: RequestMethod.Get,
   }).then((res) => {
     const dat = _.get(res, 'version.number');
@@ -503,28 +503,28 @@ export function getESVersion(datasourceValue: number) {
 }
 
 export function getEventTSQuery(params) {
-  return request('/api/takin-plus/event-ts-query', {
+  return request('/api/n9e-plus/event-ts-query', {
     method: RequestMethod.Post,
     data: params,
   });
 }
 
 export function getEventLogQuery(params) {
-  return request('/api/takin-plus/event-log-query', {
+  return request('/api/n9e-plus/event-log-query', {
     method: RequestMethod.Post,
     data: params,
   });
 }
 
 export function getLogsQuery(params) {
-  return request('/api/takin-plus/logs-query', {
+  return request('/api/n9e-plus/logs-query', {
     method: RequestMethod.Post,
     data: params,
   });
 }
 
 export const getAlertEventList = function (params) {
-  return request('/api/takin/alert-his-events/list', {
+  return request('/api/n9e/alert-his-events/list', {
     method: RequestMethod.Get,
     params,
   }).then((res) => res?.dat?.list || []);
@@ -532,13 +532,13 @@ export const getAlertEventList = function (params) {
 
 // 告警推荐方案
 export function getRuleSolution(arid) {
-  return request(`/api/takin/alert-rule-solution/${arid}`, {
+  return request(`/api/n9e/alert-rule-solution/${arid}`, {
     method: RequestMethod.Get,
   });
 }
 
 export function getFeedbacks(flag, id) {
-  return request(`/api/takin/alert-rule-solution/feedbacks/${id}?favorite=${flag}`, {
+  return request(`/api/n9e/alert-rule-solution/feedbacks/${id}?favorite=${flag}`, {
     method: RequestMethod.Put,
   });
 }

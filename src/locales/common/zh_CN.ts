@@ -3,6 +3,11 @@ const zh_CN = {
   search_placeholder: "搜索",
   nodata: "暂无数据",
   btn: {
+    copy2: "复制",
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/zh_CN.ts:67-68 两条；
+    // 新搬的 Loki 日志行组件 t('common:btn.expand') / t('common:btn.collapse') 用。
+    expand: '展开',
+    collapse: '收起',
     add: "新增",
     create: "创建",
     modify: "修改",
@@ -44,6 +49,9 @@ const zh_CN = {
     operations: "操作",
     total: "共 {{total}} 条",
   },
+  // ---- 第六步 第4段 W2（阶段 2）：fe v9.1.0 src/locales/common/locale/zh_CN.ts:25 的 and，
+  // DatasourceValueSelect/V2.tsx:70 在第二条及以后的筛选条件前显示它。
+  and: "且",
   datasource: {
     prod: "监控类型",
     name: "数据源",
@@ -55,6 +63,25 @@ const zh_CN = {
       btn1: "前往配置",
       btn2: "知道了",
     },
+    // ---- 第六步 第4段 W2（阶段 2）：只追加下面这一段，上面一个字没动。
+    // 来源 fe v9.1.0 src/locales/common/locale/zh_CN.ts:101,108-118（preview / queries / managePageLink），
+    // 给新搬进来的数据源筛选器 DatasourceValueSelect/V2.tsx 用。
+    // preview_unavailable 是羚牛自己加的一条：后端没有 POST /api/n9e/datasource/query
+    //（基线 4f150ab7:center/router/router.go:290,327 有、羚牛漏搬，后端待办 R1），
+    // 预览取不到数据时显示它，不弹全局错误、不挡保存。
+    preview: "数据源预览",
+    queries: {
+      label: "数据源筛选",
+      match_type_0: "精确匹配",
+      match_type_1: "模糊匹配",
+      match_type_1_tip: `支持两种通配符<br>* 可以匹配 0 个或多个任意字符<br>? 只能匹配一个任意字符`,
+      match_type_2: "全部数据源",
+      op_in: "包含",
+      op_not_in: "不包含",
+      preview: "数据预览",
+      preview_unavailable: "预览不可用",
+    },
+    managePageLink: "点击前往数据源管理",
   },
   confirm: {
     delete: "确认删除吗？",
@@ -192,5 +219,8 @@ const zh_CN = {
   failed: "失败",
   killfailed: "终止失败",
   timeout: "超时",
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/zh_CN.ts。
+  advanced_settings: '高级设置',
 };
 export default zh_CN;

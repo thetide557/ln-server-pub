@@ -19,6 +19,7 @@ import { getDictDataListByType } from '@/services/system/dict';
 import { downloadTemplet } from '@/services/menu';
 import Cookies from 'js-cookie';
 import moment from 'moment';
+import FlashAiButton from '@/components/AiChatNG/FlashAiButton';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -379,6 +380,20 @@ const getMenuList = (t) => {
             //   key: '/system/upgrade',
             //   label: t('系统升级'),
             // },
+            // 第六步d：AI 配置三页。key 必须与后端权限点字符串一字不差（ln:center/router/router.go:1307,1314；ops.yaml），
+            // 非 Admin 由本文件 :471-489 已有的 permList 过滤自动显隐；/ai-config/agents 不是权限点，非 Admin 自动被滤掉（后端是 rt.admin()）。
+            {
+              key: '/ai-config/llm-configs',
+              label: t('AI 模型'),
+            },
+            {
+              key: '/ai-config/skills',
+              label: t('AI 技能'),
+            },
+            {
+              key: '/ai-config/agents',
+              label: t('AI Agent'),
+            },
           ],
         },
         {
@@ -469,7 +484,7 @@ export default function () {//{ selectMenu?:any }
     if (location.pathname != '/login' && !pathname.startsWith('/callback')) {
       getMyPortrait().then((res) => {
         if (res.dat != null && res.dat != "") {
-          setImageUrl(_.cloneDeep("/api/takin/" + res.dat + "?" + Math.random()));
+          setImageUrl(_.cloneDeep("/api/n9e/" + res.dat + "?" + Math.random()));
         }
       })
       getDictDataListByType('safety_certification').then((res) => {
@@ -703,15 +718,16 @@ export default function () {//{ selectMenu?:any }
         {profile.roles?.includes("临时用户") && (
           <div className={'top-header-desc'}>剩余使用时长：{profile?.temp_remaining_days}天</div>
         )}
+        <FlashAiButton />
         {/* 帮助文档 - 临时用户和有使用期限的用户不显示 */}
-        {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
+        {/* {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
           <Dropdown 
             overlay={
               <Menu>
                 <Menu.Item
                   onClick={() => {
                     // 操作手册下载接口
-                    const url = '/api/takin/xh/assets/download/manual';
+                    const url = '/api/n9e/xh/assets/download/manual';
                     const exportTitle = '操作手册';
                     downloadTemplet(url).then((res) => {
                       const blobUrl = window.URL.createObjectURL(
@@ -734,7 +750,7 @@ export default function () {//{ selectMenu?:any }
                 <Menu.Item
                   onClick={() => {
                     // 版本说明下载接口
-                    const url = '/api/takin/xh/assets/download/version';
+                    const url = '/api/n9e/xh/assets/download/version';
                     const exportTitle = '版本说明'; 
                     downloadTemplet(url).then((res) => {
                       const blobUrl = window.URL.createObjectURL(
@@ -763,7 +779,7 @@ export default function () {//{ selectMenu?:any }
               <QuestionCircleOutlined />
             </span>
           </Dropdown>
-        )}
+        )} */}
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
             <img src={imageUrl ? imageUrl : '/image/avatar1.png'} alt='' />

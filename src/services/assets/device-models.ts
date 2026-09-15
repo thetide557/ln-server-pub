@@ -18,31 +18,31 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getDeviceModelById = function (id) {
-  return request('/api/takin/device-model/'+id, {
+  return request('/api/n9e/device-model/'+id, {
     method: RequestMethod.Get
   });
 };
 export const getDeviceModelByCondition = function (data) {
-  return request('/api/takin/device-model/getmodel', {
+  return request('/api/n9e/device-model/getmodel', {
     method: RequestMethod.Get,
     params:data
   });
 };
 // updateDeviceModel,addDeviceModel,getDeviceModelByCondition
 export const updateDeviceModel = function (data) {
-  return request('api/takin/device-model/', {
+  return request('api/n9e/device-model/', {
     method: RequestMethod.Put,
     data
   });
 };
 export const addDeviceModel = function (data) {
-  return request('api/takin/device-model', {
+  return request('api/n9e/device-model', {
     method: RequestMethod.Post,
     data
   });
 };
 export const deleteDeviceModel = function (data) {
-  return request('/api/takin/device-model/batch-del', {
+  return request('/api/n9e/device-model/batch-del', {
     method: RequestMethod.Post,
     data
   });

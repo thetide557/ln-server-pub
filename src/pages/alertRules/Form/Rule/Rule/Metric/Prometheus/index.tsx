@@ -25,6 +25,8 @@ import { PromQLInputWithBuilder } from '@/components/PromQLInput';
 import Severity from '@/pages/alertRules/Form/components/Severity';
 import Inhibit from '@/pages/alertRules/Form/components/Inhibit';
 import { FormStateContext } from '@/pages/alertRules/Form';
+import { AiButton } from '@/components/AiChatNG/FlashAiButton';
+import { buildPageFrom, getExplorerPrompts } from '@/components/AiChatNG/recommend';
 import './style.less';
 
 const DATASOURCE_ALL = 0;
@@ -34,8 +36,9 @@ function getFirstDatasourceId(datasourceIds: number[] = [], datasourceList: { id
 }
 
 export default function index(props: { datasourceCate: string; datasourceValue: number[]; includes: string[]; excludes: string[] ;field:any }) {
-  const { datasourceCate, datasourceValue, includes, excludes, field } = props;
-  const { t } = useTranslation('alertRules');
+  const { datasourceCate, datasourceValue, includes, excludes, field: outerField } = props;
+  const { t, i18n } = useTranslation('alertRules');
+  const form = Form.useFormInstance();
   const { groupedDatasourceList } = useContext(CommonStateContext);
   const { disabled } = useContext(FormStateContext);
   const curDatasourceList = groupedDatasourceList[datasourceCate] || [];
@@ -43,7 +46,7 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
 
   return (
     // <Form.List name={['rule_config', 'queries']}>
-    <Form.List {...field} name={[field.name, 'rule_config', 'queries']}>
+    <Form.List {...outerField} name={[outerField.name, 'rule_config', 'queries']}>
       {(fields, { add, remove }) => (
         <Card
           title={
@@ -73,6 +76,32 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                     <Form.Item {...field} name={[field.name, 'prom_ql']} validateTrigger={['onBlur']} trigger='onChange' rules={[{ required: true, message: t('请输入PromQL') }]}>
                       <PromQLInputWithBuilder readonly={disabled} datasourceValue={datasourceId} includes={includes} excludes={excludes} />
                     </Form.Item>
+                  </Col>
+                  <Col flex='none'>
+                    <AiButton
+                      queryPageFrom={buildPageFrom({
+                        param: {
+                          datasource_type: 'prometheus',
+                          datasource_id: datasourceId,
+                        },
+                      })}
+                      queryAction={{
+                        key: 'query_generator',
+                        param: {
+                          datasource_type: 'prometheus',
+                          datasource_id: datasourceId,
+                        },
+                      }}
+                      promptList={getExplorerPrompts(i18n.language)}
+                      onExecuteQueryForQueryContent={(promql) => {
+                        form.setFields([
+                          {
+                            name: ['strategies', outerField.name, 'rule_config', 'queries', field.name, 'prom_ql'],
+                            value: promql,
+                          },
+                        ]);
+                      }}
+                    />
                   </Col>
                 </Row>
                 <div>

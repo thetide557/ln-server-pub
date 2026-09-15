@@ -21,7 +21,7 @@ import _, { isNumber } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { Button, Space, Dropdown, Menu, Switch, Modal, Form, Select, message, Checkbox, Row, Col } from 'antd';
 import { RollbackOutlined } from '@ant-design/icons';
-import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
+import { TimeRangePickerWithRefresh, IRawTimeRange, timeRangeUnix } from '@/components/TimeRangePicker';
 import { AddPanelIcon } from '../config';
 import { visualizations } from '../Editor/config';
 import { dashboardTimeCacheKey } from './Detail';
@@ -34,6 +34,9 @@ import { updateSelfBoard } from '@/services/account';
 import { CommonStateContext } from '@/App';
 import { updateBoards } from '@/services/sxxc/bigScreen';
 import { useTimeout, useTimeoutFn } from 'react-use';
+import { AiButton } from '@/components/AiChatNG/FlashAiButton';
+import { getDashboardDetailPrompts } from '@/components/AiChatNG/recommend';
+import { NAME_SPACE as AI_CHAT_NS } from '@/components/AiChatNG/constants';
 
 interface IProps {
   dashboard: any;
@@ -56,7 +59,9 @@ const cachePageTitle = document.title;
 
 export default function Title(props: IProps) {
   const { t, i18n } = useTranslation('dashboard');
+  const { t: tAiChat } = useTranslation(AI_CHAT_NS);
   const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome, handlePanelChange } = props;
+  const showAiAnalysis = !isPreview && !isBuiltin && !!dashboard?.id;
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
@@ -154,6 +159,24 @@ export default function Title(props: IProps) {
         <div className='title' style={{ width: '205px' }}>
           {dashboard.name}
         </div>
+        {showAiAnalysis && (
+          <span style={{ marginLeft: 8, display: 'inline-flex' }}>
+            <AiButton
+              size='small'
+              queryAction={{
+                param: {
+                  dashboard_id: dashboard.id,
+                  variables: _.map(variableConfig, (v: any) => ({ name: v.name, value: v.value })),
+                  range: timeRangeUnix(range),
+                },
+              }}
+              promptList={getDashboardDetailPrompts(i18n.language)}
+              initialMessage={getDashboardDetailPrompts(i18n.language)[0]}
+            >
+              {tAiChat('flash_button.dashboard_analysis')}
+            </AiButton>
+          </span>
+        )}
       </div>
       {
         <div className='dashboard-detail-header-right' style={{ display: isHome ? 'none' : '' }}>

@@ -123,7 +123,7 @@ export default function () {
       formData.append("id", params.id);
       formData.append("crt", fileListCrt[0]);
       formData.append("key", fileListKey[0]);
-      let url = "/api/takin/xh/license/update";
+      let url = "/api/n9e/xh/license/update";
       console.log("更新证书",url);
       uploadLicense(url, formData).then((res) => {
         message.success('更新证书成功');

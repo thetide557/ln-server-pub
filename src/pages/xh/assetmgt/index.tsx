@@ -40,7 +40,7 @@ import { getDictDataListByType } from '@/services/system/dict';
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { serviceHierarchyOptions, deviceFormOptions } from './catalog';
+import { factories,serviceHierarchyOptions, deviceFormOptions } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
 
@@ -216,7 +216,12 @@ export default function () {
         label: group.name,
       };
     }),
-    manufacturers: manufacturerOptions,
+    manufacturers: factories.map((factory) => {
+      return {
+        value: _.toString(factory.value),
+        label: factory.value,
+      };
+    }),
     maintenanceStatus: maintenanceStatusOption.map((factory) => {
       return {
         value: _.toString(factory.value),

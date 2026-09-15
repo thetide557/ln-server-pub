@@ -122,6 +122,14 @@ import InspectionList from '@/pages/sxxc/inspectionList'
 import InspectionLog from '@/pages/sxxc/inspectionList/log'
 import InspectionReport from '@/pages/sxxc/inspectionReport'
 import DutyManage from '@/pages/sxxc/dutyManage'
+// 第六步d：AI 配置三页（照 fe v9.1.0 src/pages/aiConfig/）。pub 没有 lazy/Suspense，直接 import；
+// 三行 locale 是因为 pub 的 i18n 不自动收集词条，得有人 import 才会注册。
+import AiConfigAgentList from '@/pages/aiConfig/agents/pages/List';
+import AiConfigLLMConfigList from '@/pages/aiConfig/llmConfigs/pages/List';
+import AiConfigSkillList from '@/pages/aiConfig/skills/pages/List';
+import '@/pages/aiConfig/agents/locale';
+import '@/pages/aiConfig/llmConfigs/locale';
+import '@/pages/aiConfig/skills/locale';
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -245,6 +253,9 @@ export default function Content() {
         <Route exact path='/help/source/:action/:type' component={DatasourceAdd} />
         <Route exact path='/help/source/:action/:type/:id' component={DatasourceAdd} />
         <Route exact path='/help/sso' component={SSOConfigs} />
+        <Route exact path='/ai-config/agents' component={AiConfigAgentList} />
+        <Route exact path='/ai-config/llm-configs' component={AiConfigLLMConfigList} />
+        <Route exact path='/ai-config/skills' component={AiConfigSkillList} />
          <Route exact path='/license/base' component={LicenseBase} />
          <Route exact path='/license/base/:id' component={LicenseBaseLic} />
          <Route exact path='/license/device' component={LicenseDevice} /> 
