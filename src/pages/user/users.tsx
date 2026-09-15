@@ -216,17 +216,17 @@ const Resource: React.FC = () => {
         }
       }
     },
-    // {
-    //   title: t('单一会话'),
-    //   dataIndex: 'single_session',
-    //   render: (val, record) => {
-    //    if (val === 1) {
-    //       return "启用"
-    //     } else if (val === 2) {
-    //       return "禁用"
-    //     }
-    //   }
-    // },
+    {
+      title: t('单一会话'),
+      dataIndex: 'single_session',
+      render: (val, record) => {
+       if (val === 1) {
+          return "启用"
+        } else if (val === 2) {
+          return "禁用"
+        }
+      }
+    },
   ];
   const userColumns: ColumnsType<User> = [
     ...userColumn,

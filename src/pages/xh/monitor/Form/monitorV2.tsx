@@ -5,22 +5,19 @@ import { Card, Form, Modal, Space, Tag } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 
-import { factories } from '../../assetmgt/catalog';
 import { Link, useLocation } from 'react-router-dom';
 import { getAssetBoard, getXhAsset } from '@/services/assets';
+import { getDictDataListByType } from '@/services/system/dict';
 import queryString from 'query-string';
 import { getAssetstypes } from '@/services/assets';
 import Board from '@/pages/dashboard/Detail/Board';
 
-const loadImages = (cn_name) => {
-  let imageName = '/image/factory/other.png';
-  for (let factor in factories) {
-    let image = factories[factor];
-    if (image.value == cn_name) {
-      imageName = '/image/factory/' + image.key + '.png';
-    }
+const loadImages = (manufacturerName, manufacturerImageMap) => {
+  const normalizedName = _.trim(_.toString(manufacturerName));
+  if (!normalizedName) {
+    return '/image/factory/other.png';
   }
-  return imageName;
+  return manufacturerImageMap[normalizedName] || '/image/factory/other.png';
 };
 
 export default function () {
@@ -39,11 +36,34 @@ export default function () {
   const [assetInfo, setAssetInfo] = useState<any>({});
   const [assetItems, setAssetItems] = useState<any[]>([]);
   const [boardId, setBoardId] = useState('');
+  const [manufacturerImageMap, setManufacturerImageMap] = useState<Record<string, string>>({});
   const [form] = Form.useForm();
 
   const panelBaseProps: any = {
     size: 'small',
   };
+
+  useEffect(() => {
+    getDictDataListByType('manufacturer')
+      .then((res) => {
+        const imageMap = _.reduce(
+          res.dat || [],
+          (result: Record<string, string>, item: any) => {
+            const label = _.trim(_.toString(item?.dict_value));
+            const imageKey = _.trim(_.toString(item?.dict_key));
+            if (label && imageKey) {
+              result[label] = `/image/factory/${imageKey}.png`;
+            }
+            return result;
+          },
+          {},
+        );
+        setManufacturerImageMap(imageMap);
+      })
+      .catch(() => {
+        setManufacturerImageMap({});
+      });
+  }, []);
 
   const genForm = (type: string, theme: string) => {
     const assetType: any = assetTypes.find((v) => v.name === type);
@@ -200,7 +220,19 @@ export default function () {
         <div className='card-wrapper'>
           <Card {...panelBaseProps} title={'基本信息'}>
             <div className='asset_info'>
-              <div className='image_name'>{assetInfo.manufacturers ? <img src={loadImages(assetInfo.manufacturers)}></img> : <div className='image_not'>没有厂商信息</div>}</div>
+              <div className='image_name'>
+                {assetInfo.manufacturers ? (
+                  <img
+                    src={loadImages(assetInfo.manufacturers, manufacturerImageMap)}
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = '/image/factory/other.png';
+                    }}
+                  ></img>
+                ) : (
+                  <div className='image_not'>没有厂商信息</div>
+                )}
+              </div>
               <div className='info'>
                 <div className='row'>
                   <div className='theme1'>

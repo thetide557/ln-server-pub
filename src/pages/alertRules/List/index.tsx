@@ -183,17 +183,17 @@ export default function List(props: ListProps) {
         );
       },
     },
-    // {
-    //   title: '业务组',
-    //   dataIndex: 'group_id',
-    //   width: 120,
-    //   align: 'center',
-    //   render: (groupId: number) => {
-    //     const name = busiGroups.find(item => item.id === groupId)?.name
-    //     if (name) return name;
-    //     return ''
-    //   },
-    // },
+    {
+      title: '业务组',
+      dataIndex: 'group_id',
+      width: 120,
+      align: 'center',
+      render: (groupId: number) => {
+        const name = busiGroups.find(item => item.id === groupId)?.name
+        if (name) return name;
+        return ''
+      },
+    },
     {
       title: '告警接收组',
       dataIndex: 'notify_groups_obj',

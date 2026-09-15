@@ -720,7 +720,7 @@ export default function () {//{ selectMenu?:any }
         )}
         <FlashAiButton />
         {/* 帮助文档 - 临时用户和有使用期限的用户不显示 */}
-        {/* {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
+        {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
           <Dropdown 
             overlay={
               <Menu>
@@ -779,7 +779,7 @@ export default function () {//{ selectMenu?:any }
               <QuestionCircleOutlined />
             </span>
           </Dropdown>
-        )} */}
+        )}
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
             <img src={imageUrl ? imageUrl : '/image/avatar1.png'} alt='' />
