@@ -19,6 +19,7 @@ const zh_HK = {
       disable_write: "不允許寫入"
     },
     cluster_tip: "在多個機房的架構下，有時會部署多個告警引擎叢集，對應邊緣機房的數據源，需要關聯相應機房的告警引擎叢集，如果只有一個叢集，保持默認即可",
+    cluster_not_found: "關聯告警引擎已停用，當前數據源的告警不再生效。請檢查告警引擎配置或重新修改數據源關聯的告警引擎",
     logs_max_query_rows: "返回的最大日誌條數",
     protocol: "協議",
     secure_connection: "安全連接（SSL/TLS）",

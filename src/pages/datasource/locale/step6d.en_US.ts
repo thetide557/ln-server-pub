@@ -19,6 +19,7 @@ const en_US = {
       disable_write: "Disable write"
     },
     cluster_tip: "In a multi-datacenter architecture, multiple alerting engine clusters are sometimes deployed. A data source of an edge datacenter must be associated with the alerting engine cluster of that datacenter. If there is only one cluster, keep the default",
+    cluster_not_found: "The associated alerting engine has been disabled, so alerting no longer works for this data source. Check the alerting engine configuration or associate the data source with another alerting engine",
     logs_max_query_rows: "Maximum number of returned log entries",
     protocol: "Protocol",
     secure_connection: "Secure connection (SSL/TLS)",
