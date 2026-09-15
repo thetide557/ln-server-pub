@@ -7719,6 +7719,11 @@ lucide-react@0.294.0:
   resolved "https://registry.npmmirror.com/lucide-react/-/lucide-react-0.294.0.tgz#dc406e1e7e2f722cf93218fe5b31cf3c95778817"
   integrity sha512-V7o0/VECSGbLHn3/1O67FUgBwWB+hmzshrgDVRJQhMh8uj5D3HBuIvhuAmQTtlupILSplwIZg5FTc4tTKMA2SA==
 
+lunar-typescript@^1.8.0:
+  version "1.8.6"
+  resolved "https://registry.npmmirror.com/lunar-typescript/-/lunar-typescript-1.8.6.tgz#9ecadd8610369f800bf46a517da7f6c598f6491d"
+  integrity sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==
+
 lz-string@^1.5.0:
   version "1.5.0"
   resolved "https://registry.npmmirror.com/lz-string/-/lz-string-1.5.0.tgz#c1ab50f77887b712621201ba9fd4e3a6ed099941"
