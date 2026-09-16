@@ -60,7 +60,7 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                   })
                 }
               />
-              <Inhibit triggersKey='queries' />
+              <Inhibit triggersKey='queries' prefixName={['strategies', outerField.name, 'rule_config']} />
             </Space>
           }
           size='small'
