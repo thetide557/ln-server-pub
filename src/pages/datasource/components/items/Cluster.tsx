@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Form, Select } from 'antd';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
+
 import { getServerClusters } from '../../services';
 
 export default function Cluster({ form, clusterRef }) {
   const { t } = useTranslation('datasourceManage');
-  const [clusters, setClusters] = useState<any[]>([]);
+  const [clusters, setClusters] = useState<string[]>([]);
 
   useEffect(() => {
     getServerClusters().then((res) => {
@@ -19,10 +20,12 @@ export default function Cluster({ form, clusterRef }) {
       form.validateFields(['cluster_name']);
     });
   }, []);
+
   return (
     <Form.Item
       label={t('form.cluster')}
       name='cluster_name'
+      tooltip={t('form.cluster_tip')}
       rules={[
         {
           validator: (_field, value) => {
@@ -36,7 +39,7 @@ export default function Cluster({ form, clusterRef }) {
       ]}
     >
       <Select ref={clusterRef} allowClear>
-        {_.map(clusters, (item) => {
+        {_.map(_.concat(clusters, 'no_assigned_engine'), (item) => {
           return (
             <Select.Option key={item} value={item}>
               {item}
