@@ -271,7 +271,7 @@ const DutyLogs: React.FC = () => {
       cancelText: "取消",
       onOk: () => {
         setIsExporting(true);
-        const url = `/api/takin/xh/dutylog/export-xls?month=${selectedMonth.format("YYYY-MM")}`;
+        const url = `/api/n9e/xh/dutylog/export-xls?month=${selectedMonth.format("YYYY-MM")}`;
         let params = {};
         let exportTitle = `${selectedMonth.format("YYYY-MM")}月值班日志`;
 

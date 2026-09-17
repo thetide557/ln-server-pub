@@ -5,8 +5,8 @@
  * `import { fetchHistoryRangeBatch2 } from '@/services/dashboardV2'`，
  * 而羚牛 pub 的 `src/services/dashboardV2.ts` 里只有不带 2 的 `fetchHistoryRangeBatch`（`:160`）。
  * 两者的签名一样都是 `(data, signalKey)`，区别只在打的接口：
- *   pub  `fetchHistoryRangeBatch`  → POST /api/takin/query-range-batch
- *   fe   `fetchHistoryRangeBatch2` → POST /api/takin-plus/query-batch（企业版接口）
+ *   pub  `fetchHistoryRangeBatch`  → POST /api/n9e/query-range-batch
+ *   fe   `fetchHistoryRangeBatch2` → POST /api/n9e-plus/query-batch（企业版接口）
  * fe 那个函数只在 `IS_PLUS` 为真的分支里用（`query.ts:144` 之后的 else 分支、`:186`），
  * 羚牛开源构建下 `IS_PLUS` 恒为 false（`src/utils/constant.ts:22`），那段是死代码，
  * 但 TypeScript 解析不到这个导出就会报错。

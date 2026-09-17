@@ -71,7 +71,7 @@ describe('L1：victorialogs 数据源表单提交', () => {
     // eslint-disable-next-line no-console
     console.log('[step6d][L1][victorialogs] upsert body =', JSON.stringify(body, null, 2));
 
-    expect(url).toBe('/api/takin/datasource/upsert');
+    expect(url).toBe('/api/n9e/datasource/upsert');
     expect(body.plugin_type).toBe('victorialogs');
     expect(body.name).toBe('vl_test_ds');
     expect(body.settings['victorialogs.addr']).toBe('http://127.0.0.1:9428/');

@@ -77,7 +77,7 @@ describe('L1：ck（ClickHouse）数据源表单提交', () => {
     // eslint-disable-next-line no-console
     console.log('[step6d][L1][ck] upsert body =', JSON.stringify(body, null, 2));
 
-    expect(url).toBe('/api/takin/datasource/upsert');
+    expect(url).toBe('/api/n9e/datasource/upsert');
     expect(body.plugin_type).toBe('ck');
     expect(body.name).toBe('ck_test_ds');
     expect(body.settings['ck.nodes']).toEqual(['127.0.0.1:9000']);

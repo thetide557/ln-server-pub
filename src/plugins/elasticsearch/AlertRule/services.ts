@@ -2,7 +2,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export function getDsQuery(params, silence = true) {
-  return request('/api/takin/ds-query', {
+  return request('/api/n9e/ds-query', {
     method: RequestMethod.Post,
     data: params,
     headers: {
@@ -13,7 +13,7 @@ export function getDsQuery(params, silence = true) {
 }
 
 export function getLogsQuery(params) {
-  return request('/api/takin/logs-query', {
+  return request('/api/n9e/logs-query', {
     method: RequestMethod.Post,
     data: params,
     headers: {

@@ -25,7 +25,7 @@ jest.mock('@/pages/dashboard/Renderer/datasource/elasticsearch', () => ({ __esMo
 jest.mock('@/pages/dashboard/Renderer/datasource/apiservice', () => ({ __esModule: true, default: jest.fn(() => Promise.resolve([])) }));
 
 // 关键的一条：让 tdengine 的取数函数返回 fe 的原始形状 { series, query }
-const tdengineRaw = { series: [1], query: [{ url: '/api/takin/query-range-batch' }] };
+const tdengineRaw = { series: [1], query: [{ url: '/api/n9e/query-range-batch' }] };
 jest.mock('@/plugins/TDengine/Dashboard/datasource', () => ({
   __esModule: true,
   default: jest.fn(() => Promise.resolve(tdengineRaw)),

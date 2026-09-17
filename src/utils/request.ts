@@ -104,13 +104,13 @@ request.interceptors.response.use(
             ) {
               return data;
             } else if (
-              _.some(["/api/takin/proxy", "/probe/v1"], (item) => {
+              _.some(["/api/n9e/proxy", "/probe/v1"], (item) => {
                 return url.includes(item);
               })
             ) {
               return data;
             } else if (
-              _.some(["/api/v1", "/api/v2", "/api/takin/datasource"], (item) => {
+              _.some(["/api/v1", "/api/v2", "/api/n9e/datasource"], (item) => {
                 return url.includes(item);
               })
             ) {
@@ -175,7 +175,7 @@ request.interceptors.response.use(
           };
         }
 
-        if (response.url.indexOf("/api/takin/auth/refresh") > 0) {
+        if (response.url.indexOf("/api/n9e/auth/refresh") > 0) {
           Cookies.remove("access_token");
           Cookies.remove("refresh_token");
           localStorage.removeItem('access_token');

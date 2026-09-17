@@ -63,7 +63,7 @@ const en_US = {
     },
     // ---- 第六步 第4段 W2（阶段 2）：只追加下面这一段，上面一个字没动。
     // 来源 fe v9.1.0 src/locales/common/locale/en_US.ts:102,110-120；
-    // preview_unavailable 是羚牛自己加的（后端缺 POST /api/takin/datasource/query，见 zh_CN.ts 同段注释）。
+    // preview_unavailable 是羚牛自己加的（后端缺 POST /api/n9e/datasource/query，见 zh_CN.ts 同段注释）。
     preview: 'Data source preview',
     queries: {
       label: 'Data source filter',

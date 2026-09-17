@@ -18,7 +18,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getN9EServers = function () {
-  return request('/api/takin/servers', {
+  return request('/api/n9e/servers', {
     method: RequestMethod.Get,
   });
 };

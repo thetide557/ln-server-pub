@@ -9,7 +9,7 @@
 //    这里把它造出来。env 里的值就是 vite 的 import.meta.env。
 //    注意 VITE_IS_PRO / VITE_IS_ENT 故意留空：
 //    - src/components/AdvancedWrap/index.tsx 用它决定「专业版才显示」的块要不要渲染（留空 = 不渲染）；
-//    - src/pages/datasource/services.ts:40 用它决定 upsert 的 URL 走 n9e 还是 n9e-plus（留空 = 走 /api/takin）。
+//    - src/pages/datasource/services.ts:40 用它决定 upsert 的 URL 走 n9e 还是 n9e-plus（留空 = 走 /api/n9e）。
 //    某个测试想验专业版分支，在测试里改 (globalThis as any).__VITE_IMPORT_META__.env.VITE_IS_PRO = 'true' 即可。
 (globalThis as any).__VITE_IMPORT_META__ = {
   url: 'file:///test',

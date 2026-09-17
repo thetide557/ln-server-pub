@@ -50,7 +50,7 @@ export default function index(props: Props) {
     datasourceValue,
     query,
     historicalRecords,
-    url = '/api/takin-plus',
+    url = '/api/n9e-plus',
     headers,
     value,
     onChange,

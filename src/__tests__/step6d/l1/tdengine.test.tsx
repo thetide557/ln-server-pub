@@ -24,7 +24,7 @@ import DatasourceFormPage from '@/pages/datasource/Form';
 
 const requestMock = request as unknown as jest.Mock;
 
-/** 页面挂载时 items/Cluster 会先打一发 /api/takin/server-clusters，
+/** 页面挂载时 items/Cluster 会先打一发 /api/n9e/server-clusters，
  *  所以不能直接取 mock.calls[0]，要按 url 把 upsert 那一发挑出来 */
 function upsertCalls() {
   return requestMock.mock.calls.filter((c) => String(c[0]).includes('datasource/upsert'));
@@ -76,7 +76,7 @@ describe('L1：tdengine 数据源表单提交', () => {
     // eslint-disable-next-line no-console
     console.log('[step6d][L1][tdengine] upsert body =', JSON.stringify(body, null, 2));
 
-    expect(url).toBe('/api/takin/datasource/upsert');
+    expect(url).toBe('/api/n9e/datasource/upsert');
     expect(options.method).toBe('Post');
     expect(body.plugin_type).toBe('tdengine');
     expect(body.name).toBe('td_test_ds');

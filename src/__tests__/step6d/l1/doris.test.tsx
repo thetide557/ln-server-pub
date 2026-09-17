@@ -69,7 +69,7 @@ describe('L1：doris 数据源表单提交', () => {
     // eslint-disable-next-line no-console
     console.log('[step6d][L1][doris] upsert body =', JSON.stringify(body, null, 2));
 
-    expect(url).toBe('/api/takin/datasource/upsert');
+    expect(url).toBe('/api/n9e/datasource/upsert');
     expect(body.plugin_type).toBe('doris');
     expect(body.name).toBe('doris_test_ds');
     expect(body.settings['doris.addr']).toBe('127.0.0.1:9030');

@@ -19,7 +19,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getDatasourcesByQueries = (data) => {
-  return request(`/api/takin/datasource/query`, {
+  return request(`/api/n9e/datasource/query`, {
     method: RequestMethod.Post,
     data,
     silence: true,

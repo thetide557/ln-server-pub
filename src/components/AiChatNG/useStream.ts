@@ -30,7 +30,7 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
       setStreaming(true);
 
       try {
-        const response = await fetch(`${basePrefix}/api/takin/stream`, {
+        const response = await fetch(`${basePrefix}/api/n9e/stream`, {
           method: 'POST',
           credentials: 'omit',
           headers: {

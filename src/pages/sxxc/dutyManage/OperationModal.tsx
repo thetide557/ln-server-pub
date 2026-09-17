@@ -31,8 +31,8 @@ export const OperationModal = ({
   reloadList,
   // 导入配置参数
   importConfig = {
-    templateUrl: '/api/takin/busi-group/duty/template',
-    importUrl: '/api/takin/xh/duty/import-xls',
+    templateUrl: '/api/n9e/busi-group/duty/template',
+    importUrl: '/api/n9e/xh/duty/import-xls',
     templateTitle: '值班人员'
   }
 }) => {
@@ -91,7 +91,7 @@ export const OperationModal = ({
               <Button
                 className="down_load_button"
                 onClick={async (event) => {
-                  // let url = "/api/takin/busi-group/duty/template";
+                  // let url = "/api/n9e/busi-group/duty/template";
                   // let params = {};
                   // let exportTitle = "值班人员";
                   // 使用配置的URL和标题
@@ -177,7 +177,7 @@ export const OperationModal = ({
       }
       let formData = new FormData();
       formData.append("file", fileList[0]);
-      // let url = "/api/takin/xh/duty/import-xls";
+      // let url = "/api/n9e/xh/duty/import-xls";
       // 使用配置的URL
       let url = importConfig.importUrl;
       console.log("批量导入", url);

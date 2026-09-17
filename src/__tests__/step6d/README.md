@@ -11,7 +11,7 @@
 | `samples/esForm.test.tsx` | jsdom 里能把 antd 4 的数据源表单渲染出来、填字段、点提交、点掉二次确认弹窗，并且能从 mock 的 `@/utils/request` 里把**请求体原样捞出来断言**（含 aes 加密后的密码）。 |
 | `samples/dsList.render.test.tsx` | `react-dom/server` 的 `renderToString` 能把数据源列表页整棵组件树渲染成字符串、不抛异常，i18n 词条也确实翻出来了。适合当「白屏级」冒烟。 |
 
-`esForm` 实测打出来的请求体（跑测试时 `console.log('[step6d][样板A] upsert body')` 会原样打印，也抄在 `进度-P2.md` 里）：`POST /api/takin/datasource/upsert`，body = `{ name, http:{url,timeout,tls:{},headers:{}}, auth:{basic_auth_user,basic_auth_password}, settings:{version,max_shard,min_interval}, plugin_type:'elasticsearch', is_enable:true, is_test:true }`。
+`esForm` 实测打出来的请求体（跑测试时 `console.log('[step6d][样板A] upsert body')` 会原样打印，也抄在 `进度-P2.md` 里）：`POST /api/n9e/datasource/upsert`，body = `{ name, http:{url,timeout,tls:{},headers:{}}, auth:{basic_auth_user,basic_auth_password}, settings:{version,max_shard,min_interval}, plugin_type:'elasticsearch', is_enable:true, is_test:true }`。
 
 ## 写新测试照哪几行抄
 

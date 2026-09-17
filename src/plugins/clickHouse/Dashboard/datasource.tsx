@@ -140,7 +140,7 @@ export default async function mysqlQuery(options: IOptions): Promise<Result> {
         resolveData.query.push({
           type: 'TimeSeries',
           request: {
-            url: `/api/takin/ds-query`,
+            url: `/api/n9e/ds-query`,
             method: 'POST',
             data: batchTimeSeriesParams,
           },
@@ -151,7 +151,7 @@ export default async function mysqlQuery(options: IOptions): Promise<Result> {
         resolveData.query.push({
           type: 'Logs',
           request: {
-            url: `/api/takin/logs-query`,
+            url: `/api/n9e/logs-query`,
             method: 'POST',
             data: batchTimeRawParams,
           },
