@@ -42,7 +42,7 @@ import {
   autoProjectSchedule
 } from "@/services/sxxc/dutyManage";
 import { exportTemplet } from "@/services/assets/asset";
-import "./projectSupport.less";
+import "./ProjectSupport.less";
 import { CommonStateContext } from "@/App";
 import { OperateType } from "./DutyList";
 import { OperationModal } from "./OperationModal";
