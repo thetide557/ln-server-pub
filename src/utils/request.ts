@@ -104,7 +104,7 @@ request.interceptors.response.use(
             ) {
               return data;
             } else if (
-              _.some(["/api/n9e/proxy", "/probe/v1"], (item) => {
+              _.some(["/api/n9e/proxy", "/api/n9e-plus/proxy", "/probe/v1"], (item) => {
                 return url.includes(item);
               })
             ) {
