@@ -77,7 +77,7 @@ export enum ActionType {
   AddUser = '添加成员',
 }
 export enum RoleType {
-  Admin = '管理员',
+  Admin = 'admin',
   Standard = 'standard',
   Guest = 'guest',
 }

@@ -82,7 +82,7 @@ export enum TaskType {
   EditTask = '编辑任务信息',
 }
 export enum RoleType {
-  Admin = '管理员',
+  Admin = 'admin',
   Standard = 'standard',
   Guest = 'guest',
 }
