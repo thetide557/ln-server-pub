@@ -98,7 +98,9 @@ const zh_CN = {
     },
   },
   empty: {
-    greeting_prefix: '你好,我是',
+    greeting_prefix: '欢迎使用 ',
+    greeting_brand: '羚牛 AI Agent 智能体',
+    greeting_suffix: '，有什么可以帮助您？',
   },
 };
 

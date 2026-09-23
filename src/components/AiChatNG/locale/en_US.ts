@@ -98,7 +98,9 @@ const en_US = {
     },
   },
   empty: {
-    greeting_prefix: 'Hello, I am',
+    greeting_prefix: 'Welcome to ',
+    greeting_brand: 'LingNiu AI Agent',
+    greeting_suffix: '. How can I help you?',
   },
 };
 

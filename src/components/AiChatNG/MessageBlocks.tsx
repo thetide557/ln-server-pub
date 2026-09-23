@@ -14,10 +14,11 @@ import AlertRuleContentBlock from './ContentRenderer/AlertRuleContentBlock';
 import DashboardContentBlock from './ContentRenderer/DashboardContentBlock';
 import { NAME_SPACE } from './constants';
 
-function TypedGreeting({ prefix, brand }: { prefix: string; brand: string }) {
-  const fullText = `${prefix}${brand}`;
+function TypedGreeting({ prefix, brand, suffix }: { prefix: string; brand: string; suffix: string }) {
+  const fullText = `${prefix}${brand}${suffix}`;
   const textChars = React.useMemo(() => Array.from(fullText), [fullText]);
   const prefixChars = React.useMemo(() => Array.from(prefix), [prefix]);
+  const brandEnd = prefixChars.length + Array.from(brand).length;
   const [visibleCount, setVisibleCount] = React.useState(0);
 
   React.useEffect(() => {
@@ -44,13 +45,15 @@ function TypedGreeting({ prefix, brand }: { prefix: string; brand: string }) {
   }, [textChars]);
 
   const visiblePrefix = prefixChars.slice(0, visibleCount).join('');
-  const visibleBrand = textChars.slice(prefixChars.length, visibleCount).join('');
+  const visibleBrand = textChars.slice(prefixChars.length, Math.min(visibleCount, brandEnd)).join('');
+  const visibleSuffix = textChars.slice(brandEnd, visibleCount).join('');
   const showCursor = visibleCount < textChars.length;
 
   return (
     <span aria-label={fullText}>
       <span>{visiblePrefix}</span>
       <span className='text-primary'>{visibleBrand}</span>
+      <span>{visibleSuffix}</span>
       {showCursor ? <span className='ml-0.5 inline-block h-[1em] w-[2px] animate-pulse align-[-0.1em] bg-current' aria-hidden='true' /> : null}
     </span>
   );
@@ -277,7 +280,7 @@ export function EmptyConversation({ prompts, onPromptClick }: { prompts?: string
         <div className='text-l4 font-bold'>
           <Space align='baseline'>
             <img src='/image/ai-chat/ai.gif' className='w-[24px] h-[24px]' />
-            <TypedGreeting prefix={greetingPrefix} brand='NightingaleAI' />
+            <TypedGreeting prefix={greetingPrefix} brand={t('empty.greeting_brand')} suffix={t('empty.greeting_suffix')} />
           </Space>
         </div>
       </div>
