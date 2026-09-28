@@ -68,7 +68,6 @@ request.interceptors.request.use((url, options) => {
     ...options.headers,
   };
   headers["Authorization"] = `Bearer ${Cookies.get("access_token") || ""}`;
-  headers["X-Language"] = localStorage.getItem("language") === "en_US" ? "en" : "zh";
   headers["Bg-debug"] = 1;
   return {
     url,
