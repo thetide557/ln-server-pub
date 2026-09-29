@@ -366,7 +366,7 @@ function App() {
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
                 <AiRobotSse />
-                <div className='content-box'>
+                <div className='content-box' style={path.includes('alert-his-events-shanshu') ? { paddingTop: 0 } : undefined}>
                   <Content />
                 </div>
               </>

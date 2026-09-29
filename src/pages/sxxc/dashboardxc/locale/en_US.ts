@@ -212,6 +212,8 @@ const en_US = {
       colorDomainAuto_tip: 'By default, the min max value is automatically taken from the series', // hexbin
       detailName: 'Link name',
       detailUrl: 'Link addr',
+      showTopN: 'TopN switch',
+      topN: 'Default count',
       pie: {
         legengPosition: 'Legend position',
         max: 'Max',

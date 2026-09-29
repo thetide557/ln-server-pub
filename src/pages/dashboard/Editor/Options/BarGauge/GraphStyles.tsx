@@ -15,7 +15,7 @@
  *
  */
 import React from 'react';
-import { Form, Select, Row, Col, InputNumber, Input } from 'antd';
+import { Form, Select, Row, Col, InputNumber, Input, Switch } from 'antd';
 import { CaretDownOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useTranslation, Trans } from 'react-i18next';
@@ -87,6 +87,24 @@ export default function GraphStyles() {
               }}
             >
               <Input style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={10}>
+          <Col span={12}>
+            <Form.Item label={t('panel.custom.showTopN')} name={[...namePrefix, 'showTopN']} valuePropName='checked'>
+              <Switch size='small' />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label={t('panel.custom.topN')} name={[...namePrefix, 'topN']}>
+              <Select size='small'>
+                <Select.Option value={5}>1-5</Select.Option>
+                <Select.Option value={10}>1-10</Select.Option>
+                <Select.Option value={15}>1-15</Select.Option>
+                <Select.Option value={20}>1-20</Select.Option>
+                <Select.Option value={0}>全部</Select.Option>
+              </Select>
             </Form.Item>
           </Col>
         </Row>

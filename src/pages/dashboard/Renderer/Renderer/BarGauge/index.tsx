@@ -133,6 +133,10 @@ export default function BarGauge(props: IProps) {
   if (sortOrder && sortOrder !== 'none') {
     calculatedValues = _.orderBy(calculatedValues, ['stat'], [sortOrder]);
   }
+  // 按显示数量截取(0或未定义=全部)
+  if (custom?.topN && custom.topN > 0) {
+    calculatedValues = _.slice(calculatedValues, 0, custom.topN);
+  }
   const curMaxValue = maxValue !== undefined && maxValue !== null ? maxValue : _.maxBy(calculatedValues, 'stat')?.stat || 0;
 
   return (

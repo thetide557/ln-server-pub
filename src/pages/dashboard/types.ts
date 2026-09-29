@@ -172,6 +172,8 @@ export interface IBarGaugeStyles {
   serieWidth: number;
   sortOrder: 'none' | 'asc' | 'desc';
   detailUrl: string | undefined;
+  topN?: number; // 显示数量(0或未定义=全部)
+  showTopN?: boolean; // 是否显示数量切换下拉
 }
 
 export interface ITextStyles {

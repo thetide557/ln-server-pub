@@ -54,6 +54,7 @@ import Event from '@/pages/event';
 import EventDetail from '@/pages/event/detail';
 import orderformDetail from '@/pages/event/orderformdetail';
 import historyEvents from '@/pages/historyEvents';
+import historyEventsShanshu from '@/pages/historyEvents/shanshu';
 import XhAssetMgt from '@/pages/xh/assetmgt';
 import XhAssetAdd from '@/pages/xh/assetmgt/Add';
 import IotAssetMgt from '@/pages/sxxc/iotAssetMgt';
@@ -211,6 +212,7 @@ export default function Content() {
 
         <Route exact path='/alert-cur-events' component={Event} />
         <Route exact path='/alert-his-events' component={historyEvents} />
+        <Route exact path='/alert-his-events-shanshu' component={historyEventsShanshu} />
         <Route exact path='/alert-orderform-events' component={orderformEvents} />
         <Route exact path='/alert-orderform-events/:eventId' component={orderformDetail} />
         <Route exact path='/alert-cur-events/:eventId' component={EventDetail} />

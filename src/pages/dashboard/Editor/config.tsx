@@ -230,6 +230,7 @@ export const defaultCustomValuesMap = {
     displayMode: 'basic',
     serieWidth: 20,
     sortOrder: 'desc',
+    showTopN: false,
   },
   barGaugeN: {
     calc: 'lastNotNull',
