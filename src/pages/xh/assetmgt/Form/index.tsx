@@ -138,7 +138,35 @@ export default function () {
       value: 2
     }
   ]
-
+  const assetCategoryOptions = [
+    {
+      label: '物理设备',
+      value: '物理设备'
+    },
+    {
+      label: '虚拟机',
+      value: '虚拟机'
+    },
+    {
+      label: '数据库',
+      value: '数据库'
+    },
+    {
+      label: '中间件',
+      value: '中间件'
+    }
+  ]
+  const cpuArchOptions = [
+    {
+      label: 'ARM',
+      value: 'ARM'
+    },
+    {
+      label: 'X86',
+      value: 'X86'
+    },
+    
+  ]
   const loadManufacturerOptions = useCallback(async (showError = true) => {
     setManufacturerLoading(true);
     try {
@@ -912,7 +940,7 @@ export default function () {
             <Card {...panelBaseProps} className='card_base'>
               <Row gutter={10}>
                 <Col span={12}>
-                  <Form.Item label='类型' name='type' rules={[{ required: true }]}>
+                  <Form.Item label='资产类型' name='type' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
                       options={assetTypes}
@@ -1042,6 +1070,26 @@ export default function () {
                     <Input placeholder='填写备注' />
                   </Form.Item>
                 </Col>
+                <Col span={12}>
+                  <Form.Item label='区域' name='region' rules={[{ required: true }]}>
+                    <Input placeholder='请输入区域' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='租户' name='tenant' rules={[{ required: true }]}>
+                    <Input placeholder='请输入租户' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='类型' name='asset_category' rules={[{ required: true }]}>
+                      <Input placeholder='请输入类型' />
+                    </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='CPU架构' name='cpu_arch' rules={[{ required: true }]}>
+                      <Input placeholder='请输入CPU架构' />
+                  </Form.Item>
+                </Col>
                 {/* 管理状态：上架资产、下架资产 */}
                 <Col span={12}>
                   <Form.Item label='管理状态' name='is_shelf' rules={[{ required: true }]} initialValue={true}>
@@ -1087,6 +1135,9 @@ export default function () {
                       />
                     </Form.Item>
                   </Col>
+
+
+
                 )}
 
               </Row>

@@ -513,6 +513,34 @@ export default function () {
         return (daysA > 0 ? daysA : 1) - (daysB > 0 ? daysB : 1);
       },
     },
+    {
+      title: '区域',
+      dataIndex: 'region',
+      align: 'center',
+      width: 120,
+      ellipsis: true,
+    },
+    {
+      title: '租户',
+      dataIndex: 'tenant',
+      align: 'center',
+      width: 120,
+      ellipsis: true,
+    },
+    {
+      title: '类型',
+      dataIndex: 'asset_category',
+      align: 'center',
+      width: 120,
+      ellipsis: true,
+    },
+    {
+      title: 'CPU架构',
+      dataIndex: 'cpu_arch',
+      align: 'center',
+      width: 120,
+      ellipsis: true,
+    },
     // 最近更新时间、最近更新人
     {
       title: '最近更新时间',

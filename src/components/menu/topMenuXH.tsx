@@ -201,7 +201,12 @@ const getMenuList = (t) => {
         {
           key: '/healthReport',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('健康报告'),
+          label: t('巡检指标'),
+        },
+        {
+          key: '/healthReport/resourceAnalysis',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('分析报表'),
         },
       ]
     },
