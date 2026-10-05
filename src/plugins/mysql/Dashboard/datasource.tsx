@@ -1,5 +1,5 @@
 // 2026-10-05 N16 摞二：复制自 fe v9.1.0 同路径（羚牛原无 Dashboard/），并按 N16 把时序 + 表达式半边改走
-// 开源 POST /api/n9e/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），不再调 getDsQuery2 的商业版
+// 开源 POST /api/n9e/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），不再走商业版
 // query-batch（/api/n9e-plus/ 前缀，羚牛后端不补，用户拍板 77 / M229 ⑤）。raw 半边保留走 getLogsQuery（/api/n9e/log-query-batch，D-2）。接线照 ck / doris。
 import _ from 'lodash';
 import moment from 'moment';

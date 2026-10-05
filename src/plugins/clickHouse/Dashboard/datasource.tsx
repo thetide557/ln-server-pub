@@ -7,7 +7,7 @@ import replaceTemplateVariables from '@/pages/dashboard/Variables/utils/replaceT
 
 import { getLogsQuery } from '../services';
 // 2026-10-05 N16 摞二：仪表盘时序取数改发开源 POST /api/n9e/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），
-// 不再调 getDsQuery2 的 商业版 query-batch（/api/n9e-plus/ 前缀）（羚牛后端不补，用户拍板 77 / M229 ⑤）。raw/日志半边保留走 getLogsQuery（/api/n9e/log-query-batch，D-2）。
+// 不再走商业版 query-batch（/api/n9e-plus/ 前缀）（羚牛后端不补，用户拍板 77 / M229 ⑤）。raw/日志半边保留走 getLogsQuery（/api/n9e/log-query-batch，D-2）。
 import { queryBatchV2 } from '@/pages/dashboard/Renderer/datasource/queryBatchV2';
 
 interface IOptions {
