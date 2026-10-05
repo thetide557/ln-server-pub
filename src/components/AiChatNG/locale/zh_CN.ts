@@ -26,6 +26,7 @@ const zh_CN = {
   input: {
     placeholder: '输入问题，Enter 发送，Shift + Enter 换行',
     share_readonly_placeholder: '当前为只读分享模式',
+    share_forbidden_notice: '这个分享会话只对分享者本人可见，当前账号没有查看权限',
   },
   query: {
     title: '查询语句',

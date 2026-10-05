@@ -26,6 +26,7 @@ const zh_HK = {
   input: {
     placeholder: '輸入問題，Enter 發送，Shift + Enter 換行',
     share_readonly_placeholder: '當前為唯讀分享模式',
+    share_forbidden_notice: '這個分享會話只對分享者本人可見，當前帳號沒有查看權限',
   },
   query: {
     title: '查詢語句',
