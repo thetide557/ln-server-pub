@@ -25,6 +25,12 @@ import '@/plugins/clickHouse/locale';
 import Doris from '@/plugins/doris/Dashboard/QueryBuilder';
 import '@/plugins/doris/locale';
 
+// 2026-10-05 N16 摞二：mysql / pgsql 开源 fe 入口仍甩 plus 空壳（fe 最新 QueryEditor/QueryBuilder.tsx:44），羚牛比上游多走一步、照 doris 的接法。
+import MySQL from '@/plugins/mysql/Dashboard/QueryBuilder';
+import PgSQL from '@/plugins/pgsql/Dashboard/QueryBuilder';
+import '@/plugins/mysql/locale';
+import '@/plugins/pgsql/locale';
+
 export default function index({ chartForm, type, variableConfig, dashboardId }) {
   const { t } = useTranslation('dashboard');
   const [mode, setMode] = useState('query');
@@ -91,6 +97,21 @@ export default function index({ chartForm, type, variableConfig, dashboardId }) 
               return (
                 <Form.Item shouldUpdate noStyle>
                   {({ getFieldValue: getFieldValue2 }) => <Doris datasourceValue={getFieldValue2('datasourceValue')} />}
+                </Form.Item>
+              );
+            }
+            // 2026-10-05 N16 摞二：mysql / pgsql 照 doris 接法（开源 fe 入口甩 plus 空壳，羚牛多走一步）。
+            if (cate === 'mysql') {
+              return (
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue: getFieldValue2 }) => <MySQL datasourceValue={getFieldValue2('datasourceValue')} />}
+                </Form.Item>
+              );
+            }
+            if (cate === 'pgsql') {
+              return (
+                <Form.Item shouldUpdate noStyle>
+                  {({ getFieldValue: getFieldValue2 }) => <PgSQL datasourceValue={getFieldValue2('datasourceValue')} />}
                 </Form.Item>
               );
             }

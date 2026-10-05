@@ -97,6 +97,8 @@ export function getLogsQuery(data: {
   });
 }
 
+// 2026-10-05 N16 摞二：仪表盘已改发 /api/n9e/v2/query-batch（Renderer/datasource/queryBatchV2.ts），
+// 本函数的 商业版 query-batch（/api/n9e-plus/ 前缀） 羚牛后端不补（用户拍板 77 / M229 ⑤），仪表盘路径不再调用；保留与上游同形、不删。
 export const getDsQuery2 = function (data: {
   queries: {
     ref: string;

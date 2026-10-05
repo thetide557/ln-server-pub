@@ -5,7 +5,10 @@ import { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 import { DatasourceCateEnum } from '@/utils/constant';
 import replaceTemplateVariables from '@/pages/dashboard/Variables/utils/replaceTemplateVariables';
 
-import { getDsQuery2, getLogsQuery } from '../services';
+import { getLogsQuery } from '../services';
+// 2026-10-05 N16 摞二：仪表盘时序取数改发开源 POST /api/n9e/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），
+// 不再走商业版 query-batch（/api/n9e-plus/ 前缀）（羚牛后端不补，用户拍板 77 / M229 ⑤）。raw/日志半边保留走 getLogsQuery（/api/n9e/log-query-batch，D-2）。
+import { queryBatchV2 } from '@/pages/dashboard/Renderer/datasource/queryBatchV2';
 
 interface IOptions {
   id?: string; // panelId
@@ -24,17 +27,21 @@ interface Result {
 }
 
 export default async function mysqlQuery(options: IOptions): Promise<Result> {
-  const { time, targets, datasourceValue, queryOptionsTime } = options;
+  const { time, targets, datasourceValue, queryOptionsTime, scopedVars, inspect } = options;
   if (!time.start) return Promise.resolve({ series: [] });
   const parsedRange = parseRange(time);
   let start = moment(parsedRange.start).unix();
   let end = moment(parsedRange.end).unix();
-  let batchTimeSeriesParams: any[] = [];
   let batchTimeRawParams: any[] = [];
-  let exps: any[] = []; // 表达式查询条件
-  let series: any[] = [];
+  const tsTargets: any[] = []; // 时序 + 表达式 target，交给 v2 适配层
   if (targets && typeof datasourceValue === 'number') {
     _.forEach(targets, (target) => {
+      // 2026-10-05 N16：时序与表达式 target 交给 queryBatchV2（内部替换变量 / 序列化 keys / 校验 / 发 v2）。
+      if (target.__mode__ === '__expr__' || target.query?.mode === 'timeSeries') {
+        tsTargets.push(target);
+        return;
+      }
+      // 以下 raw 半边逐字保留（D-2：log-query-batch 本来就通）。
       if (queryOptionsTime) {
         const parsedRange = parseRange(queryOptionsTime);
         start = moment(parsedRange.start).unix();
@@ -44,56 +51,32 @@ export default async function mysqlQuery(options: IOptions): Promise<Result> {
       if (!query.query) return;
       const queryStr = replaceTemplateVariables(query.query, { range: queryOptionsTime ?? time });
       const mode = query.mode;
-      if (target.__mode__ === '__expr__') {
-        exps.push({
+      if (mode === 'raw') {
+        batchTimeRawParams.push({
           ref: target.refId,
-          exp: target.expr,
+          ds_id: datasourceValue,
+          ds_cate: DatasourceCateEnum.ck,
+          query: {
+            ref: target.refId,
+            from: start,
+            to: end,
+            sql: queryStr,
+          },
         });
-      } else {
-        if (_.isArray(query?.keys?.valueKey)) {
-          query.keys.valueKey = _.join(query.keys.valueKey, ' ');
-        }
-        if (_.isArray(query?.keys?.labelKey)) {
-          query.keys.labelKey = _.join(query.keys.labelKey, ' ');
-        }
-        if (mode === 'timeSeries') {
-          batchTimeSeriesParams.push({
-            ref: target.refId,
-            ds_id: datasourceValue,
-            ds_cate: DatasourceCateEnum.ck,
-            query: {
-              ref: target.refId,
-              from: start,
-              to: end,
-              sql: queryStr,
-              keys: {
-                valueKey: _.isArray(query.keys?.valueKey) ? _.join(query.keys?.valueKey, ' ') : query.keys?.valueKey,
-                labelKey: _.isArray(query.keys?.labelKey) ? _.join(query.keys?.labelKey, ' ') : query.keys?.labelKey,
-              },
-            },
-          });
-        } else if (mode === 'raw') {
-          batchTimeRawParams.push({
-            ref: target.refId,
-            ds_id: datasourceValue,
-            ds_cate: DatasourceCateEnum.ck,
-            query: {
-              ref: target.refId,
-              from: start,
-              to: end,
-              sql: queryStr,
-            },
-          });
-        }
       }
     });
-    let seriesRes;
-    if (!_.isEmpty(batchTimeSeriesParams)) {
-      seriesRes = await getDsQuery2({
-        queries: batchTimeSeriesParams,
-        exps,
-      });
-    }
+    // 时序 + 表达式：一次 v2 批量取数（结果形状与 raw 半边一致，便于 _.concat）。
+    const tsResult = tsTargets.length
+      ? await queryBatchV2({
+          cate: DatasourceCateEnum.ck,
+          datasourceValue,
+          time,
+          queryOptionsTime,
+          targets: tsTargets,
+          scopedVars,
+          inspect,
+        })
+      : ({ series: [] as any[] } as { series: any[]; query?: any[] });
     let rawRes;
     if (!_.isEmpty(batchTimeRawParams)) {
       rawRes = await getLogsQuery({
@@ -101,24 +84,6 @@ export default async function mysqlQuery(options: IOptions): Promise<Result> {
       });
     }
 
-    for (let i = 0; i < seriesRes?.length; i++) {
-      const { data, ref } = seriesRes?.[i];
-      _.forEach(data, (serie) => {
-        const isExp = _.find(exps, (exp) => exp.ref === serie.ref);
-        const currentTarget = _.find(targets, (target) => target.refId === serie.ref);
-        if (!currentTarget?.hide) {
-          series.push({
-            id: _.uniqueId('series_'),
-            refId: ref,
-            target: currentTarget,
-            isExp,
-            metric: serie.metric,
-            data: serie.values,
-            mode: 'timeSeries',
-          });
-        }
-      });
-    }
     const raw = _.flatten(
       _.map(rawRes, (item) => {
         const currentTarget = _.find(targets, (target) => target.refId === item?.ref);
@@ -133,25 +98,15 @@ export default async function mysqlQuery(options: IOptions): Promise<Result> {
         });
       }),
     );
-    const resolveData: Result = { series: _.concat(series, raw) };
-    if (options.inspect) {
-      resolveData.query = [];
-      if (!_.isEmpty(batchTimeSeriesParams)) {
-        resolveData.query.push({
-          type: 'TimeSeries',
-          request: {
-            url: `/api/n9e/ds-query`,
-            method: 'POST',
-            data: batchTimeSeriesParams,
-          },
-          response: seriesRes,
-        });
-      }
+    const resolveData: Result = { series: _.concat(tsResult.series, raw) };
+    if (inspect) {
+      // TimeSeries 条目由适配层给（url 已是 v2 真路径）；Logs 条目展示真正发出的 /api/n9e/log-query-batch。
+      resolveData.query = [...(tsResult.query ?? [])];
       if (!_.isEmpty(batchTimeRawParams)) {
         resolveData.query.push({
           type: 'Logs',
           request: {
-            url: `/api/n9e/logs-query`,
+            url: `/api/n9e/log-query-batch`,
             method: 'POST',
             data: batchTimeRawParams,
           },
