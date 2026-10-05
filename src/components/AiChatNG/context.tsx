@@ -3,9 +3,11 @@ import React from 'react';
 import { AiChatMode, AiChatExecuteQueryForQueryContent, IAiChatPageInfo, IAiChatAction } from './types';
 import { buildPageFrom } from './recommend';
 import { cleanShareParamsFromUrl } from './share';
+import { CommonStateContext } from '@/App';
 
 const AI_CHAT_MODE_STORAGE_KEY = 'ai-chat-mode';
-const AI_CHAT_CACHED_SESSION_KEY = 'ai-chat-last-session-id';
+// 本地缓存的 AI 会话 id（登出 / 切用户 / 收 forbidden|chat not found 时要清，见 todo①）；export 供登出调用处复用，别重复写字面串
+export const AI_CHAT_CACHED_SESSION_KEY = 'ai-chat-last-session-id';
 
 function getInitialMode(): AiChatMode {
   if (typeof window === 'undefined') {
@@ -90,6 +92,8 @@ export const AiChatContext = React.createContext<IAiChatContextValue>({
 
 export function AiChatProvider(props: IAiChatProviderProps) {
   const { children } = props;
+  const { profile } = React.useContext(CommonStateContext);
+  const prevProfileIdRef = React.useRef<number | undefined>(undefined);
   const [visible, setVisible] = React.useState(false);
   const [mode, setMode] = React.useState<AiChatMode>(getInitialMode);
   const [promptList, setPromptList] = React.useState<string[] | undefined>(undefined);
@@ -121,6 +125,16 @@ export function AiChatProvider(props: IAiChatProviderProps) {
       window.localStorage.removeItem(AI_CHAT_CACHED_SESSION_KEY);
     }
   }, [cachedSessionId]);
+
+  // 切换登录用户时清掉本地缓存的会话 id（上一次有值且与当前不同），避免拿旧账号的 chatId 去问新账号 → forbidden（todo①）
+  React.useEffect(() => {
+    const currentId = profile?.id;
+    const prevId = prevProfileIdRef.current;
+    prevProfileIdRef.current = currentId;
+    if (prevId !== undefined && currentId !== undefined && prevId !== currentId) {
+      setCachedSessionId(undefined);
+    }
+  }, [profile?.id]);
 
   const openAiChat = React.useCallback(
     (options?: {

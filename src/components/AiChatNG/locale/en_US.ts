@@ -26,6 +26,7 @@ const en_US = {
   input: {
     placeholder: 'Ask a question. Press Enter to send, Shift + Enter for a new line',
     share_readonly_placeholder: 'Viewing a shared chat (read-only)',
+    share_forbidden_notice: 'This shared conversation is only visible to the user who shared it; the current account has no access',
   },
   query: {
     title: 'Query',

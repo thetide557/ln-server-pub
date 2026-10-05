@@ -14,20 +14,28 @@ import { useAiChatContext } from './context';
 
 const POLLING_INTERVAL = 3000;
 
+// 会话已失效（换了账号、会话被删或无权）时后端返回的错误文本标记：命中则清本地 chatId、另起新会话（todo①）
+const isSessionGoneError = (error: unknown): boolean => {
+  const text = error instanceof Error ? error.message : String(error ?? '');
+  return /forbidden|chat not found/i.test(text);
+};
+
 export default function ChatPanel(props: IAiChatProps) {
   const { t } = useTranslation(NAME_SPACE);
   const { placeholder, chatId, queryPageFrom, queryAction, promptList, initialMessage, onExecuteQueryForQueryContent, onChatChange, onError, welcomeSlot } = props;
-  const { shareReadonly } = useAiChatContext();
+  const { shareReadonly, setCachedSessionId } = useAiChatContext();
   const [activeChat, setActiveChat] = useState<IAiChatHistoryItem>();
   const [messages, setMessages] = useState<IAiChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [shareForbidden, setShareForbidden] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
   const [streamingLocator, setStreamingLocator] = useState<IAiChatMessageLocator>();
   const chatBodyRef = useRef<HTMLDivElement>(null);
   const pollingTimerRef = useRef<number>();
   const startStreamRef = useRef<(streamId: string) => Promise<void> | void>();
+  const createNewChatRef = useRef<() => void>();
   const streamBufferRef = useRef<{ locator?: IAiChatMessageLocator; segments: IAiChatStreamSegment[] }>({ locator: undefined, segments: [] });
   const { maybeScrollToBottom, scrollToBottom } = useAutoScroll(chatBodyRef);
 
@@ -125,6 +133,7 @@ export default function ChatPanel(props: IAiChatProps) {
   const loadMessages = useCallback(
     async (targetChatId: string) => {
       setMessagesLoading(true);
+      setShareForbidden(false);
       try {
         const nextMessages = await getMessageHistory({ chat_id: targetChatId });
         setMessages(nextMessages);
@@ -143,12 +152,21 @@ export default function ChatPanel(props: IAiChatProps) {
         });
         requestAnimationFrame(() => scrollToBottom('auto'));
       } catch (error) {
-        handleError(error instanceof Error ? error : new Error('load messages failed'));
+        const nextError = error instanceof Error ? error : new Error('load messages failed');
+        if (shareReadonly && isSessionGoneError(nextError)) {
+          // 只读分享模式下遇 forbidden / chat not found：这条分享会话只对分享者本人可见，给明确文案（todo④）
+          setShareForbidden(true);
+        } else if (!shareReadonly && isSessionGoneError(nextError)) {
+          // 用旧 chatId 加载历史时若返回 forbidden / chat not found（换账号或会话失效），清本地 chatId 并另起新会话（todo①）
+          setCachedSessionId(undefined);
+          createNewChatRef.current?.();
+        }
+        handleError(nextError);
       } finally {
         setMessagesLoading(false);
       }
     },
-    [handleError, onChatChange, queryPageFrom, scrollToBottom],
+    [handleError, onChatChange, queryPageFrom, scrollToBottom, shareReadonly, setCachedSessionId],
   );
 
   useEffect(() => {
@@ -205,6 +223,12 @@ export default function ChatPanel(props: IAiChatProps) {
       return undefined;
     }
   }, [handleError, onChatChange, queryPageFrom]);
+
+  useEffect(() => {
+    createNewChatRef.current = () => {
+      createNewChat();
+    };
+  }, [createNewChat]);
 
   const startPolling = useCallback(
     (locator: IAiChatMessageLocator) => {
@@ -272,10 +296,15 @@ export default function ChatPanel(props: IAiChatProps) {
       } catch (error) {
         setSubmitting(false);
         const nextError = error instanceof Error ? error : new Error('send message failed');
+        // 用旧 chatId 发消息时若返回 forbidden / chat not found，清本地 chatId 并另起新会话（todo①）
+        if (!shareReadonly && isSessionGoneError(nextError)) {
+          setCachedSessionId(undefined);
+          createNewChatRef.current?.();
+        }
         handleError(nextError);
       }
     },
-    [activeChat, chatId, createNewChat, handleError, inputValue, mergeMessage, onChatChange, queryAction, queryPageFrom, shareReadonly, startPolling, submitting, syncMessageDetail, t],
+    [activeChat, chatId, createNewChat, handleError, inputValue, mergeMessage, onChatChange, queryAction, queryPageFrom, setCachedSessionId, shareReadonly, startPolling, submitting, syncMessageDetail, t],
   );
 
   useEffect(() => {
@@ -324,7 +353,9 @@ export default function ChatPanel(props: IAiChatProps) {
         <div ref={chatBodyRef} className='h-full min-h-0 w-full flex-1 best-looking-scroll children:h-full'>
           <Spin spinning={messagesLoading} indicator={<LoadingOutlined />}>
             <div className='h-full flex flex-col gap-8'>
-              {messageItems.length ? (
+              {shareForbidden ? (
+                <div className='flex h-full items-center justify-center px-6 text-center text-sm text-placeholder'>{t('input.share_forbidden_notice')}</div>
+              ) : messageItems.length ? (
                 messageItems
               ) : welcomeSlot ? (
                 welcomeSlot

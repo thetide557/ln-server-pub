@@ -12,6 +12,7 @@ import Cookies from 'js-cookie';
 import './topMenu.less';
 import './locale';
 import { Logout } from '@/services/login';
+import { AI_CHAT_CACHED_SESSION_KEY } from '@/components/AiChatNG/context';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -465,6 +466,8 @@ export default function () {
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
+            // 登出时清掉本地缓存的 AI 会话 id（todo①）
+            localStorage.removeItem(AI_CHAT_CACHED_SESSION_KEY);
             Cookies.remove('access_token');
             Cookies.remove('refresh_token');
             localStorage.removeItem('refresh_token');

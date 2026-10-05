@@ -4,6 +4,7 @@ import { message, notification } from "antd";
 import _ from "lodash";
 import { UpdateAccessToken } from "@/services/login";
 import Cookies from 'js-cookie';
+import i18next from 'i18next';
 
 /** 异常处理程序，所有的error都被这里处理，页面无法感知具体error */
 const errorHandler = (error: Error): Response => {
@@ -63,12 +64,19 @@ const request = extend({
 // 全局变量：缓存正在进行的刷新 Token 请求，防止并发 401 时重复调用 refresh 接口
 let refreshTokenPromise: Promise<any> | null = null;
 
+// 拼登录跳转地址：已在 /login 下不再嵌套；redirect 用 encodeURIComponent 编码，
+// 避免把内层 query 漏到外层造成 /login?redirect=/login?redirect=… 套娃（照 fe v9.1.0 request.tsx:78-80）
+const combineLoginURL = (): string => {
+  if (location.pathname.indexOf("/login") === 0) return "/login";
+  return `/login${location.pathname != "/" ? "?redirect=" + encodeURIComponent(location.pathname + location.search) : ""}`;
+};
+
 request.interceptors.request.use((url, options) => {
   let headers = {
     ...options.headers,
   };
   headers["Authorization"] = `Bearer ${Cookies.get("access_token") || ""}`;
-  headers["X-Language"] = localStorage.getItem("language") === "en_US" ? "en" : "zh";
+  headers["X-Language"] = i18next.language;
   headers["Bg-debug"] = 1;
   return {
     url,
@@ -161,10 +169,7 @@ request.interceptors.response.use(
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           setTimeout(() => {
-            location.href = `/login${location.pathname != "/"
-              ? "?redirect=" + location.pathname + location.search
-              : ""
-              }`;
+            location.href = combineLoginURL();
           }, 1000);
           throw {
             name: 'LOGIN_CONFLICT',
@@ -182,10 +187,7 @@ request.interceptors.response.use(
           localStorage.removeItem('refresh_token');
           message.warning('登录状态已过期，请重新登录');
           setTimeout(() => {
-            location.href = `/login${location.pathname != "/"
-              ? "?redirect=" + location.pathname + location.search
-              : ""
-              }`;
+            location.href = combineLoginURL();
           }, 1000);
           throw {
             name: 'UNAUTHORIZED',
@@ -211,10 +213,7 @@ request.interceptors.response.use(
                 localStorage.removeItem('refresh_token');
                 message.warning('登录状态已过期，请重新登录');
                 setTimeout(() => {
-                  location.href = `/login${location.pathname != "/"
-                    ? "?redirect=" + location.pathname + location.search
-                    : ""
-                    }`;
+                  location.href = combineLoginURL();
                 }, 1000);
               } else {
                 // 刷新成功，更新新的 Token 到 Cookies 和 localStorage
@@ -267,10 +266,7 @@ request.interceptors.response.use(
           Cookies.remove("refresh_token");
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
-          location.href = `/login${location.pathname != "/"
-            ? "?redirect=" + location.pathname + location.search
-            : ""
-            }`;
+          location.href = combineLoginURL();
           throw {
             name: 'UNAUTHORIZED',
             message: '',

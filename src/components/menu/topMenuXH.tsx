@@ -12,6 +12,7 @@ import { getMyPortrait } from '@/services/log_set';
 import './topMenu.less';
 import './locale';
 import { Logout } from '@/services/login';
+import { AI_CHAT_CACHED_SESSION_KEY } from '@/components/AiChatNG/context';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
@@ -590,6 +591,8 @@ export default function () {//{ selectMenu?:any }
     // 新增: 判断 access_token 与 refresh_token 是否存在
     if (!Cookies.get('access_token') && !Cookies.get('refresh_token')) {
       Logout().then((res) => {
+        // 登出时清掉本地缓存的 AI 会话 id（todo①）
+        localStorage.removeItem(AI_CHAT_CACHED_SESSION_KEY);
         if (res?.dat?.logout_url) {
           Cookies.remove('access_token');
           Cookies.remove('refresh_token');
@@ -658,6 +661,8 @@ export default function () {//{ selectMenu?:any }
       <Menu.Item
         onClick={() => {
           Logout().then((res) => {
+            // 登出时清掉本地缓存的 AI 会话 id（todo①）
+            localStorage.removeItem(AI_CHAT_CACHED_SESSION_KEY);
             if (res?.dat?.logout_url) {
               Cookies.remove('access_token');
               Cookies.remove('refresh_token');

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Drawer } from 'antd';
+import Cookies from 'js-cookie';
 
 import { useAiChatContext } from './context';
 import FloatingPanel from './components/FloatingPanel';
@@ -48,6 +49,9 @@ export default function AiChatContainer(props: IAiChatContainerProps) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // 未登录或当前在登录页时，不自动打开分享会话：否则会去拉 message/history → 401，
+    // 触发 401 拦截器把 /login?redirect=… 层层嵌套（BUG-T5-3 套娃）
+    if (!Cookies.get('access_token') || window.location.pathname.indexOf('/login') === 0) return;
 
     // 页面加载时检测分享 URL 参数，自动打开 AI Chat
     const searchParams = new URLSearchParams(window.location.search);
