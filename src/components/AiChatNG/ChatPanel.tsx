@@ -14,10 +14,16 @@ import { useAiChatContext } from './context';
 
 const POLLING_INTERVAL = 3000;
 
+// 会话已失效（换了账号、会话被删或无权）时后端返回的错误文本标记：命中则清本地 chatId、另起新会话（todo①）
+const isSessionGoneError = (error: unknown): boolean => {
+  const text = error instanceof Error ? error.message : String(error ?? '');
+  return /forbidden|chat not found/i.test(text);
+};
+
 export default function ChatPanel(props: IAiChatProps) {
   const { t } = useTranslation(NAME_SPACE);
   const { placeholder, chatId, queryPageFrom, queryAction, promptList, initialMessage, onExecuteQueryForQueryContent, onChatChange, onError, welcomeSlot } = props;
-  const { shareReadonly } = useAiChatContext();
+  const { shareReadonly, setCachedSessionId } = useAiChatContext();
   const [activeChat, setActiveChat] = useState<IAiChatHistoryItem>();
   const [messages, setMessages] = useState<IAiChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -28,6 +34,7 @@ export default function ChatPanel(props: IAiChatProps) {
   const chatBodyRef = useRef<HTMLDivElement>(null);
   const pollingTimerRef = useRef<number>();
   const startStreamRef = useRef<(streamId: string) => Promise<void> | void>();
+  const createNewChatRef = useRef<() => void>();
   const streamBufferRef = useRef<{ locator?: IAiChatMessageLocator; segments: IAiChatStreamSegment[] }>({ locator: undefined, segments: [] });
   const { maybeScrollToBottom, scrollToBottom } = useAutoScroll(chatBodyRef);
 
@@ -143,12 +150,18 @@ export default function ChatPanel(props: IAiChatProps) {
         });
         requestAnimationFrame(() => scrollToBottom('auto'));
       } catch (error) {
-        handleError(error instanceof Error ? error : new Error('load messages failed'));
+        const nextError = error instanceof Error ? error : new Error('load messages failed');
+        // 用旧 chatId 加载历史时若返回 forbidden / chat not found（换账号或会话失效），清本地 chatId 并另起新会话（todo①）
+        if (!shareReadonly && isSessionGoneError(nextError)) {
+          setCachedSessionId(undefined);
+          createNewChatRef.current?.();
+        }
+        handleError(nextError);
       } finally {
         setMessagesLoading(false);
       }
     },
-    [handleError, onChatChange, queryPageFrom, scrollToBottom],
+    [handleError, onChatChange, queryPageFrom, scrollToBottom, shareReadonly, setCachedSessionId],
   );
 
   useEffect(() => {
@@ -205,6 +218,12 @@ export default function ChatPanel(props: IAiChatProps) {
       return undefined;
     }
   }, [handleError, onChatChange, queryPageFrom]);
+
+  useEffect(() => {
+    createNewChatRef.current = () => {
+      createNewChat();
+    };
+  }, [createNewChat]);
 
   const startPolling = useCallback(
     (locator: IAiChatMessageLocator) => {
@@ -272,10 +291,15 @@ export default function ChatPanel(props: IAiChatProps) {
       } catch (error) {
         setSubmitting(false);
         const nextError = error instanceof Error ? error : new Error('send message failed');
+        // 用旧 chatId 发消息时若返回 forbidden / chat not found，清本地 chatId 并另起新会话（todo①）
+        if (!shareReadonly && isSessionGoneError(nextError)) {
+          setCachedSessionId(undefined);
+          createNewChatRef.current?.();
+        }
         handleError(nextError);
       }
     },
-    [activeChat, chatId, createNewChat, handleError, inputValue, mergeMessage, onChatChange, queryAction, queryPageFrom, shareReadonly, startPolling, submitting, syncMessageDetail, t],
+    [activeChat, chatId, createNewChat, handleError, inputValue, mergeMessage, onChatChange, queryAction, queryPageFrom, setCachedSessionId, shareReadonly, startPolling, submitting, syncMessageDetail, t],
   );
 
   useEffect(() => {
