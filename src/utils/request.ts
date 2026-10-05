@@ -4,6 +4,7 @@ import { message, notification } from "antd";
 import _ from "lodash";
 import { UpdateAccessToken } from "@/services/login";
 import Cookies from 'js-cookie';
+import i18next from 'i18next';
 
 /** 异常处理程序，所有的error都被这里处理，页面无法感知具体error */
 const errorHandler = (error: Error): Response => {
@@ -68,7 +69,7 @@ request.interceptors.request.use((url, options) => {
     ...options.headers,
   };
   headers["Authorization"] = `Bearer ${Cookies.get("access_token") || ""}`;
-  headers["X-Language"] = localStorage.getItem("language") === "en_US" ? "en" : "zh";
+  headers["X-Language"] = i18next.language;
   headers["Bg-debug"] = 1;
   return {
     url,

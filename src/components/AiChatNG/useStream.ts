@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Cookies from 'js-cookie';
+import i18next from 'i18next';
 import { basePrefix } from '@/utils/basePrefix';
 import { IAiChatStreamChunk } from './types';
 import { normalizeStreamChunk } from './utils';
@@ -37,7 +38,7 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
             'Content-Type': 'application/json',
             Accept: 'text/event-stream',
             Authorization: `Bearer ${Cookies.get('access_token') || ''}`,
-            'X-Language': localStorage.getItem('language') === 'en_US' ? 'en' : 'zh',
+            'X-Language': i18next.language,
             'Bg-debug': '1',
           },
           body: JSON.stringify({ stream_id: streamId }),
