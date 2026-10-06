@@ -48,6 +48,10 @@ import MySQLDetail from '@/plugins/mysql/Event';
 import PgsqlDetail from '@/plugins/pgsql/Event';
 import DorisDetail from '@/plugins/doris/Event';
 import VictorialogsDetail from '@/plugins/victorialogs/Event';
+// clickhouse 这一格上游开源自己不分发（fe ee48e701 的 eventDetailByCate.tsx 没有 ck 分支，
+// 组件只被 plugins/clickHouse/index.ts:9 导出、零消费，开源把 ck 的事件回查甩给了商业 parcel）。
+// 羚牛这里主动接上，立场与 ck / doris 的既有口径一致（拍板 D-1）。
+import ClickHouseDetail from '@/plugins/clickHouse/Event';
 import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
 // 各插件自己的词条由 src/plugins/<源>/locale/index.ts 调 addResourceBundle 注册，而那几个文件
 // 原先只被告警规则表单、仪表盘编辑器 import（见 src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx:53-59），
@@ -55,6 +59,7 @@ import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
 import '@/plugins/TDengine/locale';
 import '@/plugins/mysql/locale';
 import '@/plugins/pgsql/locale';
+import '@/plugins/clickHouse/locale';
 // es 组件里用到 `alertRules:nodata_trigger.title`，而 alertRules 这个命名空间只在
 // src/pages/alertRules/index.tsx:30 注册，本页的 import 链不经过它 —— 这里补一行只做注册的 import。
 import '@/pages/alertRules/locale';
@@ -281,6 +286,7 @@ const EventDetailPage: React.FC = () => {
     ...(eventDetail?.cate === DatasourceCateEnum.pgsql ? PgsqlDetail() : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.doris ? DorisDetail() : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.victorialogs ? VictorialogsDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.ck ? ClickHouseDetail() : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
