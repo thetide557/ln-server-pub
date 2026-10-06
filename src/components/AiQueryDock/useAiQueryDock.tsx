@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { IS_ENT } from '@/utils/constant';
+import { ENABLE_AI_QUERY_DOCK } from '@/utils/constant';
 import { timeRangeUnix } from '@/components/TimeRangePicker';
 import type { IRawTimeRange } from '@/components/TimeRangePicker';
 import { buildPageFrom } from '@/components/AiChatNG/recommend';
@@ -58,7 +58,7 @@ export function useAiQueryDock<S extends DockSnapshot>(adapter: AiQueryDockAdapt
   const latest = useRef({ adapter, options });
   latest.current = { adapter, options };
   const actions = useQueryDockActions({
-    enabled: IS_ENT && open,
+    enabled: ENABLE_AI_QUERY_DOCK && open,
     datasourceValue: options.datasourceValue,
     getControl: options.getControl,
     action: adapter.action,
@@ -93,8 +93,8 @@ export function useAiQueryDock<S extends DockSnapshot>(adapter: AiQueryDockAdapt
 
   return {
     open,
-    trigger: IS_ENT ? <AiQueryDockTrigger open={open} onClick={toggle} /> : undefined,
-    dock: IS_ENT ? (
+    trigger: ENABLE_AI_QUERY_DOCK ? <AiQueryDockTrigger open={open} onClick={toggle} /> : undefined,
+    dock: ENABLE_AI_QUERY_DOCK ? (
       <AiQueryDock
         open={open}
         pageFrom={pageFrom}
