@@ -43,6 +43,7 @@ import Host from './Detail/Host';
 // 一律直接 import 文件，风格照上面 PrometheusDetail 那行。
 import ElasticsearchDetail from '@/plugins/elasticsearch/Event';
 import TDengineDetail from '@/plugins/TDengine/Event';
+import LokiDetail from './Detail/Loki';
 import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
 // 各插件自己的词条由 src/plugins/<源>/locale/index.ts 调 addResourceBundle 注册，而那几个文件
 // 原先只被告警规则表单、仪表盘编辑器 import（见 src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx:53-59），
@@ -269,6 +270,7 @@ const EventDetailPage: React.FC = () => {
     ...(eventDetail?.cate === DatasourceCateEnum.elasticsearch ? ElasticsearchDetail({ indexPatterns }) : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.opensearch ? ElasticsearchDetail() : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.tdengine ? TDengineDetail(t) : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.loki ? LokiDetail({ eventDetail, history }) : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
