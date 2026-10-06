@@ -25,6 +25,11 @@ module.exports = {
     // ---- 第六步 B1（多数据源补搬轮）：victorialogs 即时查询的图表用的是新的 TimeSeriesNG 渲染器，
     // 它的 Legend/Annotation 两个组件用了 flex / gap-2 / mt-2 这些 tailwind 类。
     './src/pages/dashboard/Renderer/Renderer/TimeSeriesNG/**/*.{ts,tsx}',
+    // ---- N20 块 0（新日志浏览 logExplorer）：整个新页面与它带进来的 10 个共享组件都大量用 tailwind 类
+    // （fc 色板 12 处、带 className 的行 301 行，见 n20/W-0-改动清单.md 7.1）。不列进 content 这些类不会被生成——
+    // tsc 全绿、build 成功、页面打开是一堆没样式的裸元素，没有任何报错（n19 估量 R-03）。AiQueryDock 第 3 轮再加。
+    './src/pages/logExplorer/**/*.{ts,tsx}',
+    './src/components/{ViewSelect,TableColumnSelect,Meta,NavigableDrawer,OutlinedSelect,OutlinedAutoComplete,QueryBoxPrefix,ErrorWithDetail,HistoricalRecords,DatasourceSelect}/**/*.{ts,tsx}',
   ],
   // 添加下面的代码,禁用 `清除浏览器默认样式`, 解决和antd的样式冲突
   // (这样 `@tailwind base` 就只会添加一些默认的 tw 变量.不会去清除浏览器默认样式了.)
