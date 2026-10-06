@@ -59,8 +59,8 @@ export interface IRawTimeRange {
 }
 
 export interface ITimeRangePickerProps {
-  // n20-TODO-lead-导出: 第 2 轮 W-1（es）临时加的，lead 合回时核。
-  // 要它的：src/plugins/elasticsearch/ExplorerNG/Main/index.tsx:227 传了 `showMillisecond`。
+  // n20 lead 已转正（拍板 D-23 / D-28）：第 2 轮 es / loki / vl 三路都临时加了这一个成员，合回时只留这一份。
+  // 要它的：src/plugins/elasticsearch/ExplorerNG/Main/index.tsx:227、loki/ExplorerNG/Main/index.tsx:154、victorialogs/ExplorerNG/Main/index.tsx:134。
   // fe 出处：fe ee48e701 src/components/TimeRangePicker/types.ts:82
   //   `showMillisecond?: boolean; // 是否在 input 回填值中显示毫秒（固定为 000），默认不显示`。
   // 羚牛这个组件**没有**这个功能（`grep -rn showMillisecond src/components/TimeRangePicker/` 零命中），
@@ -79,19 +79,6 @@ export interface ITimeRangePickerProps {
   label?: React.ReactElement;
   extraFooter?: (fn: Function) => React.ReactElement;
   disabled?: boolean;
-<<<<<<< HEAD
-  // n20-TODO-lead-导出: loki 的 src/plugins/loki/ExplorerNG/Main/index.tsx:154 给 <TimeRangePicker> 传了
-  // showMillisecond；fe src/components/TimeRangePicker/types.ts:82 有这个可选成员，羚牛这版没有。
-  // W-2 只在自己的树里临时加这一个可选成员让 tsc 过，合回时由 lead 核（统一尺子第四节：B 类边界只加不改）。
-  // 注意：羚牛的 TimeRangePicker 实现没有认这个 prop（fe index.tsx:41 用它挑 dateFormat），
-  // 所以加了类型也只是让 tsc 过、输入框里的毫秒不会真显示——见 W-2-拿不准.md U-01。
-  showMillisecond?: boolean;
-=======
-  // n20-TODO-lead-导出: victorialogs/ExplorerNG/Main/index.tsx:134 传了 showMillisecond，羚牛这版没有这个 prop
-  // n20-TODO-lead-导出: （fe ee48e701 src/components/TimeRangePicker/types.ts:82 有）。这里只临时加类型让 tsc 过；
-  // n20-TODO-lead-导出: 真正的「毫秒显示」逻辑要 lead 一起补，改法见 n20/W-3-改动清单.md 第 5 节。
-  showMillisecond?: boolean; // 是否在 input 回填值中显示毫秒（固定为 000），默认不显示
->>>>>>> n20/vl
 }
 
 export interface ITimeRangePickerWithRefreshProps extends ITimeRangePickerProps {
