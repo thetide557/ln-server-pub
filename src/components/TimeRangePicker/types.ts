@@ -70,6 +70,10 @@ export interface ITimeRangePickerProps {
   label?: React.ReactElement;
   extraFooter?: (fn: Function) => React.ReactElement;
   disabled?: boolean;
+  // n20-TODO-lead-导出: victorialogs/ExplorerNG/Main/index.tsx:134 传了 showMillisecond，羚牛这版没有这个 prop
+  // n20-TODO-lead-导出: （fe ee48e701 src/components/TimeRangePicker/types.ts:82 有）。这里只临时加类型让 tsc 过；
+  // n20-TODO-lead-导出: 真正的「毫秒显示」逻辑要 lead 一起补，改法见 n20/W-3-改动清单.md 第 5 节。
+  showMillisecond?: boolean; // 是否在 input 回填值中显示毫秒（固定为 000），默认不显示
 }
 
 export interface ITimeRangePickerWithRefreshProps extends ITimeRangePickerProps {
