@@ -7,6 +7,8 @@ const zh_HK = {
   快捷视图: '快捷檢視',
   记录规则: '記錄規則',
   日志分析: '日誌分析',
+  // n23（用户 M264 ③）：照上游 fe ee48e701 src/components/SideMenu/locale/zh_HK.ts:32 的 `logs_explorer: '日誌'`。
+  日志: '日誌',
   索引模式: '索引模式',
   链路追踪: '鏈路追蹤',
   拓扑分析: '拓撲分析',
