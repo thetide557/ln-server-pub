@@ -75,3 +75,19 @@ export interface DrilldownInitialValues {
   linkName?: string;
   [key: string]: any;
 }
+
+// ---- n20 块 1（es 新日志浏览）：只在文件末尾追加，上面一个字没动。
+// 新搬进来的 src/plugins/elasticsearch/ExplorerNG/Main/SQL/QueryBuilder.tsx:20 用的是**具名** import
+// （`import { esQueryBuilder } from 'plus:/datasource/elasticsearch/ExplorerNG/services'`）。
+// 同文件 :16 / :18 的 QueryBuilder 与 commonStateContext 是默认 import、落到本文件默认导出上，零工作；
+// 只有具名 import 找不到同名导出会让 rollup 打包直接失败（tsc 不报，攒到 build 才炸，R-06），所以补这一个。
+// 返回形状照调用处（同文件 :90-101 用了 result.sql / result.mode / result.value_key / result.label_key），
+// 空实现返回空对象、四个键都是 undefined；fe 没有可抄的真实现（fe ee48e701 没有 src/plus 目录，
+// src/global.d.ts 里也只给 DrilldownBtn 写了 declare module，没给这个 services）。
+// 运行时走不到：同文件 :40 是 `if (!IS_PLUS) return null;`，羚牛开源形态下 IS_PLUS 恒为 false
+// （src/utils/constant.ts:22），整个 QueryBuilder 组件直接返回 null。
+async function esQueryBuilder(..._args: any[]): Promise<any> {
+  return {};
+}
+
+export { esQueryBuilder };
