@@ -4,7 +4,7 @@ import { FilterOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { SqlMonacoEditor } from '@fc-components/monaco-editor';
-import { WandSparkles } from 'lucide-react';
+import { Wand2 } from 'lucide-react';
 
 import { CommonStateContext } from '@/App';
 import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
@@ -92,7 +92,7 @@ export default forwardRef(function QueryInputCpt(props: Props, ref) {
               renderFormatButton={() => {
                 return (
                   <Tooltip title={t('common:format_sql')}>
-                    <Button size='small' type='text' icon={<WandSparkles size={12} strokeWidth={1} />} />
+                    <Button size='small' type='text' icon={<Wand2 size={12} strokeWidth={1} />} />
                   </Tooltip>
                 );
               }}

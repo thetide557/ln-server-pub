@@ -1,29 +1,17 @@
+// N20 块 1（es 新日志浏览）：fe 的 i18n 用 import.meta.glob 自动收集 **/{locale,locales}/index.ts 里的
+// `export default resources`（fe src/i18n.ts:78），pub 的 i18n 是静态 resources（src/i18n.ts:19-22），
+// 不自动收集——所以这里改成 pub 的惯例：自己调 i18next.addResourceBundle
+// （写法照 src/plugins/TDengine/locale/index.ts:7-14、src/pages/logExplorer/locale/index.ts:8-16）。
+// 语言只留 pub 支持的三种（zh_CN / en_US / zh_HK），fe 的 ja_JP / ru_RU / pt_BR / es_ES / id_ID /
+// ko_KR / fr_FR 七个文件保留但不注册。
+// 命名空间取 ../constants 的 NAME_SPACE（= 'elasticsearch'），与 fe 原文件里 resources 的键一字不差；
+// pub 静态 resources 只有 common / datasource 两个命名空间（src/locales/resources.ts:22-31），不撞。
+import i18next from 'i18next';
 import { NAME_SPACE } from '../constants';
-
 import en_US from './en_US';
 import zh_CN from './zh_CN';
 import zh_HK from './zh_HK';
-import ja_JP from './ja_JP';
-import ru_RU from './ru_RU';
-import pt_BR from './pt_BR';
-import es_ES from './es_ES';
-import id_ID from './id_ID';
-import ko_KR from './ko_KR';
-import fr_FR from './fr_FR';
 
-const resources = {
-  [NAME_SPACE]: {
-    en_US,
-    zh_CN,
-    zh_HK,
-    ja_JP,
-    ru_RU,
-    pt_BR,
-    es_ES,
-    id_ID,
-    ko_KR,
-    fr_FR,
-  },
-};
-
-export default resources;
+i18next.addResourceBundle('en_US', NAME_SPACE, en_US);
+i18next.addResourceBundle('zh_CN', NAME_SPACE, zh_CN);
+i18next.addResourceBundle('zh_HK', NAME_SPACE, zh_HK);
