@@ -91,3 +91,13 @@ async function esQueryBuilder(..._args: any[]): Promise<any> {
 }
 
 export { esQueryBuilder };
+
+// ---- N20 第 3 轮（ck / doris 新日志浏览）lead 加的，只在文件末尾追加（拍板 D-21）。
+// src/plugins/clickHouse/ExplorerNG/components/AddTo.tsx:8 与 src/plugins/doris/ExplorerNG/components/AddTo.tsx:8
+// 都是 `import RecordingRuleForm, { ActionButtons } from 'plus:/pages/recordingRules/components/OperateForm'`：
+// 默认导入落到本文件默认导出上零工作，具名的 ActionButtons 找不到同名导出会让 rollup 打包直接失败（tsc 不报，R-06），
+// 所以补一个返回 null 的空组件。「加入记录规则」是商业版功能，版本 A 下这块界面为空。
+function ActionButtons() {
+  return null;
+}
+export { ActionButtons };
