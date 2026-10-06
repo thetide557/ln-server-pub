@@ -110,11 +110,12 @@ export interface ICommonState {
   // fe 出处：fe ee48e701 src/App.tsx:144（darkMode: boolean）、:155（logsDefaultRange: IRawTimeRange）。
   // 谁要它：darkMode ← src/pages/logExplorer/components/LogsViewer/components/HistogramChart.tsx:16；
   //        logsDefaultRange ← src/pages/logExplorer/Explorer.tsx:42、Header.tsx:102。
-  // 羚牛的 App 没有暗色模式、也没有「日志默认时间范围」这个用户设置，所以**只加类型、不给值**
-  // （下面 :143 起的 useState 初始值一个字没动）：两者在版本 A 恒为 undefined——
-  // darkMode 走亮色（和羚牛已有的两处同类处置一致，见 src/components/KQLInput/index.tsx:67-70、
+  // 羚牛的 App 没有暗色模式、也没有「日志默认时间范围」这个用户设置，所以两个都是可选成员：
+  // darkMode **只加类型、不给值**（下面 useState 初始值里没有它），版本 A 恒为 undefined → 走亮色
+  // （和羚牛已有的两处同类处置一致，见 src/components/KQLInput/index.tsx:67-70、
   // src/pages/explorer/Elasticsearch/QueryBuilder.tsx:42-44 的 `as any` 注释）；
-  // logsDefaultRange 则由搬入代码自己兜底（Explorer.tsx:87,197 的 `?? { start: 'now-5m', end: 'now' }`）。
+  // logsDefaultRange **已在下面的 useState 初始值里给了 `{ start: 'now-1h', end: 'now' }`**
+  // （n23 / 用户 M264 ②，照上游 fe ee48e701 src/App.tsx:256；原 n20 块 0 只加类型，见拍板 D-18）。
   darkMode?: boolean;
   logsDefaultRange?: IRawTimeRange;
   // n20 lead 已转正（拍板 D-25）：第 2 轮 W-1（es）加的。
@@ -208,6 +209,12 @@ function App() {
       newVersion: false,
     },
     isPlus,
+    // n23（用户 M264 ②）：给 logsDefaultRange 初值，照上游 fe ee48e701 src/App.tsx:256 一字不差。
+    // 原先只加类型不给值（拍板 D-18），恒为 undefined，新日志页走搬入代码自己的兜底
+    // （src/pages/logExplorer/Explorer.tsx:87,197 的 `?? { start: 'now-5m', end: 'now' }`）→ 默认 5 分钟。
+    // 给了值之后默认 1 小时，与上游 fe 无该用户设置时的表现一致。羚牛没有「日志默认时间范围」
+    // 这个用户设置项，所以这里写死、没有 setter（上游 fe 同样写死、全仓无 setter）。
+    logsDefaultRange: { start: 'now-1h', end: 'now' },
     // n20 lead 已转正（拍板 D-25）：第 2 轮 W-1（es）加的。
     // 必须给值、不能只加类型：es ExplorerNG/SideBarNav/index.tsx:188 是
     // `initialValue={esIndexMode !== 'all' ? esIndexMode : 'indices'} hidden={isOpenSearch || esIndexMode !== 'all'}`，
