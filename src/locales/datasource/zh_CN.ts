@@ -58,7 +58,11 @@ const zh_CN = {
       delay: '延迟执行',
     },
     event: {
-      groupBy: `根据 {{field}} 分组，匹配个数 {{size}}, 文档最小值 {{min_value}}`,
+      // ---- N19 W-A：插值名由 {{min_value}} 改成 {{min_doc_count}}，与 fe ee48e701
+      // src/locales/datasource/locale/zh_CN.ts:64 一致 —— 消费它的 src/plugins/elasticsearch/Event/index.tsx:64
+      // 传进来的字段名就是 min_doc_count，不改这里会原样显示 {{min_value}} 这串占位符。
+      // 全仓只有那一个消费点（grep 'es.event.groupBy' 1 命中），所以改插值名不影响别处。
+      groupBy: `根据 {{field}} 分组，匹配个数 {{size}}, 文档最小值 {{min_doc_count}}`,
     },
   },
   // ---- 第六步 L1（多数据源）：doris / clickHouse 数据源表单的高级设置用 t('datasource:datasource.xxx')，

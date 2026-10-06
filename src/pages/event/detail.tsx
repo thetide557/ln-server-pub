@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '@/components/pageLayout';
 import { getAlertEventsById, getHistoryEventsById } from '@/services/warning';
-import { priorityColor } from '@/utils/constant';
+import { priorityColor, DatasourceCateEnum } from '@/utils/constant';
 import { deleteAlertEventsModal } from '.';
 import { parseValues } from '@/pages/alertRules/utils';
 import { CommonStateContext } from '@/App';
@@ -37,6 +37,32 @@ import PlusPreview from 'plus:/parcels/Event/Preview';
 import PlusLogsDetail from 'plus:/parcels/Event/LogsDetail';
 import PrometheusDetail from './Detail/Prometheus';
 import Host from './Detail/Host';
+// ---- N19 W-A：告警事件详情「按源回查」。照 fe ee48e701 src/pages/event/DetailNG/eventDetailByCate.tsx
+// 的分发表，把各数据源的 Event 组件接进本页下面的 descriptionInfo 数组（老结构：按 cate 展开一段详情项）。
+// 不走 `import { Event as X } from '@/plugins/<源>'` 的聚合导出（羚牛各插件 index.ts 形态不一、es 连 index.ts 都没有），
+// 一律直接 import 文件，风格照上面 PrometheusDetail 那行。
+import ElasticsearchDetail from '@/plugins/elasticsearch/Event';
+import TDengineDetail from '@/plugins/TDengine/Event';
+import LokiDetail from './Detail/Loki';
+import MySQLDetail from '@/plugins/mysql/Event';
+import PgsqlDetail from '@/plugins/pgsql/Event';
+import DorisDetail from '@/plugins/doris/Event';
+import VictorialogsDetail from '@/plugins/victorialogs/Event';
+// clickhouse 这一格上游开源自己不分发（fe ee48e701 的 eventDetailByCate.tsx 没有 ck 分支，
+// 组件只被 plugins/clickHouse/index.ts:9 导出、零消费，开源把 ck 的事件回查甩给了商业 parcel）。
+// 羚牛这里主动接上，立场与 ck / doris 的既有口径一致（拍板 D-1）。
+import ClickHouseDetail from '@/plugins/clickHouse/Event';
+import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
+// 各插件自己的词条由 src/plugins/<源>/locale/index.ts 调 addResourceBundle 注册，而那几个文件
+// 原先只被告警规则表单、仪表盘编辑器 import（见 src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx:53-59），
+// 本页不经过 —— 所以这里逐个补只做注册的 import，写法照那个文件。
+import '@/plugins/TDengine/locale';
+import '@/plugins/mysql/locale';
+import '@/plugins/pgsql/locale';
+import '@/plugins/clickHouse/locale';
+// es 组件里用到 `alertRules:nodata_trigger.title`，而 alertRules 这个命名空间只在
+// src/pages/alertRules/index.tsx:30 注册，本页的 import 链不经过它 —— 这里补一行只做注册的 import。
+import '@/pages/alertRules/locale';
 import './detail.less';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import Solution from './Solution'
@@ -83,6 +109,17 @@ const EventDetailPage: React.FC = () => {
   const history = useHistory();
   const isHistory = history.location.pathname.includes('alert-his-events');
   const [eventDetail, setEventDetail] = useState<any>();
+  // ---- N19 W-A：ES 事件详情要把 index_pattern 的 id 换成名字显示，所以先把索引模式列表拉下来。
+  // 照 fe ee48e701 src/pages/event/DetailNG/index.tsx:46-61，但羚牛这张老详情页没有分享链接的 token 场景，
+  // 所以不带 params、直接调羚牛已有的 getESIndexPatterns（src/pages/log/IndexPatterns/services.ts:20）。
+  const [indexPatterns, setIndexPatterns] = useState<{ id: number; name: string }[]>([]);
+  useEffect(() => {
+    if (eventDetail?.cate === DatasourceCateEnum.elasticsearch) {
+      getESIndexPatterns().then((res) => {
+        setIndexPatterns(res);
+      });
+    }
+  }, [eventDetail?.cate]);
   if (eventDetail) eventDetail.cate = eventDetail.cate || 'prometheus'; // TODO: 兼容历史的告警事件
   const parsedEventDetail = parseValues(eventDetail);
   const descriptionInfo = [
@@ -239,6 +276,17 @@ const EventDetailPage: React.FC = () => {
         history,
       })
       : [false]),
+    // ---- N19 W-A：按源回查的分发分支，顺序与写法照 fe ee48e701 eventDetailByCate.tsx:38-56。
+    // 用 DatasourceCateEnum 而不是字面量，是为了 clickhouse 那条不写错成 'clickhouse'（真值是 'ck'）。
+    ...(eventDetail?.cate === DatasourceCateEnum.elasticsearch ? ElasticsearchDetail({ indexPatterns }) : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.opensearch ? ElasticsearchDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.tdengine ? TDengineDetail(t) : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.loki ? LokiDetail({ eventDetail, history }) : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.mysql ? MySQLDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.pgsql ? PgsqlDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.doris ? DorisDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.victorialogs ? VictorialogsDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.ck ? ClickHouseDetail() : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
