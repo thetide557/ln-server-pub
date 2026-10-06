@@ -6,6 +6,10 @@ import { advancedCates } from 'plus:/constants';
 export interface Cate {
   value: string;
   label: string;
+  // n20 块 0：fe 的 DatasourceCategory 有 logo（数据源类型的小图标路径），羚牛这版原来没有；
+  // DatasourceSelectV3/index.tsx:169 读 datasourceCate?.logo。加成**可选**字段，不改已有成员；
+  // baseCates 里没有一条填了 logo，所以版本 A 下它恒为 undefined，V3 那一行走 null 分支、不渲染图标。
+  logo?: string;
   type: string[];
   alertRule: boolean; // 是否支持告警规则
   dashboard: boolean; // 是否支持仪表盘

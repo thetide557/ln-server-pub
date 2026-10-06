@@ -16,6 +16,11 @@
       // 本仓库 typescript 是 4.3.2 读不懂。hast-util-raw 运行时用的其实是嵌套的 parse5@6，
       // 所以把类型指回本来就在的 @types/parse5@6，与运行时一致。
       "parse5": ["node_modules/@types/parse5"],
+      // n20 块 0（新日志浏览）：@antv/g2 v5 自带的 .d.ts 用了 TS 4.5 的行内 type 修饰符语法，
+      // 本仓库 typescript 4.3.2 解析不了（TS1005），skipLibCheck 挡不住语法错。
+      // 这里只把**类型**指到一个手写的最小声明（src/antv-g2-shim.d.ts，里面写清了为什么），
+      // 运行时 vite 照旧解析 node_modules 里真正的 @antv/g2 5.4.8。
+      "@antv/g2": ["src/antv-g2-shim.d.ts"],
     },
     "skipLibCheck": true,
     "esModuleInterop": false,

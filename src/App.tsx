@@ -106,6 +106,17 @@ export interface ICommonState {
     plugins: any[];
   };
   isPlus: boolean;
+  // ---- n20 块 0（新日志浏览）在这个接口体里加的两个**可选**成员，已有成员一个字没动 ----
+  // fe 出处：fe ee48e701 src/App.tsx:144（darkMode: boolean）、:155（logsDefaultRange: IRawTimeRange）。
+  // 谁要它：darkMode ← src/pages/logExplorer/components/LogsViewer/components/HistogramChart.tsx:16；
+  //        logsDefaultRange ← src/pages/logExplorer/Explorer.tsx:42、Header.tsx:102。
+  // 羚牛的 App 没有暗色模式、也没有「日志默认时间范围」这个用户设置，所以**只加类型、不给值**
+  // （下面 :143 起的 useState 初始值一个字没动）：两者在版本 A 恒为 undefined——
+  // darkMode 走亮色（和羚牛已有的两处同类处置一致，见 src/components/KQLInput/index.tsx:67-70、
+  // src/pages/explorer/Elasticsearch/QueryBuilder.tsx:42-44 的 `as any` 注释）；
+  // logsDefaultRange 则由搬入代码自己兜底（Explorer.tsx:87,197 的 `?? { start: 'now-5m', end: 'now' }`）。
+  darkMode?: boolean;
+  logsDefaultRange?: IRawTimeRange;
 }
 
 export const initTheme = {
@@ -417,3 +428,7 @@ export default App;
 // 羚牛已经有等价常量 src/utils/basePrefix.ts:3（部署在站点根路径、写死空串，第六步 S3 定的），
 // 所以这里不重新定义一份、只把它从 @/App 这个入口再导出一次，保证两处永远同一个值。
 export { basePrefix } from '@/utils/basePrefix';
+
+// n20 块 0：上面 ICommonState 里新加的 logsDefaultRange 要这个类型。import 放文件末尾（ESM 会提升，
+// 与放在文件头等价），这样 src/App.tsx 这个边界文件的 diff 里只有 `+` 行、没有 `-` 行。
+import type { IRawTimeRange } from '@/components/TimeRangePicker';

@@ -176,7 +176,7 @@ export default function Meta(props: Props) {
                     )}
                     <CopyOutlined
                       onClick={() => {
-                        copyToClipBoard(nodeData.field);
+                        copyToClipBoard(nodeData.field, t);
                       }}
                     />
                   </Space>

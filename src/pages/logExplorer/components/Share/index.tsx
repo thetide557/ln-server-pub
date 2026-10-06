@@ -29,7 +29,7 @@ export default function index(props: Props) {
           const values = form.getFieldsValue();
           const locationsearch = getLocationSearchByFormValues(values);
           if (locationsearch) {
-            copyToClipBoard(`${window.location.origin}${location.pathname}?${locationsearch}&__execute__=true`);
+            copyToClipBoard(`${window.location.origin}${location.pathname}?${locationsearch}&__execute__=true`, t);
           }
         }}
       >
@@ -52,7 +52,7 @@ export function ShareLinkText(props: Props) {
           const values = form.getFieldsValue();
           const locationsearch = getLocationSearchByFormValues(values);
           if (locationsearch) {
-            copyToClipBoard(`${window.location.origin}${location.pathname}?${locationsearch}&__execute__=true`);
+            copyToClipBoard(`${window.location.origin}${location.pathname}?${locationsearch}&__execute__=true`, t);
           }
         }}
       >

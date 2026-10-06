@@ -158,7 +158,13 @@ import stringToRegex from '../../Variables/utils/stringToRegex';
 export const getMappedTextObj = (textValue: string, valueMappings?: IValueMapping[]) => {
   if (typeof textValue === 'string') {
     const matchedValueMapping = _.find(valueMappings, (item) => {
-      const { type, match } = item;
+      // 与 fe 的差：fe 的 IValueMapping（fe types.ts:86-99）的 type 联合里有 'textValue'、match 里有
+      // textValue 字段；羚牛那版（types.ts:62-73）两者都没有。羚牛这份 IValueMapping 是仪表盘的公共
+      // 类型（撞点表 #7 点名「不能覆盖」），**不去改它的已有行**（改联合类型就必然产生 `-` 行、
+      // 破掉 B 类只加不改的门禁），改成在这里按宽类型解构一次，逻辑与 fe 一字不差。
+      // 后果：羚牛的值映射界面里配不出 type === 'textValue' 的映射，所以这个分支实际走不到，
+      // getMappedTextObj 恒返回 { text: textValue }——与 fe 在「没配文本映射」时的结果相同。
+      const { type, match } = item as unknown as { type?: string; match?: { textValue?: string } };
       if (type === 'textValue') {
         if (textValue === match?.textValue) return true;
         const reg = stringToRegex(match?.textValue);

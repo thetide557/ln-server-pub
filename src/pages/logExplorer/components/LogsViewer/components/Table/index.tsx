@@ -132,7 +132,7 @@ export default function Table<Row>(props: Props<Row>) {
               <RowDetail
                 rowId={rowKey}
                 onHeightChange={handleHeightChange}
-                children={expandable.expandedRowRender(_.omit(row, ['__id', '__parentId', '__type', '__expanded']) as Row)}
+                children={expandable.expandedRowRender(_.omit(row, ['__id', '__parentId', '__type', '__expanded']) as unknown as Row)}
               />
             );
           }
