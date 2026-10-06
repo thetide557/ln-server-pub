@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Dropdown, Menu, Tooltip } from 'antd';
 import type { AiChatPageFromSource, IAiChatProps, IAiChatInputRequest, IAiQueryProgress } from '@/components/AiChatNG/types';
-import { ChevronUp, ChevronDown, MoreHorizontal, Share2, SquarePen, Undo2, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, MoreHorizontal, Share2, PenSquare, Undo2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { ChatPanel, EAiChatContentType, IAiChatMessage, IAiChatTurn } from '@/components/AiChatNG';
@@ -261,7 +261,11 @@ export default function AiQueryDock(props: AiQueryDockProps) {
         onError={handleError}
         collapsed={!expanded}
         chatId={chatId}
-        queryPageFrom={pageFrom}
+        // n20 W-5 适配：fe 这里是 `queryPageFrom={pageFrom}`，fe 的 IAiChatProps.queryPageFrom 类型是
+        // AiChatPageFromSource（页面信息对象，或者一个读它的函数）；羚牛这版 AiChatNG 老一些，queryPageFrom 只收对象
+        // （src/components/AiChatNG/types.ts 的 IAiChatProps）。按 n20 拍板 D-16「公共类型不改宽」，不动羚牛那个成员的类型，
+        // 在这里把函数形先取出值来再传。代价：页面状态变成「渲染时读」而不是 fe 的「发消息时读」，见 W-5-拿不准 U-03。
+        queryPageFrom={typeof pageFrom === 'function' ? pageFrom() : pageFrom}
         promptList={promptList}
         placeholder={placeholder}
         suggestion={suggested}
@@ -321,7 +325,7 @@ export default function AiQueryDock(props: AiQueryDockProps) {
                   type='text'
                   size='small'
                   className={ICON_BUTTON}
-                  icon={<SquarePen size={ICON} strokeWidth={STROKE} />}
+                  icon={<PenSquare size={ICON} strokeWidth={STROKE} />}
                   aria-label={t('dock.new_conversation')}
                   onClick={startNewConversation}
                 />
