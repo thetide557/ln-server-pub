@@ -102,11 +102,7 @@ export function useAiQueryDock<S extends DockSnapshot>(adapter: AiQueryDockAdapt
         prepareTurn={actions.prepareTurn}
         canUndo={actions.canUndo}
         onUndo={actions.undo}
-        // n20 W-5 适配：fe 的 IAiChatProps.promptList 是 Array<string | { label; value }>（标签给人看、value 是真正发出去的话）；
-        // 羚牛这版只收 string[]。按 D-16 不改羚牛那个成员的类型，这里只取 value —— 和 fe 自己在 ChatPanel.tsx:828
-        // `promptList?.map((prompt) => (typeof prompt === 'string' ? prompt : prompt.value))` 取的是同一个字段。
-        // 代价：推荐问题的小按钮上显示的是整句查询、不是短标签，见 W-5-拿不准 U-04。
-        promptList={promptList.map((prompt) => prompt.value)}
+        promptList={promptList}
         resultNoun={adapter.resultNoun}
         placeholder={adapter.placeholder ? t(adapter.placeholder) : undefined}
         onNewConversation={actions.reset}
