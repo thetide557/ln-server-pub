@@ -49,7 +49,8 @@ import LokiAlertRule from '../Log/Loki';
 // 谁用谁 import。有几个语言包确实已经在别的页面被 import 过（dashboard 的 QueryEditor、数据源表单、即时查询页），
 // 但那是别人的页面、别人的 import，哪天那边改了这边就跟着掉词条；addResourceBundle 重复调是幂等的，
 // 所以这里把告警表单用得到的七个一起 import 一遍，谁都不依赖谁。
-// elasticsearch / opensearch / loki 三种没有自己的语言包目录，它们的文案走全局的 'alertRules' 命名空间，不用 import。
+// elasticsearch / opensearch / loki 三种在告警表单里的文案走全局的 'alertRules' 命名空间，不用 import。
+// （N20 补注：es / loki 现在有了自己的语言包目录 src/plugins/{elasticsearch,loki}/locale，只给新日志浏览页用，由 src/pages/logExplorer/ExplorerContent.tsx import。）
 import '@/plugins/clickHouse/locale';
 import '@/plugins/mysql/locale';
 import '@/plugins/pgsql/locale';

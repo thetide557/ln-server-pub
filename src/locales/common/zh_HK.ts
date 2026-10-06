@@ -2,7 +2,14 @@ const zh_HK = {
   business_group: '業務組',
   search_placeholder: '搜尋',
   nodata: '暫無資料',
+  // N20（新日志浏览）加的 4 个顶层键，值照 fe ee48e701 src/locales/common/locale/zh_HK.ts:20-22,188；只加不改（拍板 D-26 / D-27）
+  unit: '單位',
+  page_help: '使用說明',
+  document_title: '說明文檔',
+  format_sql: '格式化 SQL',
   btn: {
+    // N20（新日志浏览）加的键，值照 fe ee48e701 src/locales/common/locale/zh_HK.ts；只加不改（拍板 D-27）
+    reload: '刷新',
     copy2: '複製',
     // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/zh_HK.ts:67-68 两条。
     expand: '展開',
@@ -99,6 +106,7 @@ const zh_HK = {
     import: '匯入失敗',
   },
   time: {
+    day: '天', // N20 加（D-27）
     millisecond: '毫秒',
     second: '秒',
     minute: '分鐘',

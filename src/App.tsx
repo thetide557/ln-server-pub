@@ -117,7 +117,7 @@ export interface ICommonState {
   // logsDefaultRange 则由搬入代码自己兜底（Explorer.tsx:87,197 的 `?? { start: 'now-5m', end: 'now' }`）。
   darkMode?: boolean;
   logsDefaultRange?: IRawTimeRange;
-  // n20-TODO-lead-导出: 第 2 轮 W-1（es）临时加的，lead 合回时核。
+  // n20 lead 已转正（拍板 D-25）：第 2 轮 W-1（es）加的。
   // 要它的：src/plugins/elasticsearch/ExplorerNG/index.tsx:34,212、ExplorerNG/SideBarNav/index.tsx:43,188。
   // fe 出处：fe ee48e701 src/App.tsx:147（`esIndexMode: string;`，必填）、:252（初始值写死 `'all'`，全仓没有 setter）。
   esIndexMode?: string;
@@ -208,7 +208,7 @@ function App() {
       newVersion: false,
     },
     isPlus,
-    // n20-TODO-lead-导出: 第 2 轮 W-1（es）临时加的，lead 合回时核。
+    // n20 lead 已转正（拍板 D-25）：第 2 轮 W-1（es）加的。
     // 必须给值、不能只加类型：es ExplorerNG/SideBarNav/index.tsx:188 是
     // `initialValue={esIndexMode !== 'all' ? esIndexMode : 'indices'} hidden={isOpenSearch || esIndexMode !== 'all'}`，
     // 取 undefined 时 `!== 'all'` 成立 → mode 初值变 undefined、而且「索引 / 索引模式」选择器被整个藏起来。

@@ -2,7 +2,14 @@ const en_US = {
   business_group: 'Business Group',
   search_placeholder: 'Search',
   nodata: 'No Data',
+  // N20（新日志浏览）加的 4 个顶层键，值照 fe ee48e701 src/locales/common/locale/en_US.ts:20-22,188；只加不改（拍板 D-26 / D-27）
+  unit: 'Unit',
+  page_help: 'Help',
+  document_title: 'Documentation',
+  format_sql: 'Format SQL',
   btn: {
+    // N20（新日志浏览）加的键，值照 fe ee48e701 src/locales/common/locale/en_US.ts；只加不改（拍板 D-27）
+    reload: 'Reload',
     copy2: 'Copy',
     // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/en_US.ts:68-69 两条。
     expand: 'Expand',
@@ -100,6 +107,7 @@ const en_US = {
     import: 'Import Failed',
   },
   time: {
+    day: 'Day', // N20 加（D-27）
     millisecond: 'Millisecond',
     second: 'Second',
     minute: 'Minute',
