@@ -46,6 +46,7 @@ import TDengineDetail from '@/plugins/TDengine/Event';
 import LokiDetail from './Detail/Loki';
 import MySQLDetail from '@/plugins/mysql/Event';
 import PgsqlDetail from '@/plugins/pgsql/Event';
+import DorisDetail from '@/plugins/doris/Event';
 import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
 // 各插件自己的词条由 src/plugins/<源>/locale/index.ts 调 addResourceBundle 注册，而那几个文件
 // 原先只被告警规则表单、仪表盘编辑器 import（见 src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx:53-59），
@@ -277,6 +278,7 @@ const EventDetailPage: React.FC = () => {
     ...(eventDetail?.cate === DatasourceCateEnum.loki ? LokiDetail({ eventDetail, history }) : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.mysql ? MySQLDetail() : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.pgsql ? PgsqlDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.doris ? DorisDetail() : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {

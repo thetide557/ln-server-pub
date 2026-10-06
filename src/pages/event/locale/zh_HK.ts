@@ -66,6 +66,11 @@ const zh_HK = {
       trigger: '觸發',
     },
     trigger: '觸發',
+    // ---- N19 W-A：doris / victorialogs 的事件详情组件用这两个键做「查询条件」「告警条件」两行的标题
+    // （src/plugins/doris/Event/index.tsx:8,26、src/plugins/victorialogs/Event/index.tsx:8,26）。
+    // 值逐字抄 fe ee48e701 src/pages/event/locale/zh_HK.ts:98-99。只加键，羚牛原有键一个没动。
+    query_label: '查詢條件',
+    trigger_label: '告警條件',
   },
 };
 
