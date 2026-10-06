@@ -268,3 +268,27 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
 export interface JsonObject {
   [key: string]: JsonValue;
 }
+
+// ---- n20 块 0（新日志浏览）在这里加的，只加不改 ----
+// 谁要它：ScopedVariables ← src/pages/dashboard/Renderer/Renderer/TimeSeriesNG/components/Legend/Link.tsx:8；
+//         IStandardOptions ← .../TimeSeriesNG/utils/getLegendData.ts:4。
+// fe 出处：fe ee48e701 同路径 :44-47（ScopedVariable）、:49（ScopedVariables）、:121-128（IStandardOptions），逐字。
+// ScopedVariables 依赖 ScopedVariable，一并补入（两者同源）。
+// 本文件已有的 IOptions.standardOptions（:90-98）是羚牛自己的内联对象（util / customized /
+// customizedUnit 几个字段与 fe 不同），**一个字没动**；新加的 IStandardOptions 是独立的类型，
+// 只给新搬进来的 TimeSeriesNG 图例用。ITarget.query 也一个字没动（n16 D-10a：不许改宽）。
+export interface ScopedVariable {
+  text?: string;
+  value?: string | number | string[];
+}
+
+export type ScopedVariables = Record<string, ScopedVariable>;
+
+export interface IStandardOptions {
+  unit?: string; // 纠正的单位
+  min?: number;
+  max?: number;
+  decimals?: number;
+  dateFormat?: string;
+  displayName?: string;
+}

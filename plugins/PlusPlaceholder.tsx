@@ -54,3 +54,24 @@ async function searchDrilldown(_search?: any): Promise<any[]> {
 }
 
 export { searchDrilldown };
+
+// ---- n20 块 0（新日志浏览）：只在文件末尾追加，上面一个字没动。
+// 新搬进来的 src/pages/logExplorer/components/LogsViewer/index.tsx:27 用的是**具名类型** import
+// （fe 原文是 `import DrilldownBtn, { type DrilldownInitialValues } from 'plus:/pages/LogExploreLinkSetting/components/DrilldownBtn'`
+// 这一行里的行内 type 修饰符是 TS 4.5 语法，羚牛 TS 4.3.2 读不懂，已拆成两行）。
+// 形状照 fe ee48e701 src/global.d.ts:33-41 那个 declare module 里的真实定义逐字抄（羚牛的
+// src/global.d.ts 里没有 plus: 的模块声明，只有 '*.md'）。
+// `import type` 在编译后会被整行擦掉、不产生运行时 import，所以这个导出是防御性的：
+// 将来有人把它改成值导入时，rollup 不会因为找不到同名导出而打包失败（R-06）。
+export type DrilldownMode = 'list' | 'add' | 'edit' | 'clone';
+
+export interface DrilldownInitialValues {
+  cate?: string;
+  datasource_id?: number;
+  resource?: Record<string, any>;
+  query?: any;
+  logMode?: string;
+  linkField?: string;
+  linkName?: string;
+  [key: string]: any;
+}

@@ -410,3 +410,10 @@ function App() {
 }
 
 export default App;
+
+// ---- n20 块 0（新日志浏览）在这里加的，只加不改 ----
+// 谁要它：src/pages/logExplorer/components/Links.tsx:6 `import { basePrefix } from '@/App'`。
+// fe 出处：fe ee48e701 src/App.tsx:158 `export const basePrefix = import.meta.env.VITE_PREFIX || '';`。
+// 羚牛已经有等价常量 src/utils/basePrefix.ts:3（部署在站点根路径、写死空串，第六步 S3 定的），
+// 所以这里不重新定义一份、只把它从 @/App 这个入口再导出一次，保证两处永远同一个值。
+export { basePrefix } from '@/utils/basePrefix';

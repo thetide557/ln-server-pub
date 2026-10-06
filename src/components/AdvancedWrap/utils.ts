@@ -169,3 +169,53 @@ export const getAuthorizedDatasourceCates = (feats, isPlus, filter?: (cate: any)
   }
   return cates;
 };
+
+// ---- n20 块 0（新日志浏览）在这里加的，只加不改 ----
+// 谁要它：src/pages/logExplorer/Explorer.tsx:11 要 getGraphProByCate / getPrimaryTypeByCate；
+//         src/components/DatasourceSelect/DatasourceSelectV3/index.tsx:10 要 getCateDisplayLabel。
+// fe 出处：fe ee48e701 把本文件重构成了一个 11 行的壳，三个函数的实现搬去了
+//         src/utils/datasourceRegistry.ts:164-170（DisplayLabel）、:194-197（GraphPro）、
+//         :199-208（PrimaryType），再在 AdvancedWrap/utils.ts:7-9 改名再导出。
+//         羚牛这份还是 171 行的原版（自己定义 Cate / baseCates，step6g 改过），不覆盖，
+//         所以把那三个实现照抄到末尾，名字用 fe 对外的名字。
+// 和 fe 的差：fe 的 getDatasourceCategoryByValue 对 iotdb 特判成只在 baseDatasourceCategories 里找；
+//         羚牛 allCates = baseCates + advancedCates，而版本 A 的 advancedCates 是空数组
+//         （plugins/PlusPlaceholder.tsx:37），两者等价，这里把特判原样留着。
+
+const getCateByValueForNG = (cate: string): Cate | undefined => {
+  if (cate === 'iotdb') {
+    return _.find(baseCates, { value: 'iotdb' });
+  }
+  return _.find(allCates, { value: cate });
+};
+
+/** 该数据源类型是不是商业版专属的图（fe datasourceRegistry.ts:194-197） */
+export const getGraphProByCate = (cate: string) => {
+  const currentCate = getCateByValueForNG(cate);
+  return currentCate?.graphPro;
+};
+
+/** 该数据源类型的主用途：指标还是日志（fe datasourceRegistry.ts:199-208） */
+export const getPrimaryTypeByCate = (cate: string): 'metric' | 'logging' | undefined => {
+  const currentCate = _.find(allCates, { value: cate });
+  if (currentCate) {
+    const primaryType = currentCate.type[0];
+    if (primaryType === 'metric' || primaryType === 'logging') {
+      return primaryType;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * 数据源类型在界面上显示的名字（fe datasourceRegistry.ts:164-170）。
+ * 羚牛的 Cate 接口（本文件 :6-14）没有 label_en 字段，所以参数类型写成「有 label、label_en 可选」，
+ * 逻辑与 fe 一字不差：非中文时先取 label_en，取不到回落 label。
+ */
+export const getCateDisplayLabel = (cate: (Pick<Cate, 'label'> & { label_en?: string }) | undefined, lang?: string) => {
+  if (!cate) return '';
+  if (lang && lang !== 'zh_CN') {
+    return cate.label_en || cate.label;
+  }
+  return cate.label;
+};
