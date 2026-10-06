@@ -91,6 +91,10 @@ export const WebSocketURL =`ws://${location.host}/alert/ws/`;
 export const IS_ENT = false;
 export const AccessTokenKey = 'access_token';
 
+// ---- N26：AI 查询停靠栏（AiQueryDock）的局部开关。上游用 `IS_ENT` 门控它（企业版才开），
+// 羚牛不翻 `IS_ENT`（翻了会把 AI 请求切到羚牛没有的 `/api/fc-model`），所以单独给一个开关。
+export const ENABLE_AI_QUERY_DOCK = true;
+
 // ---- 第六步 L1：fe v9.1.0 src/utils/constant.ts:87 的 SIZE（间距基数，单位 px），
 // victorialogs 数据源表单的 Row gutter 用它。
 export const SIZE = 8;

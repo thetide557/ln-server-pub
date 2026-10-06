@@ -28,10 +28,41 @@ const zh_CN = {
     rename: '重命名',
     more_actions: '更多会话操作',
   },
+  nightingale: {
+    share_fallback_notice: '你没有原页面的访问权限，这里只展示对话内容',
+    title: 'Nightingale AI',
+    new_chat: '新建会话',
+    sessions: '会话',
+    llm_configs: 'LLM 管理',
+    skills: 'Skill 管理',
+    mcp_servers: 'MCP 管理',
+    ai_task: '任务通道',
+    collapse_sidebar: '收起 AI 侧栏',
+    expand_sidebar: '展开 AI 侧栏',
+    welcome_cards: {
+      overview: {
+        title: '快速了解夜莺',
+        description: '一分钟看懂产品与 AI 助手能做什么',
+        prompt: '一分钟介绍下夜莺监控的核心功能，以及你能帮我做什么',
+      },
+      alerts: {
+        title: '盘一盘我的告警',
+        description: '哪些规则最吵、哪些从没触发过',
+        prompt: '帮我盘点当前的告警规则：最近 7 天哪些触发最频繁，哪些规则一次都没触发过',
+      },
+      create_alert: {
+        title: '一句话配一条告警',
+        description: '描述场景，我来生成 PromQL 和阈值',
+        prompt: '帮我创建一条告警规则：主机 CPU 使用率持续 5 分钟超过 80% 就告警',
+      },
+    },
+  },
   input: {
     placeholder: '输入问题，Enter 发送，Shift + Enter 换行',
     share_readonly_placeholder: '当前为只读分享模式',
     share_forbidden_notice: '这个分享会话只对分享者本人可见，当前账号没有查看权限',
+    send: '发送',
+    stop: '停止',
   },
   query: {
     title: '查询语句',
@@ -103,10 +134,15 @@ const zh_CN = {
       tags: '标签',
     },
   },
-  empty: {
-    greeting_prefix: '你好,我是',
+  input_request: {
+    title: '它想先确认一下',
   },
-  // ---- N20 第 3 轮 lead 加的两段（doris 新日志浏览的 AI 查询停靠栏 AiQueryDock 要；整段逐字照 fe ee48e701 src/components/AiChatNG/locale/zh_CN.ts，只加不改，D-30）
+  action_frame: {
+    updating_query: 'AI 正在更新当前查询',
+    acting: 'AI 正在操作页面',
+    done: '操作完成',
+    stop: '停止',
+  },
   page_action: {
     title: '页面操作',
     malformed: '这条页面操作缺少内容，无法执行',
@@ -176,6 +212,9 @@ const zh_CN = {
     placeholder_first_sql: '描述你要的查询，比如「最近一小时每分钟的记录数」',
     placeholder_follow_up: '继续调整…',
     placeholder_answer: '回答它…',
+  },
+  empty: {
+    greeting_prefix: '你好,我是',
   },
 };
 

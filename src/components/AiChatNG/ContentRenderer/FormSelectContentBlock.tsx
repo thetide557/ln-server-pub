@@ -29,7 +29,6 @@ interface IFormSelectPayload {
 // approval 确认通道：对齐后端 aiagent.ApprovalParamKey 与候选 ID（1=确认，2=取消）。
 const APPROVAL_FIELD_KEY = 'approval';
 const APPROVAL_CANDIDATE_APPROVE = 1;
-const APPROVAL_CANDIDATE_CANCEL = 2;
 
 function safeParsePayload(raw: string): IFormSelectPayload | undefined {
   if (!raw) return undefined;

@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Cookies from 'js-cookie';
 import i18next from 'i18next';
+// N26 合并：basePrefix 取自 @/utils/basePrefix（羚牛的 @/App 不导出它），token 用 cookie 里的 access_token
 import { basePrefix } from '@/utils/basePrefix';
 import { IAiChatStreamChunk } from './types';
-import { normalizeStreamChunk } from './utils';
+import { parseStreamEntry } from './utils';
 
 interface IUseAiChatStreamOptions {
   onChunk?: (chunk: IAiChatStreamChunk) => void;
   onFinish?: () => void;
   onError?: (error: Error) => void;
+  /** The connection ended before the finish frame: a proxy's idle limit, a dropped network. The turn may still be running. */
+  onClose?: () => void;
 }
 
 export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
-  const { onChunk, onFinish, onError } = options;
+  const { onChunk, onFinish, onError, onClose } = options;
   const abortControllerRef = useRef<AbortController | null>(null);
   const [streaming, setStreaming] = useState(false);
 
@@ -31,6 +34,10 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
       setStreaming(true);
 
       try {
+        // N26 合并：羚牛只有开源后端，流固定走 /api/n9e/stream（不保留上游的 IS_ENT ? fc-model 分支）；
+        // credentials 用 'omit'（羚牛不靠 cookie 认证，带上反而会被网关当跨站请求）；
+        // Authorization 从 cookie 取 access_token（羚牛的 token 存在 cookie，不在 localStorage）；
+        // 多发一个 'Bg-debug' 头（羚牛后端用它开调试日志）。
         const response = await fetch(`${basePrefix}/api/n9e/stream`, {
           method: 'POST',
           credentials: 'omit',
@@ -52,6 +59,7 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder('utf-8');
         let buffer = '';
+        let finished = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -62,29 +70,12 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
           buffer = chunks.pop() || '';
 
           chunks.forEach((entry) => {
-            const lines = entry
-              .split('\n')
-              .map((line) => line.trim())
-              .filter(Boolean);
-            if (!lines.length) return;
-
-            const eventLine = lines.find((line) => line.startsWith('event:'));
-            if (eventLine?.slice(6).trim() === 'finish') {
-              onFinish?.();
-              stop();
-              return;
-            }
-
-            const dataLine = lines.find((line) => line.startsWith('data:'));
-            if (!dataLine) return;
-
-            const payload = dataLine.slice(5).trim();
-            if (!payload) return;
-
             try {
-              const parsed = normalizeStreamChunk(JSON.parse(payload) as IAiChatStreamChunk);
-              onChunk?.(parsed);
-              if (parsed.done || parsed.type === 'done') {
+              const parsed = parseStreamEntry(entry);
+              const { chunk } = parsed;
+              if (chunk) onChunk?.(chunk);
+              if (parsed.finished || chunk?.done || chunk?.type === 'done') {
+                finished = true;
                 onFinish?.();
                 stop();
               }
@@ -92,6 +83,10 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
               onError?.(error instanceof Error ? error : new Error('stream parse failed'));
             }
           });
+        }
+        if (!finished) {
+          stop();
+          onClose?.();
         }
       } catch (error) {
         if ((error as Error)?.name === 'AbortError') {
@@ -102,7 +97,7 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
         stop();
       }
     },
-    [onChunk, onError, onFinish, stop],
+    [onChunk, onClose, onError, onFinish, stop],
   );
 
   useEffect(() => {

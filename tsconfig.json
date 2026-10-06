@@ -21,6 +21,16 @@
       // 这里只把**类型**指到一个手写的最小声明（src/antv-g2-shim.d.ts，里面写清了为什么），
       // 运行时 vite 照旧解析 node_modules 里真正的 @antv/g2 5.4.8。
       "@antv/g2": ["src/antv-g2-shim.d.ts"],
+      // n26 块 (B)（AI 浮窗升到 fe ee48e701）：streamdown@2.5.0 自己的 .d.ts 没有新语法，但它 import 的
+      // mermaid / remend / shiki 那一串包的 .d.ts 用了 TS 4.4+ 语法，本仓库 typescript 4.3.2 解析不了
+      // （TS1005 / TS1109 / TS1128，共 259 条，全在 node_modules 里，skipLibCheck 挡不住）。
+      // 同上，只把**类型**指到手写的最小声明（src/streamdown-shim.d.ts，里面写清了为什么），
+      // 运行时 vite 照旧解析 node_modules 里真正的 streamdown 2.5.0（带 patches/ 里那个 React 17 补丁）。
+      "streamdown": ["src/streamdown-shim.d.ts"],
+      // n26 块 (B)：streamdown 的依赖 mermaid 把 @types/d3 拉了进来，它 export * from 'd3-dispatch'，
+      // 而 @types/d3-dispatch:91 用了 TS 5.0 的 const 类型参数语法，4.3.2 读不懂（10 条语法错）。
+      // 本仓库 src 里的 d3 原本就没有类型（靠 noImplicitAny:false 当 any 用），这条映射把它恢复成原样。
+      "d3": ["src/d3-shim.d.ts"],
     },
     "skipLibCheck": true,
     "esModuleInterop": false,

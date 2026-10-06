@@ -28,10 +28,41 @@ const en_US = {
     rename: 'Rename',
     more_actions: 'More conversation actions',
   },
+  nightingale: {
+    share_fallback_notice: 'You do not have access to the original page, only the conversation is shown here',
+    title: 'Nightingale AI',
+    new_chat: 'New chat',
+    sessions: 'Conversations',
+    llm_configs: 'LLM configs',
+    skills: 'Skill management',
+    mcp_servers: 'MCP management',
+    ai_task: 'Task channel',
+    collapse_sidebar: 'Collapse AI sidebar',
+    expand_sidebar: 'Expand AI sidebar',
+    welcome_cards: {
+      overview: {
+        title: 'Get to know Nightingale',
+        description: 'Understand the product and what the AI assistant can do in one minute',
+        prompt: 'Give me a one-minute introduction to Nightingale monitoring and what you can help me do',
+      },
+      alerts: {
+        title: 'Review my alerts',
+        description: 'Which rules are the noisiest, and which have never fired?',
+        prompt: 'Review my current alert rules: which have fired most often in the last 7 days, and which have never fired?',
+      },
+      create_alert: {
+        title: 'Create an alert in one sentence',
+        description: 'Describe the scenario and I will generate PromQL and thresholds',
+        prompt: 'Create an alert rule: alert when host CPU usage stays above 80% for 5 minutes',
+      },
+    },
+  },
   input: {
     placeholder: 'Ask a question. Press Enter to send, Shift + Enter for a new line',
     share_readonly_placeholder: 'Viewing a shared chat (read-only)',
     share_forbidden_notice: 'This shared conversation is only visible to the user who shared it; the current account has no access',
+    send: 'Send',
+    stop: 'Stop',
   },
   query: {
     title: 'Query',
@@ -103,10 +134,15 @@ const en_US = {
       tags: 'Tags',
     },
   },
-  empty: {
-    greeting_prefix: 'Hello, I am',
+  input_request: {
+    title: 'It needs to check something first',
   },
-  // ---- N20 第 3 轮 lead 加的两段（doris 新日志浏览的 AI 查询停靠栏 AiQueryDock 要；整段逐字照 fe ee48e701 src/components/AiChatNG/locale/en_US.ts，只加不改，D-30）
+  action_frame: {
+    updating_query: 'AI is updating the current query',
+    acting: 'The assistant is working on this page',
+    done: 'Done',
+    stop: 'Stop',
+  },
   page_action: {
     title: 'Page action',
     malformed: 'This page action has no content and cannot run',
@@ -176,6 +212,9 @@ const en_US = {
     placeholder_first_sql: 'Describe the query you want, e.g. "rows per minute over the last hour"',
     placeholder_follow_up: 'Keep going…',
     placeholder_answer: 'Answer it…',
+  },
+  empty: {
+    greeting_prefix: 'Hello, I am',
   },
 };
 
