@@ -42,7 +42,12 @@ import Host from './Detail/Host';
 // 不走 `import { Event as X } from '@/plugins/<源>'` 的聚合导出（羚牛各插件 index.ts 形态不一、es 连 index.ts 都没有），
 // 一律直接 import 文件，风格照上面 PrometheusDetail 那行。
 import ElasticsearchDetail from '@/plugins/elasticsearch/Event';
+import TDengineDetail from '@/plugins/TDengine/Event';
 import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
+// 各插件自己的词条由 src/plugins/<源>/locale/index.ts 调 addResourceBundle 注册，而那几个文件
+// 原先只被告警规则表单、仪表盘编辑器 import（见 src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx:53-59），
+// 本页不经过 —— 所以这里逐个补只做注册的 import，写法照那个文件。
+import '@/plugins/TDengine/locale';
 // es 组件里用到 `alertRules:nodata_trigger.title`，而 alertRules 这个命名空间只在
 // src/pages/alertRules/index.tsx:30 注册，本页的 import 链不经过它 —— 这里补一行只做注册的 import。
 import '@/pages/alertRules/locale';
@@ -263,6 +268,7 @@ const EventDetailPage: React.FC = () => {
     // 用 DatasourceCateEnum 而不是字面量，是为了 clickhouse 那条不写错成 'clickhouse'（真值是 'ck'）。
     ...(eventDetail?.cate === DatasourceCateEnum.elasticsearch ? ElasticsearchDetail({ indexPatterns }) : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.opensearch ? ElasticsearchDetail() : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.tdengine ? TDengineDetail(t) : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
