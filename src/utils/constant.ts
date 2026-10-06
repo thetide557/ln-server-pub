@@ -117,3 +117,11 @@ export const THEME = {
     gridColor: 'rgba(240, 250, 255, 0.09)',
   },
 };
+
+// ---- n20 块 0（新日志浏览）在这里加的，只加不改 ----
+// 谁要它：src/pages/logExplorer/components/FieldsList/FieldsItem.tsx、
+//         src/pages/logExplorer/components/LogsViewer/Clustering/Popover.tsx、
+//         src/pages/logExplorer/components/LogsViewer/components/TimeSeriesBarChart/index.tsx 三处。
+// fe 出处：fe ee48e701 src/utils/constant.ts:86（值一字不差）。
+// 本文件的 IS_PLUS（:22）/ N9E_PATHNAME（:23）是羚牛自己改过的（F-02 单一来源），一个字没动。
+export const PRIMARY_COLOR = '#6C53B1';

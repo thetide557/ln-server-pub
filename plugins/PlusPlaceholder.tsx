@@ -54,3 +54,50 @@ async function searchDrilldown(_search?: any): Promise<any[]> {
 }
 
 export { searchDrilldown };
+
+// ---- n20 块 0（新日志浏览）：只在文件末尾追加，上面一个字没动。
+// 新搬进来的 src/pages/logExplorer/components/LogsViewer/index.tsx:27 用的是**具名类型** import
+// （fe 原文是 `import DrilldownBtn, { type DrilldownInitialValues } from 'plus:/pages/LogExploreLinkSetting/components/DrilldownBtn'`
+// 这一行里的行内 type 修饰符是 TS 4.5 语法，羚牛 TS 4.3.2 读不懂，已拆成两行）。
+// 形状照 fe ee48e701 src/global.d.ts:33-41 那个 declare module 里的真实定义逐字抄（羚牛的
+// src/global.d.ts 里没有 plus: 的模块声明，只有 '*.md'）。
+// `import type` 在编译后会被整行擦掉、不产生运行时 import，所以这个导出是防御性的：
+// 将来有人把它改成值导入时，rollup 不会因为找不到同名导出而打包失败（R-06）。
+export type DrilldownMode = 'list' | 'add' | 'edit' | 'clone';
+
+export interface DrilldownInitialValues {
+  cate?: string;
+  datasource_id?: number;
+  resource?: Record<string, any>;
+  query?: any;
+  logMode?: string;
+  linkField?: string;
+  linkName?: string;
+  [key: string]: any;
+}
+
+// ---- n20 块 1（es 新日志浏览）：只在文件末尾追加，上面一个字没动。
+// 新搬进来的 src/plugins/elasticsearch/ExplorerNG/Main/SQL/QueryBuilder.tsx:20 用的是**具名** import
+// （`import { esQueryBuilder } from 'plus:/datasource/elasticsearch/ExplorerNG/services'`）。
+// 同文件 :16 / :18 的 QueryBuilder 与 commonStateContext 是默认 import、落到本文件默认导出上，零工作；
+// 只有具名 import 找不到同名导出会让 rollup 打包直接失败（tsc 不报，攒到 build 才炸，R-06），所以补这一个。
+// 返回形状照调用处（同文件 :90-101 用了 result.sql / result.mode / result.value_key / result.label_key），
+// 空实现返回空对象、四个键都是 undefined；fe 没有可抄的真实现（fe ee48e701 没有 src/plus 目录，
+// src/global.d.ts 里也只给 DrilldownBtn 写了 declare module，没给这个 services）。
+// 运行时走不到：同文件 :40 是 `if (!IS_PLUS) return null;`，羚牛开源形态下 IS_PLUS 恒为 false
+// （src/utils/constant.ts:22），整个 QueryBuilder 组件直接返回 null。
+async function esQueryBuilder(..._args: any[]): Promise<any> {
+  return {};
+}
+
+export { esQueryBuilder };
+
+// ---- N20 第 3 轮（ck / doris 新日志浏览）lead 加的，只在文件末尾追加（拍板 D-21）。
+// src/plugins/clickHouse/ExplorerNG/components/AddTo.tsx:8 与 src/plugins/doris/ExplorerNG/components/AddTo.tsx:8
+// 都是 `import RecordingRuleForm, { ActionButtons } from 'plus:/pages/recordingRules/components/OperateForm'`：
+// 默认导入落到本文件默认导出上零工作，具名的 ActionButtons 找不到同名导出会让 rollup 打包直接失败（tsc 不报，R-06），
+// 所以补一个返回 null 的空组件。「加入记录规则」是商业版功能，版本 A 下这块界面为空。
+function ActionButtons() {
+  return null;
+}
+export { ActionButtons };

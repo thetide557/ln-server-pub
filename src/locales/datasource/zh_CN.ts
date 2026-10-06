@@ -1,5 +1,6 @@
 const zh_CN = {
   es: {
+    indexPatterns_manage: '管理索引模式', // N20（新日志浏览）加，值照 fe ee48e701 src/locales/datasource/locale/zh_CN.ts:19；只加不改（D-27）
     ref: '名称',
     index: '索引',
     index_tip: `

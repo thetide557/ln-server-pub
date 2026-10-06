@@ -2,7 +2,17 @@ const zh_CN = {
   business_group: "业务组",
   search_placeholder: "搜索",
   nodata: "暂无数据",
+  // N20（新日志浏览）加的 4 个顶层键，值照 fe ee48e701 src/locales/common/locale/zh_CN.ts:20-22,188；只加不改（拍板 D-26 / D-27）
+  unit: '单位',
+  page_help: '使用说明',
+  document_title: '说明文档',
+  format_sql: '格式化 SQL',
+  // N20 第 3 轮加的 2 个键（ck / doris ExplorerNG 的 DocumentDrawer 标题 + 羚牛既有 DocumentDrawer/index.tsx:78 原缺口），值照 fe ee48e701 src/locales/common/locale/zh_CN.ts:18,24；只加不改（D-29）
+  document_link: '使用说明',
+  more_document_link: '更多文档',
   btn: {
+    // N20（新日志浏览）加的键，值照 fe ee48e701 src/locales/common/locale/zh_CN.ts；只加不改（拍板 D-27）
+    reload: '刷新',
     copy2: "复制",
     // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/zh_CN.ts:67-68 两条；
     // 新搬的 Loki 日志行组件 t('common:btn.expand') / t('common:btn.collapse') 用。
@@ -105,6 +115,7 @@ const zh_CN = {
     import: "导入失败",
   },
   time: {
+    day: '天', // N20 加（D-27）
     millisecond: "毫秒",
     second: "秒",
     minute: "分钟",

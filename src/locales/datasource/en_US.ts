@@ -1,5 +1,6 @@
 const en_US = {
   es: {
+    indexPatterns_manage: 'Manage index patterns', // N20（新日志浏览）加，值照 fe ee48e701 src/locales/datasource/locale/en_US.ts:19；只加不改（D-27）
     ref: 'Name',
     index: 'Index',
     index_tip: `
