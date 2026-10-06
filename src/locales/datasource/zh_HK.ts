@@ -58,7 +58,11 @@ const zh_HK = {
       delay: '延遲執行',
     },
     event: {
-      groupBy: `根據 {{field}} 分組，匹配個數 {{size}}, 文檔最小值 {{min_value}}`,
+      // ---- N19 W-A：插值名由 {{min_value}} 改成 {{min_doc_count}}，与 fe ee48e701
+      // src/locales/datasource/locale/zh_HK.ts:64 一致 —— 消费它的 src/plugins/elasticsearch/Event/index.tsx:64
+      // 传进来的字段名就是 min_doc_count，不改这里会原样显示 {{min_value}} 这串占位符。
+      // 全仓只有那一个消费点（grep 'es.event.groupBy' 1 命中），所以改插值名不影响别处。
+      groupBy: `根據 {{field}} 分組，匹配個數 {{size}}, 文檔最小值 {{min_doc_count}}`,
     },
   },
   // ---- 第六步 L1（多数据源）：见 zh_CN 同段说明；取自 fe v9.1.0 src/locales/datasource/locale/zh_HK.ts。
