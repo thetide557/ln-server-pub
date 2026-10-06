@@ -30,6 +30,8 @@ module.exports = {
     // tsc 全绿、build 成功、页面打开是一堆没样式的裸元素，没有任何报错（n19 估量 R-03）。AiQueryDock 第 3 轮再加。
     './src/pages/logExplorer/**/*.{ts,tsx}',
     './src/components/{ViewSelect,TableColumnSelect,Meta,NavigableDrawer,OutlinedSelect,OutlinedAutoComplete,QueryBoxPrefix,ErrorWithDetail,HistoricalRecords,DatasourceSelect}/**/*.{ts,tsx}',
+    // ---- N20 第 3 轮：doris 新日志浏览的 AI 查询停靠栏（估量 5.5）
+    './src/components/AiQueryDock/**/*.{ts,tsx}',
   ],
   // 添加下面的代码,禁用 `清除浏览器默认样式`, 解决和antd的样式冲突
   // (这样 `@tailwind base` 就只会添加一些默认的 tw 变量.不会去清除浏览器默认样式了.)

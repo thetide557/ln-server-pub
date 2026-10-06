@@ -7,6 +7,9 @@ const zh_HK = {
   page_help: '使用說明',
   document_title: '說明文檔',
   format_sql: '格式化 SQL',
+  // N20 第 3 轮加的 2 个键（ck / doris ExplorerNG 的 DocumentDrawer 标题 + 羚牛既有 DocumentDrawer/index.tsx:78 原缺口），值照 fe ee48e701 src/locales/common/locale/zh_HK.ts:18,24；只加不改（D-29）
+  document_link: '使用說明',
+  more_document_link: '更多文檔',
   btn: {
     // N20（新日志浏览）加的键，值照 fe ee48e701 src/locales/common/locale/zh_HK.ts；只加不改（拍板 D-27）
     reload: '刷新',

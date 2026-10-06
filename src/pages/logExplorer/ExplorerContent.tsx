@@ -9,11 +9,16 @@ import { NAME_SPACE } from '@/pages/logExplorer/constants';
 import Elasticsearch from '@/plugins/elasticsearch/ExplorerNG';
 import VictoriaLogs from '@/plugins/victorialogs/ExplorerNG';
 import Loki from '@/plugins/loki/ExplorerNG';
+// N20（羚牛比上游多走一步，M239 ②）：fe 开源的 ExplorerContent 只接 es / victorialogs / loki 三源，ck / doris 走商业 parcel；羚牛主动接。
+import ClickHouse from '@/plugins/clickHouse/ExplorerNG';
+import Doris from '@/plugins/doris/ExplorerNG';
 // N20 lead 加（统一尺子第五节）：羚牛的 i18n 是静态 resources、不自动收集各源 locale，要有人 import 才会注册；
 // 不加界面上会显示成 elasticsearch.xxx 这样的翻译键原文（n19 估量 R-08）。victorialogs 的别处已有 import，这里再 import 一次是幂等的。
 import '@/plugins/elasticsearch/locale';
 import '@/plugins/loki/locale';
 import '@/plugins/victorialogs/locale';
+import '@/plugins/clickHouse/locale';
+import '@/plugins/doris/locale';
 
 interface Props {
   tabKey: string;
@@ -40,6 +45,15 @@ export default function index(props: Props) {
 
   if (datasourceCate === DatasourceCateEnum.loki) {
     return <Loki tabKey={tabKey} defaultFormValuesControl={defaultFormValuesControl} renderCommonSettings={renderCommonSettings} />;
+  }
+
+  // N20：ck / doris 两段照上面 es 那段的形状（三道门之③）
+  if (datasourceCate === DatasourceCateEnum.ck) {
+    return <ClickHouse tabKey={tabKey} defaultFormValuesControl={defaultFormValuesControl} renderCommonSettings={renderCommonSettings} />;
+  }
+
+  if (datasourceCate === DatasourceCateEnum.doris) {
+    return <Doris tabKey={tabKey} defaultFormValuesControl={defaultFormValuesControl} renderCommonSettings={renderCommonSettings} />;
   }
 
   return <Alert showIcon className='m-4' type='error' message={t('unsupported_datasource_type', { type: datasourceCate })} />;

@@ -268,7 +268,7 @@ function Explorer(props: Props) {
           </Form.Item>
           {!hasDatasourceCate ? null : !isLogExplorerDatasourceCateSupported(datasourceCate) ? (
             <Alert showIcon className='m-4' type='error' message={t('unsupported_datasource_type', { type: datasourceCate })} />
-          ) : cateGraphPro ? (
+          ) : cateGraphPro && !_.includes([DatasourceCateEnum.ck, DatasourceCateEnum.doris], datasourceCate) ? ( // N20：ck / doris 不走商业 parcel 桩，走下面羚牛自家的 ExplorerContent（三道门之②，估量 5.1）
             <PlusLogExplorer tabKey={tabKey} datasourceCate={datasourceCate} defaultFormValuesControl={defaultFormValuesControl} renderCommonSettings={renderCommonSettings} />
           ) : (
             <ExplorerContent tabKey={tabKey} datasourceCate={datasourceCate} defaultFormValuesControl={defaultFormValuesControl} renderCommonSettings={renderCommonSettings} />

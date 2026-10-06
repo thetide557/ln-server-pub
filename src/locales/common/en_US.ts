@@ -7,6 +7,9 @@ const en_US = {
   page_help: 'Help',
   document_title: 'Documentation',
   format_sql: 'Format SQL',
+  // N20 第 3 轮加的 2 个键（ck / doris ExplorerNG 的 DocumentDrawer 标题 + 羚牛既有 DocumentDrawer/index.tsx:78 原缺口），值照 fe ee48e701 src/locales/common/locale/en_US.ts:18,24；只加不改（D-29）
+  document_link: 'Document',
+  more_document_link: 'More documents',
   btn: {
     // N20（新日志浏览）加的键，值照 fe ee48e701 src/locales/common/locale/en_US.ts；只加不改（拍板 D-27）
     reload: 'Reload',
