@@ -340,3 +340,12 @@ export function getDorisTableConfig(data: { cate: string; datasource_id: number;
     data,
   }).then((res) => res.dat);
 }
+
+/**
+ * 当前检索的时间范围（毫秒）。后端据此把 DESC 裁到覆盖该范围的分区 —— 不传则 DESC 整张表，
+ * 大表上要几十秒。字段集随时间范围变化，所以时间范围变了要重新取。
+ */
+export interface IndexTimeRange {
+  from?: number;
+  to?: number;
+}
