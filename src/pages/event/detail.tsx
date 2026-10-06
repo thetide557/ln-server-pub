@@ -44,11 +44,13 @@ import Host from './Detail/Host';
 import ElasticsearchDetail from '@/plugins/elasticsearch/Event';
 import TDengineDetail from '@/plugins/TDengine/Event';
 import LokiDetail from './Detail/Loki';
+import MySQLDetail from '@/plugins/mysql/Event';
 import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
 // 各插件自己的词条由 src/plugins/<源>/locale/index.ts 调 addResourceBundle 注册，而那几个文件
 // 原先只被告警规则表单、仪表盘编辑器 import（见 src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx:53-59），
 // 本页不经过 —— 所以这里逐个补只做注册的 import，写法照那个文件。
 import '@/plugins/TDengine/locale';
+import '@/plugins/mysql/locale';
 // es 组件里用到 `alertRules:nodata_trigger.title`，而 alertRules 这个命名空间只在
 // src/pages/alertRules/index.tsx:30 注册，本页的 import 链不经过它 —— 这里补一行只做注册的 import。
 import '@/pages/alertRules/locale';
@@ -271,6 +273,7 @@ const EventDetailPage: React.FC = () => {
     ...(eventDetail?.cate === DatasourceCateEnum.opensearch ? ElasticsearchDetail() : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.tdengine ? TDengineDetail(t) : [false]),
     ...(eventDetail?.cate === DatasourceCateEnum.loki ? LokiDetail({ eventDetail, history }) : [false]),
+    ...(eventDetail?.cate === DatasourceCateEnum.mysql ? MySQLDetail() : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
