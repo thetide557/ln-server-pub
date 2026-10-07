@@ -206,6 +206,12 @@ const en_US = {
   'msg.sort.success': 'Successfully sorted',
   // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
   // 取自 fe v9.1.0 src/locales/common/locale/en_US.ts。
+  // ---- 第六步 N33 批 B（B-1 九种详情抽屉）：clickHouse 的详情抽屉用 t('common:yes') / t('common:no')
+  // 显示「安全连接」「跳过 SSL 验证」这两个开关（src/plugins/clickHouse/Datasource/Detail.tsx:39,42）。
+  // pub 的 common 词条里原来没有这两个键（本批之前 grep 零命中），缺了会把键名原样印在界面上。
+  // 值取自 fe v9.1.0 src/locales/common/locale/en_US.ts:26-27。
+  yes: 'Yes',
+  no: 'No',
   advanced_settings: 'Advanced settings',
 };
 export default en_US;
