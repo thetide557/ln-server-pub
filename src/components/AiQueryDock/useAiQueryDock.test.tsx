@@ -12,12 +12,16 @@ type AiQueryDockProps = React.ComponentProps<typeof AiQueryDock>;
 type AiActionsOptions = Parameters<typeof useQueryDockActions>[0];
 type Snapshot = QueryDockSnapshot & { range?: IRawTimeRange };
 
-// Which build we are: the hook reads IS_ENT at render time, so a getter lets
-// each test pick the build without reloading the module.
-const mockMode = { isEnt: false };
+// N36 批 C：上游这里 mock 的是 `IS_ENT`（夜莺商业版开关），但羚牛 N20 搬这个 hook 时
+// 把开关换成了自己的常量 `ENABLE_AI_QUERY_DOCK`（`src/utils/constant.ts:96`，写死 true——
+// 羚牛不是商业版，但要让停靠栏可用）。源码 diff 只有这三行，详见 `n20` 的改动清单。
+// 继续 mock `IS_ENT` 的话 `ENABLE_AI_QUERY_DOCK` 就是 undefined，停靠栏与触发按钮永远不渲染，
+// 下面「开着」那四条用例必红。所以这里改成按羚牛的开关名 mock，两条分支都还能测到。
+// 用 getter 而不是常量：hook 是在 render 时读这个开关的，getter 让每条用例自己选开 / 关、不用重载模块。
+const mockMode = { dockEnabled: false };
 jest.mock('@/utils/constant', () => ({
-  get IS_ENT() {
-    return mockMode.isEnt;
+  get ENABLE_AI_QUERY_DOCK() {
+    return mockMode.dockEnabled;
   },
 }));
 jest.mock('@/components/AiChatNG/constants', () => ({ NAME_SPACE: 'ai' }));
@@ -73,9 +77,11 @@ beforeEach(() => {
   dockProps = undefined;
 });
 
-describe('open-source and Nightingale commercial builds', () => {
+// N36 批 C：原标题是 'open-source and Nightingale commercial builds'（上游按版本分），
+// 羚牛这边开关不再跟版本绑，所以改成按开关的开 / 关分组，用例内容一字没动。
+describe('停靠栏开关关掉时（ENABLE_AI_QUERY_DOCK = false）', () => {
   it('renders nothing and never lets the assistant write', () => {
-    mockMode.isEnt = false;
+    mockMode.dockEnabled = false;
     render(<Host />);
     expect(screen.queryByRole('button', { name: 'dock.open' })).toBeNull();
     expect(screen.queryByTestId('ai-dock')).toBeNull();
@@ -83,9 +89,9 @@ describe('open-source and Nightingale commercial builds', () => {
   });
 });
 
-describe('Flashcat enterprise build', () => {
+describe('停靠栏开关打开时（ENABLE_AI_QUERY_DOCK = true，羚牛的默认值）', () => {
   beforeEach(() => {
-    mockMode.isEnt = true;
+    mockMode.dockEnabled = true;
   });
 
   it('opens behind its trigger, and only then lets the assistant write', () => {
