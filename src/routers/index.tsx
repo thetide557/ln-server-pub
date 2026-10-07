@@ -138,6 +138,15 @@ import LogExplorerNG from '@/pages/logExplorer';
 import '@/pages/logExplorer/locale';
 import '@/pages/logExplorer/style.less';
 
+// N33 批 E（后端交接 FE-OAUTH-CONSENT-01）：内置 OAuth 授权服务器的「同意页」，照夜莺 fe ee48e701
+// src/pages/oauthConsent/。fe 那边是 React.lazy（fe routers/index.tsx:42），pub 没有 lazy/Suspense
+// （同本文件 :125 那条注释），所以直接 import；locale 那行是副作用 import，不搬它页面文案会显示成
+// oauthConsent.xxx 的键原文（照上面 aiConfig / logExplorer 两段的做法）。
+// 这页在**登录态路由**里，不加进 src/App.tsx 的 anonymousRoutes——上游 index.tsx:18-25 的注释写明
+// 未登录访问是先绕一趟 /login（含 SSO）再回来（lead 拍板 L-06，用户已确认）。
+import OAuthConsent from '@/pages/oauthConsent';
+import '@/pages/oauthConsent/locale';
+
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
   return (result = result.concat(module.routes));
@@ -177,6 +186,8 @@ export default function Content() {
         <Route path='/callback' component={LoginCallback} exact />
         <Route path='/callback/cas' component={LoginCallbackCAS} exact />
         <Route path='/callback/oauth' component={LoginCallbackOAuth} exact />
+        {/* N33 批 E：OAuth 同意页，后端 GET /oauth/authorize 校验完会 302 跳到这条根路径（mcpConsentPath = "/oauth-consent"）。走登录态路由，不进 anonymousRoutes。 */}
+        <Route path='/oauth-consent' component={OAuthConsent} exact />
         <Route path='/metric/explorer' component={MetricExplore} exact />
         {/* N20：/log/explorer 换成新日志浏览页，老页改挂 /log/explorer-legacy（照 fe src/routers/index.tsx:222，菜单不加老页入口） */}
         <Route path='/log/explorer' component={LogExplorerNG} exact />
