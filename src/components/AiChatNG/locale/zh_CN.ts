@@ -27,6 +27,9 @@ const zh_CN = {
     share: '分享会话',
     rename: '重命名',
     more_actions: '更多会话操作',
+    // N33-C 加（AI 浮窗会话列表加回「删除」菜单项 + 确认提示；delete_confirm 已有、复用。上游 74e81635/78d1de35 去掉了删除入口，判定门 M299/M302，用户拍板加回，羚牛自加）
+    delete: '删除',
+    delete_share_notice: '删除后该会话的分享链接将失效',
   },
   nightingale: {
     share_fallback_notice: '你没有原页面的访问权限，这里只展示对话内容',

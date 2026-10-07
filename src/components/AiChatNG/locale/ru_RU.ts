@@ -20,6 +20,9 @@ const ru_RU = {
     share: 'Поделиться диалогом',
     rename: 'Переименовать',
     more_actions: 'Другие действия с диалогом',
+    // N33-C 加（AI 浮窗会话列表加回「删除」菜单项 + 确认提示；delete_confirm 已有、复用。上游 74e81635/78d1de35 去掉了删除入口，判定门 M299/M302，用户拍板加回，羚牛自加）
+    delete: 'Delete',
+    delete_share_notice: 'After deletion, the share link of this conversation will no longer work',
   },
   nightingale: {
     share_fallback_notice: 'У вас нет доступа к исходной странице, здесь показан только диалог',

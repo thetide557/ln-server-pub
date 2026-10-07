@@ -20,6 +20,9 @@ const ja_JP = {
     share: '会話を共有',
     rename: '名前を変更',
     more_actions: '会話のその他の操作',
+    // N33-C 加（AI 浮窗会话列表加回「删除」菜单项 + 确认提示；delete_confirm 已有、复用。上游 74e81635/78d1de35 去掉了删除入口，判定门 M299/M302，用户拍板加回，羚牛自加）
+    delete: 'Delete',
+    delete_share_notice: 'After deletion, the share link of this conversation will no longer work',
   },
   nightingale: {
     share_fallback_notice: '元のページへのアクセス権限がないため、ここでは会話のみを表示しています',

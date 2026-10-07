@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button, Dropdown, Empty, Input, Menu, Popover, Spin } from 'antd';
+import { Button, Dropdown, Empty, Input, Menu, Modal, Popover, Spin } from 'antd';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
-import { Edit3, MessageSquare, MoreVertical, Search, Share2 } from 'lucide-react';
+import { Edit3, MessageSquare, MoreVertical, Search, Share2, Trash2 } from 'lucide-react';
 
 import { NAME_SPACE } from './constants';
 import { deleteChat, getChatHistory, renameChat } from './services';
@@ -246,6 +246,10 @@ export default function ChatHistory(props: IChatHistoryPageProps) {
                                       items={[
                                         { key: 'rename', icon: <Edit3 size={14} />, label: t('history.rename') },
                                         { key: 'share', icon: <Share2 size={14} />, label: t('history.share') },
+                                        // N33-C 加回「删除」：上游 74e81635 重做历史列表时把 Popconfirm 删除入口注释掉、78d1de35 清掉注释块，
+                                        // 三个提交都没写原因、无关联 PR（见判定门 M299 / M302）；前端 handleDelete / deleteChat 与后端
+                                        // DELETE /api/n9e/assistant/chat/:chatId 都在，判为重构时搁置的半成品，用户拍板加回来。羚牛自加。
+                                        { key: 'delete', icon: <Trash2 size={14} />, label: t('history.delete'), danger: true },
                                       ]}
                                       onClick={({ key, domEvent }) => {
                                         domEvent.stopPropagation();
@@ -253,6 +257,17 @@ export default function ChatHistory(props: IChatHistoryPageProps) {
                                         if (key === 'rename') {
                                           setRenameChatId(chat.chat_id);
                                           setRenameTitle(chat.title);
+                                          return;
+                                        }
+                                        if (key === 'delete') {
+                                          // 删除是不可逆的，而且会让这个会话已经分享出去的链接失效（分享 URL 按 chat_id 构造，
+                                          // 后端按 chat_id 真删），所以用户拍板要先问一句、正文把这件事说清。
+                                          Modal.confirm({
+                                            title: t('history.delete_confirm'),
+                                            content: t('history.delete_share_notice'),
+                                            okType: 'danger',
+                                            onOk: () => handleDelete(chat),
+                                          });
                                           return;
                                         }
                                         handleShare(chat);
