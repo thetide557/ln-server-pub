@@ -21,6 +21,8 @@ import request from '@/utils/request';
 import '@/i18n';
 import '@/pages/datasource/locale';
 import DatasourceFormPage from '@/pages/datasource/Form';
+// N36 批 C：数据源表单测试共用的 request 假实现 + 「等集群项自动填好」的小工具，原由见该文件头注释
+import { datasourceRequestImpl, waitClusterAutoFilled, AUTO_FILLED_CLUSTER } from '../helpers/datasourceFormHelpers';
 
 const requestMock = request as unknown as jest.Mock;
 
@@ -47,7 +49,10 @@ function setInput(container: HTMLElement, id: string, value: string) {
 describe('L1：doris 数据源表单提交', () => {
   beforeEach(() => {
     requestMock.mockClear();
-    requestMock.mockImplementation(() => Promise.resolve({ dat: {}, data: {} }));
+    // N36 批 C：换成按 URL 分流的假实现，让 GET /api/n9e/server-clusters 返回一个真列表。
+    // 原来一律返回 {}，items/Cluster.tsx 的集群项既填不进值、校验规则又判它无效，
+    // 整张表单永远提交不出去——这是 N28 U-N28-3 那 8 红的第一层原因。
+    requestMock.mockImplementation(datasourceRequestImpl);
   });
 
   it('提交后 plugin_type=doris，字段平铺在 settings 里、key 带 doris. 前缀', async () => {
@@ -57,6 +62,11 @@ describe('L1：doris 数据源表单提交', () => {
     setInput(container, 'settings_doris.addr', '127.0.0.1:9030');
     setInput(container, 'settings_doris.user', 'root');
     setInput(container, 'settings_doris.password', 'p@ssw0rd');
+
+    // N36 批 C：先等「告警引擎集群」这一项被 items/Cluster.tsx 自动填好，再点提交。
+    // 不等的话点下去那一刻 cluster_name 还是空的（那个 .then 是微任务，排不进同步语句之间），
+    // Cluster.tsx:31-37 的校验规则会把整张表单拦住、onFinish 根本不跑——8 红的第二层原因。
+    await waitClusterAutoFilled(container);
 
     fireEvent.click(container.querySelector('button[type="submit"]') as HTMLButtonElement);
 
@@ -71,6 +81,8 @@ describe('L1：doris 数据源表单提交', () => {
 
     expect(url).toBe('/api/n9e/datasource/upsert');
     expect(body.plugin_type).toBe('doris');
+    // N36 批 C：集群名由 items/Cluster.tsx 自动填，提交体里会带上它
+    expect(body.cluster_name).toBe(AUTO_FILLED_CLUSTER);
     expect(body.name).toBe('doris_test_ds');
     expect(body.settings['doris.addr']).toBe('127.0.0.1:9030');
     expect(body.settings['doris.user']).toBe('root');

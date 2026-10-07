@@ -126,5 +126,15 @@ if (!window.scrollTo) {
   (window as any).scrollTo = () => {};
 }
 
+// ⑩ Element.prototype.scrollIntoView —— jsdom 没实现这个方法（连 stub 都没有，直接是 undefined）。
+//    N33 批 A 之后十张数据源表单的 onFinishFailed 都会调 src/utils/index.ts:199 的 scrollToFirstError，
+//    它在一个 setTimeout(…, 200) 里去 `.scrollIntoView(...)`；校验一失败这个定时器就被排上，
+//    200ms 后抛 `TypeError: … scrollIntoView is not a function`。因为是在定时器里抛的，
+//    jest 会把它算到「当时正在跑的那条用例」头上——哪条用例中招完全看时序，是个会飘的红
+//    （`samples/esForm.test.tsx` 就被它咬中过）。这里补一个空实现，和上面 ⑧ 的 window.scrollTo 同理。
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = function scrollIntoView() {};
+}
+
 // ⑨ jest-dom 的断言（toBeInTheDocument / toHaveValue 这些）
 import '@testing-library/jest-dom';

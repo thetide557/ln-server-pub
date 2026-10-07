@@ -23,6 +23,8 @@ import request from '@/utils/request';
 import '@/i18n';
 import '@/pages/datasource/locale';
 import DatasourceFormPage from '@/pages/datasource/Form';
+// N36 批 C：数据源表单测试共用的 request 假实现 + 「等集群项自动填好」的小工具，原由见该文件头注释
+import { datasourceRequestImpl, waitClusterAutoFilled, AUTO_FILLED_CLUSTER } from '../helpers/datasourceFormHelpers';
 
 const requestMock = request as unknown as jest.Mock;
 
@@ -49,7 +51,10 @@ function setInput(container: HTMLElement, id: string, value: string) {
 describe('L1：ck（ClickHouse）数据源表单提交', () => {
   beforeEach(() => {
     requestMock.mockClear();
-    requestMock.mockImplementation(() => Promise.resolve({ dat: {}, data: {} }));
+    // N36 批 C：换成按 URL 分流的假实现，让 GET /api/n9e/server-clusters 返回一个真列表。
+    // 原来一律返回 {}，items/Cluster.tsx 的集群项既填不进值、校验规则又判它无效，
+    // 整张表单永远提交不出去——这是 N28 U-N28-3 那 8 红的第一层原因。
+    requestMock.mockImplementation(datasourceRequestImpl);
   });
 
   it('提交后 plugin_type=ck，节点在 settings["ck.nodes"] 数组里', async () => {
@@ -60,13 +65,18 @@ describe('L1：ck（ClickHouse）数据源表单提交', () => {
     setInput(container, 'settings_ck.user', 'default');
     setInput(container, 'settings_ck.password', 'p@ssw0rd');
 
+    // N36 批 C：先等「告警引擎集群」这一项被 items/Cluster.tsx 自动填好，再点提交。
+    // 不等的话点下去那一刻 cluster_name 还是空的（那个 .then 是微任务，排不进同步语句之间），
+    // Cluster.tsx:31-37 的校验规则会把整张表单拦住、onFinish 根本不跑——8 红的第二层原因。
+    await waitClusterAutoFilled(container);
+
     fireEvent.click(container.querySelector('button[type="submit"]') as HTMLButtonElement);
 
-    // 没填集群名 → 包装层先弹二次确认，点掉它
-    await waitFor(() => {
-      expect(document.querySelector('.ant-modal-confirm-btns')).toBeTruthy();
-    });
-    fireEvent.click(document.querySelector('.ant-modal-confirm-btns .ant-btn-primary') as HTMLButtonElement);
+    // N36 批 C：这里原来要点掉「没填集群名」的二次确认弹窗，现在不会再弹了。
+    // src/pages/datasource/Form.tsx:203-213 那个 Modal.confirm 的条件是 `type === 'ck' && !values.cluster_name`，
+    // 而 items/Cluster.tsx 既会把第一个集群自动填进去（`:17-19`）、又用校验规则把空值硬拦住（`:31-37`），
+    // 所以 cluster_name 到 onFinish 时不可能是空的，这条分支对 ck 走不到（prometheus / elasticsearch 同理；
+    // influxdb / aliyun-sls 的表单没有 <Cluster>，那两种类型的弹窗还是活的）。改成直接等提交请求。
 
     await waitFor(() => {
       expect(upsertCalls().length).toBe(1);
@@ -79,6 +89,8 @@ describe('L1：ck（ClickHouse）数据源表单提交', () => {
 
     expect(url).toBe('/api/n9e/datasource/upsert');
     expect(body.plugin_type).toBe('ck');
+    // N36 批 C：集群名由 items/Cluster.tsx 自动填，提交体里会带上它
+    expect(body.cluster_name).toBe(AUTO_FILLED_CLUSTER);
     expect(body.name).toBe('ck_test_ds');
     expect(body.settings['ck.nodes']).toEqual(['127.0.0.1:9000']);
     expect(body.settings['ck.protocol']).toBe('native');

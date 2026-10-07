@@ -25,6 +25,8 @@ import request from '@/utils/request';
 import '@/i18n'; // 初始化 i18next（否则 useTranslation 拿不到实例）
 import '@/pages/datasource/locale'; // 挂上 datasourceManage 这个命名空间的词条
 import DatasourceFormPage from '@/pages/datasource/Form';
+// N36 批 C：数据源表单测试共用的 request 假实现 + 「等集群项自动填好」的小工具，原由见该文件头注释
+import { datasourceRequestImpl, waitClusterAutoFilled, AUTO_FILLED_CLUSTER } from '../helpers/datasourceFormHelpers';
 
 const requestMock = request as unknown as jest.Mock;
 
@@ -49,7 +51,10 @@ function setInput(container: HTMLElement, id: string, value: string) {
 describe('样板 A：ElasticSearch 数据源表单提交', () => {
   beforeEach(() => {
     requestMock.mockClear();
-    requestMock.mockImplementation(() => Promise.resolve({ dat: {}, data: {} }));
+    // N36 批 C：换成按 URL 分流的假实现，让 GET /api/n9e/server-clusters 返回一个真列表。
+    // 原来一律返回 {}，items/Cluster.tsx 的集群项既填不进值、校验规则又判它无效，
+    // 整张表单永远提交不出去——这是 N28 U-N28-3 那 8 红的第一层原因。
+    requestMock.mockImplementation(datasourceRequestImpl);
   });
 
   it('填完必填项点「测试并保存」，会带着 plugin_type=elasticsearch 打到 datasource/upsert', async () => {
@@ -78,17 +83,21 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     expect(enableWriteSwitch).toBeTruthy();
     fireEvent.click(enableWriteSwitch);
 
+    // N36 批 C：先等「告警引擎集群」这一项被 items/Cluster.tsx 自动填好，再点提交。
+    // 不等的话点下去那一刻 cluster_name 还是空的（那个 .then 是微任务，排不进同步语句之间），
+    // Cluster.tsx:31-37 的校验规则会把整张表单拦住、onFinish 根本不跑——8 红的第二层原因。
+    await waitClusterAutoFilled(container);
+
     const submitBtn = container.querySelector('button[type="submit"]') as HTMLButtonElement;
     expect(submitBtn).toBeTruthy();
     fireEvent.click(submitBtn);
 
-    // 没填 cluster_name 时 src/pages/datasource/Form.tsx 会先弹二次确认，点掉它
-    await waitFor(() => {
-      expect(document.querySelector('.ant-modal-confirm-btns')).toBeTruthy();
-    });
-    const okBtn = document.querySelector('.ant-modal-confirm-btns .ant-btn-primary') as HTMLButtonElement;
-    expect(okBtn).toBeTruthy();
-    fireEvent.click(okBtn);
+    // N36 批 C：这里原来要点掉「没填 cluster_name」的二次确认弹窗，现在不会再弹了。
+    // src/pages/datasource/Form.tsx:203-213 那个 Modal.confirm 的条件是
+    // `type === 'elasticsearch' && !values.cluster_name`，而 items/Cluster.tsx 既会把第一个集群
+    // 自动填进去（`:17-19`）、又用校验规则把空值硬拦住（`:31-37`），所以 cluster_name 到 onFinish
+    // 时不可能是空的，这条分支对 elasticsearch 走不到（prometheus / ck 同理；influxdb / aliyun-sls
+    // 的表单没有 <Cluster>，那两种类型的弹窗还是活的）。改成直接等提交请求。
 
     await waitFor(() => {
       expect(requestMock.mock.calls.some((c: any[]) => String(c[0]).includes('datasource/upsert'))).toBe(true);
@@ -111,6 +120,8 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     expect(options.method).toBe('Post');
 
     expect(body.plugin_type).toBe('elasticsearch');
+    // N36 批 C：集群名由 items/Cluster.tsx 自动填，提交体里会带上它
+    expect(body.cluster_name).toBe(AUTO_FILLED_CLUSTER);
     expect(body.name).toBe('es_test_ds');
     // step6f：multipleUrls 之后请求体里是数组 http.urls，不再有 http.url
     expect(body.http.urls).toEqual(['http://127.0.0.1:9200']);
@@ -122,7 +133,11 @@ describe('样板 A：ElasticSearch 数据源表单提交', () => {
     expect(typeof body.auth.basic_auth_password).toBe('string');
     expect(body.auth.basic_auth_password.startsWith('{{cipher}}')).toBe(true);
     expect(body.settings).toEqual({ version: '7.10.2', max_shard: 5, min_interval: 10, enable_write: true });
-    expect(body.is_test).toBe(true);
+    // N36 批 C（接 N33 README 第四节第 4 条）：N33 批 A-2 把写死的 is_test 换成了 force_save
+    //（后端只认 force_save，`models/datasource.go:50` json tag；is_test 后端零命中、一直没人读）。
+    // 默认点的是第一个按钮「测试连通性并保存」→ saveMode='saveAndTest' → force_save=false。
+    expect(body.is_test).toBeUndefined();
+    expect(body.force_save).toBe(false);
     expect(body.is_enable).toBe(true);
   });
 

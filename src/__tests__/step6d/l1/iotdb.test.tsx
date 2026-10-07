@@ -20,6 +20,8 @@ import request from '@/utils/request';
 import '@/i18n';
 import '@/pages/datasource/locale';
 import DatasourceFormPage from '@/pages/datasource/Form';
+// N36 批 C：数据源表单测试共用的 request 假实现 + 「等集群项自动填好」的小工具，原由见该文件头注释
+import { datasourceRequestImpl, waitClusterAutoFilled, AUTO_FILLED_CLUSTER } from '../helpers/datasourceFormHelpers';
 
 const requestMock = request as unknown as jest.Mock;
 
@@ -50,7 +52,10 @@ function setInput(container: HTMLElement, id: string, value: string) {
 describe('L1：iotdb 数据源表单提交', () => {
   beforeEach(() => {
     requestMock.mockClear();
-    requestMock.mockImplementation(() => Promise.resolve({ dat: {}, data: {} }));
+    // N36 批 C：换成按 URL 分流的假实现，让 GET /api/n9e/server-clusters 返回一个真列表。
+    // 原来一律返回 {}，items/Cluster.tsx 的集群项既填不进值、校验规则又判它无效，
+    // 整张表单永远提交不出去——这是 N28 U-N28-3 那 8 红的第一层原因。
+    requestMock.mockImplementation(datasourceRequestImpl);
   });
 
   it('提交后打到 datasource/upsert，plugin_type=iotdb，地址在 http.url、密码在 auth 里且已加密', async () => {
@@ -63,6 +68,11 @@ describe('L1：iotdb 数据源表单提交', () => {
     setInput(container, 'http_url', 'http://127.0.0.1:18080');
     setInput(container, 'auth_basic_auth_user', 'root');
     setInput(container, 'auth_basic_auth_password', 'root');
+
+    // N36 批 C：先等「告警引擎集群」这一项被 items/Cluster.tsx 自动填好，再点提交。
+    // 不等的话点下去那一刻 cluster_name 还是空的（那个 .then 是微任务，排不进同步语句之间），
+    // Cluster.tsx:31-37 的校验规则会把整张表单拦住、onFinish 根本不跑——8 红的第二层原因。
+    await waitClusterAutoFilled(container);
 
     fireEvent.click(container.querySelector('button[type="submit"]') as HTMLButtonElement);
 
@@ -78,6 +88,8 @@ describe('L1：iotdb 数据源表单提交', () => {
     expect(url).toBe('/api/n9e/datasource/upsert');
     expect(options.method).toBe('Post');
     expect(body.plugin_type).toBe('iotdb');
+    // N36 批 C：集群名由 items/Cluster.tsx 自动填，提交体里会带上它
+    expect(body.cluster_name).toBe(AUTO_FILLED_CLUSTER);
     expect(body.name).toBe('iotdb_test_ds');
     expect(body.http.url).toBe('http://127.0.0.1:18080');
     expect(body.http.timeout).toBe(10000);
