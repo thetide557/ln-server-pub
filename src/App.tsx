@@ -328,7 +328,13 @@ function App() {
           const defaultBusiId = commonState.curBusiId || busiGroups?.[0]?.id;
           const defaultOrganizationId = commonState.organizationId || 0;
           const queryCondition = commonState.queryCondition || '';
-          window.localStorage.setItem('curBusiId', String(defaultBusiId));
+          // N36-B：业务组列表为空时 defaultBusiId 是 undefined，String(undefined) 会把字面量 'undefined'
+          // 写进 localStorage，上面 `:184` 读回时 Number('undefined') 是 NaN。写空串让它读回 0；
+          // 「空串」而不是「不写」，是为了把上一个账号留下的旧 curBusiId 清掉，别让下一个账号拿着不属于自己的业务组 id 去发请求。
+          window.localStorage.setItem(
+            'curBusiId',
+            defaultBusiId === undefined || defaultBusiId === null ? '' : String(defaultBusiId),
+          );
           window.localStorage.setItem('organizationId', String(defaultOrganizationId));
           window.localStorage.setItem('queryCondition', queryCondition);
           initialized.current = true;

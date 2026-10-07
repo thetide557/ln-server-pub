@@ -129,7 +129,9 @@ export default function DetailV2(props: IProps) {
   let { id } = useParams<URLParam>();
 
   if (isHome) {
-    id = _.toString(profile.board_id) || '1'
+    // N36-B：board_id 为 0 时 _.toString(0) 是字符串 '0'、是真值，`|| '1'` 兜不住，会拼出 GET /api/n9e/board/0 → 后端 404
+    //（A13 OBS-T5-4，证据 `10-T510-standard-login.txt:142`，404 ×3）。这里改成只认大于 0 的 board_id，其余一律回落到默认首页看板 1。
+    id = profile.board_id ? _.toString(profile.board_id) : '1';
   }
   const query = queryString.parse(useLocation().search);
   if (isBuiltin) {
