@@ -25,6 +25,28 @@ const getDefaultStepByStartAndEnd = (start: number, end: number) => {
   return Math.max(Math.floor((end - start) / 240), 1);
 };
 
+/**
+ * 步长夹取。照 fe 基线原样搬（`git -C fe show v9.1.0:src/pages/dashboard/Renderer/datasource/prometheus.ts`
+ * 的 `:30-37`，到最新的 `ee48e701` 这一段一字未改），只多了一个 `export` 给单测用。
+ *
+ * 做三件事，取最大的那个当最终步长：
+ *   1. `step` —— 算出来或用户填的步长；
+ *   2. `minStep` —— 下限。调用处传面板上用户自填的 `target.step`，没填就是 15 秒
+ *      （上游写法 `options.minStep ?? 15`）；
+ *   3. `safeStep` —— prometheus 对一次 range query 返回的点数有 11000 的硬上限，
+ *      超了它直接回 `exceeded maximum resolution of 11,000 points per timeseries`，
+ *      所以步长不能小于「时间范围 / 11000」。不满 1 秒时不取整（保留小数，
+ *      让它在 `Math.max` 里输给前两个），大于 1 秒才向上取整。
+ */
+export const adjustStep = (step: number, minStep: number, range: number) => {
+  // Prometheus 限制最大点数是 11000
+  let safeStep = range / 11000;
+  if (safeStep > 1) {
+    safeStep = Math.ceil(safeStep);
+  }
+  return Math.max(step, minStep, safeStep);
+};
+
 export default async function prometheusQuery(options: IOptions) {
   const { dashboardId, id, time, targets, variableConfig, spanNulls, scopedVars } = options;
   if (!time.start) return Promise.resolve([]);
@@ -50,6 +72,11 @@ export default async function prometheusQuery(options: IOptions) {
       if (target.step) {
         _step = target.step;
       }
+      // N34-step：上面三处（面板默认 240 点算法、`target.time` 重算、`target.step` 自填）
+      // 把 `_step` 定下来之后，在这里统一夹一次。`minStep` 用面板上自填的 `target.step`
+      // ——上游把用户填的那个值当「最小步长」而不是「固定步长」，没填就兜 15 秒。
+      // 夹完才去做下面 start / end 的对齐取整，保证取整用的是最终步长。
+      _step = adjustStep(_step, target.step ?? 15, end - start);
       // TODO: 消除毛刺？
       start = start - (start % _step!);
       end = end - (end % _step!);
