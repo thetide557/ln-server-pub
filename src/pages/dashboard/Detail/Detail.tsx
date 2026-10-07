@@ -42,6 +42,9 @@ import Editor from '../Editor';
 import { defaultCustomValuesMap, defaultOptionsValuesMap } from '../Editor/config';
 import { sortPanelsByGridLayout, panelsMergeToConfigs, updatePanelsInsertNewPanelToGlobal } from '../Panels/utils';
 import { useGlobalState } from '../globalState';
+// 2026-10-07 N34-var：把看板变量与时间范围写进 Variables 垫片的全局状态，新套 replaceTemplateVariables
+// 靠它替换面板 SQL / ES filter 里的 ${var}。语义照 fe v9.1.0 Detail/Detail.tsx:97-98,266-282。
+import { setGlobalState as setVariablesGlobalState, toVariablesWithOptions } from '../Variables/utils/n9eShim';
 import './style.less';
 import './dark.antd.less';
 import './dark.less';
@@ -199,6 +202,9 @@ export default function DetailV2(props: IProps) {
         dashboardId: _.toString(id),
         variableConfigWithOptions: valueWithOptions,
       });
+      // 2026-10-07 N34-var：同步进垫片存储（fe v9.1.0 这里是 setVariablesWithOptions(newValue)）。
+      // 老套变量对象的 options 是 string[]，新套要 { label, value }[]，过一道 toVariablesWithOptions。
+      setVariablesGlobalState('variablesWithOptions', toVariablesWithOptions(valueWithOptions));
     }
   };
   const stopAutoRefresh = () => {
@@ -215,8 +221,20 @@ export default function DetailV2(props: IProps) {
     });
   };
 
+  // 2026-10-07 N34-var：时间范围变化时同步进垫片存储（照 fe v9.1.0 Detail/Detail.tsx:266-268）。
+  // 面板取数时各数据源会把 range 显式传给 replaceTemplateVariables，这里写的是没显式传时的兜底值。
   useEffect(() => {
+    setVariablesGlobalState('range', range);
+  }, [range]);
+
+  useEffect(() => {
+    // 2026-10-07 N34-var：切换仪表盘时先清空变量，免得用上一个仪表盘的变量值（照 fe v9.1.0
+    // Detail/Detail.tsx:270-282）；组件卸载时同样清空。
+    setVariablesGlobalState('variablesWithOptions', []);
     refresh();
+    return () => {
+      setVariablesGlobalState('variablesWithOptions', []);
+    };
   }, [id]);
 
   /*

@@ -40,6 +40,10 @@ import dorisQuery from '@/plugins/doris/Dashboard/datasource';
 // 2026-10-05 N16 摞二：mysql / pgsql 仪表盘取数（照 doris 接法）。
 import mysqlQuery from '@/plugins/mysql/Dashboard/datasource';
 import pgsqlQuery from '@/plugins/pgsql/Dashboard/datasource';
+// 2026-10-07 N34-var：把当前看板变量与时间范围写进 Variables 垫片的全局状态。新套
+// `Variables/utils/replaceTemplateVariables.ts` 在取数时读它来替换 SQL / ES filter 里的
+// ${var} / $var / [[var]]；不写就只有内置的 $__from / $__to 有效（原因见 n9eShim.ts 文件头）。
+import { setGlobalState as setVariablesGlobalState, toVariablesWithOptions } from '../../Variables/utils/n9eShim';
 
 interface IProps {
   id?: string;
@@ -83,6 +87,26 @@ export default function useQuery(props: IProps) {
   const { run: fetchData } = useDebounceFn(
     () => {
       if (!datasourceCate) return;
+      // 2026-10-07 N34-var：发请求前把变量与时间范围写进垫片存储。这里是所有仪表盘面板取数的唯一入口
+      // （仪表盘详情页 / Board / sxxc 两份 / 面板编辑器预览 / 分享图表页都经过它），写在这里顺序也最稳：
+      // 同一次调用里后面才轮到 replaceTemplateVariables 去读。
+      // 变量的当前值重新从 url / localStorage 取一遍（`getVaraiableSelected`），和老套 prometheus 取数
+      // 读的是同一个来源（`Renderer/datasource/prometheus.ts:41,57` → `VariableConfig/constant.tsx:199`），
+      // 免得用上 props 里还没传下来的旧值；取不到（null / undefined）才退回 props 里的 value。
+      if (variableConfig) {
+        setVariablesGlobalState(
+          'variablesWithOptions',
+          toVariablesWithOptions(
+            _.map(variableConfig, (item) => {
+              const selected = getVaraiableSelected(item.name, item.type, dashboardId);
+              return { ...item, value: selected === null || selected === undefined ? item.value : selected };
+            }),
+          ),
+        );
+      }
+      if (time) {
+        setVariablesGlobalState('range', time);
+      }
       setLoading(true);
       fetchQueryMap[datasourceCate](props)
         .then((res: any[]) => {
