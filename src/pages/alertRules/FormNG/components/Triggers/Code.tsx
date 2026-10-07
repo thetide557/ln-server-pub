@@ -57,7 +57,12 @@ export default function Code(props: IProps) {
 
   const handleValidate = (value?: string) => {
     if (!value) {
-      return Promise.resolve();
+      // 第六步 N33-D (c)-1（拍板 L-08）：后端第七份交接 4.2（后端 commit 60dc9c7a）新增存盘校验——
+      // 其它类规则在 rule_config.exp_trigger_disable=false 时，每个 trigger 的 exp 不能空，否则存盘直接报英文错。
+      // 上游 fe 的 v9.1.0 与 ee48e701 这里都还是 Promise.resolve()（空值放过），所以这一处是羚牛自修：改成 reject，
+      // 让用户在表单里就看到中文提示，而不是提交后看一条后端英文报错。
+      // 只在 validateDisabled === false 时才生效（:74 的 rules 三元 + Trigger.tsx:33-34），与后端「exp_trigger_disable=false 时才查」口径一致。
+      return Promise.reject(new Error(t('trigger.expr_required')));
     }
     const errors = validateExpr(value);
     if (errors.length > 0) {

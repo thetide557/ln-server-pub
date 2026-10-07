@@ -150,6 +150,8 @@ const zh_CN = {
     builder: '简单模式',
     code: '表达式模式',
     expr_invalid: '表达式语法错误',
+    // 第六步 N33-D (c)-1（拍板 L-08）：后端第七份 4.2 要求 trigger.exp 非空；上游 fe ee48e701 无同款键，羚牛自加。
+    expr_required: '请输入表达式',
     label: '关联 Label',
     exp_trigger_disable: '启用阈值判断',
     advanced_settings: {

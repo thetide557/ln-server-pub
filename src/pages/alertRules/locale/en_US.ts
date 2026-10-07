@@ -150,6 +150,8 @@ const en_US = {
     builder: 'Builder',
     code: 'Code',
     expr_invalid: 'Expression syntax is invalid',
+    // 第六步 N33-D (c)-1（拍板 L-08）：后端第七份 4.2 要求 trigger.exp 非空；上游 fe ee48e701 无同款键，羚牛自加。
+    expr_required: 'Expression is required',
     label: 'Label',
     exp_trigger_disable: 'Enable threshold conditions',
     advanced_settings: {

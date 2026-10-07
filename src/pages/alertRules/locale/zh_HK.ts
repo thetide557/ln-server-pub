@@ -147,6 +147,8 @@ const zh_HK = {
     builder: '簡單模式',
     code: '表達式模式',
     expr_invalid: '表達式語法錯誤',
+    // 第六步 N33-D (c)-1（拍板 L-08）：後端第七份 4.2 要求 trigger.exp 非空；上游 fe ee48e701 無同款鍵，羚牛自加。
+    expr_required: '請輸入表達式',
     label: '關聯 Label',
     exp_trigger_disable: '啟用閾值判斷',
     advanced_settings: {
