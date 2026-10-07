@@ -33,8 +33,16 @@ const POLLING_INTERVAL = 3000;
 const STREAM_RENDER_INTERVAL = 50;
 
 // 会话已失效（换了账号、会话被删或无权）时后端返回的错误文本标记：命中则清本地 chatId、另起新会话（todo①）
+// N36-B（lead D-N36-8，依据 `n36/查证-两件.md` D-1）：`utils/request.ts` 对「HTTP 200 + err 非空」抛的是
+// 普通对象字面量 `{ name, message, silence, data, response }`，**不是** Error 实例，所以只看 `instanceof Error`
+// 会把 `chat not found` / `forbidden` 文案丢掉。中间补一档：是普通对象且带 message 字段时就读它的 message。
 const isSessionGoneError = (error: unknown): boolean => {
-  const text = error instanceof Error ? error.message : String(error ?? '');
+  const text =
+    error instanceof Error
+      ? error.message
+      : error && typeof error === 'object' && 'message' in error
+      ? String((error as { message?: unknown }).message ?? '')
+      : String(error ?? '');
   return /forbidden|chat not found/i.test(text);
 };
 
@@ -401,9 +409,11 @@ export default function ChatPanel(props: IAiChatProps) {
           // 羚牛这三样都没有（D-N26-3），所以那段不搬，换回羚牛自己的两个分支——
           // 只读分享页给明确文案（todo④）、非分享页清掉本地 chatId 并另起新会话（todo①）。
           const nextError = error instanceof Error ? error : new Error('load messages failed');
-          if (shareReadonly && isSessionGoneError(nextError)) {
+          // N36-B：判「会话已失效」要拿请求封装抛回来的**原始** error，不能拿被包成通用 Error 的 nextError
+          //（后者的 message 已被换成 'load messages failed'，文案丢了）。nextError 仍留给 handleError 用。
+          if (shareReadonly && isSessionGoneError(error)) {
             setShareForbidden(true);
-          } else if (!shareReadonly && isSessionGoneError(nextError)) {
+          } else if (!shareReadonly && isSessionGoneError(error)) {
             setCachedSessionId(undefined);
             createNewChatRef.current?.();
           }
@@ -620,7 +630,8 @@ export default function ChatPanel(props: IAiChatProps) {
         if (!pending.locator) setInputValue((draft) => draft || content);
         const nextError = error instanceof Error ? error : new Error('send message failed');
         // 用旧 chatId 发消息时若返回 forbidden / chat not found，清本地 chatId 并另起新会话（todo①）
-        if (!shareReadonly && isSessionGoneError(nextError)) {
+        // N36-B：同上，判定拿原始 error（nextError 的 message 已被换成 'send message failed'）
+        if (!shareReadonly && isSessionGoneError(error)) {
           setCachedSessionId(undefined);
           createNewChatRef.current?.();
         }
