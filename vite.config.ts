@@ -20,6 +20,7 @@ import { md } from "./plugins/md";
 import plusResolve from "./plugins/plusResolve";
 import { visualizer } from "rollup-plugin-visualizer";
 const reactSvgPlugin = require("./plugins/svg");
+const path = require("path");
 
 const chunk2 = [
   "@codemirror/autocomplete",
@@ -78,6 +79,24 @@ export default defineConfig(({ mode }) => ({
       {
         find: "@",
         replacement: "/src",
+      },
+      // 垫片：vite 2 不认 package.json imports 字段，升 vite 后删
+      // vfile@6（streamdown → remark/unified 链带进来）用 "#minpath"/"#minproc"/"#minurl"
+      // 这种包内子路径导入，vite 2.9.17 自带的 rollup 解析不了，这里手工指到浏览器分支的文件。
+      // 用精确正则（^...$），避免误伤别的 # 开头的东西。
+      {
+        find: /^#minpath$/,
+        replacement: path.resolve(__dirname, "node_modules/vfile/lib/minpath.browser.js"),
+      },
+      // 垫片：vite 2 不认 package.json imports 字段，升 vite 后删
+      {
+        find: /^#minproc$/,
+        replacement: path.resolve(__dirname, "node_modules/vfile/lib/minproc.browser.js"),
+      },
+      // 垫片：vite 2 不认 package.json imports 字段，升 vite 后删
+      {
+        find: /^#minurl$/,
+        replacement: path.resolve(__dirname, "node_modules/vfile/lib/minurl.browser.js"),
       },
     ],
   },
