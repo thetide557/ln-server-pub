@@ -33,7 +33,8 @@ import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
 import { aesEncrypt, aesDecrypt } from '@/utils/aes';
 // N33 批 F：登录成功后的站内回跳（照上游 `ee48e701:src/pages/login/index.tsx:189`）
-import { goAfterLogin } from './redirect';
+// N36 批 A（A-2b）：`getSafeRedirect` 把地址栏里的 `?redirect=` 过一遍白名单，再发给 SSO 跳出接口
+import { goAfterLogin, getSafeRedirect } from './redirect';
 
 export interface DisplayName {
   oidc: string;
@@ -317,13 +318,52 @@ export default function LoginSso() {
       });
   };
 
+  /**
+   * 点「CAS / OIDC / OAuth2 登录」时，先问后端要第三方登录页的地址，拿到就把浏览器送过去。
+   *
+   * N36 批 A 在这里改了三件事（依据：后端第八份交接第一节 3、第二节 2；lead 拍板 D-N36-1 / D-N36-2）：
+   *
+   * 1. **判据从 dat 的 `valid` 字段换成 `res.dat?.redirect`**（有地址就跳）。
+   *    `valid` 是公司私有改造加的字段，上游后端没有；u-sec 把它定成「**用户传上来的回跳地址**
+   *    是不是安全的站内路径」（`ln-server center/router/router_login.go:36-50` 的
+   *    `isSafeInternalRedirect`），**不是**「SSO 配置能不能用」。原来这里当成后者判，于是
+   *    只要我们开始往后端发 `redirect`（就是下面第 2 件事），一个不安全的回跳值就会被
+   *    误读成「CAS 配置失败」，明明能跳的也不跳了。换成判 `redirect` 非空，语义上等价于
+   *    上游 fe 的 `if (!res.dat)`（`ee48e701:src/pages/login/index.tsx:121`），
+   *    与后端三条分支都对得上：已登录 → 回原样地址（能跳）；SSO 未启用 → 回空串（不跳、弹错误）；
+   *    启用未登录 → 回第三方登录地址（能跳）。后端保留 `valid` 做它的安全检查结果，前端不再读它。
+   *
+   * 2. **把 `redirect` 发给后端**，值取 `getSafeRedirect(location.search)`
+   *    （`./redirect:86`，N33 批 F 写的白名单，只放行站内相对路径，取不到或不合法回 `undefined`，
+   *    那时 `services/login.ts` 整个查询参数都不发、后端用它自己的默认 `/`）。
+   *    有了它，SSO 绕一圈回来才知道该把用户送回哪一页（401 时 `src/utils/request.ts:69-72`
+   *    把当前地址挂在 `/login?redirect=…` 上，回调页 `goAfterLogin` 再用）。
+   *    **一定要先过白名单**：后端「用户已经登录」那条分支会把收到的值原样回传
+   *    （`router_login.go:1241-1248`），这里判到有地址就跳——直接把地址栏原值发出去，
+   *    等于谁构造一条 `/login?redirect=https://evil.example` 就能把已登录用户送去外站。
+   *
+   * 3. **CAS 的 `state` 非空才存**。`state` 是 CAS 流程防跨站请求伪造（CSRF）的一次性串：
+   *    后端 `Authorize` 生成并存进 redis，前端要原样带去 CAS 服务器、回调时再带回来核对
+   *    （`loginCallbackCas` 从 query 里取 `state` 交给 `ValidateServiceTicket`）。
+   *    后端只在「CAS 已启用且用户未登录」那条分支回 `state`，另外两条（已登录、CAS 未启用）
+   *    压根不跳 CAS、没有 `state`（`router_login.go:1274-1275` 的注释写明「前端按 dat.state
+   *    非空才存」）。不加这个 `if`，那两条分支会把字符串 `"undefined"` 写进 localStorage，
+   *    留给下一次真的 CAS 回调去核对。存完再跳，顺序照上游
+   *    （`ee48e701:src/pages/login/index.tsx:125-127`）。
+   *
+   * 三处 `message.error` 的文案一个字没动。
+   */
   const handleOtherLogin = (key: any) => {
     setActiveKey(key)
+    // 登录完要回哪一页：已经过了 ./redirect 的白名单，拿不到或不合法就是 undefined（那时不发这个参数）
+    const safeRedirect = getSafeRedirect(location.search);
     switch (key) {
       case 'CAS':
-        getRedirectURLCAS().then(res => {
-          if (res.dat?.valid) {
-            localStorage.setItem("CAS_state", res.dat?.state)
+        getRedirectURLCAS(safeRedirect).then(res => {
+          if (res.dat?.redirect) {
+            if (res.dat?.state) {
+              localStorage.setItem("CAS_state", res.dat.state)
+            }
             window.location.href = res.dat?.redirect;
           } else {
             message.error('获取CAS登录地址失败，请检查CAS登录配置')
@@ -333,8 +373,8 @@ export default function LoginSso() {
         })
         break;
       case 'OIDC':
-        getRedirectURL().then(res => {
-          if (res.dat?.valid) {
+        getRedirectURL(safeRedirect).then(res => {
+          if (res.dat?.redirect) {
             window.location.href = res.dat?.redirect;
           } else {
             message.error('获取OIDC登录地址失败，请检查OIDC登录配置')
@@ -344,8 +384,8 @@ export default function LoginSso() {
         })
         break;
       case 'OAuth2':
-        getRedirectURLOAuth().then(res => {
-          if (res.dat?.valid) {
+        getRedirectURLOAuth(safeRedirect).then(res => {
+          if (res.dat?.redirect) {
             window.location.href = res.dat?.redirect;
           } else {
             message.error('获取OAuth2登录地址失败，请检查OAuth2登录配置')
