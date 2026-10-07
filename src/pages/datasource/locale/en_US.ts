@@ -1,4 +1,10 @@
 const en_US = {
+  // ---- N33 batch A-2: labels of the two save buttons, after fe v9.1.0 src/pages/datasource/locale/en_US.ts:158-159
+  test_and_save_btn: 'Save & test',
+  save_btn: 'Save',
+  // Shown when the datasource was saved but the backend returned a verification message
+  verification_failed_title: 'Saved, but not verified',
+  verification_failed_content: 'The data source has been saved, but this time it was not verified. Please check the address, account and network, then try a query again.',
   title: 'Data sources',
   list_title: 'List',
   name: 'Data source name',
@@ -26,6 +32,8 @@ const en_US = {
     auth: 'Auth',
     username: 'User',
     password: 'Password',
+    // N33 batch A-4 (B-5): fill in both, or neither
+    basic_auth_pair_required: 'User and password must be filled in together; the backend rejects only one of them',
     skip_ssl_verify: 'Skip TLS verify',
     yes: 'Yes',
     no: 'No',

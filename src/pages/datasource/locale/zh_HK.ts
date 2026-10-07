@@ -1,4 +1,10 @@
 const zh_HK = {
+  // ---- N33 批 A-2：兩個保存按鈕的文案，照 fe v9.1.0 src/pages/datasource/locale/zh_CN.ts:152-153 譯繁體
+  test_and_save_btn: '測試連通性並儲存',
+  save_btn: '不測試連通性直接儲存',
+  // 儲存成功、但後端回的 verification 裡帶了 message（典型是 es 留空版本號而自動探測失敗）時的提示
+  verification_failed_title: '已儲存，但連通性未通過驗證',
+  verification_failed_content: '資料來源已經存進來了，但這次沒有驗證成功。請檢查地址、帳號和網路後再試一次查詢。',
   title: '資料來源管理',
   list_title: '已接入的資料來源',
   name: '資料來源名稱',
@@ -26,6 +32,8 @@ const zh_HK = {
     auth: '授權',
     username: '使用者名稱',
     password: '密碼',
+    // N33 批 A-4（B-5）：帳號和口令要麼都填、要麼都不填
+    basic_auth_pair_required: '使用者名稱和密碼要一起填，只填一個後端會拒絕',
     skip_ssl_verify: '跳過 SSL 驗證',
     yes: '是',
     no: '否',

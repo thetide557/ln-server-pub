@@ -60,6 +60,9 @@ describe('L1：pgsql 数据源表单提交', () => {
 
     setInput(container, 'name', 'pgsql_test_ds');
     setInput(container, 'settings_pgsql.shards_0_pgsql.addr', '127.0.0.1:5432');
+    // N33-A：pgsql 的「数据库」是后端实际必填的（dskit/postgres/postgres.go:75-77 空库名报 `empty pgsql database`），
+    // 本批给 src/components/DBSettings/Shard.tsx 补了这个输入框并只对 pgsql 加 required，这里把它填上并钉住提交体
+    setInput(container, 'settings_pgsql.shards_0_pgsql.db', 'dsprobe');
     setInput(container, 'settings_pgsql.shards_0_pgsql.user', 'root');
     setInput(container, 'settings_pgsql.shards_0_pgsql.password', 'p@ssw0rd');
 
@@ -82,6 +85,7 @@ describe('L1：pgsql 数据源表单提交', () => {
     expect(Array.isArray(shards)).toBe(true);
     expect(shards.length).toBe(1);
     expect(shards[0]['pgsql.addr']).toBe('127.0.0.1:5432');
+    expect(shards[0]['pgsql.db']).toBe('dsprobe');
     expect(shards[0]['pgsql.user']).toBe('root');
     // 明文，不带 {{cipher}} 前缀
     expect(shards[0]['pgsql.password']).toBe('p@ssw0rd');

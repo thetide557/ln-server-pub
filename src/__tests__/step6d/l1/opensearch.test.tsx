@@ -87,9 +87,11 @@ describe('L1：opensearch 数据源表单提交', () => {
   // 注意这条用例锁的是「和 fe v9.1.0 一模一样的现状」，不是「正确行为」：
   // opensearch 的 settings 前缀是 os.，而包装层那个 if 块看的是 `${plugin_type}.headers`（= opensearch.headers），
   // 两边对不上，所以 header 是以 [{key,value}] 数组原样发出去的，没被转成对象。
-  // fe v9.1.0 和 fe 最新 HEAD 都是这个写法（未查到官方修复），本轮按「原生迁移」保持一致，
-  // 登记在 拿不准-L1.md #1，等用户 / 后端拍板。
-  it('填了自定义 header：现状是原样发数组（与 fe v9.1.0 一致，见 拿不准-L1.md #1）', async () => {
+  // N33-A（B-1）：这条原来钉的是上游那个毛病「header 原样发数组」。
+  // 现在 src/pages/datasource/Form.tsx 加了类型→表单前缀的映射（opensearch → os），
+  // 提交前会把数组转成对象，和后端 datasource/opensearch/opensearch.go:41 的 map[string]string 对上了。
+  // 上游 fe（v9.1.0 与 ee48e701）仍是老样子、未查到官方修复，所以这是羚牛自修（lead 拍板 L-04）。
+  it('填了自定义 header：提交前转成对象（N33-A 修了前缀错位，不再原样发数组）', async () => {
     const { container } = renderForm('opensearch');
 
     setInput(container, 'name', 'os_test_ds');
@@ -113,9 +115,9 @@ describe('L1：opensearch 数据源表单提交', () => {
     });
 
     const body = upsertCalls()[0][1].data;
-    expect(body.settings['os.headers']).toEqual([{ key: 'X-Tenant', value: 'lingniu' }]);
-    // 对照：如果哪天口径改成「必须转成对象」，把上面一行换成下面这行即可
-    // expect(body.settings['os.headers']).toEqual({ 'X-Tenant': 'lingniu' });
+    expect(body.settings['os.headers']).toEqual({ 'X-Tenant': 'lingniu' });
+    // 对照：N33-A 之前这里发出去的是数组 [{ key: 'X-Tenant', value: 'lingniu' }]，
+    // 后端 json.Unmarshal 解不进 map[string]string → 只打 warning、不落库，而界面照样弹「新增成功」。
   });
 
   it('节点地址没填时不发请求（表单校验拦住）', async () => {

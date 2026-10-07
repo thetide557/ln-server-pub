@@ -57,7 +57,24 @@ function AdvancedSettings(props: IProps) {
                     </Space>
                   }
                 >
-                  <Form.Item {...prefixField} name={[...prefixName, 'keys', 'valueKey']} style={{ width: '100%' }}>
+                  {/* N33 批 A-4（B-5）：值字段加必填。后端 datasource/mysql/mysql.go:152-153 对 mysql 直接报
+                      `valueKey is required`；pgsql 这一侧（datasource/postgresql/postgresql.go:197-204）没有这句显式校验，
+                      但空串在 dskit/sqlbase/timeseries.go:90 拆出来是 [""]，认不出任何值列 → 图上一条线都没有、也没有报错，
+                      比报错更难排查。同一个组件的 mysql 版本（src/plugins/mysql/components/AdvancedSettings.tsx:63-68）
+                      本来就有这条 rule，文案键 query.advancedSettings.valueKey_required 四语也都在
+                      （src/plugins/pgsql/locale/{zh_CN,zh_HK,en_US,ja_JP,ru_RU}.ts），所以这里按 mysql 那份对齐。
+                      该组件告警规则（AlertRule/Queries/index.tsx）与仪表盘（Dashboard/QueryBuilder.tsx）共用，两处都该必填。 */}
+                  <Form.Item
+                    {...prefixField}
+                    name={[...prefixName, 'keys', 'valueKey']}
+                    style={{ width: '100%' }}
+                    rules={[
+                      {
+                        required: true,
+                        message: t('query.advancedSettings.valueKey_required'),
+                      },
+                    ]}
+                  >
                     <Select
                       mode='tags'
                       disabled={disabled}

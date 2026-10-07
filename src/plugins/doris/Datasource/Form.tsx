@@ -167,7 +167,11 @@ export default function Doris(props: Props) {
         <div className='page-title'>{t('form.auth')}</div>
         <Row gutter={16}>
           <Col flex={'1'}>
-            <Form.Item label={t('form.username')} name={['settings', 'doris.user']}>
+            {/* N33 批 A-4（B-5）：用户名加必填。后端 datasource/doris/doris.go:70-72 的 Validate
+                对空用户名直接报 `doris user is invalid, please check datasource setting`，
+                而且报在「数据源缓存加载」那一步——界面上存得进去、之后所有查询都用不了。
+                上游 fe（v9.1.0 与 ee48e701 的同文件 :170）这里都没有 rules → 羚牛自修。 */}
+            <Form.Item label={t('form.username')} name={['settings', 'doris.user']} rules={[{ required: true }]}>
               <Input autoComplete='off' />
             </Form.Item>
           </Col>

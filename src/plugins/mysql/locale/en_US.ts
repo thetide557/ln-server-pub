@@ -44,6 +44,7 @@ const en_US = {
         'Whether the database can be connected depends on whether the DBA has granted the corresponding DB user authorization. If it cannot be connected due to this reason, you can continue to complete the subsequent settings first, and then verify later.',
       addr: 'Database address',
       addr_tip: 'The database address must be unique',
+      db: 'Database',
       user: 'Username',
       password: 'Password',
       help: 'Note: The account needs to have read permission for the corresponding database to continue subsequent operations. If you change to another account, try to use a read-only account.',

@@ -33,7 +33,8 @@ export default function FormCpt({ action, data, onFinish, submitLoading }: any) 
       <Card title={t(`${action}_title`)}>
         <Name />
         <HTTP placeholder='http://localhost:6041' />
-        <BasicAuth />
+        {/* N33 批 A-4（B-5）：TDengine REST 不带认证回 401，账号口令实际必填（后端 调研-tdengine.md §8 必填表） */}
+        <BasicAuth required />
         <SkipTLSVerify />
         <Headers />
         <Cluster form={form} clusterRef={clusterRef} />

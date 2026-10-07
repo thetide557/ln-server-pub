@@ -85,7 +85,10 @@ describe('L1：iotdb 数据源表单提交', () => {
     expect(typeof body.auth.basic_auth_password).toBe('string');
     expect(body.auth.basic_auth_password.startsWith('{{cipher}}')).toBe(true);
     expect(body.is_enable).toBe(true);
-    expect(body.is_test).toBe(true);
+    // N33-A：提交体里写死的 is_test 换成了 force_save（后端只认 force_save，is_test 一直没人读）。
+    // 默认点的是第一个按钮「测试连通性并保存」→ saveMode='saveAndTest' → force_save=false。
+    expect(body.is_test).toBeUndefined();
+    expect(body.force_save).toBe(false);
   });
 
   // iotdb 表单的 URL 自带初值 http://localhost:18080，所以这条反面用例改成「名称没填」

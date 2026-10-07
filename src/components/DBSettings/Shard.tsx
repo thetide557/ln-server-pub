@@ -51,6 +51,20 @@ export default function Shard(props: IProps) {
         >
           <Input placeholder={mysqlLikePlaceholder[type].addr} />
         </Form.Item>
+        {/* 「数据库」输入框：上游 fe（v9.1.0 与 ee48e701）这个组件和 src/plugins/mysql/Datasource/components/Shard.tsx 都没有这一项，
+            但 `defaultShardValues`（./config.ts:32）和 `mysqlLikePlaceholder`（./config.ts:6,10）早就留了 `<type>.db` 的键与 placeholder。
+            pgsql 后端是实际必填的：库名为空时第一次真查询就报 `empty pgsql database`
+            （ln-server `dskit/postgres/postgres.go:75-77`，注释说是兼容阿里实时数仓 Hologres），
+            而数据源本身存得进（后端对 pgsql 不跑连通性检查），表现为「数据源看着好好的，面板和告警规则全报这一句」。
+            所以这里羚牛自修补上输入框，且只对 pgsql 必填——mysql / ck 后端允许库名为空，保持不必填。 */}
+        <Form.Item
+          label={t(`${NAME_SPACE}:datasource.shards.db`)}
+          {...restField}
+          name={[name, `${type}.db`]}
+          rules={type === 'pgsql' ? [{ required: true }] : []}
+        >
+          <Input placeholder={mysqlLikePlaceholder[type].db} />
+        </Form.Item>
         <Row gutter={10}>
           <Col span={12}>
             <Form.Item

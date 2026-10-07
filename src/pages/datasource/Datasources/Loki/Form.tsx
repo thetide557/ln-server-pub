@@ -33,7 +33,8 @@ export default function FormCpt({ action, data, onFinish, submitLoading }: any) 
       <Card title={t(`${action}_title`)}>
         <Name />
         <HTTP placeholder='http://localhost:3100/loki' />
-        <BasicAuth />
+        {/* N33 批 A-4（B-5）：loki 的账号 / 口令后端要求成对（datasource/loki/loki.go:107-110），前端补上 */}
+        <BasicAuth pairRequired />
         <SkipTLSVerify />
         <Headers />
         <div className='page-title' style={{ marginTop: 0 }}>

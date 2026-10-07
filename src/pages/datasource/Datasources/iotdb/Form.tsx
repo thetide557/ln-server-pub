@@ -37,7 +37,8 @@ export default function FormCpt({ action, data, onFinish, submitLoading }: any) 
       <Card title={t(`${action}_title`)}>
         <Name />
         <HTTP placeholder='http://localhost:18080' />
-        <BasicAuth />
+        {/* N33 批 A-4（B-5）：IoTDB REST 除 /ping 外一律 Basic 认证，账号口令实际必填（后端 调研-iotdb.md §8 必填表） */}
+        <BasicAuth required />
         <SkipTLSVerify />
         <Headers />
         <Cluster form={form} clusterRef={clusterRef} />

@@ -61,11 +61,22 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('监控指标'),
         },
-        // {
-        //   key: '/dashboards-built-in',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('仪表盘'),
-        // },
+        // N33 批 A-5（lead 拍板 L-09，用户原话「11 就加上，把注释去掉」）：
+        // 两条路由本来就挂着（src/routers/index.tsx:205 的 /dashboards、:206 的 /dashboards-built-in），
+        // 只是在用的这份菜单里没有入口，只能手敲地址栏进（N29 结论正本 B-10、拿不准-W5.md U-W5-1）。
+        // label 用的两个中文 key 在 src/components/menu/locale/{zh_CN,zh_HK,en_US}.ts 里都已经有了
+        //（`仪表盘` 与 `内置仪表盘`，各 locale 的 :2 与 :4），不用加键。
+        // 位置照原注释块：放在「监控指标」之后、「即时查询」之前。
+        {
+          key: '/dashboards',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('仪表盘'),
+        },
+        {
+          key: '/dashboards-built-in',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('内置仪表盘'),
+        },
         {
           key: '/metric/explorer',
           icon: <IconFont type='icon-Menu_Infrastructure' />,

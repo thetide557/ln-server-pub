@@ -33,7 +33,10 @@ export default function FormCpt({ action, data, onFinish, submitLoading }: any) 
     >
       <Card title={t(`${action}_title`)}>
         <Name />
-        <Form.Item label='HTTP' name={['settings', `${cate}.addr`]}>
+        {/* N33 批 A-4（B-5）：地址加必填。后端 datasource/victorialogs/victorialogs.go:96-97
+            对空地址报 `victorialogs.addr is required`。
+            上游 fe（v9.1.0 与 ee48e701 的同文件 :36）没有 rules → 羚牛自修。 */}
+        <Form.Item label='HTTP' name={['settings', `${cate}.addr`]} rules={[{ required: true }]}>
           <Input autoComplete='off' placeholder='http://localhost:9428/' />
         </Form.Item>
         <Row gutter={SIZE * 2}>
@@ -48,7 +51,8 @@ export default function FormCpt({ action, data, onFinish, submitLoading }: any) 
             </Form.Item>
           </Col>
         </Row>
-        <BasicAuth cate={cate} />
+        {/* N33 批 A-4（B-5）：vl 的账号 / 口令后端要求成对（datasource/victorialogs/victorialogs.go:107-110） */}
+        <BasicAuth cate={cate} pairRequired />
         <Space className='mb-2'>
           <span>{t('form.skip_tls_verify')}</span>
           <Form.Item name={['settings', `${cate}.tls`, `${cate}.tls.skip_tls_verify`]} valuePropName='checked' noStyle>
