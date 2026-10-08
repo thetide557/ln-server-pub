@@ -12,7 +12,7 @@ export const CHART_COLORS = {
 export const TOOLTIP_STYLE = {
   backgroundColor: '#ffffff',
   borderColor: '#e3e9f0',
-  textStyle: { color: '#3d5270', fontSize: 12 },
+  textStyle: { color: '#3d5270', fontSize: 14 },
   padding: [6, 10] as [number, number],
   extraCssText: 'box-shadow: 0 2px 8px rgba(23, 55, 94, 0.14);',
 };

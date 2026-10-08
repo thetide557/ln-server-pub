@@ -1,39 +1,42 @@
-import React, { useMemo, useState } from 'react';
-import { Select } from 'antd';
-import { FundProjectionScreenOutlined } from '@ant-design/icons';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Button, message, Select, Spin } from 'antd';
+import { DownloadOutlined, FileZipOutlined, FundProjectionScreenOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
-import AllocationProgressPanel from './components/AllocationProgressPanel';
-import AllocationRateChart from './components/AllocationRateChart';
-import ChartCard from './components/ChartCard';
-import DetailTable from './components/DetailTable';
-import UnitCards from './components/UnitCards';
-import UsageCompareChart from './components/UsageCompareChart';
-import VcpuStackChart from './components/VcpuStackChart';
-import {
-  ALL,
-  ASSET_TYPES,
-  DIMENSIONS,
-  REGIONS,
-  SYSTEMS,
-  TENANTS,
-  buildOverview,
-  calcAllocationProgress,
-  calcAllocationRates,
-  calcDetailRows,
-  calcUnitCards,
-  calcZoneArchUsage,
-  filterUnits,
-} from './resourceAnalysisData';
+import { getResourceUnits } from '@/services/sxxc/healthReport';
+import type { CloudUnitRecord } from '@/services/sxxc/healthReport';
+import ReportBody from './components/ReportBody';
+import ReportExportHost from './components/ReportExportHost';
+import { ALL, buildFilterOptions, filterUnits } from './resourceAnalysisData';
 import type { FilterKey, ResourceFilters, SelectOption } from './resourceAnalysisData';
+import {
+  bundlePdfsToZip,
+  captureReportPdfBlob,
+  downloadPdf,
+  downloadZip,
+  sanitizeFileName,
+  sleep,
+} from './reportPdf';
 import './resourceAnalysis.less';
 
-/** 指标卡数值配色，浅底上保证对比度 */
-const METRIC_COLORS = ['#12b3a6', '#22b35c', '#1668dc', '#7e4ce0', '#d9822b'];
-/** 对比柱状图配色：总量 / 已分配 */
-const CPU_COLORS = { total: '#1668dc', allocated: '#3ba0f5', rest: '#a9d3f7' };
-const MEM_COLORS = { total: '#5b3fa8', allocated: '#8a63e0', rest: '#c7b6f5' };
+const withAllOption = (allLabel: string, list: string[]): SelectOption[] =>
+  [{ label: allLabel, value: ALL }].concat(list.map((item) => ({ label: item, value: item })));
 
-const withAllOption = (allLabel: string, list: string[]): SelectOption[] => [{ label: allLabel, value: ALL }].concat(list.map((item) => ({ label: item, value: item })));
+/** 等待浏览器完成两帧绘制（React 提交 + ECharts 初始化后的布局已稳定） */
+const waitForPaint = () =>
+  new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+
+/** ECharts 默认动画约 1s，导出前等待动画结束，避免截到半程动画 */
+const CHART_SETTLE_MS = 1300;
+
+const dateStamp = () => {
+  const now = new Date();
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+};
+
+type ExportingType = '' | 'current' | 'tenants';
 
 const ResourceAnalysis: React.FC = () => {
   const [filters, setFilters] = useState<ResourceFilters>({
@@ -41,17 +44,47 @@ const ResourceAnalysis: React.FC = () => {
     tenant: ALL,
     system: ALL,
     type: ALL,
-    dimension: 'region',
   });
+  const [allUnits, setAllUnits] = useState<CloudUnitRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState<ExportingType>('');
+  const [exportProgress, setExportProgress] = useState({ done: 0, total: 0 });
+  /** 离屏导出宿主当前渲染的租户数据 */
+  const [exportUnits, setExportUnits] = useState<CloudUnitRecord[]>([]);
+
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const exportBodyRef = useRef<HTMLDivElement>(null);
+
+  // 接口拉取上云单位资源明细，聚合口径全部在前端完成
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getResourceUnits()
+      .then((list) => {
+        if (!cancelled) setAllUnits(list);
+      })
+      .catch(() => {
+        // 全局请求拦截器已有错误提示，这里仅兜底为空数据
+        if (!cancelled) setAllUnits([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filterOptions = useMemo(() => buildFilterOptions(allUnits), [allUnits]);
 
   const options = useMemo(
     () => ({
-      region: withAllOption('全部区域', REGIONS),
-      tenant: withAllOption('全部租户', TENANTS),
-      system: withAllOption('全部业务系统', SYSTEMS),
-      type: withAllOption('全部资产类型', ASSET_TYPES),
+      region: withAllOption('全部区域', filterOptions.region),
+      tenant: withAllOption('全部租户', filterOptions.tenant),
+      system: withAllOption('全部业务系统', filterOptions.system),
+      type: withAllOption('全部资产类型', filterOptions.type),
     }),
-    [],
+    [filterOptions],
   );
 
   const filterItems: { key: FilterKey; label: string; options: SelectOption[] }[] = [
@@ -66,87 +99,112 @@ const ResourceAnalysis: React.FC = () => {
   };
 
   // 全部模块共用同一份筛选结果，保证与筛选栏联动
-  const units = useMemo(() => filterUnits(filters), [filters]);
-  const overview = useMemo(() => buildOverview(units), [units]);
-  const cpuUsage = useMemo(() => calcZoneArchUsage(units, 'cpu'), [units]);
-  const memUsage = useMemo(() => calcZoneArchUsage(units, 'mem'), [units]);
-  const allocationRates = useMemo(() => calcAllocationRates(units), [units]);
-  const allocationProgress = useMemo(() => calcAllocationProgress(units), [units]);
-  const detailRows = useMemo(() => calcDetailRows(units), [units]);
-  const unitCards = useMemo(() => calcUnitCards(units), [units]);
+  const units = useMemo(() => filterUnits(allUnits, filters), [allUnits, filters]);
 
-  const metrics = [
-    { key: 'unit', label: '上云单位', value: overview.unitCount, unit: '户', note: `含商用 ${overview.commercialUnitCount} 户` },
-    { key: 'server', label: '云服务器', value: overview.serverCount, unit: '台', note: overview.serverByCharge.map((item) => `${item.chargeType}${item.count}`).join(' / ') },
-    { key: 'cpu', label: 'vCPU配额', value: overview.cpuTotal, unit: '核', note: `分配率 ${overview.cpuAllocRate}%` },
-    { key: 'storage', label: '存储容量', value: overview.storageTotalGB, unit: 'GB', note: `约 ${overview.storageTotalTB} TB` },
-    { key: 'system', label: '业务系统', value: overview.systemCount, unit: '个', note: '已部署上线' },
-  ];
+  /** 导出当前页（按当前筛选条件所见内容）为 PDF */
+  const handleExportCurrent = async () => {
+    if (!bodyRef.current || units.length === 0) {
+      message.warning('当前没有可导出的数据');
+      return;
+    }
+    setExporting('current');
+    const hide = message.loading('正在生成 PDF，请稍候…', 0);
+    try {
+      const blob = await captureReportPdfBlob(bodyRef.current);
+      downloadPdf(blob, `资源分析报告_${dateStamp()}.pdf`);
+      message.success('当前页 PDF 已导出');
+    } catch (error) {
+      console.error(error);
+      message.error('PDF 导出失败，请重试');
+    } finally {
+      hide();
+      setExporting('');
+    }
+  };
+
+  /** 按租户逐个导出 PDF，并打包为一个 zip 文件夹下载 */
+  const handleExportByTenant = async () => {
+    if (units.length === 0) {
+      message.warning('当前没有可导出的数据');
+      return;
+    }
+    // 租户清单基于当前筛选结果，区域/业务系统/资产类型等条件同样生效
+    const tenantNames = Array.from(new Set(units.map((unit) => unit.name)));
+    setExporting('tenants');
+    setExportProgress({ done: 0, total: tenantNames.length });
+    message.loading({ content: `正在导出租户报告（0/${tenantNames.length}）…`, key: 'tenant-export', duration: 0 });
+    try {
+      const files: { name: string; blob: Blob }[] = [];
+      for (let i = 0; i < tenantNames.length; i += 1) {
+        const tenantName = tenantNames[i];
+        const tenantUnits = units.filter((unit) => unit.name === tenantName);
+        setExportUnits(tenantUnits);
+        await waitForPaint();
+        await sleep(CHART_SETTLE_MS);
+        if (!exportBodyRef.current) throw new Error('导出容器未就绪');
+
+        const blob = await captureReportPdfBlob(exportBodyRef.current);
+        files.push({ name: sanitizeFileName(`资源分析报告_${tenantName}.pdf`), blob });
+        setExportProgress({ done: i + 1, total: tenantNames.length });
+        message.loading({ content: `正在导出租户报告（${i + 1}/${tenantNames.length}）：${tenantName}`, key: 'tenant-export', duration: 0 });
+      }
+
+      const folderName = `租户资源分析报告_${dateStamp()}`;
+      const zipBlob = await bundlePdfsToZip(folderName, files);
+      downloadZip(zipBlob, `${folderName}.zip`);
+      message.success({ content: `已导出 ${tenantNames.length} 个租户的 PDF（打包为 zip）`, key: 'tenant-export' });
+    } catch (error) {
+      console.error(error);
+      message.error({ content: '租户 PDF 批量导出失败，请重试', key: 'tenant-export' });
+    } finally {
+      setExportUnits([]);
+      setExportProgress({ done: 0, total: 0 });
+      setExporting('');
+    }
+  };
+
+  const exportDisabled = exporting !== '' || loading || units.length === 0;
 
   return (
     <PageLayout icon={<FundProjectionScreenOutlined />} title={'资源分析'}>
-      <div className='resource-analysis'>
-        <section className='resource-analysis-filters'>
-          {filterItems.map((item) => (
-            <div className='filter-item' key={item.key}>
-              <label htmlFor={`resource-analysis-${item.key}`}>{item.label}</label>
-              <Select id={`resource-analysis-${item.key}`} value={filters[item.key]} options={item.options} onChange={handleFilterChange(item.key)} />
-            </div>
-          ))}
-          <div className='filter-item'>
-            <label htmlFor='resource-analysis-dimension'>汇总维度</label>
-            <Select
-              id='resource-analysis-dimension'
-              value={filters.dimension}
-              options={DIMENSIONS}
-              onChange={(value: string) => setFilters((prev) => ({ ...prev, dimension: value }))}
-            />
-          </div>
-        </section>
-
-        <section className='resource-analysis-overview'>
-          <h2 className='overview-title'>壹 核心指标概览</h2>
-          <div className='overview-cards'>
-            {metrics.map((metric, index) => (
-              <div className='overview-card' key={metric.key}>
-                <div className='overview-card-label'>{metric.label}</div>
-                <div className='overview-card-value' style={{ color: METRIC_COLORS[index] }}>
-                  {metric.value.toLocaleString('en-US')}
-                  <small>{metric.unit}</small>
+      <div className="resource-analysis">
+        <Spin spinning={loading}>
+          <div className="resource-analysis-body">
+            <section className="resource-analysis-filters">
+              {filterItems.map((item) => (
+                <div className="filter-item" key={item.key}>
+                  <label htmlFor={`resource-analysis-${item.key}`}>{item.label}</label>
+                  <Select
+                    id={`resource-analysis-${item.key}`}
+                    value={filters[item.key]}
+                    options={item.options}
+                    onChange={handleFilterChange(item.key)}
+                  />
                 </div>
-                <div className='overview-card-note'>{metric.note}</div>
+              ))}
+              <div className="export-actions">
+                <Button icon={<DownloadOutlined />} onClick={handleExportCurrent} loading={exporting === 'current'} disabled={exportDisabled}>
+                  导出当前页
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<FileZipOutlined />}
+                  onClick={handleExportByTenant}
+                  loading={exporting === 'tenants'}
+                  disabled={exportDisabled}
+                >
+                  {exporting === 'tenants' && exportProgress.total > 0
+                    ? `按租户导出（${exportProgress.done}/${exportProgress.total}）`
+                    : '按租户导出'}
+                </Button>
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
 
-        <section className='report-section'>
-          <h2 className='section-title'>贰 资源使用情况</h2>
-          <div className='chart-grid chart-grid--2'>
-            <UsageCompareChart title='vCPU 总量与已分配对比' unit='核' data={cpuUsage} totalColor={CPU_COLORS.total} allocatedColor={CPU_COLORS.allocated} />
-            <UsageCompareChart title='内存总量与已分配对比' unit='GB' data={memUsage} totalColor={MEM_COLORS.total} allocatedColor={MEM_COLORS.allocated} />
+            <ReportBody ref={bodyRef} units={units} />
           </div>
-          <div className='chart-grid chart-grid--1'>
-            <AllocationRateChart data={allocationRates} />
-          </div>
-          <div className='chart-grid chart-grid--2'>
-            <VcpuStackChart title='vCPU 堆叠分布（已分配 / 剩余）' unit='核' data={cpuUsage} allocatedColor={CPU_COLORS.allocated} restColor={CPU_COLORS.rest} />
-            <AllocationProgressPanel title='存储分配进度' data={allocationProgress} />
-          </div>
-        </section>
-
-        <section className='report-section'>
-          <h2 className='section-title'>三、资源使用情况明细表（含云外部署）</h2>
-          <ChartCard title='资源使用情况明细'>
-            <DetailTable rows={detailRows} />
-          </ChartCard>
-        </section>
-
-        <section className='report-section'>
-          <h2 className='section-title'>上云单位资源明细</h2>
-          <UnitCards data={unitCards} />
-        </section>
+        </Spin>
       </div>
+      <ReportExportHost units={exportUnits} bodyRef={exportBodyRef} />
     </PageLayout>
   );
 };

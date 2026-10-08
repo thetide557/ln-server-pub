@@ -30,7 +30,7 @@ const VcpuStackChart: React.FC<VcpuStackChartProps> = ({ title, unit, data, allo
         itemWidth: 10,
         itemHeight: 10,
         itemGap: 16,
-        textStyle: { color: CHART_COLORS.legendText, fontSize: 11 },
+        textStyle: { color: CHART_COLORS.legendText, fontSize: 13 },
       },
       tooltip: {
         trigger: 'axis',
@@ -43,32 +43,32 @@ const VcpuStackChart: React.FC<VcpuStackChartProps> = ({ title, unit, data, allo
         data: data.map((item) => item.label),
         axisLine: { lineStyle: { color: CHART_COLORS.axisLine } },
         axisTick: { show: false },
-        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11 },
+        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 13 },
       },
       yAxis: {
         type: 'value',
         name: unit,
-        nameTextStyle: { color: CHART_COLORS.axisLabel, fontSize: 11, padding: [0, 0, 4, -28] },
+        nameTextStyle: { color: CHART_COLORS.axisLabel, fontSize: 13, padding: [0, 0, 4, -28] },
         splitLine: { lineStyle: { color: CHART_COLORS.splitLine } },
-        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, formatter: (value: number) => formatChartNumber(value) },
+        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 13, formatter: (value: number) => formatChartNumber(value) },
       },
       series: [
         {
           name: '已分配',
           type: 'bar',
           stack: 'quota',
-          barWidth: 18,
+          barWidth: 24,
           itemStyle: { color: allocatedColor },
-          label: { show: true, position: 'inside', color: '#ffffff', fontSize: 10, formatter: (params: any) => formatChartNumber(params.value) },
+          label: { show: true, position: 'inside', color: '#ffffff', fontSize: 12, formatter: (params: any) => formatChartNumber(params.value) },
           data: data.map((item) => item.allocated),
         },
         {
           name: '剩余',
           type: 'bar',
           stack: 'quota',
-          barWidth: 18,
+          barWidth: 24,
           itemStyle: { color: restColor },
-          label: { show: true, position: 'inside', color: '#3d5270', fontSize: 10, formatter: (params: any) => formatChartNumber(params.value) },
+          label: { show: true, position: 'inside', color: '#3d5270', fontSize: 12, formatter: (params: any) => formatChartNumber(params.value) },
           data: rest,
         },
       ],
@@ -76,7 +76,7 @@ const VcpuStackChart: React.FC<VcpuStackChartProps> = ({ title, unit, data, allo
   }, [data, unit, allocatedColor, restColor]);
 
   return (
-    <ChartCard title={title}>
+    <ChartCard title={title} className="chart-fill-height">
       <EChart option={option} height={270} />
     </ChartCard>
   );

@@ -30,7 +30,7 @@ const AllocationRateChart: React.FC<AllocationRateChartProps> = ({ data }) => {
         splitLine: { lineStyle: { color: CHART_COLORS.splitLine } },
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11, formatter: '{value}%' },
+        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 13, formatter: '{value}%' },
       },
       yAxis: {
         type: 'category',
@@ -38,14 +38,15 @@ const AllocationRateChart: React.FC<AllocationRateChartProps> = ({ data }) => {
         data: data.map((item) => item.label),
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 11 },
+        axisLabel: { color: CHART_COLORS.axisLabel, fontSize: 13 },
       },
       series: [
         {
           type: 'bar',
-          barWidth: 10,
-          label: { show: true, position: 'right', color: CHART_COLORS.valueLabel, fontSize: 11, formatter: '{c}%' },
-          data: data.map((item) => ({ value: item.rate, itemStyle: { color: rateColor(item.rate), borderRadius: 5 } })),
+          barWidth: 16,
+          barCategoryGap: '40%',
+          label: { show: true, position: 'right', color: CHART_COLORS.valueLabel, fontSize: 13, formatter: '{c}%' },
+          data: data.map((item) => ({ value: item.rate, itemStyle: { color: rateColor(item.rate), borderRadius: 6 } })),
         },
       ],
     }),
@@ -54,7 +55,7 @@ const AllocationRateChart: React.FC<AllocationRateChartProps> = ({ data }) => {
 
   return (
     <ChartCard title='各资源池分配率'>
-      <EChart option={option} height={Math.max(320, data.length * 26 + 62)} />
+      <EChart option={option} height={Math.max(320, data.length * 38 + 62)} />
       <div className='rate-legend'>
         <span>低</span>
         <i />

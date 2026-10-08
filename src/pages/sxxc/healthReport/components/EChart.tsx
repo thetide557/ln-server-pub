@@ -16,8 +16,12 @@ const EChart: React.FC<EChartProps> = ({ option, height = 260 }) => {
     const chart = echarts.init(containerRef.current);
     chartRef.current = chart;
     const handleResize = () => chart.resize();
+    // 数据异步到达后容器高度可能变化（如动态高度的条形图），需同步 resize 画布
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(containerRef.current);
     window.addEventListener('resize', handleResize);
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
       chart.dispose();
       chartRef.current = null;

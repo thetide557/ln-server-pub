@@ -1,6 +1,9 @@
 .resource-analysis {
+  // 占满标题区之外的剩余高度并自行滚动，避免溢出到父元素
+  flex: 1 1 0%;
+  min-height: 0;
   padding: 12px 18px 18px;
-  min-height: 100%;
+  overflow-y: auto;
 }
 
 .resource-analysis-filters {
@@ -18,7 +21,7 @@
 
     label {
       display: block;
-      font-size: 12px;
+      font-size: 14px;
       color: #71839b;
     }
 
@@ -43,20 +46,29 @@
     line-height: 32px;
     color: #3d5270;
   }
+
+  .export-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    padding-bottom: 0;
+  }
 }
 
 .resource-analysis-overview {
-  margin-top: 18px;
+  margin: 20px 0;
+  padding: 4px 10px 10px;
+  border-radius: 10px;
 
   .overview-title {
     position: relative;
     display: flex;
     align-items: center;
-    margin: 0 0 14px;
+    margin: 4px 0 18px;
     padding-left: 12px;
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 600;
-    line-height: 20px;
+    line-height: 22px;
     color: #17375e;
 
     &::before {
@@ -65,7 +77,7 @@
       left: 0;
       top: 1px;
       width: 4px;
-      height: 18px;
+      height: 20px;
       border-radius: 2px;
       background: linear-gradient(180deg, #56a8ff, #1668dc);
     }
@@ -87,43 +99,45 @@
   }
 
   .overview-card-label {
-    font-size: 12px;
+    font-size: 14px;
     color: #6b7a90;
   }
 
   .overview-card-value {
     margin-top: 10px;
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 700;
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
 
     small {
       margin-left: 5px;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 400;
     }
   }
 
   .overview-card-note {
     margin-top: 9px;
-    font-size: 11px;
+    font-size: 13px;
     color: #8a97a8;
   }
 }
 
 .report-section {
-  margin-top: 22px;
+  margin: 20px  0;
+  padding: 4px 10px 10px;
+  border-radius: 10px;
 
   .section-title {
     position: relative;
     display: flex;
     align-items: center;
-    margin: 0 0 14px;
+    margin: 4px 0 18px;
     padding-left: 12px;
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 600;
-    line-height: 20px;
+    line-height: 22px;
     color: #17375e;
 
     &::before {
@@ -132,7 +146,7 @@
       left: 0;
       top: 1px;
       width: 4px;
-      height: 18px;
+      height: 20px;
       border-radius: 2px;
       background: linear-gradient(180deg, #56a8ff, #1668dc);
     }
@@ -151,6 +165,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  &.chart-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   & + .chart-grid {
     margin-top: 12px;
   }
@@ -167,9 +185,9 @@
     position: relative;
     margin: 0 0 12px;
     padding-left: 10px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
-    line-height: 16px;
+    line-height: 20px;
     color: #17375e;
 
     &::before {
@@ -178,7 +196,7 @@
       left: 0;
       top: 1px;
       width: 3px;
-      height: 14px;
+      height: 16px;
       border-radius: 2px;
       background: linear-gradient(180deg, #56a8ff, #1668dc);
     }
@@ -191,7 +209,7 @@
   justify-content: center;
   gap: 8px;
   margin-top: 6px;
-  font-size: 11px;
+  font-size: 13px;
   color: #8a97a8;
 
   i {
@@ -218,33 +236,33 @@
   }
 
   .progress-item-label {
-    font-size: 12px;
+    font-size: 14px;
     color: #6b7a90;
   }
 
   .progress-item-rate {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
 
   .progress-item-track {
-    height: 6px;
+    height: 12px;
     margin-top: 6px;
-    border-radius: 3px;
+    border-radius: 6px;
     background: #edf1f6;
     overflow: hidden;
 
     i {
       display: block;
       height: 100%;
-      border-radius: 3px;
+      border-radius: 6px;
     }
   }
 
   .progress-item-note {
     margin-top: 6px;
-    font-size: 11px;
+    font-size: 13px;
     color: #8a97a8;
   }
 }
@@ -257,7 +275,7 @@
   width: 100%;
   min-width: 960px;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
   color: #3d5270;
   font-variant-numeric: tabular-nums;
 
@@ -305,7 +323,7 @@
     i {
       display: inline-block;
       width: 4px;
-      height: 14px;
+      height: 16px;
       margin-right: 8px;
       vertical-align: -2px;
       border-radius: 2px;
@@ -325,7 +343,7 @@
   border-radius: 0 4px 4px 0;
   border-left: 3px solid #1668dc;
   background: rgba(22, 104, 220, 0.06);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   color: #5a6a80;
 }
@@ -351,7 +369,7 @@
   }
 
   .unit-card-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #17375e;
   }
@@ -360,7 +378,7 @@
     flex: none;
     padding: 1px 7px;
     border-radius: 3px;
-    font-size: 11px;
+    font-size: 13px;
 
     &.unit-card-tag--commercial {
       color: #1668dc;
@@ -394,19 +412,19 @@
     }
 
     span {
-      font-size: 12px;
+      font-size: 14px;
       color: #7b8899;
     }
 
     b {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 600;
       color: #2b3a4d;
       font-variant-numeric: tabular-nums;
 
       small {
         margin-left: 3px;
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 400;
         color: #96a1b1;
       }
@@ -424,11 +442,16 @@
   }
 
   .resource-analysis-overview .overview-card-value {
-    font-size: 24px;
+    font-size: 26px;
   }
 
-  .chart-grid.chart-grid--2 {
+  .chart-grid.chart-grid--2,
+  .chart-grid.chart-grid--3 {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .resource-analysis-filters .export-actions {
+    margin-left: 0;
   }
 
   .unit-cards {
@@ -455,5 +478,29 @@
       min-width: 0;
       width: 100%;
     }
+  }
+}
+
+/* PDF 离屏导出宿主：移出可视区域但保持真实布局，ECharts 才能正常初始化画布 */
+.report-export-host {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 1200px;
+  padding: 12px 18px 18px;
+  background: #ffffff;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 图表卡片填充高度：让 EChart 自动撑满卡片剩余空间，与同行的兄弟元素等高 */
+.chart-fill-height {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  > div {
+    flex: 1 1 auto;
+    min-height: 0;
   }
 }
