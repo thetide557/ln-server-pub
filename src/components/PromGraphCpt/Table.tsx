@@ -20,6 +20,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import { Input, DatePicker, List, Space } from 'antd';
 import { getPromData } from './services';
+import type { QueryRequest } from '@/components/AiQueryDock/usePendingQuery';
 import { QueryStats } from './components/QueryStatsView';
 
 interface IProps {
@@ -32,6 +33,15 @@ interface IProps {
   timestamp?: number;
   setTimestamp: (timestamp?: number) => void;
   refreshFlag: string;
+  /**
+   * N36 批 E：这一次取数是谁要的。停靠栏按下「执行」时由 `usePendingQuery.begin()` 造出来，
+   * 取数这边**必须**显式调它的 `complete(...)` 才算结束——停靠栏那边的 promise 就靠它 resolve。
+   * 不能拿 `setQueryStats` / `setErrorContent` 被调到当完成信号：那样一条慢查询的响应回来时，
+   * 会去应答后一条请求（上游在 `usePendingQuery.ts:8-16` 的注释里说明了这一点）。
+   */
+  queryRequest?: QueryRequest;
+  /** 真时不取数：停靠栏刚把语句填进框、还没按「执行」的那段时间。 */
+  queryPaused?: boolean;
 }
 type ResultType = 'matrix' | 'vector' | 'scalar' | 'string' | 'streams';
 
@@ -91,7 +101,7 @@ function getListItemValue(resultType, record) {
 }
 
 export default function Table(props: IProps) {
-  const { url, datasourceValue, promql, setQueryStats, setErrorContent, contentMaxHeight, timestamp, setTimestamp, refreshFlag } = props;
+  const { url, datasourceValue, promql, setQueryStats, setErrorContent, contentMaxHeight, timestamp, setTimestamp, refreshFlag, queryRequest, queryPaused } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<{
     resultType: ResultType;
@@ -102,16 +112,37 @@ export default function Table(props: IProps) {
   });
 
   useEffect(() => {
+    // N36 批 E：这一帧的 `queryRequest` 当场抓进局部常量，后面只认它。
+    // 这就是「谁发的请求谁来结」：同一个对象只会被它所在那一次 effect 捕获，
+    // 后一次 `begin()` 会先把前一个 abort 掉（`usePendingQuery.ts:33`），
+    // 所以前一条慢响应回来时它的 `complete` 早已结了、应答不到后一条请求。
+    const request = queryRequest;
+    if (queryPaused || request?.signal.aborted) return;
     if (datasourceValue && promql) {
+      // 这一轮自己的 controller：用来真的掐断 HTTP 请求；外面要停时通过 request.signal 转进来。
+      const controller = new AbortController();
+      let settled = false;
+      const abort = () => {
+        controller.abort();
+        setIsLoading(false);
+        if (!settled) request?.complete(new DOMException('Query stopped', 'AbortError'));
+      };
+      request?.signal.addEventListener('abort', abort, { once: true });
       const queryStart = Date.now();
       setIsLoading(true);
-      getPromData(`${url}/${datasourceValue}/api/v1/query`, {
-        time: timestamp || moment().unix(),
-        query: promql,
-      })
+      getPromData(
+        `${url}/${datasourceValue}/api/v1/query`,
+        {
+          time: timestamp || moment().unix(),
+          query: promql,
+        },
+        controller.signal,
+      )
         .then((res) => {
+          if (controller.signal.aborted) return;
           const { resultType } = res;
           let { result } = res;
+          const empty = !result || result.length === 0;
           let tooLong = false;
           let maxLength = 0;
           if (result) {
@@ -144,16 +175,26 @@ export default function Table(props: IProps) {
             loadTime: Date.now() - queryStart,
             resultSeries: result.length,
           });
+          settled = true;
+          request?.complete({ empty, count: result.length });
         })
         .catch((err) => {
+          if (controller.signal.aborted) return;
           const msg = _.get(err, 'message');
           setErrorContent(`Error executing query: ${msg}`);
+          settled = true;
+          request?.complete(err instanceof Error ? err : new Error(String(msg || err)));
         })
         .finally(() => {
+          if (controller.signal.aborted) return;
           setIsLoading(false);
         });
+      return () => {
+        request?.signal.removeEventListener('abort', abort);
+        abort();
+      };
     }
-  }, [timestamp, datasourceValue, promql, refreshFlag]);
+  }, [timestamp, datasourceValue, promql, refreshFlag, queryRequest, queryPaused]);
 
   return (
     <div className='prom-graph-table-container'>

@@ -25,6 +25,7 @@ import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
 import { completeBreakpoints } from '@/pages/dashboard/Renderer/datasource/utils';
 import { CommonStateContext } from '@/App';
 import { getPromData, setTmpChartData } from './services';
+import type { QueryRequest } from '@/components/AiQueryDock/usePendingQuery';
 import { QueryStats } from './components/QueryStatsView';
 import { useLocation } from 'react-router-dom';
 import { queryStringOptions } from '@/pages/explorer/constants';
@@ -45,6 +46,15 @@ interface IProps {
     enabled: boolean;
   };
   refreshFlag: string;
+  /**
+   * N36 批 E：这一次取数是谁要的。停靠栏按下「执行」时由 `usePendingQuery.begin()` 造出来，
+   * 取数这边**必须**显式调它的 `complete(...)` 才算结束——停靠栏那边的 promise 就靠它 resolve。
+   * 不能拿 `setQueryStats` / `setErrorContent` 被调到当完成信号：那样一条慢查询的响应回来时，
+   * 会去应答后一条请求（上游在 `usePendingQuery.ts:8-16` 的注释里说明了这一点）。
+   */
+  queryRequest?: QueryRequest;
+  /** 真时不取数：停靠栏刚把语句填进框、还没按「执行」的那段时间。 */
+  queryPaused?: boolean;
 }
 
 enum ChartType {
@@ -65,7 +75,22 @@ const getSerieName = (metric: any) => {
 
 export default function Graph(props: IProps) {
   const { datasourceList } = useContext(CommonStateContext);
-  const { url, datasourceValue, promql, setQueryStats, setErrorContent, contentMaxHeight, range, setRange, step, setStep, graphOperates, refreshFlag } = props;
+  const {
+    url,
+    datasourceValue,
+    promql,
+    setQueryStats,
+    setErrorContent,
+    contentMaxHeight,
+    range,
+    setRange,
+    step,
+    setStep,
+    graphOperates,
+    refreshFlag,
+    queryRequest,
+    queryPaused,
+  } = props;
   const [data, setData] = useState<any[]>([]);
   const [highLevelConfig, setHighLevelConfig] = useState({
     shared: true,
@@ -105,6 +130,12 @@ export default function Graph(props: IProps) {
   const isInitialRender = useRef(true);
 
   useEffect(() => {
+    // N36 批 E：这一帧的 `queryRequest` 当场抓进局部常量，后面只认它（和 Table.tsx 同款）。
+    // 「谁发的请求谁来结」：同一个对象只会被它所在那一次 effect 捕获，后一次 `begin()`
+    // 会先把前一个 abort 掉（`usePendingQuery.ts:33`），所以前一条慢响应回来时它的
+    // `complete` 早已结了、应答不到后一条请求。
+    const request = queryRequest;
+    if (queryPaused || request?.signal.aborted) return;
     if (datasourceValue && promql) {
       // console.log("useEffect----range", range);
       const parsedRange = parseRange(range);
@@ -114,71 +145,73 @@ export default function Graph(props: IProps) {
       if (!step) realStep = Math.max(Math.floor((end - start) / 240), 1);
       const queryStart = Date.now();
       // console.log("query参数",query)
-      if(query.prom_ql){
-        if (!isInitialRender.current) {
-          // console.log("执行查询",range)
-          getPromData(`${url}/${datasourceValue}/api/v1/query_range`, {
-            query: promql,
-            start: moment(parsedRange.start).unix(),
-            end: moment(parsedRange.end).unix(),
-            step: realStep,
-          })
-            .then((res) => {
-              const series = _.map(res?.result, (item) => {
-                return {
-                  id: _.uniqueId('series_'),
-                  name: getSerieName(item.metric),
-                  metric: item.metric,
-                  data: completeBreakpoints(realStep, item.values),
-                };
-              });
-              setQueryStats({
-                loadTime: Date.now() - queryStart,
-                resolution: step,
-                resultSeries: series.length,
-              });
-
-              setData(series);
-            })
-            .catch((err) => {
-              const msg = _.get(err, 'message');
-              setErrorContent(`Error executing query: ${msg}`);
-            });
-        }
+      // 羚牛自改：URL 里带 prom_ql 时，本实例第一次跑这个 effect 不取数（原来的两个分支里
+      // 那句「初次渲染不做查询」）。先把「这一轮到底取不取数」算出来，原行为一字不改；
+      // 这样下面的取数只写一遍，请求绑定也只接一处。
+      const willFetch = !query.prom_ql || !isInitialRender.current;
+      if (query.prom_ql) {
         // 初次渲染不做查询
-        isInitialRender.current = false;
-      }else{
-        // console.log("执行查询",range)
-        getPromData(`${url}/${datasourceValue}/api/v1/query_range`, {
+        isInitialRender.current = false;
+      }
+      if (!willFetch) {
+        // 正常首屏时 `request` 是 undefined，这里是空操作。只有「停靠栏按了执行、偏巧撞上这个
+        // 不取数的分支」那种病态时序才会走到：宁可把它拒掉，也不能让停靠栏一直挂着
+        // （任务书尺子 4）。原由见 `n36/拿不准-E.md` U-N36-E-5。
+        request?.complete(new Error('The chart skipped this run (first render with prom_ql in the URL)'));
+        return;
+      }
+      // 这一轮自己的 controller：用来真的掐断 HTTP 请求；外面要停时通过 request.signal 转进来。
+      const controller = new AbortController();
+      let settled = false;
+      const abort = () => {
+        controller.abort();
+        if (!settled) request?.complete(new DOMException('Query stopped', 'AbortError'));
+      };
+      request?.signal.addEventListener('abort', abort, { once: true });
+      // console.log("执行查询",range)
+      getPromData(
+        `${url}/${datasourceValue}/api/v1/query_range`,
+        {
           query: promql,
           start: moment(parsedRange.start).unix(),
           end: moment(parsedRange.end).unix(),
           step: realStep,
-        })
-          .then((res) => {
-            const series = _.map(res?.result, (item) => {
-              return {
-                id: _.uniqueId('series_'),
-                name: getSerieName(item.metric),
-                metric: item.metric,
-                data: completeBreakpoints(realStep, item.values),
-              };
-            });
-            setQueryStats({
-              loadTime: Date.now() - queryStart,
-              resolution: step,
-              resultSeries: series.length,
-            });
-  
-            setData(series);
-          })
-          .catch((err) => {
-            const msg = _.get(err, 'message');
-            setErrorContent(`Error executing query: ${msg}`);
+        },
+        controller.signal,
+      )
+        .then((res) => {
+          if (controller.signal.aborted) return;
+          const series = _.map(res?.result, (item) => {
+            return {
+              id: _.uniqueId('series_'),
+              name: getSerieName(item.metric),
+              metric: item.metric,
+              data: completeBreakpoints(realStep, item.values),
+            };
           });
-      }
+          setQueryStats({
+            loadTime: Date.now() - queryStart,
+            resolution: step,
+            resultSeries: series.length,
+          });
+
+          setData(series);
+          settled = true;
+          request?.complete({ empty: series.length === 0, count: series.length });
+        })
+        .catch((err) => {
+          if (controller.signal.aborted) return;
+          const msg = _.get(err, 'message');
+          setErrorContent(`Error executing query: ${msg}`);
+          settled = true;
+          request?.complete(err instanceof Error ? err : new Error(String(msg || err)));
+        });
+      return () => {
+        request?.signal.removeEventListener('abort', abort);
+        abort();
+      };
     }
-  }, [JSON.stringify(range), step, datasourceValue, promql, refreshFlag]);
+  }, [JSON.stringify(range), step, datasourceValue, promql, refreshFlag, queryRequest, queryPaused]);
 
   return (
     <div className='prom-graph-graph-container'>
