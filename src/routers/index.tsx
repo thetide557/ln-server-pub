@@ -218,6 +218,7 @@ export default function Content() {
         <Route exact path='/alert-orderform-events/:eventId' component={orderformDetail} />
         <Route exact path='/alert-cur-events/:eventId' component={EventDetail} />
         <Route exact path='/alert-his-events/:eventId' component={EventDetail} />
+        <Route exact path='/alert-his-events-shanshu/:eventId' component={EventDetail} />
         <Route exact path='/targets' component={Targets} />
 
         <Route exact path='/assetmgt' component={AssetMgt} />

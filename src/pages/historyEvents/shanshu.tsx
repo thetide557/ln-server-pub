@@ -35,6 +35,7 @@ import './locale';
 import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
 import { useLocalStorage } from 'react-use';
 import TimeRangePicker, { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
+import { getHistoryEventsById } from '@/services/warning';
 
 const { RangePicker } = DatePicker;
 export const getDefaultHours = () => {
@@ -117,12 +118,21 @@ const Event: React.FC = () => {
     {
       title: '告警规则名称',
       dataIndex: 'rule_name',
-      width: 150,
+      width: 120,
       ellipsis: true,
       render(title, { id, tags }) {
         return (
           <>
-            <Link to={`/alert-his-events/${id}?from=history`}>{title}</Link>
+            <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={() => {
+              getHistoryEventsById(id)
+                .then((res) => {
+                  history.push(`/alert-his-events-shanshu/${id}?from=history`);
+                }).catch(_ => {
+                })
+            }}>
+              {title}
+            </div>
+            {/* <Link to={`/alert-his-events-shanshu/${id}?from=history`}>{title}</Link> */}
           </>
         );
       },
@@ -136,18 +146,18 @@ const Event: React.FC = () => {
       width: 100,
       align: 'center',
       ellipsis: true,
-      render(name, record, index) {
-        return (
-          <div
-            style={{ color: '#2B7EE5', cursor: 'pointer' }}
-            onClick={(e) => {
-              history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`);
-            }}
-          >
-            {name}
-          </div>
-        );
-      },
+      // render(name, record, index) {
+      //   return (
+      //     <div
+      //       style={{ color: '#2B7EE5', cursor: 'pointer' }}
+      //       onClick={(e) => {
+      //         history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`);
+      //       }}
+      //     >
+      //       {name}
+      //     </div>
+      //   );
+      // },
       sorter: (a, b) => {
         return a.asset_name.localeCompare(b.asset_name);
       },
@@ -157,18 +167,18 @@ const Event: React.FC = () => {
       dataIndex: 'asset_ip',
       width: 100,
       align: 'center',
-      render(name, record, index) {
-        return (
-          <div
-            style={{ color: '#2B7EE5', cursor: 'pointer' }}
-            onClick={(e) => {
-              history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`);
-            }}
-          >
-            {name}
-          </div>
-        );
-      },
+      // render(name, record, index) {
+      //   return (
+      //     <div
+      //       style={{ color: '#2B7EE5', cursor: 'pointer' }}
+      //       onClick={(e) => {
+      //         history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`);
+      //       }}
+      //     >
+      //       {name}
+      //     </div>
+      //   );
+      // },
       sorter: (a, b) => {
         return a.asset_ip.localeCompare(b.asset_ip);
       },
@@ -176,7 +186,7 @@ const Event: React.FC = () => {
     {
       title: '告警规则',
       dataIndex: 'rule_config_cn',
-      width: 180,
+      width: 150,
       align: 'center',
       render: (value) => {
         return value;
@@ -252,7 +262,11 @@ const Event: React.FC = () => {
               (profile.roles?.includes("Admin") || permList.includes("/alert-his-events/detail")) && <FileSearchOutlined
                 title='详情'
                 onClick={() => {
-                  history.push(`/alert-his-events/${record.id}?from=history`);
+                  getHistoryEventsById(record.id)
+                    .then((res) => {
+                      history.push(`/alert-his-events-shanshu/${record.id}?from=history`);
+                    }).catch(_ => {
+                    })
                 }}
               />
             }

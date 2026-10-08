@@ -77,7 +77,8 @@ const EventDetailPage: React.FC = () => {
     }
   };
   const history = useHistory();
-  const isHistory = history.location.pathname.includes('alert-his-events');
+  const isHistory = history.location.pathname.includes('alert-his-events') || history.location.pathname.includes('alert-his-events-shanshu');
+  const isShanshuRoute = history.location.pathname.includes('alert-his-events-shanshu');
   const [eventDetail, setEventDetail] = useState<any>();
   if (eventDetail) eventDetail.cate = eventDetail.cate || 'prometheus'; // TODO: 兼容历史的告警事件
   const parsedEventDetail = parseValues(eventDetail);
@@ -261,7 +262,7 @@ const EventDetailPage: React.FC = () => {
     return (
       <span style={{ lineHeight: '1.8', display: 'flex', alignItems: 'center' }}>
         {sentence || '-'}
-        {renderReplayBtn()}
+        { !isShanshuRoute && renderReplayBtn()}
       </span>
     );
   };
@@ -273,7 +274,7 @@ const EventDetailPage: React.FC = () => {
       render(content, { rule_id, asset_name }) {
         const displayName = asset_name ? `[${asset_name}] ${content}` : content;
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
+          !isShanshuRoute && history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
         }}>{displayName}</div>;
       },
     },
@@ -296,7 +297,7 @@ const EventDetailPage: React.FC = () => {
       align: 'center',
       render: (asset_name, { asset_id }) => {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
+          !isShanshuRoute &&history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
         }}>{asset_name}</div>;
       },
     },
@@ -306,7 +307,7 @@ const EventDetailPage: React.FC = () => {
       align: 'center',
       render: (asset_ip, { asset_id }) => {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
+          !isShanshuRoute && history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
         }}>{asset_ip}</div>;
       },
     },
@@ -315,7 +316,7 @@ const EventDetailPage: React.FC = () => {
       key: 'group_name',
       render(content, { group_id }) {
         return (
-          <Button size='small' type='link' className='rule-link-btn' onClick={() => handleNavToWarningList(group_id)}>
+          <Button size='small' type='link' className='rule-link-btn' onClick={() => !isShanshuRoute && handleNavToWarningList(group_id)}>
             {content}
           </Button>
         );

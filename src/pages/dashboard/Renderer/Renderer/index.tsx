@@ -189,7 +189,7 @@ function index(props: IProps) {
             ) : null}
             {values.type === 'barGauge' && values.custom?.showTopN && onTopNChange && (
               <div style={{ marginLeft: 18, display: 'flex', alignItems: 'center' }}>
-                <span>Top </span>
+                <span>Top&nbsp;</span>
                 <Select
                   size='small'
                   value={values.custom?.topN ?? 0}
