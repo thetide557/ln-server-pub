@@ -18,7 +18,7 @@
  * 类似 prometheus graph 的组件
  */
 import React, { useState, useRef, useEffect, useLayoutEffect, useContext } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, unstable_batchedUpdates } from 'react-dom';
 import { Input, Tabs, Button, Alert, Checkbox, Space } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import _ from 'lodash';
@@ -79,6 +79,25 @@ export interface PromGraphSnapshot extends QueryDockSnapshot {
 }
 
 export type PromGraphControl = QueryDockControl<PromGraphSnapshot>;
+
+/**
+ * 垫片（N36 批 E 修复轮）· 把紧挨着的几次 setState 圈进同一帧。
+ *
+ * 为什么要它：上游 fe 跑在 React 18 上，React 18 不管在哪儿调 setState 都会自动合批，
+ * 所以上游写「开一次运行 + 刷新查询」时可以直接连着调几次 setState、取数那边在同一帧里
+ * 同时看到新请求和新查询串。羚牛这个仓库是 React 17.0.2（`package.json`，入口
+ * `src/main.tsx:23` 是 legacy 的 `ReactDOM.render`），**只在 React 事件处理函数里合批**；
+ * 而 AI 停靠栏是在两个 `await` 之后调 control 的（`src/components/AiQueryDock/useQueryDockActions.ts:208,216`），
+ * 那是一个 microtask，不在任何合批上下文里。不圈这一帧，几次 setState 就是几次独立渲染，
+ * 取数 effect 会在「新请求已到、已提交查询还是上一条」的中间帧先发一条旧查询，
+ * 紧接着下一次渲染的 cleanup 又把本轮运行结成 `AbortError`。
+ *
+ * `unstable_batchedUpdates` 是 React 17 自带的（`act()` 内部用的就是它），不是第三方东西。
+ * **删除条件**：仓库升到 React 18 并改用 `createRoot` 之后，这个别名和下面三处 `batchOneFrame(...)`
+ * 一起删掉即可，语义回到上游原样。
+ * 出处：`第六步-流水线/n36/审阅/verdict-E.md` 第三节 P-1；登记在 `第六步-流水线/垫片清单-2026-10-07.md`。
+ */
+const batchOneFrame = unstable_batchedUpdates;
 
 const TabPane = Tabs.TabPane;
 
@@ -296,10 +315,14 @@ export default function index(props: IProps) {
       }),
       revision: () => revisionRef.current,
       fill: (next, nextRange) => {
-        pending.abort();
-        setQueryPaused(true);
-        change(next);
-        if (nextRange) updateRange(nextRange);
+        // batchOneFrame：见下面 run() 上方那段说明——停靠栏是在 await 之后调这些回调的，
+        // React 17 在那种位置不会自己合批，所以必须自己圈一帧。
+        batchOneFrame(() => {
+          pending.abort();
+          setQueryPaused(true);
+          change(next);
+          if (nextRange) updateRange(nextRange);
+        });
       },
       run: ({ signal } = {}) => {
         if (!valueRef.current?.trim() || !datasourceValue) return Promise.reject(new Error('A query and data source are required'));
@@ -311,23 +334,35 @@ export default function index(props: IProps) {
           return Promise.reject(new Error('No result panel is available to run this query'));
         }
         // 开一次运行和把它发出去要放在同一块里，取数那边才能在同一帧里同时拿到请求和刷新标记。
-        const result = pending.begin(signal);
-        setQueryPaused(false);
-        submit(valueRef.current);
-        return result;
+        // 「同一帧」在羚牛要自己圈：上游是 React 18、自动合批；羚牛是 React 17，只在 React
+        // 事件处理函数里合批，而停靠栏调 run() 的位置在两个 await 之后（`useQueryDockActions.ts:216`），
+        // 是一个 microtask、不在任何合批上下文里。不圈的话这三次 setState 变成三次独立渲染，
+        // 取数 effect 会在「新请求已到、已提交查询还是上一条」的中间帧先发一条旧查询，
+        // 紧接着下一次渲染的 cleanup 又把本轮结成 AbortError。见 `n36/审阅/verdict-E.md` P-1。
+        let result: ReturnType<typeof pending.begin> | undefined;
+        batchOneFrame(() => {
+          result = pending.begin(signal);
+          setQueryPaused(false);
+          submit(valueRef.current);
+        });
+        // begin() 是同步返回 promise 的（`usePendingQuery.ts:32-53`），所以出了这一帧它一定已经赋值
+        return result!;
       },
       restore: (snapshot) => {
-        pending.clear();
-        setErrorContent('');
-        setQueryStats(null);
-        setQueryPaused(false);
-        // 只有「已提交查询」真的会变，上面那个 `[promql]` effect 才会触发，也只在那时才需要跳过一次。
-        if (snapshot.submitted !== submittedRef.current) skipValueSyncRef.current = true;
-        change(snapshot.query);
-        updateSubmitted(snapshot.submitted);
-        updateRange(_.cloneDeep(snapshot.range));
-        updateTimestamp(snapshot.timestamp);
-        setRefreshFlag(_.uniqueId('refreshFlag_'));
+        // 同样要圈一帧：撤销要改八样 state，不合批就是八次渲染、八次取数 effect 重跑。
+        batchOneFrame(() => {
+          pending.clear();
+          setErrorContent('');
+          setQueryStats(null);
+          setQueryPaused(false);
+          // 只有「已提交查询」真的会变，上面那个 `[promql]` effect 才会触发，也只在那时才需要跳过一次。
+          if (snapshot.submitted !== submittedRef.current) skipValueSyncRef.current = true;
+          change(snapshot.query);
+          updateSubmitted(snapshot.submitted);
+          updateRange(_.cloneDeep(snapshot.range));
+          updateTimestamp(snapshot.timestamp);
+          setRefreshFlag(_.uniqueId('refreshFlag_'));
+        });
       },
       // 要的是查询框本体、不是整行：高亮圈不该把两个按钮和面板一起圈进去。
       queryInput: () => inputWrapRef.current?.querySelector('.ant-input-affix-wrapper') ?? inputWrapRef.current,

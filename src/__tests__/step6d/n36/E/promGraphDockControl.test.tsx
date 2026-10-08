@@ -429,3 +429,88 @@ describe('N36-E · 不接停靠栏时 PromGraphCpt 的 DOM 不变', () => {
     unmount();
   });
 });
+
+describe('N36-E 修复轮 · P-1：run() 在「不合批」的真实路径上被调用', () => {
+  /**
+   * 为什么要单开这一组：上面那 13 条里每一处 `run()` 都写在 `await act(async () => {...})` 的
+   * **同步段**里，而 React 17 的 `act` 内部就是 `batchedUpdates(callback)`，所以那些用例里
+   * `run()` 是**合批**跑的。真实情况不是这样——停靠栏在两个 `await` 之后才调 `run()`
+   * （`src/components/AiQueryDock/useQueryDockActions.ts:216`），那是一个 microtask；
+   * 而羚牛是 React 17.0.2、legacy `ReactDOM.render`（`src/main.tsx:23`），只在 React 事件
+   * 处理函数里合批。所以这一组**故意不把 `fill()` / `run()` 放进 `act` 的同步段**，
+   * 只用 `act` 推进时序（审阅者 verdict-E P-1 第 3 条点名要这样写）。
+   *
+   * 会看到 React 的 "not wrapped in act" 告警 —— 那正是本组要的调用形态，不是毛病。
+   */
+  it('第二轮 run() 也要拿到本轮结果，并且这一轮恰好发 1 条请求、query 就是本轮填进去那条', async () => {
+    const { controlRef } = setup();
+
+    // 第一轮：先让页面上确实查过一次。P-1 只有在「已经查过一次」之后才会踩中
+    // （开局「已提交查询」是空串，中间帧那次取数会被 `if (datasourceValue && promql)` 挡掉）。
+    controlRef.current!.fill('up'); // act 之外
+    const first = controlRef.current!.run(); // act 之外
+    const firstOutcome = first.then(
+      (value) => ({ kind: 'resolved' as const, value }),
+      (err: Error) => ({ kind: 'rejected' as const, name: err.name }),
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(promData.calls.map((c) => c.params.query)).toEqual(['up']);
+    await settle(0, twoRows);
+    await expect(firstOutcome).resolves.toEqual({ kind: 'resolved', value: { empty: false, count: 2 } });
+
+    // 第二轮：这才是 P-1 真正踩中的那一轮
+    const before = promData.calls.length;
+    controlRef.current!.fill('rate(up[5m])'); // act 之外
+    const second = controlRef.current!.run(); // act 之外
+    const secondOutcome = second.then(
+      (value) => ({ kind: 'resolved' as const, value }),
+      (err: Error) => ({ kind: 'rejected' as const, name: err.name }),
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // ① 这一轮恰好 1 条请求，且就是本轮填进去那条（修前是 3 条：['up','up','rate(up[5m])']）
+    expect(promData.calls.slice(before).map((c) => c.params.query)).toEqual(['rate(up[5m])']);
+    await settle(before, oneRow);
+    // ② 第二轮必须 resolve 本轮结果，不得 reject AbortError（修前是 {kind:'rejected',name:'AbortError'}）
+    await expect(secondOutcome).resolves.toEqual({ kind: 'resolved', value: { empty: false, count: 1 } });
+  });
+
+  it('restore() 在 act 之外被调用时，也只触发一次重取', async () => {
+    const { controlRef } = setup();
+    controlRef.current!.fill('up');
+    const first = controlRef.current!.run();
+    const firstOutcome = first.then(
+      () => 'ok',
+      (err: Error) => err.name,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await settle(0, twoRows);
+    await expect(firstOutcome).resolves.toBe('ok');
+    const snapshot = controlRef.current!.snapshot();
+
+    controlRef.current!.fill('node_load1');
+    const second = controlRef.current!.run();
+    const secondOutcome = second.then(
+      () => 'ok',
+      (err: Error) => err.name,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await settle(1, oneRow);
+    await expect(secondOutcome).resolves.toBe('ok');
+
+    // 撤销：改八样 state，不圈一帧就是八次渲染、八次取数 effect 重跑
+    const before = promData.calls.length;
+    controlRef.current!.restore(snapshot); // act 之外
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(promData.calls.slice(before).map((c) => c.params.query)).toEqual(['up']);
+  });
+});
