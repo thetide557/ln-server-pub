@@ -4,12 +4,10 @@ import queryString from 'query-string';
 import moment from 'moment';
 import _ from 'lodash';
 import { FormInstance } from 'antd/lib/form/Form';
-import { useTranslation } from 'react-i18next';
 import PromGraph from '@/components/PromGraphCpt';
 import { IRawTimeRange, timeRangeUnix, isMathString } from '@/components/TimeRangePicker';
-import { AiButton } from '@/components/AiChatNG/FlashAiButton';
-import { buildPageFrom, getExplorerPrompts } from '@/components/AiChatNG/recommend';
 import { queryStringOptions } from '../constants';
+import { usePrometheusAiDock } from './aiDock';
 
 type IMode = 'table' | 'graph';
 interface IProps {
@@ -20,9 +18,20 @@ interface IProps {
 
 export default function Prometheus(props: IProps) {
   const { headerExtra, datasourceValue, form } = props;
-  const { i18n } = useTranslation();
-  // 第六步：AI 浮窗生成 PromQL 后回填到查询框；seq 递增用来触发 PromGraph 里的 effect
+  // 第六步：AI 浮窗生成 PromQL 后回填到查询框；seq 递增用来触发 PromGraph 里的 effect。
+  // N36 批 E：这条路留给「停靠栏开关关着」的时候用——那时 `ai.chatButton` 就是原来那个浮窗按钮。
+  // 开关开着时浮窗按钮不渲染，停靠栏改走 control 的 `fill()`（直接写 PromGraph 的 state），
+  // 两条路互不相干，见 `n36/改动清单-E.md`。
   const [fillPromQL, setFillPromQL] = useState<{ value: string; seq: number }>();
+  const ai = usePrometheusAiDock({
+    datasourceValue,
+    // 上游这里是「用户伸手找 AI = 已接管，体检落地横幅让位」（`ProbeBanner`）。
+    // 羚牛这一页没有那个横幅，所以没有要收起来的东西，留一个空实现。
+    onTakeOver: () => {},
+    onQuery: (nextPromql) => {
+      setFillPromQL((prev) => ({ value: nextPromql, seq: (prev?.seq ?? 0) + 1 }));
+    },
+  });
   const history = useHistory();
   const { search } = useLocation();
   const query = queryString.parse(search, queryStringOptions);
@@ -39,6 +48,8 @@ export default function Prometheus(props: IProps) {
 
   return (
     <PromGraph
+      controlRef={ai.controlRef}
+      onUserContextChange={ai.onUserContextChange}
       type={query.mode as IMode}
       defaultTime={defaultTime}
       onTimeChange={(newRange) => {
@@ -62,16 +73,9 @@ export default function Prometheus(props: IProps) {
         form.validateFields();
       }}
       fillPromQL={fillPromQL}
-      extra={
-        <AiButton
-          queryPageFrom={buildPageFrom({ param: { datasource_type: 'prometheus', datasource_id: datasourceValue } })}
-          queryAction={{ key: 'query_generator', param: { datasource_type: 'prometheus', datasource_id: datasourceValue } }}
-          promptList={getExplorerPrompts(i18n.language)}
-          onExecuteQueryForQueryContent={(nextPromql) => {
-            setFillPromQL((prev) => ({ value: nextPromql, seq: (prev?.seq ?? 0) + 1 }));
-          }}
-        />
-      }
+      queryExtra={ai.trigger}
+      noticeBanner={ai.dock}
+      extra={ai.chatButton}
     />
   );
 }
