@@ -25,6 +25,11 @@ dayjs.extend(customParseFormat);
 const { TextArea } = Input;
 const PASSWORD_PLACEHOLDER_VALUE = 'haveValue';
 
+const isServerAssetType = (type?: string) => {
+  const assetType = _.toLower(_.toString(type));
+  return assetType.includes('server') || assetType.includes('服务器') || assetType.includes('宿主机');
+};
+
 const ControlledPasswordField = ({ placeholder, value, onChange, hasStoredValue, onDraftChange }) => {
   const currentValue = value === PASSWORD_PLACEHOLDER_VALUE ? '' : value || '';
 
@@ -490,7 +495,17 @@ export default function () {
     }
   };
 
-  const submitForm = async () => {
+  const submitForm = async (values = {}) => {
+    const submitData = {
+      ...assetData,
+      ...form.getFieldsValue(true),
+      ...values,
+    };
+
+    if (!isServerAssetType(submitData.type)) {
+      submitData.cpu_arch = '';
+    }
+
     //  检查管理状态，如果是上架状态则清空下架原因
     if (assetData.is_shelf === true) {
       assetData.shelf_reason = ''
@@ -937,10 +952,11 @@ export default function () {
         </Form.Item>
         {tabIndex == 'base_set' && (
           <div className='card-wrapper'>
-            <Card {...panelBaseProps} className='card_base'>
-              <Row gutter={10}>
-                <Col span={12}>
-                  <Form.Item label='资产类型' name='type' rules={[{ required: true }]}>
+            <Card {...panelBaseProps} title={'基本信息'} className='card_base'>
+              <Row gutter={16}>
+                {/* 第 1 行：类型 / 名称 / IP地址 */}
+                <Col span={8}>
+                  <Form.Item {...basicItemLayout} label='设备类型' name='type' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
                       options={assetTypes}
@@ -948,6 +964,10 @@ export default function () {
                       disabled={id != null}
                       onChange={(val) => {
                         setCurrentType(val);
+                        if (!isServerAssetType(val)) {
+                          form.setFieldsValue({ cpu_arch: undefined });
+                          setAssetData((prev) => ({ ...prev, type: val, cpu_arch: undefined }));
+                        }
                       }}
                     />
                   </Form.Item>
@@ -995,8 +1015,34 @@ export default function () {
                     /> */}
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item label='厂商' name='manufacturers' rules={[{ required: false }]}>
+
+                {/* 第 2 行：区域 / 租户 / 资产类型 */}
+                <Col span={8}>
+                  <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请输入区域' }]}>
+                    <Input placeholder='请输入区域' />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item {...basicItemLayout} label='租户' name='tenant'>
+                    <Input placeholder='请输入租户' />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item {...basicItemLayout} label='资产类型' name='asset_category'>
+                    <Input placeholder='请输入资产类型' />
+                  </Form.Item>
+                </Col>
+
+                {/* 第 3 行：CPU架构 / 厂商 / 位置 */}
+                {isServerAssetType(currentType) && (
+                  <Col span={8}>
+                    <Form.Item {...basicItemLayout} label='CPU架构' name='cpu_arch'>
+                      <Input placeholder='请输入CPU架构' />
+                    </Form.Item>
+                  </Col>
+                )}
+                <Col span={isServerAssetType(currentType) ? 8 : 12}>
+                  <Form.Item {...basicItemLayout} label='厂商' name='manufacturers' rules={[{ required: false }]}>
                     <Select
                       style={{ width: '100%' }}
                       allowClear
@@ -1015,6 +1061,10 @@ export default function () {
                     />
                   </Form.Item>
                 </Col>
+<<<<<<< HEAD
+                <Col span={isServerAssetType(currentType) ? 8 : 12}>
+                  <Form.Item {...basicItemLayout} label='位置' name='position' rules={[{ required: false }]}>
+=======
                 <Col span={12}>
                   <Form.Item label='IP地址' name='ip' rules={[{ required: true }, { validator: validateIP }]}>
                     <Input placeholder='请输入IP地址' disabled={currentType === "物理服务器" || currentType === "虚拟服务器"} />
@@ -1028,11 +1078,14 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='位置' name='position' rules={[{ required: false }]}>
+>>>>>>> 4eee3a60e10a79cf5c6bcf1264d7c0e9ece6ae0d
                     <Input placeholder='请输入位置' />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item label='业务组' name='group_id' rules={[{ required: true }]}>
+
+                {/* 第 4 行：业务组 / 备注 / 管理状态 */}
+                <Col span={8}>
+                  <Form.Item {...basicItemLayout} label='业务组' name='group_id' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
                       options={busiGroups.map(({ id, name }) => ({
@@ -1123,6 +1176,8 @@ export default function () {
                     <span className='hsBtn' style={{ fontSize: '12px', position: 'absolute', left: '76%', top: '15%' }} onClick={showAssetReleaseHistory} >上下架历史</span>
                   )}
                 </Col>
+
+                {/* 第 5 行：下架原因（整行） */}
                 {form.getFieldValue('is_shelf') === false && (
                   <Col span={24}>
                     <Form.Item

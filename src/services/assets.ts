@@ -40,6 +40,20 @@ export const getAssetsByConditionSimple = function (params) {
   });
 };
 
+export const getAssetScopeTreeChildren = function (params) {
+  return request("/api/takin/assets/scope-tree/children", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+export const getAssetScopeTreeAssets = function (params) {
+  return request("/api/takin/assets/scope-tree/assets", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
 export const getAssetsByMonitor = function (params) {
   return request("/api/takin/xh/assets/monitor", {
     method: RequestMethod.Get,
