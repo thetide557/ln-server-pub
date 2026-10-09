@@ -1061,10 +1061,6 @@ export default function () {
                     />
                   </Form.Item>
                 </Col>
-<<<<<<< HEAD
-                <Col span={isServerAssetType(currentType) ? 8 : 12}>
-                  <Form.Item {...basicItemLayout} label='位置' name='position' rules={[{ required: false }]}>
-=======
                 <Col span={12}>
                   <Form.Item label='IP地址' name='ip' rules={[{ required: true }, { validator: validateIP }]}>
                     <Input placeholder='请输入IP地址' disabled={currentType === "物理服务器" || currentType === "虚拟服务器"} />
@@ -1078,7 +1074,6 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='位置' name='position' rules={[{ required: false }]}>
->>>>>>> 4eee3a60e10a79cf5c6bcf1264d7c0e9ece6ae0d
                     <Input placeholder='请输入位置' />
                   </Form.Item>
                 </Col>
