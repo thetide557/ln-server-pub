@@ -47,6 +47,13 @@ export const getAssetScopeTreeChildren = function (params) {
   });
 };
 
+export const getAssetScopeTree = function (params) {
+  return request("/api/takin/assets/scope-tree", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
 export const getAssetScopeTreeAssets = function (params) {
   return request("/api/takin/assets/scope-tree/assets", {
     method: RequestMethod.Get,

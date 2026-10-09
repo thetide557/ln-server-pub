@@ -34,7 +34,7 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { batchShelfXhAssets, deleteXhAssets, getAssetScopeTreeAssets, getAssetScopeTreeChildren, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { batchShelfXhAssets, deleteXhAssets, getAssetScopeTree, getAssetScopeTreeAssets, getAssetScopeTreeChildren, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 import { getDictDataListByType } from '@/services/system/dict';
 
 import RefreshIcon from '@/components/RefreshIcon';
@@ -171,10 +171,66 @@ function createScopeTreeNode({
   };
 }
 
+function getScopeValueKey(nodeType?: string) {
+  const type = _.toString(nodeType);
+  if (['region', 'tenant_set', 'tenant', 'asset_category', 'cpu_arch'].includes(type)) {
+    return type;
+  }
+  return '';
+}
+
+function normalizeScopeTreeNode(node: any, indexPath = '0', groupLevel = 1, parentScopeValues: Record<string, any> = {}) {
+  const nodeType = node?.node_type || node?.nodeType || (groupLevel === 1 ? 'root' : '');
+  const name = node?.label || node?.name || node?.title || node?.key || node?.id || '';
+  const scopeValues = {
+    ...parentScopeValues,
+    ...(node?.scopeValues || {}),
+  };
+  const scopeKey = getScopeValueKey(nodeType);
+  if (scopeKey && name !== '') {
+    scopeValues[scopeKey] = node?.[scopeKey] || node?.value || node?.key || name;
+  }
+  if (node?.tenant_set) {
+    scopeValues.tenant_set = node.tenant_set;
+  }
+
+  const rawChildren = node?.sub_groups || node?.children || node?.nodes || [];
+  return createScopeTreeNode({
+    id: `scope-${indexPath}`,
+    name: _.toString(name || '未命名'),
+    nodeType,
+    count: node?.count,
+    groupLevel,
+    scopeValues,
+    children: rawChildren.map((child: any, index: number) => normalizeScopeTreeNode(child, `${indexPath}-${index}`, groupLevel + 1, scopeValues)),
+  });
+}
+
+function normalizeScopeTreeData(data: any) {
+  const nodes = data?.nodes || data?.list || data?.tree || (Array.isArray(data) ? data : []);
+  if (!Array.isArray(nodes) || !nodes.length) {
+    return SCOPE_TREE_DATA;
+  }
+  const normalizedNodes = nodes.map((node: any, index: number) => normalizeScopeTreeNode(node, `${index}`, 2, {}));
+  if (normalizedNodes.length === 1 && normalizedNodes[0].node_type === 'root') {
+    return normalizedNodes;
+  }
+  return [
+    createScopeTreeNode({
+      id: 'scope-all-assets',
+      name: '陕西工业云',
+      nodeType: 'root',
+      groupLevel: 1,
+      scopeValues: {},
+      children: normalizedNodes,
+    }),
+  ];
+}
+
 const SCOPE_TREE_DATA = [
   createScopeTreeNode({
     id: 'scope-all-assets',
-    name: '全部资产',
+    name: '陕西工业云',
     nodeType: 'root',
     groupLevel: 1,
     scopeValues: {},
@@ -345,16 +401,6 @@ function updateScopeTreeChildren(nodes: any[] = [], nodeId: string, children: an
   });
 }
 
-function hasCompleteScopeAssetParams(params: Record<string, any>) {
-  return Boolean(
-    params?.region &&
-    params?.tenant_set &&
-    params?.tenant &&
-    params?.asset_category &&
-    params?.cpu_arch,
-  );
-}
-
 export default function () {
   const { t } = useTranslation('assets');
   const history = useHistory();
@@ -415,6 +461,7 @@ export default function () {
   // 物理资源下的设备类型
   const [oidTreeList, setOidTreeList] = useState<any[]>([]);
   const [scopeTreeFilter, setScopeTreeFilter] = useState<Record<string, any>>({});
+  const [scopeTreeNodeType, setScopeTreeNodeType] = useState<string>('root');
 
   const maintenanceStatusOption = [
     {
@@ -773,34 +820,6 @@ export default function () {
         return (daysA > 0 ? daysA : 1) - (daysB > 0 ? daysB : 1);
       },
     },
-    {
-      title: '区域',
-      dataIndex: 'region',
-      align: 'center',
-      width: 120,
-      ellipsis: true,
-    },
-    {
-      title: '租户',
-      dataIndex: 'tenant',
-      align: 'center',
-      width: 120,
-      ellipsis: true,
-    },
-    {
-      title: '类型',
-      dataIndex: 'asset_category',
-      align: 'center',
-      width: 120,
-      ellipsis: true,
-    },
-    {
-      title: 'CPU架构',
-      dataIndex: 'cpu_arch',
-      align: 'center',
-      width: 120,
-      ellipsis: true,
-    },
     // 最近更新时间、最近更新人
     {
       title: '最近更新时间',
@@ -1094,8 +1113,16 @@ export default function () {
     return sortedNodes;
   }
   const getAssetTree = () => {
-    setTreeList(SCOPE_TREE_DATA);
-    setOidTreeList([]);
+    getAssetScopeTree({})
+      .then((res) => {
+        setTreeList(normalizeScopeTreeData(res?.dat));
+        setOidTreeList([]);
+      })
+      .catch(() => {
+        setTreeList(SCOPE_TREE_DATA);
+        setOidTreeList([]);
+        message.error('资产范围树加载失败');
+      });
   }
 
   useEffect(() => {
@@ -1194,17 +1221,20 @@ export default function () {
     const parentId = localStorage.getItem('left_parId')
     // console.log(requestIdCounter);
     // console.log(requestId);
-    const param = {
+    const isScopeTreeMode = treeList?.[0]?.isScopeTreeNode;
+    const param: Record<string, any> = {
       page: current,
       limit: pageSize,
-      groupIds: groupIds?.toString()
     };
+    if (!isScopeTreeMode) {
+      param['groupIds'] = groupIds?.toString();
+    }
 
     if (searchVal != null && searchVal.length > 0) {
       param['query'] = searchVal;
       treeQuery['query'] = searchVal
     }
-    if (treeList?.[0]?.isScopeTreeNode) {
+    if (isScopeTreeMode) {
       Object.entries(scopeTreeFilter).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           param[key] = value;
@@ -1265,7 +1295,7 @@ export default function () {
     }
     setQueryCondition(param);
 
-    const requestFunc = treeList?.[0]?.isScopeTreeNode && hasCompleteScopeAssetParams(param)
+    const requestFunc = isScopeTreeMode
       ? getAssetScopeTreeAssets
       : getAssetsByCondition;
 
@@ -1538,6 +1568,7 @@ export default function () {
   const handleClickTree = (item: any, par: any, isAllAssets: boolean) => {
     if (item?.isScopeTreeNode) {
       setScopeTreeFilter(item.scopeValues || {});
+      setScopeTreeNodeType(item.node_type || 'root');
       setCurrent(1);
       setIsAllAssets(item.node_type === 'root');
       setTypeId('0');
@@ -1591,8 +1622,8 @@ export default function () {
       if (!nodes.length) {
         return;
       }
-      const children = nodes.map((node) => createScopeTreeNode({
-        id: `${item.id}-${node.key}`,
+      const children = nodes.map((node, index) => createScopeTreeNode({
+        id: `${item.id}-cpu-${index}`,
         name: node.label || node.key,
         nodeType: node.node_type || 'cpu_arch',
         count: node.count,
