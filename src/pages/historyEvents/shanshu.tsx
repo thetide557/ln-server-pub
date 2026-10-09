@@ -66,7 +66,7 @@ const Event: React.FC = () => {
   const groupIds = busiGroups?.map(item => item.id)
   const [filterType, setFilterType] = useLocalStorage<any>('history_filter_types', 'input');
   const [searchVal, setSearchVal] = useLocalStorage<any>('history_filter_value', null);
-  const [filterParam, setFilterParam] = useLocalStorage<any>('history_filter_param', 'ip');
+  const [filterParam, setFilterParam] = useLocalStorage<any>('history_filter_param', 'asset_ip');
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
