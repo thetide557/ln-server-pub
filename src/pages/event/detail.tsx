@@ -492,7 +492,7 @@ const EventDetailPage: React.FC = () => {
               <div className='alert_detail_action-btns'>
                 <Space>
                   {
-                    eventDetail?.is_muted != 1 && <Button
+                    eventDetail?.is_muted != 1 && !isShanshuRoute && <Button
                       type='primary'
                       onClick={() => {
                         history.push({
