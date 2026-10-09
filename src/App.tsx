@@ -242,7 +242,7 @@ function App() {
     let flag = true
     licenseWebsocket.current = new WebSocket(WebSocketURL + 758493);//获取推送过来的许可到期的消息
     licenseWebsocket.current.onmessage = e => {
-      if (!anonymous && flag) {
+      if (!anonymous && flag && !path.includes('alert-his-events-shanshu')) {
         let data = JSON.parse(e.data);
         Modal.warning({
           title: '许可信息提醒',
@@ -375,7 +375,7 @@ function App() {
         </ConfigProvider>
       </CommonStateContext.Provider>
 
-      <div className='special_alert_dialog' style={dialogShow == '0' ? { display: 'none' } : { display: 'block' }}>
+      <div className='special_alert_dialog' style={dialogShow == '0' || path.includes('alert-his-events-shanshu') ? { display: 'none' } : { display: 'block' }}>
         <div className='close_button'>
           <p>告警提醒</p>
           <span
