@@ -1021,6 +1021,12 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
+                   <Form.Item label='资产IP' name='asset_ip' rules={[{ validator: validateIP }]}>
+                    <Input placeholder='请输入资产IP，为空时默认填充 IP 地址' />
+                  </Form.Item>
+
+                </Col>
+                <Col span={12}>
                   <Form.Item label='位置' name='position' rules={[{ required: false }]}>
                     <Input placeholder='请输入位置' />
                   </Form.Item>

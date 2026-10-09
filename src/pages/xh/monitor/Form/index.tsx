@@ -27,6 +27,8 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [assetIpOptions, setAssetIpOptions] = useState<any[]>([]);
+  // 资产ip地址
+  const [assetIps, setAssetIps] = useState<any[]>([]);
   const [sqlCN, setSqlCN] = useState<string>("")
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; required?: boolean; password?: boolean; items?: [] }[]>([]);
@@ -108,14 +110,19 @@ const [operateScript, setOperateScript] = useState<any>({
         });
         setAssetOptions(options);
         let ipOptions = new Array();
+        let assetIps = new Array();
         assets.dat.list.map((v) => {
           ipOptions.push({
             value: v.id,
             label: v.ip,
           });
+          assetIps.push({
+            value: v.id,
+            label: v.asset_ip,
+          });
         });
         setAssetIpOptions(ipOptions);
-        
+        setAssetIps(assetIps);  
         setAssetList(assets.dat.list);
         if (id != null && id.length > 0 && id != 'null' && action!="add") {
           getXhMonitor(id).then(({ dat }) => {
@@ -290,8 +297,13 @@ const [operateScript, setOperateScript] = useState<any>({
 
               <Form.Item label='IP地址' name='asset_id' rules={[{ required: true }]}>
                   <Select style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetIpOptions} placeholder='请选择资产' disabled={action === 'edit'} />
-                </Form.Item>              
+                </Form.Item>   
               </Col>
+              {/* <Col span={8}>
+                <Form.Item label='资产IP' name='asset_id' rules={[{ required: true }]}>
+                  <Select style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetIps} placeholder='请选择资产IP' disabled={action === 'edit'} />
+                </Form.Item>   
+              </Col> */}
             </Row>
             <Row gutter={10}>
               <Col span={14}>

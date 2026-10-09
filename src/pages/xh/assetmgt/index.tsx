@@ -71,6 +71,7 @@ export enum OperateType {
 }
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'asset_ip', label: '资产IP', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'manufacturers', label: '厂商', type: 'select' },
   { name: 'os', label: '操作系统', type: 'input' },
@@ -318,6 +319,13 @@ export default function () {
       sorter: (a, b) => {
         return a.ip.localeCompare(b.ip);
       },
+    },
+    {
+      title: '资产IP',
+      dataIndex: 'asset_ip',
+      align: 'center',
+      ellipsis: true,
+      width: 120,
     },
     {
       title: '厂商',

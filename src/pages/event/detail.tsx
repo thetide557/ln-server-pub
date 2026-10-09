@@ -302,7 +302,7 @@ const EventDetailPage: React.FC = () => {
       },
     },
     {
-      label: 'IP地址',
+      label: '资产IP',
       key: 'asset_ip',
       align: 'center',
       render: (asset_ip, { asset_id }) => {

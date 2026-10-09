@@ -45,7 +45,7 @@ export const getDefaultHours = () => {
   return 6;
 };
 let queryFilter = [
-  { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'asset_ip', label: '资产IP', type: 'input' },
   { name: 'severity', label: '告警级别', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'rule_name', label: '告警规则名称', type: 'input' },
@@ -153,7 +153,7 @@ const Event: React.FC = () => {
       },
     },
     {
-      title: 'IP地址',
+      title: '资产IP',
       dataIndex: 'asset_ip',
       width: 100,
       align: 'center',

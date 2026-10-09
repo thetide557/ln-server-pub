@@ -59,6 +59,7 @@ let queryFilter = [
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'status', label: '监控状态', type: 'select' },
   { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'asset_ip_col', label: '资产IP', type: 'input' }
 ];
 
 /** 在组织树中查找分组节点 id 从根到该节点的路径（展开祖先链后子节点与 type_list 才可见） */
@@ -287,6 +288,13 @@ export default function () {
         }
       },
     },
+    {
+      title: '资产IP',
+      dataIndex: 'asset_ip',
+      align: 'center',
+      ellipsis: true,
+      width: 120,
+    }
   ];
   const rawChooooseColumns = [
     {
@@ -1174,11 +1182,11 @@ export default function () {
                     setFilterParam(value);
                     if (value == 'ip') {
                       setFilterParam2('asset_ip');
-                    }
-                    if (value == 'name') {
+                    } else if (value == 'name') {
                       setFilterParam2('asset_name');
+                    } else {
+                      setFilterParam2(value);
                     }
-                    setFilterParam2(value);
                     setSearchVal(null);
                     setCurrentAssetId(0);
                     setCurrent(1);
