@@ -745,7 +745,8 @@ export default function () {
   };
 
 
-  const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
+  const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 16 } };
+  const basicItemLayout = formItemLayout;
   // 获取维保信息详情
   const getMaintenanceInfo = async () => {
     try {
@@ -953,9 +954,9 @@ export default function () {
         {tabIndex == 'base_set' && (
           <div className='card-wrapper'>
             <Card {...panelBaseProps} title={'基本信息'} className='card_base'>
-              <Row gutter={16}>
+              <Row gutter={[24, 12]}>
                 {/* 第 1 行：类型 / 名称 / IP地址 */}
-                <Col span={8}>
+                <Col span={12}>
                   <Form.Item {...basicItemLayout} label='设备类型' name='type' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
@@ -1017,17 +1018,17 @@ export default function () {
                 </Col>
 
                 {/* 第 2 行：区域 / 租户 / 资产类型 */}
-                <Col span={8}>
+                <Col span={12}>
                   <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请输入区域' }]}>
                     <Input placeholder='请输入区域' />
                   </Form.Item>
                 </Col>
-                <Col span={8}>
+                <Col span={12}>
                   <Form.Item {...basicItemLayout} label='租户' name='tenant'>
                     <Input placeholder='请输入租户' />
                   </Form.Item>
                 </Col>
-                <Col span={8}>
+                <Col span={12}>
                   <Form.Item {...basicItemLayout} label='资产类型' name='asset_category'>
                     <Input placeholder='请输入资产类型' />
                   </Form.Item>
@@ -1035,13 +1036,13 @@ export default function () {
 
                 {/* 第 3 行：CPU架构 / 厂商 / 位置 */}
                 {isServerAssetType(currentType) && (
-                  <Col span={8}>
+                  <Col span={12}>
                     <Form.Item {...basicItemLayout} label='CPU架构' name='cpu_arch'>
                       <Input placeholder='请输入CPU架构' />
                     </Form.Item>
                   </Col>
                 )}
-                <Col span={isServerAssetType(currentType) ? 8 : 12}>
+                <Col span={12}>
                   <Form.Item {...basicItemLayout} label='厂商' name='manufacturers' rules={[{ required: false }]}>
                     <Select
                       style={{ width: '100%' }}
@@ -1079,7 +1080,7 @@ export default function () {
                 </Col>
 
                 {/* 第 4 行：业务组 / 备注 / 管理状态 */}
-                <Col span={8}>
+                <Col span={12}>
                   <Form.Item {...basicItemLayout} label='业务组' name='group_id' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
@@ -1122,26 +1123,6 @@ export default function () {
                 <Col span={12}>
                   <Form.Item label='备注' name='memo'>
                     <Input placeholder='填写备注' />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='区域' name='region' rules={[{ required: true }]}>
-                    <Input placeholder='请输入区域' />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='租户' name='tenant' rules={[{ required: true }]}>
-                    <Input placeholder='请输入租户' />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='类型' name='asset_category' rules={[{ required: true }]}>
-                      <Input placeholder='请输入类型' />
-                    </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='CPU架构' name='cpu_arch' rules={[{ required: true }]}>
-                      <Input placeholder='请输入CPU架构' />
                   </Form.Item>
                 </Col>
                 {/* 管理状态：上架资产、下架资产 */}
