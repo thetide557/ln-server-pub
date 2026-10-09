@@ -34,7 +34,6 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { usePermission } from '@/utils/permission';
 import { batchShelfXhAssets, deleteXhAssets, getAssetScopeTreeAssets, getAssetScopeTreeChildren, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 import { getDictDataListByType } from '@/services/system/dict';
 
@@ -1629,7 +1628,9 @@ export default function () {
               }
             }}
           >
-            {canExpand ? (isExpanded ? <CaretDownOutlined /> : <CaretRightOutlined />) : <span className="tree-toggle-placeholder" />}
+            {canExpand ? (
+              isExpanded ? <MinusSquareOutlined style={{ fontSize: 13 }} /> : <PlusSquareOutlined style={{ fontSize: 13 }} />
+            ) : <span className="tree-toggle-placeholder" />}
           </span>
           <span
             className="g-name"
@@ -1823,7 +1824,7 @@ export default function () {
                     <span>资产范围树</span>
                 </div>
                 {false &&
-                  hasPermission("/xh/assetmgt/addGroup") && <span
+                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && <span
                     className="add_group"
                     onClick={() => {
                       setOpen(true);
