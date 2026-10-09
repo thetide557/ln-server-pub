@@ -218,7 +218,7 @@ function App() {
     // console.log('anonymous', anonymous);
     alertWebsocket.current = new WebSocket(WebSocketURL + 232443);//获取推送过来的告警消息
     alertWebsocket.current.onmessage = e => {
-      if (!anonymous) {
+      if (!anonymous && !path.includes('alert-his-events-shanshu')) {
         const busiGroups = localStorage.getItem('groupIds')?.split(',').map(id => Number(id));
         let data = JSON.parse(e.data);
         if (busiGroups?.includes(data.dat[0].group_id)) {
