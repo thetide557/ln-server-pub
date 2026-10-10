@@ -4,8 +4,8 @@ import moment from 'moment';
 import type { Moment } from 'moment';
 import { DownloadOutlined, FileZipOutlined, FundProjectionScreenOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
-import { getResourceUnits } from '@/services/sxxc/healthReport';
-import type { CloudUnitRecord } from '@/services/sxxc/healthReport';
+import { getAnalysisFilters, getResourceUnits } from '@/services/sxxc/healthReport';
+import type { AnalysisFilterOptions, CloudUnitRecord } from '@/services/sxxc/healthReport';
 import ReportBody from './components/ReportBody';
 import ReportExportHost from './components/ReportExportHost';
 import { ALL, buildFilterOptions } from './resourceAnalysisData';
@@ -54,6 +54,8 @@ const ResourceAnalysis: React.FC = () => {
     type: ALL,
   });
   const [allUnits, setAllUnits] = useState<CloudUnitRecord[]>([]);
+  /** 筛选栏接口返回的四个下拉选项；某项为空时回退为从明细数据派生 */
+  const [apiFilterOptions, setApiFilterOptions] = useState<Partial<AnalysisFilterOptions>>({});
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState<ExportingType>('');
   const [exportProgress, setExportProgress] = useState({ done: 0, total: 0 });
@@ -90,7 +92,31 @@ const ResourceAnalysis: React.FC = () => {
     };
   }, [date, filters]);
 
-  const filterOptions = useMemo(() => buildFilterOptions(allUnits), [allUnits]);
+  // 顶部筛选栏选项接口：区域 / 租户 / 业务系统 / 资产类型
+  useEffect(() => {
+    let cancelled = false;
+    getAnalysisFilters()
+      .then((opts) => {
+        if (!cancelled) setApiFilterOptions(opts);
+      })
+      .catch(() => {
+        // 接口失败时静默回退：下拉选项从明细数据派生（错误提示由全局拦截器处理）
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // 优先使用筛选栏接口返回的选项；接口该项为空（region/tenant 目前为空数组）或失败时，回退为从明细数据派生
+  const filterOptions = useMemo(() => {
+    const derived = buildFilterOptions(allUnits);
+    return {
+      region: apiFilterOptions.region?.length ? apiFilterOptions.region : derived.region,
+      tenant: apiFilterOptions.tenant?.length ? apiFilterOptions.tenant : derived.tenant,
+      system: apiFilterOptions.system?.length ? apiFilterOptions.system : derived.system,
+      type: apiFilterOptions.type?.length ? apiFilterOptions.type : derived.type,
+    };
+  }, [apiFilterOptions, allUnits]);
 
   const options = useMemo(
     () => ({

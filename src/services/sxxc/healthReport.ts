@@ -115,6 +115,62 @@ export function getResourceUnits(params?: ResourceAnalysisQuery) {
 }
 
 /* ============================================================================
+ * 顶部筛选栏数据接口
+ * GET /biz/analysis/filters
+ * 返回：{ msg, code, data: { region, tenant, businessSystem, assetType } }
+ * 四个数组元素形如 { name: string }，region / tenant 后端可能返回空数组
+ * ========================================================================== */
+
+/** 筛选项条目 */
+export interface AnalysisFilterItem {
+  name: string;
+}
+
+/** 筛选栏数据（后端原始结构，字段可能缺失） */
+export interface AnalysisFilterData {
+  region: AnalysisFilterItem[];
+  tenant: AnalysisFilterItem[];
+  businessSystem: AnalysisFilterItem[];
+  assetType: AnalysisFilterItem[];
+}
+
+/** 筛选栏选项（前端视图模型：四个下拉各自的名字列表） */
+export interface AnalysisFilterOptions {
+  region: string[];
+  tenant: string[];
+  system: string[];
+  type: string[];
+}
+
+/** 后端条目 → 名字字符串，容忍 null / 缺 name / 非对象元素 */
+const toName = (item: unknown): string => {
+  if (item && typeof item === 'object' && typeof (item as AnalysisFilterItem).name === 'string') {
+    return (item as AnalysisFilterItem).name;
+  }
+  return '';
+};
+
+const toNameList = (list: unknown): string[] => {
+  if (!Array.isArray(list)) return [];
+  return list.map(toName).filter((name) => name !== '');
+};
+
+/** 获取顶部筛选栏的四个下拉选项（区域 / 租户 / 业务系统 / 资产类型） */
+export function getAnalysisFilters(): Promise<AnalysisFilterOptions> {
+  return request(`/biz/analysis/filters`, {
+    method: RequestMethod.Get,
+  }).then((res): AnalysisFilterOptions => {
+    const data = res?.data ?? {};
+    return {
+      region: toNameList(data.region),
+      tenant: toNameList(data.tenant),
+      system: toNameList(data.businessSystem),
+      type: toNameList(data.assetType),
+    };
+  });
+}
+
+/* ============================================================================
  * MOCK 区块（仅 USE_MOCK = true 时使用，后端接口就绪后整段删除即可）
  * 数据口径与改造前的页面演示数据完全一致，结构严格对齐 CloudUnitRecord。
  * ========================================================================== */

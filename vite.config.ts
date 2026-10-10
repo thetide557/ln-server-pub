@@ -122,6 +122,11 @@ export default defineConfig(({ mode }) => ({
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
+      "/biz": {
+        // 资源分析模块（sxxc 健康报告）后端服务
+        target: "http://172.16.20.11:8094/",
+        changeOrigin: true,
+      },
       "/sxxcTask": {
         // target: 'http://10.0.20.212:8086/',
         target: "http://172.16.20.11:8090/",
