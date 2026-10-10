@@ -55,6 +55,8 @@ type RawCloudUnitRecord = Partial<Omit<CloudUnitRecord, 'quotas'>> & {
 
 /** 资源分析查询参数，空字符串 / 不传表示「全部」 */
 export interface ResourceAnalysisQuery {
+  /** 查询日期（YYYY-MM-DD），后端按该日资源快照返回 */
+  date?: string;
   region?: string;
   tenant?: string;
   system?: string;

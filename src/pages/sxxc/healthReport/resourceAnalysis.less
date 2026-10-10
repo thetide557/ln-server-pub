@@ -25,10 +25,24 @@
       color: #71839b;
     }
 
-    .ant-select {
+    .ant-select,
+    .ant-picker {
       display: block;
       width: 100%;
       margin-top: 8px;
+    }
+
+    .ant-picker {
+      height: 34px;
+      padding: 0 11px;
+      background: #ffffff;
+      border-color: #dfe6ef;
+      border-radius: 3px;
+
+      .ant-picker-input > input {
+        height: 32px;
+        color: #3d5270;
+      }
     }
   }
 
@@ -481,6 +495,35 @@
   }
 }
 
+/* 报告顶部的筛选条件摘要 */
+.report-filters-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 0 10px 14px;
+  padding: 10px 14px;
+  background: #f3f6fb;
+  border-radius: 4px;
+  border: 1px solid #e3eaf3;
+}
+
+.report-filters-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.report-filters-summary-label {
+  color: #71839b;
+}
+
+.report-filters-summary-value {
+  color: #17375e;
+  font-weight: 600;
+}
+
 /* PDF 离屏导出宿主：移出可视区域但保持真实布局，ECharts 才能正常初始化画布 */
 .report-export-host {
   position: fixed;
@@ -491,6 +534,15 @@
   background: #ffffff;
   pointer-events: none;
   z-index: -1;
+
+  /* 导出时取消滚动容器和表格最小宽度限制，确保 html2canvas 截取完整内容 */
+  .detail-table-wrap {
+    overflow: visible;
+  }
+
+  .detail-table {
+    min-width: auto;
+  }
 }
 
 /* 图表卡片填充高度：让 EChart 自动撑满卡片剩余空间，与同行的兄弟元素等高 */
