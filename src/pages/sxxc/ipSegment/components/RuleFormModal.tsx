@@ -120,7 +120,11 @@ export default function RuleFormModal(props: RuleFormModalProps) {
         >
           <Input placeholder='请输入规则名称' maxLength={30} />
         </Form.Item>
-        <div style={{ marginBottom: 12, paddingLeft: 90 }}>归属：{group?.name}</div>
+        <Form.Item
+          label='归属'
+        >
+          <div>{group?.name}</div>
+        </Form.Item>
         <Form.Item label='适用范围' name='scopeType' style={{ marginBottom: 8 }} rules={[{ required: true, message: '请选择适用范围' }]}>
           <Select
             style={{ width: 260 }}
@@ -177,7 +181,8 @@ export default function RuleFormModal(props: RuleFormModalProps) {
           </Form.Item>
         )}
         <div className='rule-field-tip' style={{ marginLeft: 90, marginBottom: 12 }}>
-          ={triggerMeta.text}时，显示“{triggerMeta.tip}”；
+          {/* ={triggerMeta.text}时，显示“{triggerMeta.tip}”； */}
+          {triggerMeta.tip}
         </div>
         <Form.Item label='回收动作' name='action' style={{ marginBottom: 4 }} rules={[{ required: true, message: '请选择回收动作' }]}>
           <Select style={{ width: 200 }}>
@@ -189,7 +194,8 @@ export default function RuleFormModal(props: RuleFormModalProps) {
           </Select>
         </Form.Item>
         <div className='rule-field-tip' style={{ marginLeft: 90, marginBottom: 12 }}>
-          ={actionMeta.text}时，显示“{actionMeta.tip}”；
+          {/* ={actionMeta.text}时，显示“{actionMeta.tip}”； */}
+          {actionMeta.tip}
         </div>
         <Form.Item label='执行频率' required style={{ marginBottom: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', columnGap: 8 }}>

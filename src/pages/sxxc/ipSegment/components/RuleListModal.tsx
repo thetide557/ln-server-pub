@@ -7,7 +7,8 @@ import { Button, Descriptions, Dropdown, Form, Input, Menu, message, Modal, Swit
 import _ from 'lodash';
 import moment from 'moment';
 import { ColumnsType } from 'antd/lib/table';
-import TimeRangePicker, { IRawTimeRange } from '@/components/TimeRangePicker';
+import DatePicker, { DatePickerProps, RangePickerProps } from 'antd/es/date-picker';
+import usePagination from '@/components/usePagination';
 import {
   addRecycleRule,
   deleteRecycleRule,
@@ -25,6 +26,11 @@ import {
   ruleTriggerMap,
 } from '../types';
 import RuleFormModal from './RuleFormModal';
+
+// antd RangePicker 组件类型与项目 @types/react 多版本冲突（TS2786，log/* 页面案发点均整文件 @ts-nocheck），
+// 此处仅对该组件 any 化绕过 JSX 组件类型检查，文件其余类型检查保留
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const RangePickerFC = DatePicker.RangePicker as any;
 
 interface RuleListModalProps {
   visible: boolean;
@@ -59,22 +65,28 @@ export default function RuleListModal(props: RuleListModalProps) {
   const [editingRule, setEditingRule] = useState<RecycleRule>();
   const [viewRule, setViewRule] = useState<RecycleRule>();
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
-  const [timeRange, setTimeRange] = useState<IRawTimeRange>();
+  const pagination = usePagination({ PAGESIZE_KEY: 'ip_recycle_rules' });
+  // antd 日期范围（非受控，与 log/operlog 页同款写法规避 @types/react 多版本冲突；传参格式 YYYY-MM-DD）
+  const [timeRange, setTimeRange] = useState<[moment.Moment, moment.Moment]>();
+  // 重置时通过 key 重挂载清空日期输入框
+  const [pickerKey, setPickerKey] = useState(0);
 
-  const fetchList = () => {
+  const onTimeRangeChange = (value: DatePickerProps['value'] | RangePickerProps['value']) => {
+    const dates = value as [moment.Moment, moment.Moment];
+    setTimeRange(dates && dates[0] && dates[1] ? [dates[0], dates[1]] : undefined);
+  };
+
+  const fetchList = (override?: { startTime?: string; endTime?: string }) => {
     if (!group && !segment) return;
     setLoading(true);
     const values = form.getFieldsValue();
-    const formatDate = (val?: string | moment.Moment) => {
-      if (!val) return undefined;
-      return moment.isMoment(val) ? val.format('YYYY-MM-DD') : val.slice(0, 10);
-    };
     getRecycleRules({
       ...(group ? { groupId: group.id } : {}),
       ...(segment ? { segment: segment.fullSegment } : {}),
       name: values.name,
-      startTime: formatDate(timeRange?.start),
-      endTime: formatDate(timeRange?.end),
+      // 重置时 override 传空对象强制清空时间，其余读取当前选取
+      startTime: override ? override.startTime : timeRange?.[0]?.format('YYYY-MM-DD'),
+      endTime: override ? override.endTime : timeRange?.[1]?.format('YYYY-MM-DD'),
     })
       .then((res) => {
         setList(res.list);
@@ -82,14 +94,23 @@ export default function RuleListModal(props: RuleListModalProps) {
       .finally(() => setLoading(false));
   };
 
+  // 弹窗打开 / 切换目标分组(地址段)时：重置全部查询条件（fetchList({}) 强制清空时间，规避读取旧 state 闭包）
   useEffect(() => {
     if (props.visible && (group || segment)) {
       form.resetFields();
       setTimeRange(undefined);
-      fetchList();
+      setPickerKey((key) => key + 1);
       setSelectedKeys([]);
+      fetchList({});
     }
-  }, [props.visible, group, segment, refreshFlag]);
+  }, [props.visible, group, segment]);
+
+  // 新增/编辑/删除/启停后刷新列表：保留当前查询条件
+  useEffect(() => {
+    if (props.visible && (group || segment)) {
+      fetchList();
+    }
+  }, [refreshFlag]);
 
   const columns: ColumnsType<RecycleRule> = [
     { title: '规则名称', dataIndex: 'name', width: 130, ellipsis: true },
@@ -196,7 +217,7 @@ export default function RuleListModal(props: RuleListModalProps) {
             <Input placeholder='请输入规则名称' style={{ width: 180 }} allowClear />
           </Form.Item>
           <Form.Item>
-            <TimeRangePicker value={timeRange} onChange={setTimeRange} dateFormat='YYYY-MM-DD' />
+            <RangePickerFC key={pickerKey} onChange={onTimeRangeChange} />
           </Form.Item>
           <Form.Item>
             <Button type='primary' onClick={() => fetchList()}>
@@ -208,7 +229,8 @@ export default function RuleListModal(props: RuleListModalProps) {
               onClick={() => {
                 form.resetFields();
                 setTimeRange(undefined);
-                fetchList();
+                setPickerKey((key) => key + 1);
+                fetchList({});
               }}
             >
               重置
@@ -233,6 +255,20 @@ export default function RuleListModal(props: RuleListModalProps) {
                     message.warning('请先勾选规则');
                     return;
                   }
+                  if (key === 'delete') {
+                    Modal.confirm({
+                      title: `是否确认删除选中的${selectedKeys.length}条回收规则？`,
+                      onOk: () => {
+                        Promise.all(_.map(selectedKeys, (id) => deleteRecycleRule(id))).then(() => {
+                          message.success('删除成功');
+                          setSelectedKeys([]);
+                          setRefreshFlag(_.uniqueId('refresh_'));
+                        });
+                      },
+                      onCancel() {},
+                    });
+                    return;
+                  }
                   Promise.all(_.map(selectedKeys, (id) => toggleRecycleRule(id, key === 'enable'))).then(() => {
                     message.success(key === 'enable' ? '批量启用成功' : '批量停用成功');
                     setRefreshFlag(_.uniqueId('refresh_'));
@@ -241,6 +277,7 @@ export default function RuleListModal(props: RuleListModalProps) {
                 items={[
                   { key: 'enable', label: '启用' },
                   { key: 'disable', label: '停用' },
+                  { key: 'delete', label: '删除' },
                 ]}
               />
             }
@@ -255,7 +292,7 @@ export default function RuleListModal(props: RuleListModalProps) {
         loading={loading}
         columns={columns}
         dataSource={list}
-        pagination={false}
+        pagination={{ ...pagination, total: list.length }}
         scroll={{ x: 1400, y: 360 }}
         rowSelection={{
           selectedRowKeys: selectedKeys,

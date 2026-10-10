@@ -6,7 +6,7 @@
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Button, Dropdown, Empty, Input, Menu, message, Modal, notification, Progress, Select, Table, Tabs, Tag } from 'antd';
-import { ArrowUpOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
+import { GroupOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { Resizable } from 're-resizable';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -147,6 +147,9 @@ function IpSegmentPage() {
   const [ruleGroup, setRuleGroup] = useState<IpGroup>();
   /** 树上 IP 段节点菜单打开的回收规则（地址段视角） */
   const [ruleSegment, setRuleSegment] = useState<IpSegment>();
+
+  /** 左侧分组树宽度 */
+  const [width, setWidth] = useState<number>(270);
 
   const fetchAll = () => {
     setLoading(true);
@@ -654,14 +657,20 @@ function IpSegmentPage() {
   );
 
   return (
-    <PageLayout icon={<SearchOutlined />} title='IP地址段管理'>
+    <PageLayout icon={<GroupOutlined />} title='IP地址段管理'>
       <div className='ip-segment-page'>
         <Resizable
-          style={{ background: '#fff' }}
-          size={{ width: 240, height: '100%' }}
-          enable={{ right: true }}
-          maxWidth={420}
-          minWidth={180}
+          size={{ width: width, height: '100%' }}
+          enable={{
+            right: true,
+          }}
+          onResizeStop={(e, direction, ref, d) => {
+            let curWidth = width + d.width;
+            if (curWidth < 200) {
+              curWidth = 200;
+            }
+            setWidth(curWidth);
+          }}
         >
           <GroupTree
             key={expandGroupIds.join('-')}
@@ -834,7 +843,15 @@ function IpSegmentPage() {
                       <Button type='primary' onClick={() => setRefreshFlag(_.uniqueId('refresh_'))}>
                         查询
                       </Button>
-                      <Button onClick={() => setIpFilterValue(undefined)}>重置</Button>
+                      <Button
+                        onClick={() => {
+                          // 重置所有查询条件：维度回默认、值清空
+                          setIpFilterField('ip');
+                          setIpFilterValue(undefined);
+                        }}
+                      >
+                        重置
+                      </Button>
                     </div>
                     <div className='filter-right'>
                       <span
@@ -869,7 +886,7 @@ function IpSegmentPage() {
                 </>
               ) : (
                 <div className='ip-view-placeholder'>
-                  <Empty description='IP视图待后端接口就绪后提供' />
+                  <Empty description='IP视图' />
                 </div>
               )}
             </>
@@ -966,6 +983,8 @@ function IpSegmentPage() {
                   </Button>
                   <Button
                     onClick={() => {
+                      // 重置所有查询条件：维度回默认、值清空
+                      setFilterField('segment');
                       setFilterValue(undefined);
                     }}
                   >
