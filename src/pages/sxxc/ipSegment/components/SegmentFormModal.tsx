@@ -69,7 +69,11 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
       destroyOnClose
     >
       <Form form={form} labelCol={{ flex: '90px' }}>
-        <div style={{ marginBottom: 12, paddingLeft: 90 }}>归属：{ownerName}</div>
+        <Form.Item
+          label='归属'
+        >
+          <div>{ownerName}</div>
+        </Form.Item>
         <Form.Item
           label='地址段'
           required
@@ -135,7 +139,7 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
                 >
                   <Input.TextArea placeholder='请输入停用原因' maxLength={200} autoSize={{ minRows: 2, maxRows: 4 }} />
                 </Form.Item>
-                <div
+                {/* <div
                   style={{
                     background: '#fdf2e2',
                     color: '#d97a08',
@@ -146,7 +150,7 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
                   }}
                 >
                   停用后将自动收回该地址段所有已分配/预留/已使用地址
-                </div>
+                </div> */}
               </>
             )}
           </>

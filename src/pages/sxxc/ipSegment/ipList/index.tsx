@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Dropdown, Empty, Input, Menu, message, Modal, Progress, Select, Table, Tabs, Tag } from 'antd';
-import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons';
+import { GroupOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ColumnsType } from 'antd/lib/table';
@@ -290,44 +290,49 @@ function IpListPage() {
 
   return (
     <PageLayout
-      icon={<ArrowLeftOutlined />}
       title='IP地址段管理'
       showBack
       backPath='/ipSegment'
       backState={{ fromGroupId: (location.state as { fromGroupId?: number } | undefined)?.fromGroupId }}
     >
       <div className='ip-list-page'>
-        {/* 头部地址段信息：负责人 / 掩码 / 描述 */}
-        <div className='segment-info-bar'>
-          {segmentInfo && (
-            <>
-              <span className='info-item'>地址段：{segmentInfo.fullSegment}</span>
+        {/* 内容统一包在唯一子元素 .ip-right-area 内：PageLayout 的 "& + div > *" 规则
+            会给内容容器的每个直接子元素加白卡背景+阴影，若逐块直接放置会被渲染成多张独立卡片造成“分层” */}
+        <div className='ip-right-area'>
+        {/* 头部地址段概览：与主页面 IP 视角一致（房子图标+名称加粗，第二行负责人/掩码/描述） */}
+        {segmentInfo && (
+          <div className='group-overview'>
+            <div className='overview-name'>
+              <HomeOutlined className='overview-icon' />
+              <span>{segmentInfo.fullSegment}</span>
+            </div>
+            <div className='overview-meta'>
               <span className='info-item'>负责人：{segmentInfo.owner}</span>
               <span className='info-item'>掩码：{segmentInfo.mask}</span>
               <span className='info-item'>描述：{segmentInfo.note || '-'}</span>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
         <div className='stats-cards'>
           <div className='stat-card'>
             <div className='stat-label'>IP总数</div>
-            <div className='stat-value'>{stats.total}个</div>
+            <div className='stat-value'>{stats.total}<span className='stat-unit'>个</span></div>
           </div>
           <div className='stat-card'>
             <div className='stat-label'>已分配</div>
-            <div className='stat-value'>{stats.allocated}个</div>
+            <div className='stat-value'>{stats.allocated}<span className='stat-unit'>个</span></div>
           </div>
           <div className='stat-card'>
             <div className='stat-label'>预留</div>
-            <div className='stat-value'>{stats.reserved}个</div>
+            <div className='stat-value'>{stats.reserved}<span className='stat-unit'>个</span></div>
           </div>
           <div className='stat-card'>
             <div className='stat-label'>资产在线数</div>
-            <div className='stat-value'>{stats.online}个</div>
+            <div className='stat-value'>{stats.online}<span className='stat-unit'>个</span></div>
           </div>
           <div className='stat-card'>
             <div className='stat-label'>IP使用率</div>
-            <div className='stat-value'>{stats.usageRate}%</div>
+            <div className='stat-value'>{stats.usageRate}<span className='stat-unit'>%</span></div>
             <Progress className='stat-progress' percent={stats.usageRate} size='small' showInfo={false} />
           </div>
         </div>
@@ -390,6 +395,8 @@ function IpListPage() {
                 </Button>
                 <Button
                   onClick={() => {
+                    // 重置所有查询条件：维度回默认、值清空
+                    setFilterField('ip');
                     setFilterValue(undefined);
                   }}
                 >
@@ -429,7 +436,7 @@ function IpListPage() {
           </>
         ) : (
           <div className='ip-view-placeholder'>
-            <Empty description='IP视图待后端接口就绪后提供' />
+            <Empty description='IP视图' />
           </div>
         )}
 
@@ -487,6 +494,7 @@ function IpListPage() {
             handleRefresh();
           }}
         />
+        </div>
       </div>
     </PageLayout>
   );

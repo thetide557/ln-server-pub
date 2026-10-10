@@ -42,7 +42,12 @@ export default function GroupFormModal(props: GroupFormModalProps) {
     >
       <Form form={form} labelCol={{ flex: '90px' }}>
         {props.parentGroupName && !group && (
-          <div style={{ marginBottom: 12, paddingLeft: 90 }}>归属：{props.parentGroupName}</div>
+          <Form.Item
+            label='归属'
+          >
+            <div>{props.parentGroupName}</div>
+          </Form.Item>
+
         )}
         <Form.Item
           label='分组名称'
