@@ -25,7 +25,12 @@ const en_US = {
     secure_connection: "Secure connection (SSL/TLS)",
     skip_tls_verify: "Skip TLS verify",
     url_required_msg: "URL cannot be empty",
-    url_no_http_msg: "URL cannot start with http:// or https://"
+    url_no_http_msg: "URL cannot start with http:// or https://",
+    // ---- N36 批 H1 第 7 / 8 条（后端第九份第二节 6 / 7）：两句新提示，上游 fe 没有、羚牛自写。
+    // 这份文件原本只放「上游有、pub 缺」的键，这两条是自写文案，放这里是因为 datasourceManage
+    // 这个命名空间的新键都挂在它上面（见 ./index.ts 的 addResourceBundle(deep=true, overwrite=false)）。
+    cluster_match_tip: "Defaults to default. This name must match the alerting engine name exactly; if it does not, none of the alert rules on this data source are ever evaluated, and nothing on the page says so.",
+    vl_addr_tip: "Enter only scheme, host and port - no path and no trailing slash, e.g. http://localhost:9428."
   }
 };
 export default en_US;

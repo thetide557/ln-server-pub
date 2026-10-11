@@ -34,6 +34,9 @@ const en_US = {
     time_field_tip: '<span>To link this time picker, you need to use a time macro in the query condition</span><br/>Introduction to time macro usage: <a>Details</a>',
     query: 'Query',
     query_required: 'Query is required',
+    // ---- N36 批 H1 第 9 条（后端第九份第二节 8、第十份第二节 6）：面板 SQL 写法提示。羚牛自写，上游 fe 无。
+    dashboard_sql_tip:
+      'Alias the time column as `AS time` (the backend only recognises the column names time / __time__; without the alias the chart is empty and nothing is reported); inside $__timeFilter() use the original column name, not the alias; in time-series mode the value field under Auxiliary settings is required.',
     advancedSettings: {
       title: 'Auxiliary settings',
       tags_placeholder: 'Enter multiple tags by pressing Enter',

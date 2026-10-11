@@ -69,6 +69,10 @@ export default function MySQLQueryBuilder({ datasourceValue }) {
                     <Form.Item noStyle {...field} name={[field.name, 'refId']}>
                       <div />
                     </Form.Item>
+                    {/* ---- N36 批 H1 第 9 条（后端第九份第二节 8、第十份第二节 6）：面板 SQL 的两条硬要求写在输入框下面。
+                        ①时间列必须起别名 `AS time`——后端只认 `time` / `__time__` 这两个列名，漏了别名图是空的、还不报错；
+                        ②时序模式下「辅助配置」里的「值字段」（valueKey）必填，漏填后端直接回 `valueKey is required`。
+                        文案羚牛自写，上游 fe 没有这一行。 */}
                     <Form.Item
                       className='n9e-mysql-dashboard-querybuilder-query-item'
                       label={
@@ -100,6 +104,7 @@ export default function MySQLQueryBuilder({ datasourceValue }) {
                       {...field}
                       name={[field.name, 'query', 'query']}
                       validateTrigger={['onBlur']}
+                      extra={<span className='second-color'>{t('query.dashboard_sql_tip')}</span>}
                       rules={[
                         {
                           required: true,

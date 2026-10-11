@@ -25,7 +25,12 @@ const zh_CN = {
     secure_connection: "安全连接（SSL/TLS）",
     skip_tls_verify: "跳过 TLS 验证",
     url_required_msg: "URL 不能为空",
-    url_no_http_msg: "URL 不能以 http:// 或 https:// 开头"
+    url_no_http_msg: "URL 不能以 http:// 或 https:// 开头",
+    // ---- N36 批 H1 第 7 / 8 条（后端第九份第二节 6 / 7）：两句新提示，上游 fe 没有、羚牛自写。
+    // 这份文件原本只放「上游有、pub 缺」的键，这两条是自写文案，放这里是因为 datasourceManage
+    // 这个命名空间的新键都挂在它上面（见 ./index.ts 的 addResourceBundle(deep=true, overwrite=false)）。
+    cluster_match_tip: "默认填 default；这里的名字必须和告警引擎的名字一样，不一样的话这个数据源下的告警规则一条都不会被求值（界面上不会报错）。",
+    vl_addr_tip: "只填协议、主机和端口，不要带路径，也不要带结尾的斜杠，例如 http://localhost:9428。"
   }
 };
 export default zh_CN;

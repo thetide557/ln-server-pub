@@ -36,8 +36,17 @@ export default function FormCpt({ action, data, onFinish, submitLoading }: any) 
         {/* N33 批 A-4（B-5）：地址加必填。后端 datasource/victorialogs/victorialogs.go:96-97
             对空地址报 `victorialogs.addr is required`。
             上游 fe（v9.1.0 与 ee48e701 的同文件 :36）没有 rules → 羚牛自修。 */}
-        <Form.Item label='HTTP' name={['settings', `${cate}.addr`]} rules={[{ required: true }]}>
-          <Input autoComplete='off' placeholder='http://localhost:9428/' />
+        {/* ---- N36 批 H1 第 7 条（后端第九份第二节 6）：VictoriaLogs 的地址**不带任何路径、也不带尾斜杠**
+            （后端实测；loki 那边反过来，必须以 `/loki` 结尾）。上游 fe `ee48e701` 同文件 :37 的 placeholder
+            写的是 `http://localhost:9428/`，带尾斜杠——照抄会被用户当样板跟着填，所以这里**故意偏离上游**
+            去掉尾斜杠，并在下面加一句说明。lead 预拍 D-N36-19。 */}
+        <Form.Item
+          label='HTTP'
+          name={['settings', `${cate}.addr`]}
+          rules={[{ required: true }]}
+          extra={<span className='second-color'>{t('form.vl_addr_tip')}</span>}
+        >
+          <Input autoComplete='off' placeholder='http://localhost:9428' />
         </Form.Item>
         <Row gutter={SIZE * 2}>
           <Col span={12}>

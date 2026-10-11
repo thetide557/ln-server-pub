@@ -5,6 +5,9 @@ const zh_CN = {
     execute: '查询',
     query: 'SQL',
     query_required: 'SQL不能为空',
+    // ---- N36 批 H1 第 9 条（后端第九份第二节 8、第十份第二节 6）：面板 SQL 写法提示。羚牛自写，上游 fe 无。
+    dashboard_sql_tip:
+      '时间列要起别名 `AS time`（后端只认 time / __time__ 两个列名，漏了别名图是空的、还不报错）；时序模式下「辅助配置」的「值字段」必填。',
     query_placeholder: '输入 SQL 进行查询，按 Shift+Enter 换行',
     query_placeholder2: '按 Shift+Enter 换行',
     advancedSettings: {

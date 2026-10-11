@@ -7,6 +7,9 @@ const en_US = {
     execute: 'Execute',
     query: 'SQL',
     query_required: 'SQL is required',
+    // ---- N36 批 H1 第 9 条（后端第九份第二节 8、第十份第二节 6）：面板 SQL 写法提示。羚牛自写，上游 fe 无。
+    dashboard_sql_tip:
+      'Alias the time column as `AS time` (the backend only recognises the column names time / __time__; without the alias the chart is empty and nothing is reported); in time-series mode the value field under Auxiliary settings is required.',
     query_placeholder: 'Enter SQL to query. Press Shift+Enter for a new line',
     query_placeholder2: 'Press Shift+Enter for a new line',
     advancedSettings: {

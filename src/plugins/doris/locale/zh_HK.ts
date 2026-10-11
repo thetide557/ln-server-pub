@@ -33,6 +33,9 @@ const zh_HK = {
     time_field_tip: '<span>需在查詢條件中使用時間宏才能聯動此時間選擇器</span><br/>時間宏使用介紹: <a>詳情</a>',
     query: '查詢條件',
     query_required: '查詢條件不能為空',
+    // ---- N36 批 H1 第 9 条（后端第九份第二节 8、第十份第二节 6）：面板 SQL 写法提示。羚牛自写，上游 fe 无。
+    dashboard_sql_tip:
+      '時間列要起別名 `AS time`（後端只認 time / __time__ 兩個列名，漏了別名圖是空的、還不報錯）；`$__timeFilter()` 括號裡寫原列名、不寫別名；時序模式下「輔助配置」的「值欄位」必填。',
     advancedSettings: {
       title: '輔助配置',
       tags_placeholder: '回車輸入多個',
