@@ -19,6 +19,9 @@ const zh_CN = {
   duration: '持续时长',
   severity_label: '触发告警',
   prom_eval_interval: '执行频率 (s)',
+  // ---- N36 批 H1 第 4 条：SQL 型数据源的取数窗口提示（后端第九份第二节 4、第十份第二节 7）。文案自写，上游无。
+  prom_eval_interval_sql_tip:
+    'SQL 型数据源（mysql / pgsql / doris / ck / tdengine）请按数据写入频率把查询里的「时间间隔」调大：告警取数的窗口只有那么宽，数据最后一个点不在窗口里，就会「面板出图、告警永不触发」，或者事件冒出来几十秒后又自动恢复。',
   prom_for_duration: '持续时长 (s)',
   effective_configs: '生效配置',
   enable_status: '立即启用',

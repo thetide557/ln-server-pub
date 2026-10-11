@@ -223,6 +223,20 @@ export default function Shard(props: IProps) {
                     />
                   </Form.Item>
                 </Col>
+                {/* ---- N36 批 H1 第 1 条（后端第九份第二节 1，`A-MYSQL-DSN-LOC-01`）：
+                    界面建的 mysql 数据源，查出来的时间戳整体 +8 小时。原因是 go-sql-driver 不带 `loc` 参数时
+                    按 UTC 解析 DATETIME；后端收 `settings['mysql.shards'][i]['mysql.dsn_extra_params']`
+                    （`ln-server/dskit/mysql/mysql.go:37`，分片级键），原样拼进 DSN 的 query 片段
+                    （`dskit/mysql/dsn_params.go:18-52` 的 NormalizeDSNExtraParams，带不带开头的 `?` / `&` 都接）。
+                    所以这里给一个默认 `loc=Local` 的输入框，界面建的源就不再偏 8 小时。
+                    上游 fe `ee48e701` 全仓 `git grep dsn_extra_params` 零命中 → **上游无此栏**，按后端键名自加
+                    （lead 预拍 D-N36-18）。这个组件只被 mysql 的 Conn 用（pgsql 走 `@/components/DBSettings/Conn`），
+                    所以用 `${type}` 拼键不会串到别的源。 */}
+                <Col span={12}>
+                  <Form.Item label={t(`datasource.dsn_extra_params`)} tooltip={t(`datasource.dsn_extra_params_tip`)} {...restField} name={[name, `${type}.dsn_extra_params`]} initialValue='loc=Local'>
+                    <Input placeholder='loc=Local' />
+                  </Form.Item>
+                </Col>
               </Row>
             </div>
           </div>

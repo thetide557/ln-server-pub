@@ -75,5 +75,27 @@ const en_US = {
     timeout: 'Timeout (unit: seconds)',
     timeout_ms: 'Timeout (unit: milliseconds)',
   },
+  // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器上 `datasource:query.title` 这一串
+  // 直接把键名原文显示出来了（引用点 `src/plugins/doris/AlertRule/index.tsx:91` / `:124`，
+  // 还有 `src/plugins/TDengine/AlertRule/Queries/index.tsx:62`、`src/plugins/clickHouse/AlertRule/Queries/index.tsx:77`）。
+  // pub 这份词条里原来根本没有顶层的 `query` 段，所以整段按上游 fe `ee48e701:src/locales/datasource/locale/<lang>.ts`
+  // 的 `query` 段**逐字抄**过来（只加不改，pub 原有的键一个没动）。
+  query: {
+    title: 'Queries',
+    execute: 'Execute',
+    query: 'Query',
+    query_required: 'Query is required',
+    query_placeholder: 'Enter SQL to query. Press Shift+Enter for a new line',
+    query_placeholder2: 'Press Shift+Enter for a new line',
+    advancedSettings: {
+      title: 'Auxiliary settings',
+      tags_placeholder: 'Enter multiple tags by pressing Enter',
+      valueKey: 'Value field',
+      valueKey_tip: 'SQL query results usually contain multiple columns; specify which columns are displayed as series on the chart',
+      valueKey_required: 'Value field is required',
+      labelKey: 'Label field',
+      labelKey_tip: 'SQL query results usually contain multiple columns; specify which columns are used as label metadata for series',
+    },
+  },
 };
 export default en_US;

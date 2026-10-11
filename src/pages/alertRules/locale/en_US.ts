@@ -19,6 +19,9 @@ const en_US = {
   duration: 'Duration',
   severity_label: 'Severity',
   prom_eval_interval: 'Interval (s)',
+  // ---- N36 批 H1 第 4 条：SQL 型数据源的取数窗口提示（后端第九份第二节 4、第十份第二节 7）。文案自写，上游无。
+  prom_eval_interval_sql_tip:
+    'For SQL data sources (mysql / pgsql / doris / ck / tdengine), raise the query interval to match how often data is written: the alert query window is only that wide, so if the latest data point falls outside it the panel still draws a chart while the alert never fires, or the event resolves itself seconds after firing.',
   prom_for_duration: 'Duration (s)',
   effective_configs: 'Effective Configs',
   enable_status: 'Enable Now',

@@ -76,5 +76,27 @@ const zh_CN = {
     timeout: '超时时间（单位: 秒）',
     timeout_ms: '超时时间（单位: 毫秒）',
   },
+  // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器上 `datasource:query.title` 这一串
+  // 直接把键名原文显示出来了（引用点 `src/plugins/doris/AlertRule/index.tsx:91` / `:124`，
+  // 还有 `src/plugins/TDengine/AlertRule/Queries/index.tsx:62`、`src/plugins/clickHouse/AlertRule/Queries/index.tsx:77`）。
+  // pub 这份词条里原来根本没有顶层的 `query` 段，所以整段按上游 fe `ee48e701:src/locales/datasource/locale/<lang>.ts`
+  // 的 `query` 段**逐字抄**过来（只加不改，pub 原有的键一个没动）。
+  query: {
+    title: '查询统计',
+    execute: '查询',
+    query: '查询条件',
+    query_required: '查询条件不能为空',
+    query_placeholder: '输入 SQL 进行查询，按 Shift+Enter 换行',
+    query_placeholder2: '按 Shift+Enter 换行',
+    advancedSettings: {
+      title: '辅助配置',
+      tags_placeholder: '回车输入多个',
+      valueKey: '值字段',
+      valueKey_tip: 'SQL 查询结果通常包含多个列，您可以指定哪些列的值作为曲线展示在图表上',
+      valueKey_required: '值字段不能为空',
+      labelKey: '标签字段',
+      labelKey_tip: 'SQL 查询结果通常包含多个列，您可以指定哪些列作为曲线的标签元信息',
+    },
+  },
 };
 export default zh_CN;

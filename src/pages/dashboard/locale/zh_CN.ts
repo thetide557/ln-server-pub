@@ -293,6 +293,11 @@ const zh_CN = {
   },
   query: {
     title: '查询条件',
+    // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：仪表盘面板编辑器的「添加查询条件 / 添加表达式」两个按钮
+    //（`src/pages/dashboard/Editor/Components/AddQueryButtons/index.tsx:22` / `:30`）显示键名原文；
+    // 值逐字抄上游 fe `ee48e701:src/pages/dashboard/locale/<lang>.ts:683-684`。
+    add_query_btn: '添加查询条件',
+    add_expression_btn: '添加表达式',
     transform: '数据转换',
     datasource_placeholder: '请选择数据源',
     datasource_msg: '请选择数据源',

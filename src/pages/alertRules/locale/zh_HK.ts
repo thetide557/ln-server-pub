@@ -19,6 +19,9 @@ const zh_HK = {
   duration: '持續時長',
   severity_label: '觸發告警',
   prom_eval_interval: '執行頻率 (s)',
+  // ---- N36 批 H1 第 4 條：SQL 型資料源的取數視窗提示（後端第九份第二節 4、第十份第二節 7）。文案自寫，上游無。
+  prom_eval_interval_sql_tip:
+    'SQL 型資料源（mysql / pgsql / doris / ck / tdengine）請按資料寫入頻率把查詢裡的「時間間隔」調大：告警取數的視窗只有那麼寬，資料最後一個點不在視窗裡，就會「面板出圖、告警永不觸發」，或者事件冒出來幾十秒後又自動恢復。',
   prom_for_duration: '持續時長 (s)',
   effective_configs: '生效配置',
   enable_status: '立即啟用',

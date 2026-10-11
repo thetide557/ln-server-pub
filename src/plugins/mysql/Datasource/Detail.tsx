@@ -62,6 +62,11 @@ export default function MysqlLike(props: Props) {
               <Col span={24} className='second-color'>
                 {item[`${type}.conn_max_lifetime`] || '-'}
               </Col>
+              {/* N36 批 H1 第 1 条：表单加了 dsn_extra_params 栏，详情页顺手显示（上游无此栏） */}
+              <Col span={24}>{t('datasource.dsn_extra_params')}</Col>
+              <Col span={24} className='second-color'>
+                {item[`${type}.dsn_extra_params`] || '-'}
+              </Col>
             </Row>
           </div>
         ))}

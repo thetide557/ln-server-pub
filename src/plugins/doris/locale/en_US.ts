@@ -87,8 +87,9 @@ const en_US = {
     default_search_by_tip: 'Default search field',
     datasource_disabled_tip: 'Please select a data source first',
     interval: 'Interval',
+    // ---- N36 批 H1 第 4 条：原文一字未改，只在末尾补一句（后端第九份第二节 4、第十份第二节 7 实测）。
     interval_tip:
-      'The query interval configuration will only take effect when the $__timeFilter time macro is used in the SQL.<br />The alerting system will limit the data scanning range based on this time window to ensure alert timeliness and database performance',
+      'The query interval configuration will only take effect when the $__timeFilter time macro is used in the SQL.<br />The alerting system will limit the data scanning range based on this time window to ensure alert timeliness and database performance<br />Raise it to match how often data is written: the window is only that wide, so if the latest data point falls outside it the panel still draws a chart while the alert never fires, or the event resolves itself seconds after firing.',
     offset: 'Offset',
     offset_tip:
       'On the basis of the current query time, offset a specified number of seconds forward before executing the query, similar to offset in PromQL.<br />It is commonly used to handle scenarios such as data write delay and link delay to avoid alert misreporting due to data not arriving in time',

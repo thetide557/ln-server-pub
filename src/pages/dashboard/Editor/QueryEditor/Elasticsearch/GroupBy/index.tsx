@@ -23,11 +23,17 @@ export default function index({ prefixField = {}, prefixFieldNames = [], parentN
   const [fieldsOptions, setFieldsOptions] = useState<any[]>([]);
   const { run } = useDebounceFn(
     () => {
-      // step6f（ES 升级轮）：fe v9.1.0 这里传 `{ includeSubFields: true }`，
-      // 羚牛 pub 的 getFullFields 第三个参数还是老的字符串 type，没有 includeSubFields
-      //（pub `src/pages/explorer/Elasticsearch/services.ts:76`）；pub 现有共享文件不许改，
-      // 这里退成只传前两个参数，差别是分组字段下拉里不出现 `xxx.keyword` 这类子字段。已登记。
-      getFullFields(datasourceValue, index).then((res) => {
+      // step6f（ES 升级轮）原注：fe v9.1.0 这里传 `{ includeSubFields: true }`，当时 pub 的 getFullFields
+      // 第三个参数还是老的字符串 type、没有 includeSubFields，所以退成只传前两个参数。
+      // ---- N36 批 H1 第 2 条（后端第九份第二节 2）：那个共享函数后来已经按上游升过了
+      //（`src/pages/explorer/Elasticsearch/services.ts:97-110` 的 options 里就有 includeSubFields，
+      // 实现见 `src/pages/explorer/Elasticsearch/utils/index.tsx:93-120`），这里恢复成上游写法
+      //（上游 fe `ee48e701` 同文件 :29-31 一字不差）。
+      // 不传的话分组字段下拉里只有 `xxx` 这个 text 字段、没有 `xxx.keyword`，用户只能选 text 型，
+      // ES 直接回 `Fielddata is disabled on text fields by default`——后端那条反馈就是这么来的。
+      getFullFields(datasourceValue, index, {
+        includeSubFields: true,
+      }).then((res) => {
         setFieldsOptions(
           _.map(res.allFields, (item) => {
             return {

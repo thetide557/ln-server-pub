@@ -17,6 +17,10 @@ const en_US = {
     // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/en_US.ts:68-69 两条。
     expand: 'Expand',
     collapse: 'Collapse',
+    // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器的「数据预览」按钮
+    //（`src/plugins/doris/AlertRule/GraphPreview.tsx:101` / `:164`）直接显示键名原文；
+    // 值逐字抄上游 fe `ee48e701:src/locales/common/locale/<lang>.ts` 的 `btn.data_preview`。
+    data_preview: 'Preview',
     add: 'Add',
     create: 'Create',
     modify: 'Modify',

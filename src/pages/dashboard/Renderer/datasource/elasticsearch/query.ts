@@ -172,6 +172,25 @@ export default async function elasticSearchQuery(options: IOptions): Promise<Res
           dsPlayload += esQuery + '\n';
         });
         dsRes = await getDsQuery(datasourceValue, dsPlayload);
+        // ---- N36 批 H1 第 2 条（后端第九份第二节 2）：`_msearch` 报错时把错误原因冒出来，别只画一张空图。
+        // ES 的 `/_msearch` 出错时 HTTP 仍是 200，错误装在 `responses[i].error` 里；pub 的
+        // `src/utils/request.ts` 对 `/api/n9e/proxy` 这类地址是「200 就原样返回、不查错误字段」，
+        // 所以错误会一路走到这里。不判的话 `processResponseToSeries` 把它当成「查到 0 条」，
+        // 面板显示空图、用户看不到一个字（典型：Group By 选了 text 型字段，ES 回
+        // `Fielddata is disabled on text fields by default`）。
+        // 这里抛出来之后由 `src/pages/dashboard/Renderer/datasource/useQuery.tsx:116-118` 的 .catch
+        // setError(e.message)，面板上就能看到原因。
+        // reason 优先取 `root_cause[0].reason`：ES 顶层 reason 常是「all shards failed」这种没信息量的话。
+        // 做法与 N33 在即时查询那条路上的同款一致（`src/pages/explorer/Elasticsearch/services.ts:206-209`，
+        // 对应测试 `src/__tests__/step6d/step6h-w0/esGetLogsQueryError.test.ts`）。
+        // 上游 fe `ee48e701` 的同文件（`.../elasticsearch/index.ts`）也没判 error → **上游无**，羚牛自加。
+        const esError = _.get(
+          _.find(dsRes, (item: any) => !!_.get(item, 'error')),
+          'error',
+        );
+        if (esError) {
+          throw new Error(_.get(esError, 'root_cause[0].reason') || _.get(esError, 'reason') || JSON.stringify(esError));
+        }
         series = _.map(processResponseToSeries(dsRes, batchDsParams), (item) => {
           return {
             id: _.uniqueId('series_'),

@@ -53,6 +53,9 @@ const zh_HK = {
     max_open_conns: '最大打開連接數',
     conn_max_lifetime: '連接最大生存時間 （單位: 秒）',
     timeout: '超時時間 （單位: 秒）',
+    // ---- N36 批 H1 第 1 條：mysql 的 DSN 額外參數（後端鍵 `mysql.dsn_extra_params`）。上游 fe 無此欄，文案自寫。
+    dsn_extra_params: 'DSN 額外參數',
+    dsn_extra_params_tip: '拼在資料庫連接串後面的參數，寫法同 go-sql-driver，多個用 & 隔開。預設 loc=Local：不填這個的話驅動按 UTC 解析時間列，查出來的時間會整體偏 8 小時。',
   },
 };
 

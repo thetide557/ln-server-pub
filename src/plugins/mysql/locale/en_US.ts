@@ -54,6 +54,9 @@ const en_US = {
     max_open_conns: 'Maximum open connections',
     conn_max_lifetime: 'Maximum connection lifetime (unit: seconds)',
     timeout: 'Timeout (unit: seconds)',
+    // ---- N36 批 H1 第 1 条：mysql 的 DSN 额外参数（后端键 `mysql.dsn_extra_params`）。上游 fe 无此栏，文案自写。
+    dsn_extra_params: 'DSN extra params',
+    dsn_extra_params_tip: 'Extra parameters appended to the database connection string, in go-sql-driver syntax; separate multiple ones with &. Default loc=Local: without it the driver parses datetime columns as UTC and every timestamp comes back 8 hours off.',
   },
 };
 export default en_US;

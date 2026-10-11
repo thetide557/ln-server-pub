@@ -18,6 +18,10 @@ const zh_CN = {
     // 新搬的 Loki 日志行组件 t('common:btn.expand') / t('common:btn.collapse') 用。
     expand: '展开',
     collapse: '收起',
+    // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器的「数据预览」按钮
+    //（`src/plugins/doris/AlertRule/GraphPreview.tsx:101` / `:164`）直接显示键名原文；
+    // 值逐字抄上游 fe `ee48e701:src/locales/common/locale/<lang>.ts` 的 `btn.data_preview`。
+    data_preview: '数据预览',
     add: "新增",
     create: "创建",
     modify: "修改",

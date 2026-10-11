@@ -53,6 +53,9 @@ const zh_CN = {
     max_open_conns: '最大打开连接数',
     conn_max_lifetime: '连接最大生存时间（单位: 秒）',
     timeout: '超时时间（单位: 秒）',
+    // ---- N36 批 H1 第 1 条：mysql 的 DSN 额外参数（后端键 `mysql.dsn_extra_params`）。上游 fe 无此栏，文案自写。
+    dsn_extra_params: 'DSN 额外参数',
+    dsn_extra_params_tip: '拼在数据库连接串后面的参数，写法同 go-sql-driver，多个用 & 隔开。默认 loc=Local：不填这个的话驱动按 UTC 解析时间列，查出来的时间会整体偏 8 小时。',
   },
 };
 export default zh_CN;
