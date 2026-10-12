@@ -464,9 +464,9 @@ export function scanRecyclable(segmentId: number): Promise<{ hitCount: number }>
   return delay({ hitCount: hit.length || 9 }, 1000);
 }
 
-/** 批量扫描选中的IP（mock：闲置天数>0 视为命中，已加入可回收列表） */
-export function batchScanIps(ids: number[]): Promise<{ hitCount: number }> {
-  const hit = _.filter(ips, (item) => _.includes(ids, item.id) && (item.idleDays || 0) > 0);
+/** 批量扫描选中的IP（mock：闲置天数>0 视为命中，已加入可回收列表；入参兼容 id 或 ip，联调后页面勾选值为 ip） */
+export function batchScanIps(ids: Array<number | string>): Promise<{ hitCount: number }> {
+  const hit = _.filter(ips, (item) => (_.includes(ids, item.id) || _.includes(ids, item.ip)) && (item.idleDays || 0) > 0);
   return delay({ hitCount: hit.length }, 1000);
 }
 
@@ -627,8 +627,9 @@ export function changeIp(id: number, data: { assetName?: string; mac?: string; n
   return delay({ success: true });
 }
 
-export function deleteIp(id: number): Promise<{ success: boolean }> {
-  _.remove(ips, { id });
+/** 删除IP（后端删除接口暂未提供，保留 mock；入参兼容 id 或 ip） */
+export function deleteIp(idOrIp: number | string): Promise<{ success: boolean }> {
+  _.remove(ips, (item) => item.id === idOrIp || item.ip === idOrIp);
   return delay({ success: true });
 }
 

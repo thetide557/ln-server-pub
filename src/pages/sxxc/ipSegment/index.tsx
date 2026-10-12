@@ -4,7 +4,7 @@
  * 布局：左侧分组组织树 + 右侧（统计卡片 / 筛选 / 地址段表格 / 弹窗体系）
  * 数据：mock.ts（后端接口就绪后替换为真实 service）
  */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Dropdown, Empty, Input, Menu, message, Modal, notification, Progress, Select, Table, Tabs, Tag } from 'antd';
 import { GroupOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
 import _ from 'lodash';
@@ -24,27 +24,23 @@ import {
   addGroup,
   addSegment,
   assignIp,
-  batchScanIps,
   changeIp,
-  collectGroupIds,
   deleteGroup,
-  deleteIp,
   deleteSegment,
   editGroup,
   editSegment,
   enableSegment,
-  getGroups,
-  getIpList,
-  getIpStats,
-  getRecyclableIps,
-  getSegments,
-  hostCount,
-  recycleIps,
+  getIpDetail,
+  getSegmentAddresses,
+  getSegmentList,
+  getSubnetDetail,
+  getTreeData,
+  IpamGroupVO,
   recycleOneIp,
   releaseIp,
   reserveIp,
-  scanRecyclable,
-} from './mock';
+} from '@/services/sxxc/ipam';
+import { batchScanIps, collectGroupIds, deleteIp, getRecyclableIps, recycleIps, scanRecyclable } from './mock';
 import {
   IpAllocStatus,
   ipAllocStatusMap,
@@ -110,6 +106,8 @@ function IpSegmentPage() {
   const [segments, setSegments] = useState<IpSegment[]>([]);
   const [tableData, setTableData] = useState<IpSegment[]>([]);
   const [stats, setStats] = useState<SegmentStats>({ total: 0, usageRate: 0, allocated: 0, reserved: 0, remaining: 0, segmentCount: 0 });
+  /** 当前查询分组的信息（来自地址段列表接口，含负责人 owner） */
+  const [groupInfo, setGroupInfo] = useState<IpamGroupVO>();
 
   const [selectedGroupId, setSelectedGroupId] = useState<number>();
   const [selectedSegmentId, setSelectedSegmentId] = useState<number>();
@@ -118,22 +116,34 @@ function IpSegmentPage() {
   // 筛选条件：维度（地址段/负责人/地址段状态）+ 值，两框联动，切换维度时清空值
   const [filterField, setFilterField] = useState<FilterField>('segment');
   const [filterValue, setFilterValue] = useState<string | number>();
+  /** 已提交的地址段查询条件（点击「查询」才生效） */
+  const [submittedFilter, setSubmittedFilter] = useState<{ field?: FilterField; value?: string | number }>({});
+  /** 地址段表格服务端分页 */
+  const [current, setCurrent] = useState(1);
+  const [serverTotal, setServerTotal] = useState(0);
 
   // ===== 选中地址段时：IP 视角状态 =====
   /** 选中段的 IP 全量列表 */
   const [ipList, setIpList] = useState<IpItem[]>([]);
   /** IP 视角统计 */
   const [ipStats, setIpStats] = useState<IpStats>({ total: 0, allocated: 0, reserved: 0, online: 0, usageRate: 0 });
+  /** 选中段的完整信息（列表接口返回，用于概览头展示负责人/描述等） */
+  const [ipSegmentInfo, setIpSegmentInfo] = useState<IpSegment>();
   /** IP 视角 tab：ip-list / ip-view */
   const [ipActiveTab, setIpActiveTab] = useState<string>('ip-list');
   /** IP 视角筛选 */
   const [ipFilterField, setIpFilterField] = useState<IpFilterField>('ip');
   const [ipFilterValue, setIpFilterValue] = useState<string | number>();
+  /** 已提交的 IP 查询条件（点击「查询」才生效） */
+  const [ipSubmittedFilter, setIpSubmittedFilter] = useState<{ field?: IpFilterField; value?: string | number }>({});
+  /** IP 表格服务端分页 */
+  const [ipCurrent, setIpCurrent] = useState(1);
+  const [ipTotal, setIpTotal] = useState(0);
   /** IP 行操作弹窗 */
   const [ipAction, setIpAction] = useState<IpActionType>();
   const [currentIp, setCurrentIp] = useState<IpItem>();
   /** IP 表格选中行 */
-  const [ipSelectedRowKeys, setIpSelectedRowKeys] = useState<number[]>([]);
+  const [ipSelectedRowKeys, setIpSelectedRowKeys] = useState<string[]>([]);
   /** IP 批量导入/导出弹窗 */
   const [ipImportVisible, setIpImportVisible] = useState(false);
   const [ipExportVisible, setIpExportVisible] = useState(false);
@@ -156,13 +166,16 @@ function IpSegmentPage() {
   /** 左侧分组树宽度 */
   const [width, setWidth] = useState<number>(270);
 
+  /** 拉取组织树（一次 tree 请求同时得到分组与树上地址段节点） */
   const fetchAll = () => {
     setLoading(true);
-    Promise.all([getGroups(), getSegments()]).then(([groupRes, segmentRes]) => {
-      setGroups(groupRes);
-      setSegments(segmentRes.list);
-      setLoading(false);
-    });
+    getTreeData()
+      .then(({ groups: groupList, segments: segmentList }) => {
+        setGroups(groupList);
+        setSegments(segmentList);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -192,87 +205,101 @@ function IpSegmentPage() {
     }
   }, [location.state, groups]);
 
-  // 选中地址段时拉取该段 IP 列表与统计（IP 视角）
+// 选中地址段时：切换 IP 视角并重置 IP 查询分页（点击哪个段查哪个，不做缓存）
   useEffect(() => {
     if (selectedSegmentId) {
-      getIpList({ segmentId: selectedSegmentId }).then((res) => setIpList(res.list));
-      getIpStats(selectedSegmentId).then((res) => setIpStats(res));
       setIpActiveTab('ip-list');
       setIpSelectedRowKeys([]);
+      setIpCurrent(1);
+      // 引用保稳：无变化时不触发重渲染，避免依赖变化导致重复请求
+      setIpSubmittedFilter((prev) => (_.isEmpty(prev) ? prev : {}));
     } else {
       setIpList([]);
+      setIpTotal(0);
     }
-  }, [selectedSegmentId, refreshFlag]);
+  }, [selectedSegmentId]);
 
-  /** IP 视角筛选后的列表 */
-  const filteredIpList = useMemo<IpItem[]>(() => {
-    let result: IpItem[] = ipList;
-    if (ipFilterField && ipFilterValue !== undefined && ipFilterValue !== '') {
-      if (ipFilterField === 'ip') {
-        result = _.filter(result, (item) => item.ip.indexOf(String(ipFilterValue)) > -1);
-      } else if (ipFilterField === 'owner') {
-        // mock 中 IP 无独立负责人字段，按备注/资产名近似匹配
-        result = _.filter(result, (item) => (item.note || '').indexOf(String(ipFilterValue)) > -1 || (item.assetName || '').indexOf(String(ipFilterValue)) > -1);
-      } else if (ipFilterField === 'assetName') {
-        result = _.filter(result, (item) => item.assetName !== undefined && item.assetName.indexOf(String(ipFilterValue)) > -1);
-      } else if (ipFilterField === 'mac') {
-        result = _.filter(result, (item) => item.mac !== undefined && item.mac.indexOf(String(ipFilterValue)) > -1);
-      } else {
-        const match: Partial<IpItem> = { [ipFilterField]: Number(ipFilterValue) } as Partial<IpItem>;
-        result = _.filter(result, match);
-      }
-    }
-    return result;
-  }, [ipList, ipFilterField, ipFilterValue]);
+  /** IP 查询维度 → 后端参数（后端支持 query 匹配 IP/资产名/MAC 与 allocation_status） */
+  const buildIpQuery = () => {
+    const { field, value } = ipSubmittedFilter;
+    if (value === undefined || value === '') return {} as { query?: string; allocStatus?: number };
+    if (field === 'ip' || field === 'assetName' || field === 'mac') return { query: String(value) };
+    if (field === 'allocStatus') return { allocStatus: Number(value) };
+    return {};
+  };
+
+  /** 拉取选中段的 IP 列表（服务端分页 + 服务端查询，一次请求同时得到列表/总数/统计） */
+  const fetchIpData = () => {
+    if (!selectedSegmentId) return;
+    const q = buildIpQuery();
+    setLoading(true);
+    getSegmentAddresses(selectedSegmentId, {
+      page: ipCurrent,
+      limit: pagination.pageSize,
+      query: q.query,
+      allocStatus: q.allocStatus,
+    })
+      .then((res) => {
+        setIpList(res.list);
+        setIpTotal(res.total);
+        setIpStats(res.stats);
+        if (res.segment) setIpSegmentInfo(res.segment);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchIpData();
+  }, [selectedSegmentId, refreshFlag, ipCurrent, pagination.pageSize, ipSubmittedFilter]);
 
   /** IP 视角当前维度对应的枚举选项（有则为下拉） */
   const ipEnumOptions = ipFilterField ? IP_ENUM_OPTIONS[ipFilterField] : undefined;
 
-  /** 当前选中地址段对象 */
-  const selectedSegmentObj = useMemo(() => _.find(segments, { id: selectedSegmentId }), [segments, selectedSegmentId]);
-
   /** 当前筛选维度对应的控件类型 */
   const filterType: 'input' | 'select' | undefined = QUERY_FILTERS.find((item) => item.name === filterField)?.type;
 
-  /** 范围过滤（选中分组聚合/选中地址段）+ 筛选条件过滤的统一入口 */
-  const applyFilters = () => {
-    let list = segments;
-    if (selectedSegmentId) {
-      list = _.filter(list, { id: selectedSegmentId });
-    } else if (selectedGroupId) {
-      const groupIds = collectGroupIds(selectedGroupId, groups);
-      list = _.filter(list, (item) => groupIds.includes(item.groupId));
-    }
-    if (filterField === 'segment' && filterValue) {
-      list = _.filter(list, (item) => item.fullSegment.indexOf(String(filterValue)) > -1);
-    } else if (filterField === 'owner' && filterValue) {
-      list = _.filter(list, (item) => item.owner.indexOf(String(filterValue)) > -1);
-    } else if (filterField === 'status' && filterValue !== undefined && filterValue !== '') {
-      list = _.filter(list, { status: Number(filterValue) });
-    }
-    return list;
+  /** 地址段查询维度 → 后端参数（query 匹配 cidr/name/owner/vlan；status 为地址段状态） */
+  const buildSegmentQuery = () => {
+    const { field, value } = submittedFilter;
+    if (value === undefined || value === '') return {} as { query?: string; status?: SegmentStatus };
+    if (field === 'segment' || field === 'owner') return { query: String(value) };
+    if (field === 'status') return { status: Number(value) as SegmentStatus };
+    return {};
   };
 
-  // 选中分组/地址段、筛选条件变化时刷新表格与统计
+  /** 拉取地址段列表（服务端分页 + 服务端查询；点击分组只查该组，不传则为全部） */
+  const fetchTableData = () => {
+    const q = buildSegmentQuery();
+    setLoading(true);
+    getSegmentList({
+      segmentId: selectedSegmentId,
+      groupId: selectedGroupId,
+      page: current,
+      limit: pagination.pageSize,
+      query: q.query,
+      status: q.status,
+    })
+      .then((res) => {
+        setTableData(res.list);
+        setServerTotal(res.total);
+        if (res.stats) setStats(res.stats);
+        if (res.group) setGroupInfo(res.group);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
+
+  // 选中分组、服务端分页/查询条件变化时重新拉取列表与统计
+  // 选中地址段时右侧切换为 IP 视角，地址段列表不可见，无需请求（IP 列表由 fetchIpData 负责）
   useEffect(() => {
-    const list = applyFilters();
-    setTableData(list);
-    const total = _.sumBy(list, (item) => hostCount(item.mask));
-    const allocated = _.sumBy(list, 'allocatedCount');
-    const reserved = _.sumBy(list, 'reservedIpCount');
-    const remaining = total - allocated - reserved;
-    setStats({
-      total,
-      usageRate: total ? Math.min(100, _.round(((allocated + reserved) / total) * 100)) : 0,
-      allocated,
-      reserved,
-      remaining: remaining > 0 ? remaining : 0,
-      segmentCount: list.length,
-    });
-  }, [segments, groups, selectedGroupId, selectedSegmentId, filterField, filterValue, refreshFlag]);
+    if (selectedSegmentId) return;
+    fetchTableData();
+  }, [selectedGroupId, selectedSegmentId, current, pagination.pageSize, submittedFilter, refreshFlag]);
 
   const handleSearch = () => {
-    setTableData(applyFilters());
+    setCurrent(1);
+    setSubmittedFilter({ field: filterField, value: filterValue });
   };
 
   const showScanNotification = (hitCount: number) => {
@@ -290,6 +317,21 @@ function IpSegmentPage() {
       hide();
       showScanNotification(res.hitCount);
     });
+  };
+
+  /** 打开地址段弹窗：编辑/查看前先按 id 拉取详情（树节点/列表行字段不全） */
+  const openSegmentForm = (segment: IpSegment, mode: 'edit' | 'view') => {
+    getSubnetDetail(segment.id)
+      .then((detail) => {
+        if (mode === 'edit') {
+          setEditingSegment(detail);
+          setAddGroupForSegment(undefined);
+          setSegmentFormVisible(true);
+        } else {
+          setViewSegment(detail);
+        }
+      })
+      .catch(() => {});
   };
 
   const columns: ColumnsType<IpSegment> = [
@@ -337,7 +379,7 @@ function IpSegmentPage() {
       fixed: 'right',
       render: (_, record) => (
         <>
-          <Button type='link' size='small' style={{ padding: 0 }} onClick={() => setViewSegment(record)}>
+          <Button type='link' size='small' style={{ padding: 0 }} onClick={() => openSegmentForm(record, 'view')}>
             查看
           </Button>
           {record.status !== SegmentStatus.Disabled && (
@@ -345,10 +387,7 @@ function IpSegmentPage() {
               type='link'
               size='small'
               style={{ padding: 0, marginLeft: 8 }}
-              onClick={() => {
-                setEditingSegment(record);
-                setSegmentFormVisible(true);
-              }}
+              onClick={() => openSegmentForm(record, 'edit')}
             >
               编辑
             </Button>
@@ -524,10 +563,19 @@ function IpSegmentPage() {
           setCurrentIp(record);
           setIpAction(type);
         };
+        // 查看：以详情接口为准（列表行字段可能不全），先查详情再打开弹窗
+        const openIpView = () => {
+          getIpDetail({ ip: record.ip, segmentId: record.segmentId })
+            .then((detail) => {
+              setCurrentIp(detail);
+              setIpAction('view');
+            })
+            .catch(() => {});
+        };
         if (record.allocStatus === IpAllocStatus.Allocated) {
           return (
             <>
-              <Button type='link' size='small' style={{ padding: 0 }} onClick={openIpAction('view')}>
+              <Button type='link' size='small' style={{ padding: 0 }} onClick={openIpView}>
                 查看
               </Button>
               <Button type='link' size='small' style={{ padding: 0, marginLeft: 8 }} onClick={openIpAction('change')}>
@@ -542,7 +590,7 @@ function IpSegmentPage() {
         if (record.allocStatus === IpAllocStatus.Reserved) {
           return (
             <>
-              <Button type='link' size='small' style={{ padding: 0 }} onClick={openIpAction('view')}>
+              <Button type='link' size='small' style={{ padding: 0 }} onClick={openIpView}>
                 查看
               </Button>
               <Button type='link' size='small' style={{ padding: 0, marginLeft: 8 }} onClick={openIpAction('assign')}>
@@ -558,7 +606,7 @@ function IpSegmentPage() {
                     title: '释放提醒',
                     content: `确认释放IP ${record.ip} 吗？`,
                     onOk: () => {
-                      releaseIp(record.id).then(() => {
+                      releaseIp(record).then(() => {
                         message.success('释放成功');
                         setRefreshFlag(_.uniqueId('refresh_'));
                       });
@@ -590,7 +638,7 @@ function IpSegmentPage() {
                   Modal.confirm({
                     title: '是否确认删除该IP？',
                     onOk: () => {
-                      deleteIp(record.id).then(() => {
+                      deleteIp(record.ip).then(() => {
                         message.success('删除成功');
                         setRefreshFlag(_.uniqueId('refresh_'));
                       });
@@ -606,7 +654,7 @@ function IpSegmentPage() {
         }
         return (
           <>
-            <Button type='link' size='small' style={{ padding: 0 }} onClick={openIpAction('view')}>
+            <Button type='link' size='small' style={{ padding: 0 }} onClick={openIpView}>
               查看
             </Button>
             <Button type='link' size='small' style={{ padding: 0, marginLeft: 8 }} onClick={openIpAction('assign')}>
@@ -628,13 +676,17 @@ function IpSegmentPage() {
         // 批量导出：勾选则导出选中，未勾选确认后导出全部（参考操作日志页批量导出）
         if (key === 'export') {
           if (ipSelectedRowKeys.length > 0) {
-            setIpExportRecords(_.filter(ipList, (item) => _.includes(ipSelectedRowKeys, item.id)));
+            setIpExportRecords(_.filter(ipList, (item) => _.includes(ipSelectedRowKeys, item.ip)));
             setIpExportVisible(true);
           } else {
             Modal.confirm({
               title: '确认导出所有IP信息吗',
-              onOk: () => {
-                setIpExportRecords(filteredIpList);
+              onOk: async () => {
+                if (!selectedSegmentId) return;
+                const q = buildIpQuery();
+                // 导出当前查询条件下的全部数据（服务端分页下取大 limit 拉全量）
+                const res = await getSegmentAddresses(selectedSegmentId, { page: 1, limit: 100000, query: q.query, allocStatus: q.allocStatus });
+                setIpExportRecords(res.list);
                 setIpExportVisible(true);
               },
               onCancel() {},
@@ -657,7 +709,8 @@ function IpSegmentPage() {
             title: `确认回收选中的${ipSelectedRowKeys.length}个IP吗？`,
             content: '回收后地址状态为未分配，资产IP绑定将同步解绑并不再使用。',
             onOk: async () => {
-              await Promise.all(_.map(ipSelectedRowKeys, (id) => recycleOneIp(id, '批量回收')));
+              if (!selectedSegmentId) return;
+              await Promise.all(_.map(ipSelectedRowKeys, (ip) => recycleOneIp({ ip, segmentId: selectedSegmentId }, '批量回收')));
               message.success('回收成功');
               setIpSelectedRowKeys([]);
               setRefreshFlag(_.uniqueId('refresh_'));
@@ -668,7 +721,7 @@ function IpSegmentPage() {
           Modal.confirm({
             title: `是否确认删除选中的${ipSelectedRowKeys.length}个IP？`,
             onOk: async () => {
-              await Promise.all(_.map(ipSelectedRowKeys, (id) => deleteIp(id)));
+              await Promise.all(_.map(ipSelectedRowKeys, (ip) => deleteIp(ip)));
               message.success('删除成功');
               setIpSelectedRowKeys([]);
               setRefreshFlag(_.uniqueId('refresh_'));
@@ -762,9 +815,7 @@ function IpSegmentPage() {
             }}
             onShowRules={(group) => setRuleGroup(group)}
             onEditSegment={(segment) => {
-              setEditingSegment(segment);
-              setAddGroupForSegment(undefined);
-              setSegmentFormVisible(true);
+              openSegmentForm(segment, 'edit');
             }}
             onDeleteSegment={(segment) => {
               Modal.confirm({
@@ -790,18 +841,18 @@ function IpSegmentPage() {
           />
         </Resizable>
         <div className='ip-right-area'>
-          {selectedSegmentId && selectedSegmentObj ? (
+          {selectedSegmentId && ipSegmentInfo ? (
             <>
               {/* ===== IP 视角：点击树上的地址段节点 ===== */}
               <div className='group-overview'>
                 <div className='overview-name'>
                   <HomeOutlined className='overview-icon' />
-                  <span>{selectedSegmentObj.fullSegment}</span>
+                  <span>{ipSegmentInfo.fullSegment}</span>
                 </div>
                 <div className='overview-meta'>
-                  <span className='info-item'>负责人：{selectedSegmentObj.owner}</span>
-                  <span className='info-item'>掩码：{selectedSegmentObj.mask}</span>
-                  <span className='info-item'>描述：{selectedSegmentObj.note || '-'}</span>
+                  <span className='info-item'>负责人：{ipSegmentInfo.owner}</span>
+                  <span className='info-item'>掩码：{ipSegmentInfo.mask}</span>
+                  <span className='info-item'>描述：{ipSegmentInfo.note || '-'}</span>
                 </div>
               </div>
               <div className='stats-cards'>
@@ -876,7 +927,13 @@ function IpSegmentPage() {
                           onChange={(e) => setIpFilterValue(e.target.value)}
                         />
                       )}
-                      <Button type='primary' onClick={() => setRefreshFlag(_.uniqueId('refresh_'))}>
+                      <Button
+                        type='primary'
+                        onClick={() => {
+                          setIpCurrent(1);
+                          setIpSubmittedFilter({ field: ipFilterField, value: ipFilterValue });
+                        }}
+                      >
                         查询
                       </Button>
                       <Button
@@ -884,6 +941,8 @@ function IpSegmentPage() {
                           // 重置所有查询条件：维度回默认、值清空
                           setIpFilterField('ip');
                           setIpFilterValue(undefined);
+                          setIpCurrent(1);
+                          setIpSubmittedFilter({});
                         }}
                       >
                         重置
@@ -908,15 +967,20 @@ function IpSegmentPage() {
                   </div>
                   <Table
                     size='small'
-                    rowKey='id'
+                    rowKey='ip'
                     loading={loading}
                     columns={ipColumns}
-                    dataSource={filteredIpList}
-                    pagination={{ ...pagination, total: filteredIpList.length }}
+                    dataSource={ipList}
+                    pagination={{
+                      ...pagination,
+                      current: ipCurrent,
+                      total: ipTotal,
+                      onChange: (page) => setIpCurrent(page),
+                    }}
                     scroll={{ x: 1500 }}
                     rowSelection={{
                       selectedRowKeys: ipSelectedRowKeys,
-                      onChange: (keys) => setIpSelectedRowKeys(keys as number[]),
+                      onChange: (keys) => setIpSelectedRowKeys(keys as string[]),
                     }}
                   />
                 </>
@@ -937,7 +1001,7 @@ function IpSegmentPage() {
                 </div>
                 <div className='overview-meta'>
                   <span className='info-item'>
-                    负责人：{selectedGroupId ? _.find(groups, { id: selectedGroupId })?.owner || '-' : '-'}
+                    负责人：{selectedGroupId ? groupInfo?.owner || '-' : '-'}
                   </span>
                   <span className='overview-count'>分组地址段数：{stats.segmentCount}</span>
                 </div>
@@ -1022,6 +1086,8 @@ function IpSegmentPage() {
                       // 重置所有查询条件：维度回默认、值清空
                       setFilterField('segment');
                       setFilterValue(undefined);
+                      setCurrent(1);
+                      setSubmittedFilter({});
                     }}
                   >
                     重置
@@ -1050,7 +1116,12 @@ function IpSegmentPage() {
                 loading={loading}
                 columns={columns}
                 dataSource={tableData}
-                pagination={{ ...pagination, total: tableData.length }}
+                pagination={{
+                  ...pagination,
+                  current,
+                  total: serverTotal,
+                  onChange: (page) => setCurrent(page),
+                }}
                 scroll={{ x: 1500 }}
                 rowSelection={{
                   selectedRowKeys,
@@ -1069,7 +1140,7 @@ function IpSegmentPage() {
           onClose={() => setIpAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await recycleOneIp(currentIp.id, values.reason);
+            await recycleOneIp(currentIp, values.reason);
             message.success('回收成功');
             setIpAction(undefined);
             setRefreshFlag(_.uniqueId('refresh_'));
@@ -1081,7 +1152,7 @@ function IpSegmentPage() {
           onClose={() => setIpAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await reserveIp(currentIp.id, values);
+            await reserveIp(currentIp, values);
             message.success('预留成功');
             setIpAction(undefined);
             setRefreshFlag(_.uniqueId('refresh_'));
@@ -1093,7 +1164,7 @@ function IpSegmentPage() {
           onClose={() => setIpAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await assignIp(currentIp.id, values);
+            await assignIp(currentIp, values);
             message.success('分配成功');
             setIpAction(undefined);
             setRefreshFlag(_.uniqueId('refresh_'));
@@ -1105,7 +1176,7 @@ function IpSegmentPage() {
           onClose={() => setIpAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await changeIp(currentIp.id, values);
+            await changeIp(currentIp, values);
             message.success('变更成功');
             setIpAction(undefined);
             setRefreshFlag(_.uniqueId('refresh_'));

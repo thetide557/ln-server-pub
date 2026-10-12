@@ -3,7 +3,7 @@
  * 对应原型：IP地址段管理-IP 页面
  * 头部地址段信息（负责人/掩码/描述） + 统计卡片 + IP列表/IP视图 tab + 筛选 + IP表格 + 操作弹窗
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Dropdown, Empty, Input, Menu, message, Modal, notification, Progress, Select, Table, Tabs, Tag } from 'antd';
 import { GroupOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
 import _ from 'lodash';
@@ -11,18 +11,8 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ColumnsType } from 'antd/lib/table';
 import PageLayout from '@/components/pageLayout';
 import usePagination from '@/components/usePagination';
-import {
-  assignIp,
-  batchScanIps,
-  changeIp,
-  deleteIp,
-  getIpList,
-  getIpStats,
-  getSegments,
-  recycleOneIp,
-  releaseIp,
-  reserveIp,
-} from '../mock';
+import { assignIp, changeIp, getIpDetail, getSegmentAddresses, recycleOneIp, releaseIp, reserveIp } from '@/services/sxxc/ipam';
+import { batchScanIps, deleteIp } from '../mock';
 import {
   IpAllocStatus,
   ipAllocStatusMap,
@@ -80,12 +70,17 @@ function IpListPage() {
   const [list, setList] = useState<IpItem[]>([]);
   const [stats, setStats] = useState<IpStats>({ total: 0, allocated: 0, reserved: 0, online: 0, usageRate: 0 });
   const [segmentInfo, setSegmentInfo] = useState<IpSegment>();
-  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
+  /** 服务端分页 */
+  const [current, setCurrent] = useState(1);
+  const [total, setTotal] = useState(0);
 
   // 筛选：维度 + 值，两框联动，切换维度清空值
   const [filterField, setFilterField] = useState<IpFilterField>('ip');
   const [filterValue, setFilterValue] = useState<string | number>();
+  /** 已提交的查询条件（点击「查询」才生效） */
+  const [submittedFilter, setSubmittedFilter] = useState<{ field?: IpFilterField; value?: string | number }>({});
   // 当前 tab：ip-list / ip-view
   const [activeTab, setActiveTab] = useState<string>('ip-list');
 
@@ -100,45 +95,53 @@ function IpListPage() {
   /** 当前筛选维度对应的枚举选项（有则为第二框下拉） */
   const enumOptions = filterField ? IP_ENUM_OPTIONS[filterField] : undefined;
 
+  /** 查询维度 → 后端参数（后端支持 query 匹配 IP/资产名/MAC 与 allocation_status） */
+  const buildQuery = () => {
+    const { field, value } = submittedFilter;
+    if (value === undefined || value === '') return {} as { query?: string; allocStatus?: number };
+    if (field === 'ip' || field === 'assetName' || field === 'mac') return { query: String(value) };
+    if (field === 'allocStatus') return { allocStatus: Number(value) };
+    return {};
+  };
+
+  /** 拉取段内 IP 列表（服务端分页 + 服务端查询，一次请求同时得到列表/总数/段信息/统计） */
   const fetchData = () => {
+    if (!segmentId) return;
+    const q = buildQuery();
     setLoading(true);
-    Promise.all([getIpList({ segmentId }), getIpStats(segmentId), getSegments({ segmentId })]).then(
-      ([listRes, statsRes, segmentRes]) => {
-        setList(listRes.list);
-        setStats(statsRes);
-        const seg = segmentRes.list?.[0];
-        setSegmentInfo(seg);
+    getSegmentAddresses(segmentId, {
+      page: current,
+      limit: pagination.pageSize,
+      query: q.query,
+      allocStatus: q.allocStatus,
+    })
+      .then((res) => {
+        setList(res.list);
+        setTotal(res.total);
+        setStats(res.stats);
+        if (res.segment) setSegmentInfo(res.segment);
         setLoading(false);
-      },
-    );
+      })
+      .catch(() => setLoading(false));
   };
 
   useEffect(() => {
     if (segmentId) {
       fetchData();
     }
-  }, [segmentId, refreshFlag]);
+  }, [segmentId, refreshFlag, current, pagination.pageSize, submittedFilter]);
 
-  /** 按筛选维度 + 值过滤 IP 列表（前端过滤，mock 阶段数据全量拉取） */
-  const filteredList = useMemo<IpItem[]>(() => {
-    let result: IpItem[] = list;
-    if (filterField && filterValue !== undefined && filterValue !== '') {
-      if (filterField === 'ip') {
-        result = _.filter(result, (item) => item.ip.indexOf(String(filterValue)) > -1);
-      } else if (filterField === 'owner') {
-        // 负责人维度：mock 中 IP 无独立负责人字段，按备注/资产名近似匹配
-        result = _.filter(result, (item) => (item.note || '').indexOf(String(filterValue)) > -1 || (item.assetName || '').indexOf(String(filterValue)) > -1);
-      } else if (filterField === 'assetName') {
-        result = _.filter(result, (item) => item.assetName !== undefined && item.assetName.indexOf(String(filterValue)) > -1);
-      } else if (filterField === 'mac') {
-        result = _.filter(result, (item) => item.mac !== undefined && item.mac.indexOf(String(filterValue)) > -1);
-      } else {
-        const match: Partial<IpItem> = { [filterField]: Number(filterValue) } as Partial<IpItem>;
-        result = _.filter(result, match);
-      }
-    }
-    return result;
-  }, [list, filterField, filterValue]);
+  // 切换地址段时重置分页与查询条件（引用保稳，避免无变化时触发重复请求）
+  useEffect(() => {
+    setCurrent(1);
+    setSubmittedFilter((prev) => (_.isEmpty(prev) ? prev : {}));
+    setSelectedRowKeys([]);
+  }, [segmentId]);
+
+  const handleSearch = () => {
+    setCurrent(1);
+    setSubmittedFilter({ field: filterField, value: filterValue });
+  };
 
   const handleRefresh = () => {
     setRefreshFlag(_.uniqueId('refresh_'));
@@ -205,21 +208,30 @@ function IpListPage() {
           setCurrentIp(record);
           setAction(type);
         };
+        // 查看：以详情接口为准（列表行字段可能不全），先查详情再打开弹窗
+        const openView = () => {
+          getIpDetail({ ip: record.ip, segmentId: record.segmentId })
+            .then((detail) => {
+              setCurrentIp(detail);
+              setAction('view');
+            })
+            .catch(() => {});
+        };
         if (record.allocStatus === IpAllocStatus.Allocated) {
           // 已分配：查看、变更、回收
-          push('查看', openAction('view'));
+          push('查看', openView);
           push('变更', openAction('change'));
           push('回收', openAction('recycle'));
         } else if (record.allocStatus === IpAllocStatus.Reserved) {
           // 预留：查看、分配、释放
-          push('查看', openAction('view'));
+          push('查看', openView);
           push('分配', openAction('assign'));
           push('释放', () => {
             Modal.confirm({
               title: '释放提醒',
               content: `确认释放IP ${record.ip} 吗？`,
               onOk: () => {
-                releaseIp(record.id).then(() => {
+                releaseIp(record).then(() => {
                   message.success('释放成功');
                   handleRefresh();
                 });
@@ -235,7 +247,7 @@ function IpListPage() {
             Modal.confirm({
               title: '是否确认删除该IP？',
               onOk: () => {
-                deleteIp(record.id).then(() => {
+                deleteIp(record.ip).then(() => {
                   message.success('删除成功');
                   handleRefresh();
                 });
@@ -245,7 +257,7 @@ function IpListPage() {
           }, true);
         } else {
           // 未分配但有使用痕迹：查看、分配、回收
-          push('查看', openAction('view'));
+          push('查看', openView);
           push('分配', openAction('assign'));
           push('回收', openAction('recycle'));
         }
@@ -260,13 +272,17 @@ function IpListPage() {
         // 批量导出：勾选则导出选中，未勾选确认后导出全部（参考操作日志页批量导出）
         if (key === 'export') {
           if (selectedRowKeys.length > 0) {
-            setExportRecords(_.filter(list, (item) => _.includes(selectedRowKeys, item.id)));
+            setExportRecords(_.filter(list, (item) => _.includes(selectedRowKeys, item.ip)));
             setExportVisible(true);
           } else {
             Modal.confirm({
               title: '确认导出所有IP信息吗',
-              onOk: () => {
-                setExportRecords(filteredList);
+              onOk: async () => {
+                if (!segmentId) return;
+                const q = buildQuery();
+                // 导出当前查询条件下的全部数据（服务端分页下取大 limit 拉全量）
+                const res = await getSegmentAddresses(segmentId, { page: 1, limit: 100000, query: q.query, allocStatus: q.allocStatus });
+                setExportRecords(res.list);
                 setExportVisible(true);
               },
               onCancel() {},
@@ -294,7 +310,8 @@ function IpListPage() {
             title: `确认回收选中的${selectedRowKeys.length}个IP吗？`,
             content: '回收后地址状态为未分配，资产IP绑定将同步解绑并不再使用。',
             onOk: async () => {
-              await Promise.all(_.map(selectedRowKeys, (id) => recycleOneIp(id, '批量回收')));
+              if (!segmentId) return;
+              await Promise.all(_.map(selectedRowKeys, (ip) => recycleOneIp({ ip, segmentId }, '批量回收')));
               message.success('回收成功');
               setSelectedRowKeys([]);
               handleRefresh();
@@ -305,7 +322,7 @@ function IpListPage() {
           Modal.confirm({
             title: `是否确认删除选中的${selectedRowKeys.length}个IP？`,
             onOk: async () => {
-              await Promise.all(_.map(selectedRowKeys, (id) => deleteIp(id)));
+              await Promise.all(_.map(selectedRowKeys, (ip) => deleteIp(ip)));
               message.success('删除成功');
               setSelectedRowKeys([]);
               handleRefresh();
@@ -431,7 +448,7 @@ function IpListPage() {
                     onChange={(e) => setFilterValue(e.target.value)}
                   />
                 )}
-                <Button type='primary' onClick={() => setRefreshFlag(_.uniqueId('refresh_'))}>
+                <Button type='primary' onClick={handleSearch}>
                   查询
                 </Button>
                 <Button
@@ -439,6 +456,8 @@ function IpListPage() {
                     // 重置所有查询条件：维度回默认、值清空
                     setFilterField('ip');
                     setFilterValue(undefined);
+                    setCurrent(1);
+                    setSubmittedFilter({});
                   }}
                 >
                   重置
@@ -463,15 +482,20 @@ function IpListPage() {
             </div>
             <Table
               size='small'
-              rowKey='id'
+              rowKey='ip'
               loading={loading}
               columns={columns}
-              dataSource={filteredList}
-              pagination={{ ...pagination, total: filteredList.length }}
+              dataSource={list}
+              pagination={{
+                ...pagination,
+                current,
+                total,
+                onChange: (page) => setCurrent(page),
+              }}
               scroll={{ x: 1500 }}
               rowSelection={{
                 selectedRowKeys,
-                onChange: (keys) => setSelectedRowKeys(keys as number[]),
+                onChange: (keys) => setSelectedRowKeys(keys as string[]),
               }}
             />
           </>
@@ -490,7 +514,7 @@ function IpListPage() {
           onClose={() => setAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await recycleOneIp(currentIp.id, values.reason);
+            await recycleOneIp(currentIp, values.reason);
             message.success('回收成功');
             setAction(undefined);
             handleRefresh();
@@ -503,7 +527,7 @@ function IpListPage() {
           onClose={() => setAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await reserveIp(currentIp.id, values);
+            await reserveIp(currentIp, values);
             message.success('预留成功');
             setAction(undefined);
             handleRefresh();
@@ -516,7 +540,7 @@ function IpListPage() {
           onClose={() => setAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await assignIp(currentIp.id, values);
+            await assignIp(currentIp, values);
             message.success('分配成功');
             setAction(undefined);
             handleRefresh();
@@ -529,7 +553,7 @@ function IpListPage() {
           onClose={() => setAction(undefined)}
           onOk={async (values) => {
             if (!currentIp) return;
-            await changeIp(currentIp.id, values);
+            await changeIp(currentIp, values);
             message.success('变更成功');
             setAction(undefined);
             handleRefresh();
