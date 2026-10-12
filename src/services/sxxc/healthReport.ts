@@ -67,7 +67,7 @@ const toNameList = (list: unknown): string[] => {
 
 /** 获取顶部筛选栏的四个下拉选项（区域 / 租户 / 业务系统 / 资产类型） */
 export function getAnalysisFilters(): Promise<AnalysisFilterOptions> {
-  return request(`/biz/analysis/filters`, {
+  return request(`/sxxcTask/biz/analysis/filters`, {
     method: RequestMethod.Get,
   }).then((res): AnalysisFilterOptions => {
     const data = res?.data ?? {};
@@ -98,7 +98,7 @@ export interface OverviewCardItem {
 
 /** 获取核心指标概览 5 张卡片 */
 export function getAnalysisOverview(params?: AnalysisQuery): Promise<OverviewCardItem[]> {
-  return request(`/biz/analysis/overview`, {
+  return request(`/sxxcTask/biz/analysis/overview`, {
     method: RequestMethod.Get,
     params,
   }).then((res): OverviewCardItem[] => {
@@ -150,7 +150,7 @@ const toStr = (value: unknown): string => (typeof value === 'string' ? value : '
 
 /** 获取资源使用情况图表数据 */
 export function getAnalysisResourceUsage(params?: AnalysisQuery): Promise<ResourceUsageData> {
-  return request(`/biz/analysis/resourceUsage`, {
+  return request(`/sxxcTask/biz/analysis/resourceUsage`, {
     method: RequestMethod.Get,
     params,
   }).then((res): ResourceUsageData => {
@@ -217,7 +217,7 @@ export interface DetailGroupItem extends DetailCellItem {
 
 /** 获取资源使用明细表数据 */
 export function getAnalysisDetail(params?: AnalysisQuery): Promise<DetailResourceItem[]> {
-  return request(`/biz/analysis/detail`, {
+  return request(`/sxxcTask/biz/analysis/detail`, {
     method: RequestMethod.Get,
     params,
   }).then((res): DetailResourceItem[] => {
@@ -267,7 +267,7 @@ export interface UnitDetailItem {
 
 /** 获取上云单位资源明细（与三个租户排名图数据同源） */
 export function getAnalysisUnitDetail(params?: AnalysisQuery): Promise<UnitDetailItem[]> {
-  return request(`/biz/analysis/unitDetail`, {
+  return request(`/sxxcTask/biz/analysis/unitDetail`, {
     method: RequestMethod.Get,
     params,
   }).then((res): UnitDetailItem[] => {
