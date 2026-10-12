@@ -34,7 +34,7 @@ import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { batchShelfXhAssets, deleteXhAssets, getAssetScopeTree, getAssetScopeTreeAssets, getAssetScopeTreeChildren, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { batchShelfXhAssets, deleteXhAssets, getAssetScopeTree, getAssetScopeTreeAssets, getAssetScopeTreeChildren, getAssetsByN9eCondition, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 import { getDictDataListByType } from '@/services/system/dict';
 
 import RefreshIcon from '@/components/RefreshIcon';
@@ -1295,7 +1295,10 @@ export default function () {
     }
     setQueryCondition(param);
 
-    const requestFunc = isScopeTreeMode
+    const hasSearchValue = searchVal != null && searchVal.length > 0;
+    const requestFunc = hasSearchValue
+      ? getAssetsByN9eCondition
+      : isScopeTreeMode
       ? getAssetScopeTreeAssets
       : getAssetsByCondition;
 
