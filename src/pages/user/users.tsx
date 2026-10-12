@@ -252,7 +252,7 @@ const Resource: React.FC = () => {
         <>
           {
             (profile.roles?.includes("Admin") || (permList.includes("/users/status") && record.id != '1')) && <PoweroffOutlined className='oper-name'
-              title={record.status === 1 ? ('已启用') : ('已禁用')}
+              title={record.status === 1 ? t('user.status_tip_enabled') : t('user.status_tip_disabled')}
               style={{ color: record.status === 1 ? ('green') : ('red') }}
               onClick={e => {
                 if ("" + record.id == "1") {

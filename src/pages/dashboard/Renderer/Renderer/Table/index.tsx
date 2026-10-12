@@ -28,7 +28,7 @@ import getOverridePropertiesByName from '../../utils/getOverridePropertiesByName
 import localeCompare from '../../utils/localeCompare';
 import formatToTable from '../../utils/formatToTable';
 import { useGlobalState } from '../../../globalState';
-import { transformColumns } from './utils';
+import { transformColumns, isRawData } from './utils';
 import './style.less';
 
 interface IProps {
@@ -117,7 +117,7 @@ export default function Stat(props: IProps) {
     if (displayMode === 'seriesToRows') {
       fields = ['name', 'value'];
     } else if (displayMode === 'labelsOfSeriesToRows') {
-      fields = !_.isEmpty(columns) ? columns : [...getColumnsKeys(data), 'value'];
+      fields = !_.isEmpty(columns) ? columns : isRawData(series) ? getColumnsKeys(data) : [...getColumnsKeys(data), 'value'];
     } else if (displayMode === 'labelValuesToRows') {
       fields = [aggrDimension];
     }
@@ -217,7 +217,7 @@ export default function Stat(props: IProps) {
 
   if (displayMode === 'labelsOfSeriesToRows') {
     const allColumns = _.concat(getColumnsKeys(calculatedValues), 'value');
-    const columnsKeys: any[] = _.isEmpty(columns) ? _.concat(getColumnsKeys(calculatedValues), 'value') : columns;
+    const columnsKeys: any[] = _.isEmpty(columns) ? (isRawData(series) ? getColumnsKeys(calculatedValues) : _.concat(getColumnsKeys(calculatedValues), 'value')) : columns;
     tableColumns = _.map(columnsKeys, (key, idx) => {
       return {
         title: key,
