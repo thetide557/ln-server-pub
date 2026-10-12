@@ -63,6 +63,8 @@ export interface IpSegment {
   /** 可回收数量 */
   recyclableCount: number;
   note?: string;
+  /** 停用原因（仅状态为停用时有值） */
+  disableReason?: string;
 }
 
 /** 分组/地址段维度统计 */

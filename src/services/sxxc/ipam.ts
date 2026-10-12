@@ -338,6 +338,7 @@ function subnetVOToSegment(vo: IpamSubnetVO): IpSegment {
     usageRate: vo.usage_rate || 0,
     recyclableCount: vo.recyclable_count || 0,
     note: vo.remark || undefined,
+    disableReason: vo.disable_reason || undefined,
   };
 }
 

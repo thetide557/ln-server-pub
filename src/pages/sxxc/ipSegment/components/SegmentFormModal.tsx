@@ -47,7 +47,7 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
           owner: segment.owner,
           note: segment.note,
           status: segment.status,
-          disableReason: undefined,
+          disableReason: segment.disableReason,
         });
       } else {
         setStatus(SegmentStatus.InUse);
