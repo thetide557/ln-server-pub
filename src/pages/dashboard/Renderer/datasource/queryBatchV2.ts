@@ -1,6 +1,6 @@
 // 2026-10-05 N16 摞二：羚牛适配层。仪表盘面板对 ck/doris/mysql/pgsql 的时序取数，
-// 由原来的商业版 POST 商业版 query-batch（/api/n9e-plus/ 前缀）（羚牛后端没有、打不通）改发开源
-// POST /api/n9e/v2/query-batch（后端已挂、照搬上游，四类真实现；用户拍板 77 / M229 ⑤）。
+// 由原来的商业版 POST 商业版 query-batch（/api/takin-plus/ 前缀）（羚牛后端没有、打不通）改发开源
+// POST /api/takin/v2/query-batch（后端已挂、照搬上游，四类真实现；用户拍板 77 / M229 ⑤）。
 //
 // 校验与归一化逐字抄自 fe main ee48e701:src/pages/dashboard/Renderer/datasource/contract.ts
 // （函数上方各标 fe file:line）；信封组装按「单数据源、无 per-target datasource、无变量插件、
@@ -145,7 +145,7 @@ interface QueryBatchV2Result {
   query?: any[];
 }
 
-// 对外：输入单数据源的时序 + 表达式 target，组装 v2 信封、发 /api/n9e/v2/query-batch、归一化返回。
+// 对外：输入单数据源的时序 + 表达式 target，组装 v2 信封、发 /api/takin/v2/query-batch、归一化返回。
 // 形状与各插件 Dashboard/datasource.tsx 的 Result 一致（{ series, query? }）。raw/日志 target 不走这里（D-2）。
 export async function queryBatchV2(options: QueryBatchV2Options): Promise<QueryBatchV2Result> {
   const { cate, datasourceValue, time, queryOptionsTime, targets, scopedVars, inspect } = options;

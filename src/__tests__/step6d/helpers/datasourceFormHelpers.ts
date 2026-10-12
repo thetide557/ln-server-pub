@@ -5,7 +5,7 @@
  *
  * 第一层 · 假数据不对。`src/pages/datasource/components/items/Cluster.tsx`
  * （与上游 fe `v9.1.0` 逐字相同，`git -C ../fe show v9.1.0:src/pages/datasource/components/items/Cluster.tsx` 可核）
- * 一挂载就去拉告警引擎集群列表 `GET /api/n9e/server-clusters`，然后：
+ * 一挂载就去拉告警引擎集群列表 `GET /api/takin/server-clusters`，然后：
  *   - `:17-19` 新增时把列表第一项自动填进 `cluster_name`；
  *   - `:31-37` 的校验规则要求 `cluster_name` 必须在列表里、或者正好等于 `no_assigned_engine`，否则整张表单校验不过。
  * 原来各测试的假实现对所有 URL 一律返回 `{ dat: {}, data: {} }`，集群列表就成了空对象 `{}`：
@@ -28,11 +28,11 @@ export const AUTO_FILLED_CLUSTER = SERVER_CLUSTERS[0];
 
 /**
  * 按 URL 分流的 `@/utils/request` 假实现：
- *   - `/api/n9e/server-clusters` → `{ dat: ['default'] }`（让 `<Cluster>` 能自动填、校验能过）
+ *   - `/api/takin/server-clusters` → `{ dat: ['default'] }`（让 `<Cluster>` 能自动填、校验能过）
  *   - 其它（含 `datasource/upsert`） → `{ dat: {}, data: {} }`（与各测试原来的写法一致）
  */
 export const datasourceRequestImpl = (url?: any) =>
-  String(url).includes('/api/n9e/server-clusters') ? Promise.resolve({ dat: [...SERVER_CLUSTERS], data: {} }) : Promise.resolve({ dat: {}, data: {} });
+  String(url).includes('/api/takin/server-clusters') ? Promise.resolve({ dat: [...SERVER_CLUSTERS], data: {} }) : Promise.resolve({ dat: {}, data: {} });
 
 /**
  * 等「告警引擎集群」这一项被自动填好，再去点提交按钮。

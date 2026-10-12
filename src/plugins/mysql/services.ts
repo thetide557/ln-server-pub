@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { BaseParams } from './types';
 
 export function getDatabases(data: BaseParams): Promise<string[]> {
-  return request('/api/n9e/db-databases', {
+  return request('/api/takin/db-databases', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -17,7 +17,7 @@ export function getTables(
     query: string[];
   },
 ): Promise<string[]> {
-  return request('/api/n9e/db-tables', {
+  return request('/api/takin/db-tables', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -39,7 +39,7 @@ export function getColumns(
     type2: string;
   }[]
 > {
-  return request('/api/n9e/db-desc-table', {
+  return request('/api/takin/db-desc-table', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -60,7 +60,7 @@ export function getDsQuery(
     }[];
   },
 ): Promise<any> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -88,7 +88,7 @@ export function getLogsQuery(data: {
     data: { [index: string]: string | number }[];
   }[]
 > {
-  return request('/api/n9e/log-query-batch', {
+  return request('/api/takin/log-query-batch', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -97,8 +97,8 @@ export function getLogsQuery(data: {
   });
 }
 
-// 2026-10-05 N16 摞二：仪表盘已改发 /api/n9e/v2/query-batch（Renderer/datasource/queryBatchV2.ts），
-// 本函数的 商业版 query-batch（/api/n9e-plus/ 前缀） 羚牛后端不补（用户拍板 77 / M229 ⑤），仪表盘路径不再调用；保留与上游同形、不删。
+// 2026-10-05 N16 摞二：仪表盘已改发 /api/takin/v2/query-batch（Renderer/datasource/queryBatchV2.ts），
+// 本函数的 商业版 query-batch（/api/takin-plus/ 前缀） 羚牛后端不补（用户拍板 77 / M229 ⑤），仪表盘路径不再调用；保留与上游同形、不删。
 export const getDsQuery2 = function (data: {
   queries: {
     ref: string;
@@ -124,7 +124,7 @@ export const getDsQuery2 = function (data: {
     values: [number, number][];
   }[]
 > {
-  return request('/api/n9e-plus/query-batch', {
+  return request('/api/takin-plus/query-batch', {
     method: RequestMethod.Post,
     data,
     silence: true,

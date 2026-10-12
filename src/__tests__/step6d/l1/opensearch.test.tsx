@@ -71,7 +71,7 @@ describe('L1：opensearch 数据源表单提交', () => {
     // eslint-disable-next-line no-console
     console.log('[step6d][L1][opensearch] upsert body =', JSON.stringify(body, null, 2));
 
-    expect(url).toBe('/api/n9e/datasource/upsert');
+    expect(url).toBe('/api/takin/datasource/upsert');
     expect(body.plugin_type).toBe('opensearch');
     expect(body.name).toBe('os_test_ds');
     expect(body.settings['os.nodes']).toEqual(['http://127.0.0.1:9200']);

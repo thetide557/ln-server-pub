@@ -169,7 +169,7 @@ describe('N36-E · PromGraphCpt 交给停靠栏的 control', () => {
     });
     expect(promData.calls).toHaveLength(1);
     expect(promData.calls[0].params.query).toBe('up');
-    expect(promData.calls[0].url).toBe('/api/n9e/proxy/1/api/v1/query');
+    expect(promData.calls[0].url).toBe('/api/takin/proxy/1/api/v1/query');
     expect(promData.calls[0].signal).toBeInstanceOf(AbortSignal);
 
     // 还没结 → promise 还挂着（用一个会先到的 sentinel 证明它没 settle）

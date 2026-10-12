@@ -1,6 +1,6 @@
 // 2026-10-05 N16 摞二：复制自 fe v9.1.0 同路径（羚牛原无 Dashboard/），并按 N16 把时序 + 表达式半边改走
-// 开源 POST /api/n9e/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），不再走商业版
-// query-batch（/api/n9e-plus/ 前缀，羚牛后端不补，用户拍板 77 / M229 ⑤）。raw 半边保留走 getLogsQuery（/api/n9e/log-query-batch，D-2）。接线照 ck / doris。
+// 开源 POST /api/takin/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），不再走商业版
+// query-batch（/api/takin-plus/ 前缀，羚牛后端不补，用户拍板 77 / M229 ⑤）。raw 半边保留走 getLogsQuery（/api/takin/log-query-batch，D-2）。接线照 ck / doris。
 // pgsql 的 SQL 存在 target.query[QUERY_KEY]（QUERY_KEY === 'sql'）。
 import _ from 'lodash';
 import moment from 'moment';
@@ -104,13 +104,13 @@ export default async function mysqlQuery(options: IOptions): Promise<Result> {
     );
     const resolveData: Result = { series: _.concat(tsResult.series, raw) };
     if (inspect) {
-      // TimeSeries 条目由适配层给（url 已是 v2 真路径）；Logs 条目展示真正发出的 /api/n9e/log-query-batch。
+      // TimeSeries 条目由适配层给（url 已是 v2 真路径）；Logs 条目展示真正发出的 /api/takin/log-query-batch。
       resolveData.query = [...(tsResult.query ?? [])];
       if (!_.isEmpty(batchTimeRawParams)) {
         resolveData.query.push({
           type: 'Logs',
           request: {
-            url: `/api/n9e/log-query-batch`,
+            url: `/api/takin/log-query-batch`,
             method: 'POST',
             data: batchTimeRawParams,
           },

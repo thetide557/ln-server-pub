@@ -23,14 +23,14 @@ export function logsQuery(data: {
   list: LokiLogRow[];
   total: number;
 }> {
-  return request('/api/n9e/logs-query', {
+  return request('/api/takin/logs-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || { list: [], total: 0 });
 }
 
 export function dsQuery(data: { cate: DatasourceCateEnum; datasource_id: number; query: Record<string, any>[] }): Promise<DataResp[]> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);
@@ -45,7 +45,7 @@ export function getLabelNames(data: {
   filter?: string;
   limit?: number;
 }): Promise<FieldNameSuggestion[]> {
-  return request('/api/n9e/loki-label-names', {
+  return request('/api/takin/loki-label-names', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -64,7 +64,7 @@ export function getLabelValues(data: {
   filter?: string;
   limit?: number;
 }): Promise<FieldValueSuggestion[]> {
-  return request('/api/n9e/loki-label-values', {
+  return request('/api/takin/loki-label-values', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -81,7 +81,7 @@ export function getParsedFields(data: {
   end: number;
   limit?: number;
 }): Promise<FieldNameSuggestion[]> {
-  return request('/api/n9e/loki-parsed-fields', {
+  return request('/api/takin/loki-parsed-fields', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -115,7 +115,7 @@ export function getHistogram(data: {
     fields_limit?: number;
   }[];
 }): Promise<HistogramValue[]> {
-  return request('/api/n9e/loki-histogram', {
+  return request('/api/takin/loki-histogram', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat || []);

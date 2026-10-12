@@ -346,7 +346,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
               </Upload>
               <Button className='down_load_button'
                 onClick={async event => {
-                  let url = "/api/n9e/xh/asset/templet";
+                  let url = "/api/takin/xh/asset/templet";
                   let params = {};
                   let exportTitle = "资产";
                   exportTemplet(url, params).then((res) => {
@@ -389,7 +389,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
               <Button
                 className='down_load_button'
                 onClick={() => {
-                  const url = '/api/n9e/xh/asset-oid/templet';
+                  const url = '/api/takin/xh/asset-oid/templet';
                   const query =
                     assets && assets.length > 0 ? { asset_ids: assets.join(',') } : {};
                   const exportTitle = '网络设备';
@@ -468,7 +468,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       }
       let formData = new FormData();
       formData.append("file", fileList[0]);
-      let url = "/api/n9e/xh/asset/import-xls";
+      let url = "/api/takin/xh/asset/import-xls";
       console.log("批量导入",url);
       importXhAssetSetData(url, formData).then((res) => {
         message.success('批量导入成功');
@@ -484,7 +484,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       }
       const formData = new FormData();
       formData.append('file', fileList[0]);
-      const url = '/api/n9e/xh/asset-oid/import-xls';
+      const url = '/api/takin/xh/asset-oid/import-xls';
       importXhAssetSetData(url, formData).then(() => {
         message.success('批量导入成功');
         setFileName('');
@@ -502,7 +502,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
           delete names.page;
           params = {...params,...names}         
       }
-      let url = "/api/n9e/xh/asset/export-xls?ftype="+ftype;
+      let url = "/api/takin/xh/asset/export-xls?ftype="+ftype;
       let exportTitle = "资产";
       exportTemplet(url, params).then((res) => {
         const url = window.URL.createObjectURL(new Blob([res],

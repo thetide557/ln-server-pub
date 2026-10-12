@@ -18,36 +18,36 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getProducersByType = function (type) {
-  return request('/api/n9e/device-producer/getName?type='+type, {
+  return request('/api/takin/device-producer/getName?type='+type, {
        method: RequestMethod.Get
   });
 };
 export const getProducersListByType = function (type,data) {
-  return request('/api/n9e/device-producer/list?type='+type, {
+  return request('/api/takin/device-producer/list?type='+type, {
        method: RequestMethod.Get,
        params:data
   });
 };
 export const getProducerList = function () {
-  return request('/api/n9e/device-producer/getName', {
+  return request('/api/takin/device-producer/getName', {
        method: RequestMethod.Get
   });
 };
 export const addDeviceProducer = function (data) {
-  return request('/api/n9e/device-producer', {
+  return request('/api/takin/device-producer', {
        method: RequestMethod.Post,
        data
   });
 };
 export const updateDeviceProducer = function (data) {
-  return request('/api/n9e/device-producer', {
+  return request('/api/takin/device-producer', {
        method: RequestMethod.Put,
        data
   });
 };
 
 export const deleteDeviceProducer = function (data) {
-  return request('/api/n9e/device-producer/batch-del', {
+  return request('/api/takin/device-producer/batch-del', {
     method: RequestMethod.Post,
     data
   });

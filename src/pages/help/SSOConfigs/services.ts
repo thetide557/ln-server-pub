@@ -3,7 +3,7 @@ import { RequestMethod } from '@/store/common';
 import { SSOConfigType } from './types';
 
 export const getSSOConfigs = function (): Promise<SSOConfigType[]> {
-  return request('/api/n9e/sso-configs', {
+  return request('/api/takin/sso-configs', {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat || [];
@@ -11,7 +11,7 @@ export const getSSOConfigs = function (): Promise<SSOConfigType[]> {
 };
 
 export const putSSOConfig = function (data: SSOConfigType) {
-  return request('/api/n9e/sso-config', {
+  return request('/api/takin/sso-config', {
     method: RequestMethod.Put,
     data,
   }).then((res) => {

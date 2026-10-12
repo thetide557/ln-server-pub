@@ -248,7 +248,7 @@ export default function ChatHistory(props: IChatHistoryPageProps) {
                                         { key: 'share', icon: <Share2 size={14} />, label: t('history.share') },
                                         // N33-C 加回「删除」：上游 74e81635 重做历史列表时把 Popconfirm 删除入口注释掉、78d1de35 清掉注释块，
                                         // 三个提交都没写原因、无关联 PR（见判定门 M299 / M302）；前端 handleDelete / deleteChat 与后端
-                                        // DELETE /api/n9e/assistant/chat/:chatId 都在，判为重构时搁置的半成品，用户拍板加回来。羚牛自加。
+                                        // DELETE /api/takin/assistant/chat/:chatId 都在，判为重构时搁置的半成品，用户拍板加回来。羚牛自加。
                                         { key: 'delete', icon: <Trash2 size={14} />, label: t('history.delete'), danger: true },
                                       ]}
                                       onClick={({ key, domEvent }) => {

@@ -1,15 +1,15 @@
 /**
- * N36 批 B（C-1）· 首页（`/home`）在「用户没有设过首页看板」时不要去请求 `GET /api/n9e/board/0`。
+ * N36 批 B（C-1）· 首页（`/home`）在「用户没有设过首页看板」时不要去请求 `GET /api/takin/board/0`。
  *
  * 钉的是什么：`/home` 这条路由渲染的是 `<Detail isPreview isHome />`
  * （`src/pages/home/index.tsx:6`、`src/routers/index.tsx:182`，`/` 由 `:337-338` 重定向过来）。
  * `Detail.tsx` 里原来是这么取 id 的：
  *     id = _.toString(profile.board_id) || '1'
  * `profile.board_id` 为 **0** 时 `_.toString(0)` 得到字符串 `'0'`——它是**真值**，`|| '1'` 兜不住，
- * 于是发出 `GET /api/n9e/board/0`，后端回 **404**。
+ * 于是发出 `GET /api/takin/board/0`，后端回 **404**。
  * A13 本地回归里这条一次登录就打了三遍：
  * `ln-server/第三步-流水线/阶段6-A线收尾/A13本地回归/证据/T5/10-T510-standard-login.txt:142`
- * （`404 GET /api/n9e/board/0`，05:01:33 / :52 / :53），归在 OBS-T5-4 / T5-todo-7 名下。
+ * （`404 GET /api/takin/board/0`，05:01:33 / :52 / :53），归在 OBS-T5-4 / T5-todo-7 名下。
  *
  * 改法：只认大于 0 的 `board_id`，其余（0 / undefined / null）一律回落到默认首页看板 `'1'`。
  *
@@ -24,7 +24,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('@/App', () => require('../../helpers/appMock'));
 
-// 要数的那一次：`src/services/dashboardV2.ts:76-82` 的 getDashboard（打 /api/n9e/board/:id）。
+// 要数的那一次：`src/services/dashboardV2.ts:76-82` 的 getDashboard（打 /api/takin/board/:id）。
 const mockGetDashboard = jest.fn(() =>
   Promise.resolve({ id: 1, name: 'home', configs: { panels: [], var: [] }, update_at: 0 }),
 );

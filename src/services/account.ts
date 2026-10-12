@@ -17,13 +17,13 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-const profileApi = 'api/n9e/self/profile';
+const profileApi = 'api/takin/self/profile';
 // 修改个人信息
 // ---- N36 批 H1 第 14 条（后端第十份第三节 1，待办 `LN-USER-CONTACTS-SELF-01`）：
-// 这条请求必须带 `contacts`。后端在 `POST /api/n9e/users` 与 `PUT /api/n9e/user/:id/profile`
-// 两条上已经把 contacts 兜成 `{}`，但**个人中心自己改资料这条** `PUT /api/n9e/self/profile`
+// 这条请求必须带 `contacts`。后端在 `POST /api/takin/users` 与 `PUT /api/takin/user/:id/profile`
+// 两条上已经把 contacts 兜成 `{}`，但**个人中心自己改资料这条** `PUT /api/takin/self/profile`
 // 走的是裸字串、没兜；不带这个字段就会在库里落成空串，空串不是合法 JSON，
-// 之后用户列表 `GET /api/n9e/users` 与用户详情整个请求都会失败（`sql: Scan error … contacts`）。
+// 之后用户列表 `GET /api/takin/users` 与用户详情整个请求都会失败（`sql: Scan error … contacts`）。
 // 组装处 `src/pages/account/info.tsx:109-142` 的 `contacts` 来自表单，表单里没填就是 undefined，
 // `JSON.stringify` 会把 undefined 的键直接丢掉 —— 所以在这里（只有这一条请求走得到的地方）兜一次 `{}`。
 export const UpdateProfile = function (data: object) {
@@ -42,7 +42,7 @@ export const GetProfile = function () {
   });
 };
 
-const secretApi = 'api/n9e/self/token';
+const secretApi = 'api/takin/self/token';
 // 获取个人秘钥
 export const GetSecret = function () {
   return request(`/${secretApi}`, {
@@ -64,13 +64,13 @@ export const CreateSecret = function () {
 };
 
 export const getUsers = function () {
-  return request('/api/n9e/user/getNames', {
+  return request('/api/takin/user/getNames', {
     method: RequestMethod.Get,
   });
 };
 
 export const updateSelfBoard = function (data) {
-  return request('/api/n9e/self/board', {
+  return request('/api/takin/self/board', {
     method: RequestMethod.Put,
     data,
   });

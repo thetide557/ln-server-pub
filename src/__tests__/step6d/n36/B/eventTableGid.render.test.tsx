@@ -1,7 +1,7 @@
 /**
- * N36 批 B（C-4）· 当前告警事件的表格视图：业务组列表为空时**不发** `GET /api/n9e/alert-events/list/xh`。
+ * N36 批 B（C-4）· 当前告警事件的表格视图：业务组列表为空时**不发** `GET /api/takin/alert-events/list/xh`。
  *
- * 钉的是什么：A13 本地回归里，测试账号不属于任何用户组 → `GET /api/n9e/busi-groups` 回空列表 →
+ * 钉的是什么：A13 本地回归里，测试账号不属于任何用户组 → `GET /api/takin/busi-groups` 回空列表 →
  * `src/App.tsx:318` 把 localStorage 的 `groupIds` 写成空串 → `src/pages/event/Table.tsx` 把这个空串
  * 当 `gid` 发出去 → 后端 `ln-server/center/router/router_alert_cur_event.go:525-527` 判
  * `gid == "" && !admin` 直接回 **400**「gid 不能为空」。
@@ -42,7 +42,7 @@ jest.mock('@/pages/event/index', () => ({
   default: () => null,
 }));
 
-// 本用例要数的那一次：`src/pages/event/services.ts` 的 getEvents（打 /api/n9e/alert-events/list/xh）。
+// 本用例要数的那一次：`src/pages/event/services.ts` 的 getEvents（打 /api/takin/alert-events/list/xh）。
 const mockGetEvents = jest.fn(() => Promise.resolve({ dat: { list: [], total: 0 } }));
 jest.mock('@/pages/event/services', () => ({
   __esModule: true,

@@ -18,19 +18,19 @@ function appendSkillAuth(formData: FormData, auth?: SkillAuthValues) {
 }
 
 export const getList = function (): Promise<Item[]> {
-  return request('/api/n9e/ai-skills', {
+  return request('/api/takin/ai-skills', {
     method: RequestMethod.Get,
   }).then((res) => res.dat ?? []);
 };
 
 export const getItem = function (id: number): Promise<SkillDetail> {
-  return request(`/api/n9e/ai-skill/${id}`, {
+  return request(`/api/takin/ai-skill/${id}`, {
     method: RequestMethod.Get,
   }).then((res) => res.dat);
 };
 
 export const postItem = function (data: FormValues) {
-  return request('/api/n9e/ai-skills', {
+  return request('/api/takin/ai-skills', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
@@ -40,7 +40,7 @@ export const importItem = function (file: File, auth?: SkillAuthValues) {
   const formData = new FormData();
   formData.append('file', file);
   appendSkillAuth(formData, auth);
-  return request('/api/n9e/ai-skills/import', {
+  return request('/api/takin/ai-skills/import', {
     method: RequestMethod.Post,
     data: formData,
   }).then((res) => res.dat);
@@ -50,33 +50,33 @@ export const importItemToUpdate = function (id: number, file: File, auth?: Skill
   const formData = new FormData();
   formData.append('file', file);
   appendSkillAuth(formData, auth);
-  return request(`/api/n9e/ai-skill/${id}/import`, {
+  return request(`/api/takin/ai-skill/${id}/import`, {
     method: RequestMethod.Put,
     data: formData,
   }).then((res) => res.dat);
 };
 
 export const putItem = function (id: number, data: FormValues) {
-  return request(`/api/n9e/ai-skill/${id}`, {
+  return request(`/api/takin/ai-skill/${id}`, {
     method: RequestMethod.Put,
     data,
   }).then((res) => res.dat);
 };
 
 export const deleteItem = function (id: number) {
-  return request(`/api/n9e/ai-skill/${id}`, {
+  return request(`/api/takin/ai-skill/${id}`, {
     method: RequestMethod.Delete,
   }).then((res) => res.dat);
 };
 
 export const getFile = function (fileId: number): Promise<FileContent> {
-  return request(`/api/n9e/ai-skill-file/${fileId}`, {
+  return request(`/api/takin/ai-skill-file/${fileId}`, {
     method: RequestMethod.Get,
   }).then((res) => res.dat);
 };
 
 export const deleteFile = function (fileId: number) {
-  return request(`/api/n9e/ai-skill-file/${fileId}`, {
+  return request(`/api/takin/ai-skill-file/${fileId}`, {
     method: RequestMethod.Delete,
   }).then((res) => res.dat);
 };
@@ -87,7 +87,7 @@ interface GitRequestOptions {
 }
 
 export const gitInstall = function (data: GitInstallPayload, options?: GitRequestOptions) {
-  return request('/api/n9e/ai-skills/git/install', {
+  return request('/api/takin/ai-skills/git/install', {
     method: RequestMethod.Post,
     data,
     silence: options?.silence,
@@ -96,7 +96,7 @@ export const gitInstall = function (data: GitInstallPayload, options?: GitReques
 };
 
 export const gitReplaceConfig = function (id: number, data: Partial<GitInstallPayload>, options?: GitRequestOptions) {
-  return request(`/api/n9e/ai-skill/${id}/git/install`, {
+  return request(`/api/takin/ai-skill/${id}/git/install`, {
     method: RequestMethod.Put,
     data,
     silence: options?.silence,
@@ -105,7 +105,7 @@ export const gitReplaceConfig = function (id: number, data: Partial<GitInstallPa
 };
 
 export const gitUpdate = function (id: number, data: Partial<GitInstallPayload>, options?: GitRequestOptions) {
-  return request(`/api/n9e/ai-skill/${id}/git/update`, {
+  return request(`/api/takin/ai-skill/${id}/git/update`, {
     method: RequestMethod.Post,
     data,
     silence: options?.silence,

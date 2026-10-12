@@ -58,14 +58,14 @@ export default function Info() {
     getMyPortrait().then((res) => {
       setLoading(false);
       if(res.dat!=null && res.dat!=""){
-        setImageUrl(_.cloneDeep("/api/n9e/"+res.dat+"?"+Math.random()));
+        setImageUrl(_.cloneDeep("/api/takin/"+res.dat+"?"+Math.random()));
       }
     });
   }, []);
 
   const props: UploadProps = {
     name: 'photo',
-    action: '/api/n9e/xh/users/photo',
+    action: '/api/takin/xh/users/photo',
     headers: {
       authorization: `Bearer ${Cookies.get('access_token') || ''}`,
     },
@@ -169,7 +169,7 @@ export default function Info() {
       getMyPortrait().then((res) => {
           setLoading(false);
           if(res.dat!=null && res.dat!=""){
-            setImageUrl(_.cloneDeep("/api/n9e/"+res.dat+"?"+Math.random()));
+            setImageUrl(_.cloneDeep("/api/takin/"+res.dat+"?"+Math.random()));
             confirm({
               title: '系统提醒',
               content: '头像已修改，确定立即生效？',

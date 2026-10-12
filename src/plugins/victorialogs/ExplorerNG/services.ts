@@ -23,7 +23,7 @@ export function logsQuery(data: {
   list: Record<string, any>[];
   total: number;
 }> {
-  return request('/api/n9e/logs-query', {
+  return request('/api/takin/logs-query', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -31,7 +31,7 @@ export function logsQuery(data: {
 }
 
 export function dsQuery(data: { cate: DatasourceCateEnum; datasource_id: number; query: Record<string, any>[] }): Promise<DataResp[]> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
     silence: true,
@@ -47,7 +47,7 @@ export function getFieldNames(data: {
   filter?: string;
   limit?: number;
 }): Promise<FieldNameSuggestion[]> {
-  return request('/api/n9e/victorialogs-field-names', {
+  return request('/api/takin/victorialogs-field-names', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -67,7 +67,7 @@ export function getFieldValues(data: {
   filter?: string;
   limit?: number;
 }): Promise<FieldValueSuggestion[]> {
-  return request('/api/n9e/victorialogs-field-values', {
+  return request('/api/takin/victorialogs-field-values', {
     method: RequestMethod.Post,
     data: {
       ...data,
@@ -88,7 +88,7 @@ export function getHistogram(data: {
     group_by?: string;
   }[];
 }): Promise<HistogramValue[]> {
-  return request('/api/n9e/victorialogs-histogram', {
+  return request('/api/takin/victorialogs-histogram', {
     method: RequestMethod.Post,
     data,
     silence: true,

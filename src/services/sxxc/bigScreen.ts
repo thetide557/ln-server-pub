@@ -82,7 +82,7 @@ import _ from 'lodash';
 
 // 仪表盘列表
 export const getDashboards = function (id: number | string) {
-    return request(`/api/n9e/busi-group/${id}/boards`, {
+    return request(`/api/takin/busi-group/${id}/boards`, {
         method: RequestMethod.Get,
     }).then((res) => {
         return res.dat;
@@ -91,7 +91,7 @@ export const getDashboards = function (id: number | string) {
 
 // 更新仪表盘
 export const updateBoards = function (id: number | string) {
-    return request(`/api/n9e/board/${id}/update`, {
+    return request(`/api/takin/board/${id}/update`, {
         method: RequestMethod.Post,
     })
 };
@@ -99,7 +99,7 @@ export const updateBoards = function (id: number | string) {
 
 // 大屏list
 export const getBigScreen = function () {
-    return request(`/api/n9e/bigscreen`, {
+    return request(`/api/takin/bigscreen`, {
         method: RequestMethod.Get
     })
 }
@@ -107,14 +107,14 @@ export const getBigScreen2 = function (busiGroup) {
     // 业务组为空（未分配 / 空数组 / 0）时不拼 busiGroup 参数，避免发 ?busiGroup= 空值被后端 400（todo③）
     const value = busiGroup === undefined || busiGroup === null ? '' : String(busiGroup);
     const query = value === '' || value === '0' ? '' : `?busiGroup=${value}`;
-    return request(`/api/n9e/bigscreen${query}`, {
+    return request(`/api/takin/bigscreen${query}`, {
         method: RequestMethod.Get
     })
 }
 
 // 新增大屏
 export const addBigScreen = function (data: any) {
-    return request("/api/n9e/bigscreen", {
+    return request("/api/takin/bigscreen", {
         method: RequestMethod.Post,
         data
     })
@@ -122,7 +122,7 @@ export const addBigScreen = function (data: any) {
 
 // 修改大屏
 export const editBigScreen = function (data: any) {
-    return request("/api/n9e/bigscreen", {
+    return request("/api/takin/bigscreen", {
         method: RequestMethod.Put,
         data
     })
@@ -130,20 +130,20 @@ export const editBigScreen = function (data: any) {
 
 // 根据id查询大屏
 export const getScreenById = function (id: number | string) {
-    return request(`/api/n9e/bigscreen/${id}`, {
+    return request(`/api/takin/bigscreen/${id}`, {
         method: RequestMethod.Get,
     })
 }
 
 // 删除大屏
 export const deleteScreenById = function (id: number | string) {
-    return request(`/api/n9e/bigscreen/${id}`, {
+    return request(`/api/takin/bigscreen/${id}`, {
         method: RequestMethod.Delete,
     })
 }
 // 大屏二级导航
 export function getNav2(query = '', limit: number = 5000) {
-    return request(`/api/n9e/bigscreen/busi-groups`, {
+    return request(`/api/takin/bigscreen/busi-groups`, {
       method: RequestMethod.Get,
       params: Object.assign(
         {

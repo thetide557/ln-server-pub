@@ -6,7 +6,7 @@ import { DatasourceCateEnum } from '@/utils/constant';
 export type { IndexDataItem, ClusteringItem };
 
 // export const getDorisDatabases = (data: DorisDBParams): Promise<string[]> => {
-//   return request('/api/n9e/db-databases', {
+//   return request('/api/takin/db-databases', {
 //     method: RequestMethod.Post,
 //     data,
 //   }).then((res) => res.dat);

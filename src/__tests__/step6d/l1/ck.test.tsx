@@ -51,7 +51,7 @@ function setInput(container: HTMLElement, id: string, value: string) {
 describe('L1：ck（ClickHouse）数据源表单提交', () => {
   beforeEach(() => {
     requestMock.mockClear();
-    // N36 批 C：换成按 URL 分流的假实现，让 GET /api/n9e/server-clusters 返回一个真列表。
+    // N36 批 C：换成按 URL 分流的假实现，让 GET /api/takin/server-clusters 返回一个真列表。
     // 原来一律返回 {}，items/Cluster.tsx 的集群项既填不进值、校验规则又判它无效，
     // 整张表单永远提交不出去——这是 N28 U-N28-3 那 8 红的第一层原因。
     requestMock.mockImplementation(datasourceRequestImpl);
@@ -87,7 +87,7 @@ describe('L1：ck（ClickHouse）数据源表单提交', () => {
     // eslint-disable-next-line no-console
     console.log('[step6d][L1][ck] upsert body =', JSON.stringify(body, null, 2));
 
-    expect(url).toBe('/api/n9e/datasource/upsert');
+    expect(url).toBe('/api/takin/datasource/upsert');
     expect(body.plugin_type).toBe('ck');
     // N36 批 C：集群名由 items/Cluster.tsx 自动填，提交体里会带上它
     expect(body.cluster_name).toBe(AUTO_FILLED_CLUSTER);

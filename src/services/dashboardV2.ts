@@ -21,7 +21,7 @@ import { stringify } from 'query-string';
 
 // 仪表盘列表
 export const getDashboards = function (id: number | string) {
-  return request(`/api/n9e/busi-group/${id}/boards`, {
+  return request(`/api/takin/busi-group/${id}/boards`, {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;
@@ -36,7 +36,7 @@ interface Dashboard {
 }
 // 创建仪表盘
 export const createDashboard = function (id: number, data: Dashboard) {
-  return request(`/api/n9e/busi-group/${id}/boards`, {
+  return request(`/api/takin/busi-group/${id}/boards`, {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -46,14 +46,14 @@ export const createDashboard = function (id: number, data: Dashboard) {
 
 // 克隆仪表盘
 export const cloneDashboard = function (busiId: number, id: number) {
-  return request(`/api/n9e/busi-group/${busiId}/board/${id}/clone`, {
+  return request(`/api/takin/busi-group/${busiId}/board/${id}/clone`, {
     method: RequestMethod.Post,
   });
 };
 
 // 删除仪表盘
 export const removeDashboards = function (ids: number[]) {
-  return request(`/api/n9e/boards`, {
+  return request(`/api/takin/boards`, {
     method: RequestMethod.Delete,
     data: {
       ids,
@@ -64,7 +64,7 @@ export const removeDashboards = function (ids: number[]) {
 // 导出仪表盘
 // 仪表盘迁移页面需要
 export const exportDashboard = function (busiId: number | string, ids: number[]) {
-  return request(`/api/n9e/busi-group/${busiId}/dashboards/export`, {
+  return request(`/api/takin/busi-group/${busiId}/dashboards/export`, {
     method: RequestMethod.Post,
     data: { ids },
   }).then((res) => {
@@ -74,7 +74,7 @@ export const exportDashboard = function (busiId: number | string, ids: number[])
 
 // 获取仪表盘详情
 export const getDashboard = function (id: string | number) {
-  return request(`/api/n9e/board/${id}`, {
+  return request(`/api/takin/board/${id}`, {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;
@@ -83,7 +83,7 @@ export const getDashboard = function (id: string | number) {
 
 // 更新仪表盘 - 只能更新 name 和 tags
 export const updateDashboard = function (id: string | number, data: { name: string; ident?: string; tags: string }) {
-  return request(`/api/n9e/board/${id}`, {
+  return request(`/api/takin/board/${id}`, {
     method: RequestMethod.Put,
     data,
   }).then((res) => res.dat);
@@ -91,7 +91,7 @@ export const updateDashboard = function (id: string | number, data: { name: stri
 
 // 更新仪表盘 - 只能更新 configs
 export const updateDashboardConfigs = function (id: string | number, data: { configs: string }) {
-  return request(`/api/n9e/board/${id}/configs`, {
+  return request(`/api/takin/board/${id}/configs`, {
     method: RequestMethod.Put,
     data,
   });
@@ -99,7 +99,7 @@ export const updateDashboardConfigs = function (id: string | number, data: { con
 
 // 更新仪表盘 - 只能更新 public
 export const updateDashboardPublic = function (id: string | number, data: { public: number }) {
-  return request(`/api/n9e/board/${id}/public`, {
+  return request(`/api/takin/board/${id}/public`, {
     method: RequestMethod.Put,
     data,
   });
@@ -107,7 +107,7 @@ export const updateDashboardPublic = function (id: string | number, data: { publ
 
 // boards v2 api
 export const migrateDashboard = function (id: number, data: { name: string; tags: string; configs: string }) {
-  return request(`/api/n9e/dashboard/${id}/migrate`, {
+  return request(`/api/takin/dashboard/${id}/migrate`, {
     method: RequestMethod.Put,
     data,
   });
@@ -115,7 +115,7 @@ export const migrateDashboard = function (id: number, data: { name: string; tags
 
 // 设置资产类型默认仪表盘
 export const setDashboardAssetType = function (id: string | number, data: { asset_name: string; apply_all?: boolean }) {
-  return request(`/api/n9e/board/${id}/asset-type`, {
+  return request(`/api/takin/board/${id}/asset-type`, {
     method: RequestMethod.Put,
     data,
   });
@@ -123,14 +123,14 @@ export const setDashboardAssetType = function (id: string | number, data: { asse
 
 // 获取看板的默认模板
 export const getDashboardTemplate = function () {
-  return request(`/api/n9e/board/templates`, {
+  return request(`/api/takin/board/templates`, {
     method: RequestMethod.Get
   })
 }
 
 // 重置看板的默认模板 data : {to: number}
 export const putDashboardTemplte = function (id, data) {
-  return request(`/api/n9e/board/${id}/from`, {
+  return request(`/api/takin/board/${id}/from`, {
     method: RequestMethod.Put,
     data
   })
@@ -139,7 +139,7 @@ export const putDashboardTemplte = function (id, data) {
 // 以下是非仪表盘相关的接口
 
 export const getBuiltinDashboard = function (data) {
-  return request('/api/n9e/builtin-boards-detail', {
+  return request('/api/takin/builtin-boards-detail', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {
@@ -148,7 +148,7 @@ export const getBuiltinDashboard = function (data) {
 };
 
 export const getDashboardPure = function (id: string) {
-  return request(`/api/n9e/board/${id}/pure`, {
+  return request(`/api/takin/board/${id}/pure`, {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.dat;
@@ -164,7 +164,7 @@ export const fetchHistoryRangeBatch = (data, signalKey) => {
     signals[signalKey].abort();
   }
   signals[signalKey] = controller;
-  return request(`/api/n9e/query-range-batch`, {
+  return request(`/api/takin/query-range-batch`, {
     method: RequestMethod.Post,
     data,
     signal,
@@ -181,7 +181,7 @@ export const fetchHistoryInstantBatch = (data, signalKey) => {
     signals[signalKey].abort();
   }
   signals[signalKey] = controller;
-  return request(`/api/n9e/query-instant-batch`, {
+  return request(`/api/takin/query-instant-batch`, {
     method: RequestMethod.Post,
     data,
     signal,
@@ -192,7 +192,7 @@ export const fetchHistoryInstantBatch = (data, signalKey) => {
 };
 
 export const getLabelNames = function (data, datasourceValue: number) {
-  return request(`/api/n9e/proxy/${datasourceValue}/api/v1/labels`, {
+  return request(`/api/takin/proxy/${datasourceValue}/api/v1/labels`, {
     method: RequestMethod.Get,
     params: { ...data },
     silence: true,
@@ -200,7 +200,7 @@ export const getLabelNames = function (data, datasourceValue: number) {
 };
 
 export const getLabelValues = function (label, data, datasourceValue: number) {
-  return request(`/api/n9e/proxy/${datasourceValue}/api/v1/label/${label}/values`, {
+  return request(`/api/takin/proxy/${datasourceValue}/api/v1/label/${label}/values`, {
     method: RequestMethod.Get,
     params: { ...data },
     silence: true,
@@ -208,7 +208,7 @@ export const getLabelValues = function (label, data, datasourceValue: number) {
 };
 
 export const getMetricSeries = function (data, datasourceValue: number) {
-  return request(`/api/n9e/proxy/${datasourceValue}/api/v1/series`, {
+  return request(`/api/takin/proxy/${datasourceValue}/api/v1/series`, {
     method: RequestMethod.Get,
     params: { ...data },
     silence: true,
@@ -216,7 +216,7 @@ export const getMetricSeries = function (data, datasourceValue: number) {
 };
 
 export const getMetric = function (data = {}, datasourceValue: number) {
-  return request(`/api/n9e/proxy/${datasourceValue}/api/v1/label/__name__/values`, {
+  return request(`/api/takin/proxy/${datasourceValue}/api/v1/label/__name__/values`, {
     method: RequestMethod.Get,
     params: { ...data },
     silence: true,
@@ -225,7 +225,7 @@ export const getMetric = function (data = {}, datasourceValue: number) {
 };
 
 export const getQueryResult = function (data, datasourceValue: number) {
-  return request(`/api/n9e/proxy/${datasourceValue}/api/v1/query`, {
+  return request(`/api/takin/proxy/${datasourceValue}/api/v1/query`, {
     method: RequestMethod.Get,
     params: { ...data },
     silence: true,
@@ -233,7 +233,7 @@ export const getQueryResult = function (data, datasourceValue: number) {
 };
 
 export function getESVariableResult(datasourceValue: number, index, requestBody) {
-  return request(`/api/n9e/proxy/${datasourceValue}/${index}/_search`, {
+  return request(`/api/takin/proxy/${datasourceValue}/${index}/_search`, {
     method: RequestMethod.Post,
     data: JSON.stringify(requestBody),
     headers: {

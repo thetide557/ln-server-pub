@@ -64,7 +64,7 @@ function globToRegExp(pattern: string) {
 /**
  * 把 datasource_queries 算成实际命中的数据源 id 列表。
  *
- * 为什么要在前端算：夜莺是调后端接口 POST /api/n9e/datasource/query 拿这个结果的
+ * 为什么要在前端算：夜莺是调后端接口 POST /api/takin/datasource/query 拿这个结果的
  *（fe:.../DatasourceValueSelect/V2.tsx:204-218），羚牛后端漏搬了这条路由
  *（基线 4f150ab7:center/router/router.go:290,327 有；羚牛 center/router/router.go 零命中），
  * 所以照后端同一套算法（ln-server/models/alert_rule.go:1625-1746）在前端复刻一份。
@@ -352,7 +352,7 @@ export function processFormValues(values) {
 
 export function processInitialValues(values) {
   // ---- 第六步 第4段 W2（阶段 2）：回填时两个数据源字段要分开走。
-  // pub 的编辑页拿的是 GET /api/n9e/alert-rule/strategy/:id（src/services/warning.ts:141-145），
+  // pub 的编辑页拿的是 GET /api/takin/alert-rule/strategy/:id（src/services/warning.ts:141-145），
   // 后端那条链路把 datasource_ids 和 datasource_queries **原样**返回、不做任何翻译
   //（ln-server/center/router/router_alert_rule.go:1146-1179），所以两个字段都可能有值。
   //   * host / 老类型：表单只认 datasource_ids，把 datasource_queries 从表单值里删掉，

@@ -382,7 +382,7 @@ const Event: React.FC = () => {
       if (filter.end <= 0) {
         delete filter["end"];
       }
-      let url = "/api/n9e/alert-events/export-xls";
+      let url = "/api/takin/alert-events/export-xls";
       let exportTitle = "活跃告警告警信息";
       exportTemplet(url, filter, params).then((res) => {
         const url = window.URL.createObjectURL(new Blob([res],

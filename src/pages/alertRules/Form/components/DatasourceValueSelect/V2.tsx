@@ -206,7 +206,7 @@ export default function index(props: IProps) {
   const datasource_queries = Form.useWatch(absNames); // 第六步 W2：绝对路径，见 IProps 上的注释
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   // ---- 第六步 第4段 W2（阶段 2）改动 3/3：预览降级。
-  // 「这条规则会命中哪几个数据源」是问后端要的（POST /api/n9e/datasource/query），
+  // 「这条规则会命中哪几个数据源」是问后端要的（POST /api/takin/datasource/query），
   // 羚牛把这条路由漏搬了（夜莺基线 4f150ab7:center/router/router.go:290,327 有；
   // 羚牛 ln-server/center/router/router.go 零命中），后端待办 R1。
   // 所以这里兜一个失败状态：预览区改显示「预览不可用」，**不弹全局错误、也不挡保存**。
@@ -335,7 +335,7 @@ export default function index(props: IProps) {
                 >
                   {t('common:datasource.preview')}
                 </Button>
-                {/* 第六步 W2：后端没有 POST /api/n9e/datasource/query 时，这里给一句话说明，不影响保存 */}
+                {/* 第六步 W2：后端没有 POST /api/takin/datasource/query 时，这里给一句话说明，不影响保存 */}
                 {previewUnavailable && (
                   <span className='alert-rule-datasource-preview-unavailable' style={{ color: 'var(--fc-text-3, #8c8c8c)' }}>
                     {t('common:datasource.queries.preview_unavailable')}

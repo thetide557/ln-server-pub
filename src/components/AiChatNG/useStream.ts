@@ -34,11 +34,11 @@ export function useAiChatStream(options: IUseAiChatStreamOptions = {}) {
       setStreaming(true);
 
       try {
-        // N26 合并：羚牛只有开源后端，流固定走 /api/n9e/stream（不保留上游的 IS_ENT ? fc-model 分支）；
+        // N26 合并：羚牛只有开源后端，流固定走 /api/takin/stream（不保留上游的 IS_ENT ? fc-model 分支）；
         // credentials 用 'omit'（羚牛不靠 cookie 认证，带上反而会被网关当跨站请求）；
         // Authorization 从 cookie 取 access_token（羚牛的 token 存在 cookie，不在 localStorage）；
         // 多发一个 'Bg-debug' 头（羚牛后端用它开调试日志）。
-        const response = await fetch(`${basePrefix}/api/n9e/stream`, {
+        const response = await fetch(`${basePrefix}/api/takin/stream`, {
           method: 'POST',
           credentials: 'omit',
           headers: {

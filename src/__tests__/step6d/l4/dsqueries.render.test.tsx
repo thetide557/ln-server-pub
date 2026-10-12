@@ -8,7 +8,7 @@
  *     `['strategies',0,'datasource_queries',0,'match_type']` → id="strategies_0_datasource_queries_0_match_type"。
  *     这同时是 `拿不准-W2.md` 第 2 条（相对 / 绝对两条路径）的实证。
  *  2. **老类型**（这里用 prometheus）渲染的仍是原来的老选择器（绑 `datasource_ids`），DOM 里没有 V2 的特征元素。
- *  3. 预览接口失败时（羚牛后端没有 POST /api/n9e/datasource/query），
+ *  3. 预览接口失败时（羚牛后端没有 POST /api/takin/datasource/query），
  *     筛选器上显示「预览不可用」，**不抛错、不挡表单**。
  *
  * 用 @testing-library 的 render 而不是 renderToString：V2 靠 `Form.useWatch` 和 `useEffect` 取值发请求，

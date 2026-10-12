@@ -19,9 +19,9 @@ import { RequestMethod } from '@/store/common';
 
 // 获取监控对象列表
 export function getMonObjectList(params) {
-  let url = '/api/n9e/targets';
+  let url = '/api/takin/targets';
   if (import.meta.env.VITE_IS_PRO === 'true') {
-    url = '/api/n9e-plus/targets';
+    url = '/api/takin-plus/targets';
   }
   return request(url, {
     method: RequestMethod.Get,
@@ -30,9 +30,9 @@ export function getMonObjectList(params) {
 }
 
 export function getMonObjectUpdateList(params) {
-  let url = '/api/n9e/targetsForUpdate';
+  let url = '/api/takin/targetsForUpdate';
   if (import.meta.env.VITE_IS_PRO === 'true') {
-    url = '/api/n9e-plus/targetsForUpdate';
+    url = '/api/takin-plus/targetsForUpdate';
   }
   return request(url, {
     method: RequestMethod.Get,
@@ -50,7 +50,7 @@ export function unbindTags(data) {
 
 // 获取监控对象标签列表
 export function getTargetTags(params) {
-  return request(`/api/n9e/targets/tags`, {
+  return request(`/api/takin/targets/tags`, {
     method: RequestMethod.Get,
     params,
   });
@@ -58,7 +58,7 @@ export function getTargetTags(params) {
 
 // 绑定/解绑标签
 export function bindOrUnbindTags(isBind, data) {
-  return request(`/api/n9e/targets/tags`, {
+  return request(`/api/takin/targets/tags`, {
     method: isBind ? RequestMethod.Post : RequestMethod.Delete,
     data,
   });
@@ -66,7 +66,7 @@ export function bindOrUnbindTags(isBind, data) {
 
 // 修改/移出业务组
 export function moveTargetBusi(data) {
-  return request(`/api/n9e/targets/bgid`, {
+  return request(`/api/takin/targets/bgid`, {
     method: RequestMethod.Put,
     data: Object.assign({ bgid: 0 }, data),
   });
@@ -74,7 +74,7 @@ export function moveTargetBusi(data) {
 
 // 更新业务组
 export function autoTargetBusi(data) {
-  return request(`/api/n9e/targetsAuto/bgid`, {
+  return request(`/api/takin/targetsAuto/bgid`, {
     method: RequestMethod.Put,
     data: Object.assign({ bgid: -1 }, data),
   });
@@ -82,7 +82,7 @@ export function autoTargetBusi(data) {
 
 // 修改对象备注
 export function updateTargetNote(data) {
-  return request(`/api/n9e/targets/note`, {
+  return request(`/api/takin/targets/note`, {
     method: RequestMethod.Put,
     data,
   });
@@ -90,14 +90,14 @@ export function updateTargetNote(data) {
 
 // 删除对象
 export function deleteTargets(data) {
-  return request(`/api/n9e/targets`, {
+  return request(`/api/takin/targets`, {
     method: RequestMethod.Delete,
     data,
   });
 }
 
 export function getTargetList(data) {
-  return request(`/api/n9e/target/list`, {
+  return request(`/api/takin/target/list`, {
     method: RequestMethod.Post,
     data,
   });
@@ -105,14 +105,14 @@ export function getTargetList(data) {
 
 // 获取探针可使用版本
 export function getTargetVersion(ident) {
-  return request(`/api/n9e/target/${ident}/version`, {
+  return request(`/api/takin/target/${ident}/version`, {
     method: RequestMethod.Get
   })
 }
 
 // 更新探针目标版本
 export function updateTargetVersion(ident, data) {
-  return request(`/api/n9e/target/${ident}/version`, {
+  return request(`/api/takin/target/${ident}/version`, {
     method: RequestMethod.Put,
     data
   })
@@ -120,7 +120,7 @@ export function updateTargetVersion(ident, data) {
 
 // 上传探针版本
 export function uploadTargetVersion(data) {
-  return request(`/api/n9e/target/version`, {
+  return request(`/api/takin/target/version`, {
     method: RequestMethod.Post,
     requestType: "form",
     data

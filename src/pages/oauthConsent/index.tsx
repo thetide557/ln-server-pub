@@ -122,7 +122,7 @@ export default function OAuthConsent() {
   const decide = (decision: 'allow' | 'deny') => {
     setSubmitting(decision);
     setError(null);
-    request('/api/n9e/mcp/oauth/authorize', {
+    request('/api/takin/mcp/oauth/authorize', {
       method: RequestMethod.Post,
       data: { req, decision },
     })

@@ -3,7 +3,7 @@
  *
  * 背景（判定门 `G8-ES兜底补丁核对.md` 第三节 + 主 session 拍板 M38）：
  * ES 的 `/_msearch` 出错时 HTTP 仍是 200，错误装在 `responses[0].error` 里；
- * pub 的 `src/utils/request.ts:106-111` 对 `/api/n9e/proxy` 这类地址是「200 就原样返回」，
+ * pub 的 `src/utils/request.ts:106-111` 对 `/api/takin/proxy` 这类地址是「200 就原样返回」，
  * 所以错误会一路直达 `.then`。羚牛那个兜底（`_.get(res,'responses[0].hits',{hits:[],total:0})`）
  * 会把它当成「查到 0 条」，页面显示「暂无数据」、错误横幅还被 `index.tsx:291` 清空，
  * ES 说的真实原因一个字都看不到。本轮在兜底前加三行：有 error 就 throw ES 的 reason。

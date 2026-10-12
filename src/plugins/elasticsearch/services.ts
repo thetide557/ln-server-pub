@@ -359,7 +359,7 @@ export function getESClusterInfo(data: { cate: DatasourceCateEnum; datasource_id
   version: string;
   is_sql_supported: boolean;
 }> {
-  return request('/api/n9e/es-cluster-info', {
+  return request('/api/takin/es-cluster-info', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
@@ -379,7 +379,7 @@ export function esLogsQuery(data: {
   total: number;
   list: Record<string, any>[];
 }> {
-  return request('/api/n9e/logs-query', {
+  return request('/api/takin/logs-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => res.dat);
@@ -399,7 +399,7 @@ export function esSQLDsQuery(data: {
     };
   }[];
 }): Promise<any[]> {
-  return request('/api/n9e/ds-query', {
+  return request('/api/takin/ds-query', {
     method: RequestMethod.Post,
     data,
   }).then((res) => {

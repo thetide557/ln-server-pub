@@ -7,7 +7,7 @@ import replaceTemplateVariables from '@/pages/dashboard/Variables/utils/replaceT
 
 import { getLogsQuery } from '../services';
 // 2026-10-05 N16 摞二：仪表盘时序取数（queryStrategy==='sql' && mode==='timeSeries' 与表达式）改发开源
-// POST /api/n9e/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），不再走商业版 query-batch（/api/n9e-plus/ 前缀）
+// POST /api/takin/v2/query-batch（适配层 Renderer/datasource/queryBatchV2.ts），不再走商业版 query-batch（/api/takin-plus/ 前缀）
 // （羚牛后端不补，用户拍板 77 / M229 ⑤）。queryStrategy==='query' 与 'sql'+raw 两支逐字保留走 getLogsQuery（D-2）。
 import { queryBatchV2 } from '@/pages/dashboard/Renderer/datasource/queryBatchV2';
 
@@ -132,13 +132,13 @@ export default async function dorisQuery(options: IOptions): Promise<Result> {
     );
     const resolveData: Result = { series: _.concat(tsResult.series, raw) };
     if (inspect) {
-      // TimeSeries 条目由适配层给（url 已是 v2 真路径）；Logs 条目展示真正发出的 /api/n9e/log-query-batch。
+      // TimeSeries 条目由适配层给（url 已是 v2 真路径）；Logs 条目展示真正发出的 /api/takin/log-query-batch。
       resolveData.query = [...(tsResult.query ?? [])];
       if (!_.isEmpty(batchRawParams)) {
         resolveData.query.push({
           type: 'Logs',
           request: {
-            url: `/api/n9e/log-query-batch`,
+            url: `/api/takin/log-query-batch`,
             method: 'POST',
             data: batchRawParams,
           },

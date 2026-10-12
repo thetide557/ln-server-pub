@@ -18,7 +18,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getCabinetList = function (val) {
-  return request('/api/n9e/device-cabinet/getNames?roomId='+val, {
+  return request('/api/takin/device-cabinet/getNames?roomId='+val, {
     method: RequestMethod.Get
   });
 };

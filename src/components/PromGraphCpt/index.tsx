@@ -104,7 +104,7 @@ const TabPane = Tabs.TabPane;
 export default function index(props: IProps) {
   const { t } = useTranslation('promGraphCpt');
   const {
-    url = '/api/n9e/proxy',
+    url = '/api/takin/proxy',
     datasourceValue,
     promQL,
     contentMaxHeight = 300,

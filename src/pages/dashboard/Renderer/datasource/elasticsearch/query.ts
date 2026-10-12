@@ -174,7 +174,7 @@ export default async function elasticSearchQuery(options: IOptions): Promise<Res
         dsRes = await getDsQuery(datasourceValue, dsPlayload);
         // ---- N36 批 H1 第 2 条（后端第九份第二节 2）：`_msearch` 报错时把错误原因冒出来，别只画一张空图。
         // ES 的 `/_msearch` 出错时 HTTP 仍是 200，错误装在 `responses[i].error` 里；pub 的
-        // `src/utils/request.ts` 对 `/api/n9e/proxy` 这类地址是「200 就原样返回、不查错误字段」，
+        // `src/utils/request.ts` 对 `/api/takin/proxy` 这类地址是「200 就原样返回、不查错误字段」，
         // 所以错误会一路走到这里。不判的话 `processResponseToSeries` 把它当成「查到 0 条」，
         // 面板显示空图、用户看不到一个字（典型：Group By 选了 text 型字段，ES 回
         // `Fielddata is disabled on text fields by default`）。

@@ -32,9 +32,9 @@ import { RequestMethod } from '@/store/common';
 type Fn = (redirect?: string) => Promise<any>;
 
 const cases: Array<[string, Fn, string]> = [
-  ['getRedirectURL（OIDC）', getRedirectURL, '/api/n9e/auth/redirect'],
-  ['getRedirectURLCAS', getRedirectURLCAS, '/api/n9e/auth/redirect/cas'],
-  ['getRedirectURLOAuth', getRedirectURLOAuth, '/api/n9e/auth/redirect/oauth'],
+  ['getRedirectURL（OIDC）', getRedirectURL, '/api/takin/auth/redirect'],
+  ['getRedirectURLCAS', getRedirectURLCAS, '/api/takin/auth/redirect/cas'],
+  ['getRedirectURLOAuth', getRedirectURLOAuth, '/api/takin/auth/redirect/oauth'],
 ];
 
 describe('N36-A (A-2b)：三个 SSO 跳出接口发出去的 params', () => {

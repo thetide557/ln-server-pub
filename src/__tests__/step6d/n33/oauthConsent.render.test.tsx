@@ -5,7 +5,7 @@
  * 征求用户同意这一步时，后端 `GET /oauth/authorize` 校验完 client_id / redirect_uri / PKCE，
  * 会 302 把浏览器跳到这个前端页，地址栏上挂一个签了名的票据 `?req=<JWT>`。页面把票据里的
  * 申请方、回调地址、申请权限摊开给用户看，用户点「允许」就把决定 POST 给
- * `POST /api/n9e/mcp/oauth/authorize`（后端 ln-server center/router/router.go:1396，
+ * `POST /api/takin/mcp/oauth/authorize`（后端 ln-server center/router/router.go:1396，
  * 带 `rt.auth(), rt.user()`），后端签出授权码再把浏览器送回申请方的 redirect_uri。
  *
  * 钉的是什么（三件）：
@@ -107,7 +107,7 @@ describe('N33-E：OAuth 同意页 /oauth-consent', () => {
     expect(getByText(BTN_DENY, squash)).toBeTruthy();
   });
 
-  it('③ 点「允许」：发一次 POST /api/n9e/mcp/oauth/authorize，body 是 {req, decision:"allow"}，然后跳回调地址', async () => {
+  it('③ 点「允许」：发一次 POST /api/takin/mcp/oauth/authorize，body 是 {req, decision:"allow"}，然后跳回调地址', async () => {
     const REDIRECT = 'http://localhost:1234/cb?code=1';
     mockRequest.mockResolvedValue({ dat: { redirect: REDIRECT } });
 
@@ -122,7 +122,7 @@ describe('N33-E：OAuth 同意页 /oauth-consent', () => {
       fireEvent.click(allowBtn);
 
       await waitFor(() => expect(mockRequest).toHaveBeenCalledTimes(1));
-      expect(mockRequest.mock.calls[0][0]).toBe('/api/n9e/mcp/oauth/authorize');
+      expect(mockRequest.mock.calls[0][0]).toBe('/api/takin/mcp/oauth/authorize');
       expect(mockRequest.mock.calls[0][1]).toEqual({
         method: RequestMethod.Post,
         data: { req: REQ_TICKET, decision: 'allow' },

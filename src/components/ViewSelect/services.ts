@@ -6,7 +6,7 @@ import { View } from './types';
 export type { View } from './types';
 
 export function getViews(page: string): Promise<View[]> {
-  return request('/api/n9e/saved-views', {
+  return request('/api/takin/saved-views', {
     method: RequestMethod.Get,
     params: { page },
   }).then((res) => {
@@ -15,7 +15,7 @@ export function getViews(page: string): Promise<View[]> {
 }
 
 export function postView(data: View) {
-  return request('/api/n9e/saved-views', {
+  return request('/api/takin/saved-views', {
     method: RequestMethod.Post,
     data: _.omit(data, ['id', 'is_favorite']),
   }).then((res) => {
@@ -24,27 +24,27 @@ export function postView(data: View) {
 }
 
 export function updateView(id: number, data: View) {
-  return request(`/api/n9e/saved-view/${id}`, {
+  return request(`/api/takin/saved-view/${id}`, {
     method: RequestMethod.Put,
     data: _.omit(data, ['id', 'is_favorite']),
   });
 }
 
 export function deleteView(id: number) {
-  return request(`/api/n9e/saved-view/${id}`, {
+  return request(`/api/takin/saved-view/${id}`, {
     method: RequestMethod.Delete,
   });
 }
 
 export function postViewFavorite(id: number) {
-  return request(`/api/n9e/saved-view/${id}/favorite`, {
+  return request(`/api/takin/saved-view/${id}/favorite`, {
     method: RequestMethod.Post,
     data: { id },
   });
 }
 
 export function deleteViewFavorite(id: number) {
-  return request(`/api/n9e/saved-view/${id}/favorite`, {
+  return request(`/api/takin/saved-view/${id}/favorite`, {
     method: RequestMethod.Delete,
     data: { id },
   });

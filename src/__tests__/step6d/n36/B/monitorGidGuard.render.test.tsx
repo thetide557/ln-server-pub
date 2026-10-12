@@ -1,5 +1,5 @@
 /**
- * N36 批 B（C-2）· 监控列表页（`/xh/monitor`）：业务组列表为空时**不发** `GET /api/n9e/xh/monitoring/filter`。
+ * N36 批 B（C-2）· 监控列表页（`/xh/monitor`）：业务组列表为空时**不发** `GET /api/takin/xh/monitoring/filter`。
  *
  * 和同目录另外两份（卡片 C-3、表格 C-4）是同一类毛病，只是参数名叫 `gId`：
  * 测试账号不属于任何用户组 → `busi-groups` 回空 → `groupIds?.toString()` 是空串 → 当 `gId` 发出去 →

@@ -1,11 +1,11 @@
 /**
  * N36 批 H1 第 14 条：个人中心改资料这条请求必须带 `contacts`。
  *
- * 背景（后端第十份第三节 1，待办 `LN-USER-CONTACTS-SELF-01`）：后端在 `POST /api/n9e/users`
- * 与 `PUT /api/n9e/user/:id/profile` 两条上已经把 contacts 兜成 `{}`，
- * 但**个人中心自己改资料这条** `PUT /api/n9e/self/profile` 走的是裸字串、没兜。
+ * 背景（后端第十份第三节 1，待办 `LN-USER-CONTACTS-SELF-01`）：后端在 `POST /api/takin/users`
+ * 与 `PUT /api/takin/user/:id/profile` 两条上已经把 contacts 兜成 `{}`，
+ * 但**个人中心自己改资料这条** `PUT /api/takin/self/profile` 走的是裸字串、没兜。
  * 不带这个字段就会在库里落成空串，空串不是合法 JSON，之后用户列表
- * `GET /api/n9e/users` 与用户详情整个请求都会失败（`sql: Scan error … contacts`）。
+ * `GET /api/takin/users` 与用户详情整个请求都会失败（`sql: Scan error … contacts`）。
  *
  * 组装处 `src/pages/account/info.tsx:109-142` 的 `contacts` 来自表单，表单里没填就是 undefined，
  * `JSON.stringify` 会把 undefined 的键整个丢掉；所以兜底加在 `src/services/account.ts` 的
@@ -19,7 +19,7 @@ jest.mock('@/utils/request', () => ({
 
 import { UpdateProfile } from '@/services/account';
 
-describe('N36 批 H1 第 14 条 · PUT /api/n9e/self/profile 的请求体带 contacts', () => {
+describe('N36 批 H1 第 14 条 · PUT /api/takin/self/profile 的请求体带 contacts', () => {
   beforeEach(() => {
     mockRequest.mockClear();
   });
@@ -29,7 +29,7 @@ describe('N36 批 H1 第 14 条 · PUT /api/n9e/self/profile 的请求体带 con
 
     expect(mockRequest).toHaveBeenCalledTimes(1);
     const [url, options] = (mockRequest.mock.calls[0] as any[]) as [string, any];
-    expect(url).toBe('/api/n9e/self/profile');
+    expect(url).toBe('/api/takin/self/profile');
     expect(String(options.method).toUpperCase()).toBe('PUT');
     expect(options.data).toHaveProperty('contacts');
     expect(options.data.contacts).toEqual({});

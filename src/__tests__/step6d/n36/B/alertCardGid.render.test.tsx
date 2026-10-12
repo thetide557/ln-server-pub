@@ -1,8 +1,8 @@
 /**
- * N36 批 B（C-3）· 当前告警事件的卡片视图：业务组列表为空时**不发** `GET /api/n9e/alert-cur-events/card/xh`。
+ * N36 批 B（C-3）· 当前告警事件的卡片视图：业务组列表为空时**不发** `GET /api/takin/alert-cur-events/card/xh`。
  *
  * 和同目录 `eventTableGid.render.test.tsx`（表格视图，C-4）是同一个页面的两个视图、同一类毛病：
- * 测试账号不属于任何用户组 → `GET /api/n9e/busi-groups` 回空列表 → `busiGroups` 是空数组 →
+ * 测试账号不属于任何用户组 → `GET /api/takin/busi-groups` 回空列表 → `busiGroups` 是空数组 →
  * `groupIds?.toString()` 得到空串 → 当 `gid` 发出去 → 后端
  * `ln-server/center/router/router_alert_cur_event.go:166-168` 判 `gid == "" && !admin` 回 **400**「gid 参数为空」。
  * 证据：`A13本地回归/证据/T5/10-T510-standard-login.txt:145`（Standard，05:02:04）、

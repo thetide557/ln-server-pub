@@ -260,7 +260,7 @@ describe('阶段 2 · 老类型的提交体：逐字节不变，只多一个 dat
 });
 
 describe('阶段 2 · 编辑回填（processInitialValues）', () => {
-  // 后端 GET /api/n9e/alert-rule/strategy/:id 把两个字段原样返回、不翻译
+  // 后端 GET /api/takin/alert-rule/strategy/:id 把两个字段原样返回、不翻译
   const fromBackend = (over: any) => ({
     prod: 'metric',
     cate: 'prometheus',
