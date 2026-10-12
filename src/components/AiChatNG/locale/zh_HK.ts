@@ -33,7 +33,7 @@ const zh_HK = {
   },
   nightingale: {
     share_fallback_notice: '你沒有原頁面的存取權限，這裡只顯示對話內容',
-    title: 'Nightingale AI',
+    title: 'Takin AI',
     new_chat: '新建會話',
     sessions: '會話',
     llm_configs: 'LLM 管理',
@@ -44,9 +44,9 @@ const zh_HK = {
     expand_sidebar: '展開 AI 側欄',
     welcome_cards: {
       overview: {
-        title: '快速了解夜鶯',
+        title: '快速了解羚牛',
         description: '一分鐘看懂產品與 AI 助手能做什麼',
-        prompt: '一分鐘介紹下夜鶯監控的核心功能，以及你能幫我做什麼',
+        prompt: '一分鐘介紹下羚牛監控的核心功能，以及你能幫我做什麼',
       },
       alerts: {
         title: '盤一盤我的告警',

@@ -26,7 +26,7 @@ const ru_RU = {
   },
   nightingale: {
     share_fallback_notice: 'У вас нет доступа к исходной странице, здесь показан только диалог',
-    title: 'Nightingale AI',
+    title: 'Takin AI',
     new_chat: 'Новый чат',
     sessions: 'Диалоги',
     llm_configs: 'Управление LLM',
@@ -37,9 +37,9 @@ const ru_RU = {
     expand_sidebar: 'Развернуть боковую панель AI',
     welcome_cards: {
       overview: {
-        title: 'Быстро познакомиться с Nightingale',
+        title: 'Быстро познакомиться с Takin',
         description: 'За минуту узнайте о продукте и возможностях AI-помощника',
-        prompt: 'За минуту расскажи об основных функциях мониторинга Nightingale и о том, чем ты можешь мне помочь',
+        prompt: 'За минуту расскажи об основных функциях мониторинга Takin и о том, чем ты можешь мне помочь',
       },
       alerts: {
         title: 'Проверить мои алерты',

@@ -1,6 +1,6 @@
 const en_US = {
   title: 'Authorization request',
-  intro: 'The following application requests to access the Nightingale MCP / A2A API as you:',
+  intro: 'The following application requests to access the Takin MCP / A2A API as you:',
   asUser: 'Signed in as: ',
   redirectTo: 'Redirect to: ',
   scope: 'Requested scope: ',
