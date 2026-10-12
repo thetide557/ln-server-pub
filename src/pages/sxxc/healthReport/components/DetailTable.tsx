@@ -4,6 +4,8 @@ import type { DetailCell, DetailRow } from '../resourceAnalysisData';
 
 interface DetailTableProps {
   rows: DetailRow[];
+  /** 导出模式：去掉 rowSpan，每行都显示资源类型，避免 PDF 切片换页后文字缺失 */
+  flat?: boolean;
 }
 
 const USAGE_LABELS = ['总量', '已分配', '剩余', '分配率'];
@@ -18,10 +20,28 @@ const cellText = (cell: DetailCell, rowIndex: number) => {
   return formatChartNumber(cell.rest);
 };
 
+/** 资源类型单元格 */
+const TypeCell: React.FC<{ row: DetailRow; flat: boolean; showIcon: boolean }> = ({ row, flat, showIcon }) => {
+  if (flat) {
+    return (
+      <td className='detail-cell-type detail-cell-type--flat'>
+        {showIcon && <i style={{ background: row.color }} />}
+        {row.label}
+      </td>
+    );
+  }
+  return (
+    <td className='detail-cell-type' rowSpan={USAGE_LABELS.length}>
+      <i style={{ background: row.color }} />
+      {row.label}
+    </td>
+  );
+};
+
 /** 资源使用情况明细表（含云外部署） */
-const DetailTable: React.FC<DetailTableProps> = ({ rows }) => (
+const DetailTable: React.FC<DetailTableProps> = ({ rows, flat = false }) => (
   <div className='detail-table-wrap'>
-    <table className='detail-table'>
+    <table className={`detail-table${flat ? ' detail-table--flat' : ''}`}>
       <thead>
         <tr>
           <th className='detail-col-type' rowSpan={2}>
@@ -58,12 +78,7 @@ const DetailTable: React.FC<DetailTableProps> = ({ rows }) => (
           <Fragment key={row.key}>
             {USAGE_LABELS.map((label, rowIndex) => (
               <tr key={label}>
-                {rowIndex === 0 && (
-                  <td className='detail-cell-type' rowSpan={USAGE_LABELS.length}>
-                    <i style={{ background: row.color }} />
-                    {row.label}
-                  </td>
-                )}
+                {(rowIndex === 0 || flat) && <TypeCell row={row} flat={flat} showIcon={rowIndex === 0} />}
                 <td className='detail-cell-usage'>{`${label} (${row.unit})`}</td>
                 {row.cells.map((cell, cellIndex) => (
                   <td key={cellIndex}>{cellText(cell, rowIndex)}</td>

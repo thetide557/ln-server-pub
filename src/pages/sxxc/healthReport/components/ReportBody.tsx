@@ -29,13 +29,17 @@ const TENANT_COLORS = { hosts: '#22b35c', cpu: '#3ba0f5', storage: '#8a63e0' };
 
 interface ReportBodyProps {
   units: CloudUnit[];
+  /** 检索栏当前选中值摘要，用于在报告顶部展示筛选条件 */
+  filterSummary?: { label: string; value: string }[];
+  /** 导出模式：明细表去掉 rowSpan，避免 PDF 切片换页后文字缺失 */
+  flat?: boolean;
 }
 
 /**
- * 资源分析报告正文（核心指标概览 + 资源使用情况 + 明细表 + 单位明细）。
+ * 资源分析报告正文（筛选条件摘要 + 核心指标概览 + 资源使用情况 + 明细表 + 单位明细）。
  * 页面展示与 PDF 导出共用同一份渲染结果，保证「所见即所导」。
  */
-const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(({ units }, ref) => {
+const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(({ units, filterSummary, flat = false }, ref) => {
   const overview = useMemo(() => buildOverview(units), [units]);
   const cpuUsage = useMemo(() => calcZoneArchUsage(units, 'cpu'), [units]);
   const memUsage = useMemo(() => calcZoneArchUsage(units, 'mem'), [units]);
@@ -75,6 +79,17 @@ const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(({ units }, ref) 
 
   return (
     <div className="report-body" ref={ref}>
+      {filterSummary && filterSummary.length > 0 && (
+        <div className="report-filters-summary">
+          {filterSummary.map((item) => (
+            <div className="report-filters-summary-item" key={item.label}>
+              <span className="report-filters-summary-label">{item.label}</span>
+              <span className="report-filters-summary-value">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <section className="resource-analysis-overview">
         <h2 className="overview-title">核心指标概览</h2>
         <div className="overview-cards">
@@ -117,7 +132,7 @@ const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(({ units }, ref) 
       <section className="report-section">
         <h2 className="section-title">资源使用情况明细表（含云外部署）</h2>
         <ChartCard title="资源使用情况明细">
-          <DetailTable rows={detailRows} />
+          <DetailTable rows={detailRows} flat={flat} />
         </ChartCard>
       </section>
 
