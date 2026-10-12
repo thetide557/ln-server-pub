@@ -411,8 +411,12 @@ export default function () {
     }
   };
 
-  const handleChange = useCallback((value: string) => {
+  const handleChange = useCallback((value: string, option?: any) => {
     console.log("handleChange", value)
+    // 页面无 IP 表单项，选择/变更探针时直接把探针资产的 ip 作为未注册字段写入 form store，
+    // 保存时由 form.getFieldsValue(true) 一并提交（清空探针时同步清空）
+    const ip = option && !Array.isArray(option) ? option.ip : undefined;
+    form.setFieldsValue({ ip: ip || undefined });
   }, [form]);
 
   // const mockVal = (str: string) => ({
@@ -462,10 +466,10 @@ export default function () {
         id: v.id,
         value: v.ident,
         label: `[${v.type}]-[${v.ip}]-${v.ident}`,
-        type: v.type
+        type: v.type,
+        ip: v.ip,
       })).sort((a, b) => localeCompare(a.label, b.label))
         .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
-
       setAssetOptions(options);
       setAssetList(res.dat?.list.reduce((acc, v) => ({ ...acc, [v.id]: v }), {}));
       if (id) {
@@ -496,10 +500,11 @@ export default function () {
   };
 
   const submitForm = async (values = {}) => {
+    // setFieldsValue 编程式写入的字段（如选择/变更探针时联动写入的 ip）不会触发 onValuesChange，
+    // assetData 中会缺失；提交前统一用 form store 当前值补齐，保证 ip 等字段随接口入参提交
+    Object.assign(assetData, form.getFieldsValue(true), values);
     const submitData = {
       ...assetData,
-      ...form.getFieldsValue(true),
-      ...values,
     };
 
     if (!isServerAssetType(submitData.type)) {
@@ -510,8 +515,9 @@ export default function () {
     if (assetData.is_shelf === true) {
       assetData.shelf_reason = ''
     }
-    console.log("submitForm111", assetData, assetOptions)
-
+    console.log(submitData);
+    
+    // return false
     if (editType !== 'edit') {
       await insertXHAsset(assetData);
       message.success('添加成功');
@@ -1060,11 +1066,6 @@ export default function () {
                       options={manufacturerOptions}
                       placeholder='请选择厂商'
                     />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='IP地址' name='ip' rules={[{ required: true }, { validator: validateIP }]}>
-                    <Input placeholder='请输入IP地址' disabled={currentType === "物理服务器" || currentType === "虚拟服务器"} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
