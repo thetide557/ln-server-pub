@@ -19,11 +19,12 @@ import SegmentFormModal from './components/SegmentFormModal';
 import SegmentViewModal from './components/SegmentViewModal';
 import RecycleModal from './components/RecycleModal';
 import RuleListModal from './components/RuleListModal';
-import { IpAssignModal, IpChangeModal, IpRecycleModal, IpReserveModal, IpViewModal } from './ipList/components/IpModals';
+import { IpAssignModal, IpChangeModal, IpExportModal, IpImportModal, IpRecycleModal, IpReserveModal, IpViewModal } from './ipList/components/IpModals';
 import {
   addGroup,
   addSegment,
   assignIp,
+  batchScanIps,
   changeIp,
   collectGroupIds,
   deleteGroup,
@@ -133,6 +134,10 @@ function IpSegmentPage() {
   const [currentIp, setCurrentIp] = useState<IpItem>();
   /** IP 表格选中行 */
   const [ipSelectedRowKeys, setIpSelectedRowKeys] = useState<number[]>([]);
+  /** IP 批量导入/导出弹窗 */
+  const [ipImportVisible, setIpImportVisible] = useState(false);
+  const [ipExportVisible, setIpExportVisible] = useState(false);
+  const [ipExportRecords, setIpExportRecords] = useState<IpItem[]>([]);
 
   // 弹窗状态
   const [groupFormVisible, setGroupFormVisible] = useState(false);
@@ -551,7 +556,7 @@ function IpSegmentPage() {
                 onClick={() => {
                   Modal.confirm({
                     title: '释放提醒',
-                    content: `确认释放IP ${record.ip} 吗？释放后该地址状态为未分配。`,
+                    content: `确认释放IP ${record.ip} 吗？`,
                     onOk: () => {
                       releaseIp(record.id).then(() => {
                         message.success('释放成功');
@@ -620,11 +625,34 @@ function IpSegmentPage() {
   const ipBatchMenu = (
     <Menu
       onClick={({ key }) => {
-        if (ipSelectedRowKeys.length === 0) {
-          message.warning('请先勾选IP');
+        // 批量导出：勾选则导出选中，未勾选确认后导出全部（参考操作日志页批量导出）
+        if (key === 'export') {
+          if (ipSelectedRowKeys.length > 0) {
+            setIpExportRecords(_.filter(ipList, (item) => _.includes(ipSelectedRowKeys, item.id)));
+            setIpExportVisible(true);
+          } else {
+            Modal.confirm({
+              title: '确认导出所有IP信息吗',
+              onOk: () => {
+                setIpExportRecords(filteredIpList);
+                setIpExportVisible(true);
+              },
+              onCancel() {},
+            });
+          }
           return;
         }
-        if (key === 'recycle') {
+        // if (ipSelectedRowKeys.length === 0) {
+        //   message.warning('请先勾选IP');
+        //   return;
+        // }
+        if (key === 'scan') {
+          const hide = message.loading('正在扫描可回收IP...', 0);
+          batchScanIps(ipSelectedRowKeys).then((res) => {
+            hide();
+            showScanNotification(res.hitCount);
+          });
+        } else if (key === 'recycle') {
           Modal.confirm({
             title: `确认回收选中的${ipSelectedRowKeys.length}个IP吗？`,
             content: '回收后地址状态为未分配，资产IP绑定将同步解绑并不再使用。',
@@ -647,11 +675,19 @@ function IpSegmentPage() {
             },
             onCancel() {},
           });
+        } else if (key === 'import') {
+          setIpImportVisible(true);
+        } else if (key === 'change') {
+          message.info('批量变更');
         }
       }}
       items={[
+        { key: 'scan', label: '批量扫描' },
         { key: 'recycle', label: '批量回收' },
         { key: 'delete', label: '批量删除' },
+        { key: 'export', label: '批量导出' },
+        { key: 'import', label: '批量导入' },
+        { key: 'change', label: '批量变更' },
       ]}
     />
   );
@@ -1075,6 +1111,16 @@ function IpSegmentPage() {
             setRefreshFlag(_.uniqueId('refresh_'));
           }}
         />
+        {/* IP 批量导入/导出弹窗 */}
+        <IpImportModal
+          visible={ipImportVisible}
+          onClose={() => setIpImportVisible(false)}
+          onImported={() => {
+            setIpImportVisible(false);
+            setRefreshFlag(_.uniqueId('refresh_'));
+          }}
+        />
+        <IpExportModal visible={ipExportVisible} records={ipExportRecords} onClose={() => setIpExportVisible(false)} />
 
         {/* 新增/编辑分组 */}
         <GroupFormModal

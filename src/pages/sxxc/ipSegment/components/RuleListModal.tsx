@@ -3,7 +3,7 @@
  * 对应原型：回收规则列表弹框（从组织树"回收规则"入口打开）
  */
 import React, { useEffect, useState } from 'react';
-import { Button, Descriptions, Dropdown, Form, Input, Menu, message, Modal, Switch, Table } from 'antd';
+import { Button, Dropdown, Form, Input, Menu, message, Modal, Switch, Table } from 'antd';
 import _ from 'lodash';
 import moment from 'moment';
 import { ColumnsType } from 'antd/lib/table';
@@ -21,6 +21,7 @@ import {
   IpSegment,
   RecycleRule,
   ruleActionMap,
+  RuleFreqType,
   ruleFreqMap,
   RuleTriggerType,
   ruleTriggerMap,
@@ -51,8 +52,13 @@ function triggerText(rule: RecycleRule) {
 
 function freqText(rule: RecycleRule) {
   const meta = ruleFreqMap[rule.freqType];
+  const text = meta?.text || '-';
+  // 每周：freqValue 存星期（一~日），拼接为「每周三」，其余为「每月 1」「每年 3月1日」
+  if (rule.freqType === RuleFreqType.Weekly) {
+    return `${text}${rule.freqValue || ''} ${rule.execTime}`;
+  }
   const valuePart = rule.freqValue ? `${rule.freqValue} ` : '';
-  return `${meta?.text || '-'} ${valuePart}${rule.execTime}`;
+  return `${text} ${valuePart}${rule.execTime}`;
 }
 
 export default function RuleListModal(props: RuleListModalProps) {
@@ -307,7 +313,7 @@ export default function RuleListModal(props: RuleListModalProps) {
           segments={segments}
           onClose={() => setFormModalVisible(false)}
           onOk={async (values) => {
-            const execTime = moment.isMoment(values.execTime) ? values.execTime.format('HH:mm') : values.execTime || '02:00';
+            const execTime = moment.isMoment(values.execTime) ? values.execTime.format('HH:mm:ss') : values.execTime || '02:00:00';
             const payload = {
               ...values,
               execTime,
@@ -325,25 +331,18 @@ export default function RuleListModal(props: RuleListModalProps) {
           }}
         />
       )}
-      <Modal title='查看回收规则' visible={!!viewRule} footer={null} onCancel={() => setViewRule(undefined)} width={620}>
-        {viewRule && (
-          <Descriptions bordered size='small' column={1}>
-            <Descriptions.Item label='规则名称'>{viewRule.name}</Descriptions.Item>
-            <Descriptions.Item label='归属'>{viewRule.groupName}</Descriptions.Item>
-            <Descriptions.Item label='适用范围'>
-              {viewRule.scopeType === 'all' ? '当前分组全部地址段' : `指定地址段（${(viewRule.customSegments || []).join('、')}）`}
-            </Descriptions.Item>
-            <Descriptions.Item label='触发条件'>{triggerText(viewRule)}</Descriptions.Item>
-            <Descriptions.Item label='回收动作'>{ruleActionMap[viewRule.action]?.text}</Descriptions.Item>
-            <Descriptions.Item label='执行频率'>{freqText(viewRule)}</Descriptions.Item>
-            <Descriptions.Item label='回收白名单'>{(viewRule.whitelist || []).join('、') || '-'}</Descriptions.Item>
-            <Descriptions.Item label='累计命中次数'>{viewRule.hitCount}</Descriptions.Item>
-            <Descriptions.Item label='最近执行时间'>{viewRule.lastExecTime}</Descriptions.Item>
-            <Descriptions.Item label='启用状态'>{viewRule.enabled ? '启用' : '停用'}</Descriptions.Item>
-            <Descriptions.Item label='更新人 / 更新时间'>{`${viewRule.updater} / ${viewRule.updateTime}`}</Descriptions.Item>
-          </Descriptions>
-        )}
-      </Modal>
+      {/* 查看回收规则：复用编辑表单（查看模式，全部禁用、无提交按钮） */}
+      {targetGroup && (
+        <RuleFormModal
+          visible={!!viewRule}
+          rule={viewRule}
+          group={targetGroup}
+          segments={segments}
+          disabled
+          onClose={() => setViewRule(undefined)}
+          onOk={async () => undefined}
+        />
+      )}
     </Modal>
   );
 }

@@ -14,6 +14,8 @@ interface SegmentFormModalProps {
   segment?: IpSegment;
   /** 新增时传入归属分组名 */
   groupName?: string;
+  /** 查看模式：表单与编辑完全一致但全部禁用，无提交按钮 */
+  disabled?: boolean;
   onClose: () => void;
   onOk: (values: {
     segment: string;
@@ -59,16 +61,17 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
 
   return (
     <Modal
-      title={isEdit ? '编辑地址段' : '新增地址段'}
+      title={props.disabled ? '查看地址段' : isEdit ? '编辑地址段' : '新增地址段'}
       visible={visible}
       onCancel={props.onClose}
+      footer={props.disabled ? null : undefined}
       onOk={async () => {
         const values = await form.validateFields();
         await props.onOk(values);
       }}
       destroyOnClose
     >
-      <Form form={form} labelCol={{ flex: '90px' }}>
+      <Form form={form} labelCol={{ flex: '90px' }} disabled={props.disabled}>
         <Form.Item
           label='归属'
         >

@@ -172,6 +172,7 @@ function mkIp(partial: Partial<IpItem> & { id: number; ip: string; segmentId: nu
     allocStatus: IpAllocStatus.Allocated,
     useStatus: IpUseStatus.Used,
     onlineStatus: IpOnlineStatus.Online,
+    owner: '李磊',
     assetName: '这是一个名称',
     mac: '这是一个MAC地址',
     port: '-',
@@ -208,6 +209,34 @@ const ips: IpItem[] = [
   // 空IP（完全未分配）
   mkIp({ id: 5001, ip: '10.20.3.9', segmentId: 101, allocStatus: IpAllocStatus.Unallocated, useStatus: IpUseStatus.Unused, onlineStatus: IpOnlineStatus.None, assetName: undefined, mac: undefined, lastOnlineTime: undefined, idleDays: undefined, isTempIp: -1, isGateway: -1 }),
   mkIp({ id: 5002, ip: '10.30.4.9', segmentId: 104, allocStatus: IpAllocStatus.Unallocated, useStatus: IpUseStatus.Unused, onlineStatus: IpOnlineStatus.None, assetName: undefined, mac: undefined, lastOnlineTime: undefined, idleDays: undefined, isTempIp: -1, isGateway: -1 }),
+  // 未分配但已使用（扫描发现资产在用，分配时应自动带出资产信息；操作：查看/分配/回收）
+  mkIp({
+    id: 5003,
+    ip: '10.30.8.5',
+    segmentId: 105,
+    allocStatus: IpAllocStatus.Unallocated,
+    useStatus: IpUseStatus.Used,
+    onlineStatus: IpOnlineStatus.Online,
+    assetName: '会议室打印机',
+    mac: 'A8:5E:45:1B:2C:3D',
+    isTempIp: -1,
+    isGateway: -1,
+    idleDays: 0,
+  }),
+  // 同状态演示行（办公网段，资产离线）：与原型「IP地址段管理-IP」第5行一致
+  mkIp({
+    id: 5004,
+    ip: '10.20.3.7',
+    segmentId: 101,
+    allocStatus: IpAllocStatus.Unallocated,
+    useStatus: IpUseStatus.Used,
+    onlineStatus: IpOnlineStatus.Offline,
+    assetName: '访客无线AP',
+    mac: 'B4:2A:1E:9F:03:8C',
+    isTempIp: -1,
+    isGateway: -1,
+    idleDays: 0,
+  }),
 ];
 
 function mkRule(partial: Partial<RecycleRule> & { id: number; name: string; groupId: number }): RecycleRule {
@@ -219,7 +248,7 @@ function mkRule(partial: Partial<RecycleRule> & { id: number; name: string; grou
     action: RuleAction.Mark,
     freqType: RuleFreqType.Daily,
     freqValue: '',
-    execTime: '02:00',
+    execTime: '02:00:00',
     hitCount: 66,
     lastExecTime: now(),
     enabled: true,
@@ -253,8 +282,8 @@ const rules: RecycleRule[] = [
     triggerType: RuleTriggerType.ReservedExpired,
     thresholdDays: 90,
     action: RuleAction.Auto,
-    freqType: RuleFreqType.Quarterly,
-    freqValue: '1',
+    freqType: RuleFreqType.Yearly,
+    freqValue: '3月1日',
   }),
 ];
 
@@ -435,6 +464,12 @@ export function scanRecyclable(segmentId: number): Promise<{ hitCount: number }>
   return delay({ hitCount: hit.length || 9 }, 1000);
 }
 
+/** 批量扫描选中的IP（mock：闲置天数>0 视为命中，已加入可回收列表） */
+export function batchScanIps(ids: number[]): Promise<{ hitCount: number }> {
+  const hit = _.filter(ips, (item) => _.includes(ids, item.id) && (item.idleDays || 0) > 0);
+  return delay({ hitCount: hit.length }, 1000);
+}
+
 // ==================== IP ====================
 
 export interface IpQueryParams {
@@ -481,6 +516,13 @@ export function getRecyclableIps(segmentId: number): Promise<IpItem[]> {
   return delay(_.cloneDeep(list));
 }
 
+/** 同步获取回收白名单可选项：全部地址段 + 全部已有 IP（供规则表单下拉多选） */
+export function getWhitelistOptions(): { type: 'segment' | 'ip'; value: string }[] {
+  const segmentOptions = _.map(segments, (item) => ({ type: 'segment' as const, value: item.fullSegment }));
+  const ipOptions = _.map(ips, (item: IpItem) => ({ type: 'ip' as const, value: item.ip }));
+  return [...segmentOptions, ...ipOptions];
+}
+
 export function recycleIps(ids: number[]): Promise<{ success: boolean }> {
   _.forEach(ids, (id) => {
     const item = _.find(ips, { id });
@@ -517,11 +559,19 @@ export function recycleOneIp(id: number, reason: string): Promise<{ success: boo
   return delay({ success: true });
 }
 
-export function reserveIp(id: number, data: { owner?: string; note?: string }): Promise<{ success: boolean }> {
+export function reserveIp(
+  id: number,
+  data: { owner?: string; note?: string; gateway?: boolean; tempIp?: boolean; duration?: number; durationUnit?: string; reason?: string },
+): Promise<{ success: boolean }> {
   const item = _.find(ips, { id });
   if (item) {
     item.allocStatus = IpAllocStatus.Reserved;
-    item.note = data.note || item.note;
+    item.owner = data.owner || item.owner;
+    item.isGateway = data.gateway ? 1 : 0;
+    item.isTempIp = data.tempIp ? 1 : 0;
+    item.duration = data.duration;
+    item.durationUnit = data.durationUnit;
+    item.note = data.reason || data.note || item.note;
   }
   return delay({ success: true });
 }
@@ -536,13 +586,32 @@ export function releaseIp(id: number): Promise<{ success: boolean }> {
   return delay({ success: true });
 }
 
-export function assignIp(id: number, data: { assetName?: string; mac?: string; owner?: string; note?: string }): Promise<{ success: boolean }> {
+export function assignIp(
+  id: number,
+  data: {
+    assetName?: string;
+    mac?: string;
+    owner?: string;
+    port?: string;
+    gateway?: boolean;
+    tempIp?: boolean;
+    duration?: number;
+    durationUnit?: string;
+    note?: string;
+  },
+): Promise<{ success: boolean }> {
   const item = _.find(ips, { id });
   if (item) {
     item.allocStatus = IpAllocStatus.Allocated;
     item.useStatus = IpUseStatus.Unused;
     item.assetName = data.assetName;
     item.mac = data.mac;
+    item.owner = data.owner || item.owner;
+    item.port = data.port;
+    item.isGateway = data.gateway ? 1 : 0;
+    item.isTempIp = data.tempIp ? 1 : 0;
+    item.duration = data.duration;
+    item.durationUnit = data.durationUnit;
     item.note = data.note || item.note;
   }
   return delay({ success: true });
@@ -612,7 +681,7 @@ export function addRecycleRule(data: Partial<RecycleRule> & { name: string; grou
     action: data.action || RuleAction.Mark,
     freqType: data.freqType || RuleFreqType.Daily,
     freqValue: data.freqValue || '',
-    execTime: data.execTime || '02:00',
+    execTime: data.execTime || '02:00:00',
     hitCount: 0,
     lastExecTime: '-',
     enabled: data.enabled !== false,

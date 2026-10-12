@@ -127,8 +127,8 @@ export default function DetailV2(props: IProps) {
 
   if (isHome) {
     // 陕数工业云工作台默认首页
-    id = '455950'
-    // id = _.toString(profile.board_id) || '1'
+    // id = '455950'
+    id = _.toString(profile.board_id) || '1'
   }
   const query = queryString.parse(useLocation().search);
   if (isBuiltin) {

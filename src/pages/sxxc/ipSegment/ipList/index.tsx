@@ -4,7 +4,7 @@
  * 头部地址段信息（负责人/掩码/描述） + 统计卡片 + IP列表/IP视图 tab + 筛选 + IP表格 + 操作弹窗
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, Empty, Input, Menu, message, Modal, Progress, Select, Table, Tabs, Tag } from 'antd';
+import { Button, Dropdown, Empty, Input, Menu, message, Modal, notification, Progress, Select, Table, Tabs, Tag } from 'antd';
 import { GroupOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -13,6 +13,7 @@ import PageLayout from '@/components/pageLayout';
 import usePagination from '@/components/usePagination';
 import {
   assignIp,
+  batchScanIps,
   changeIp,
   deleteIp,
   getIpList,
@@ -33,7 +34,7 @@ import {
   IpUseStatus,
   ipUseStatusMap,
 } from '../types';
-import { IpAssignModal, IpChangeModal, IpRecycleModal, IpReserveModal, IpViewModal } from './components/IpModals';
+import { IpAssignModal, IpChangeModal, IpExportModal, IpImportModal, IpRecycleModal, IpReserveModal, IpViewModal } from './components/IpModals';
 import '../index.less';
 
 type IpActionType = 'view' | 'recycle' | 'reserve' | 'assign' | 'change' | 'release';
@@ -91,6 +92,10 @@ function IpListPage() {
   // 弹窗状态
   const [action, setAction] = useState<IpActionType>();
   const [currentIp, setCurrentIp] = useState<IpItem>();
+  // 批量导入/导出弹窗
+  const [importVisible, setImportVisible] = useState(false);
+  const [exportVisible, setExportVisible] = useState(false);
+  const [exportRecords, setExportRecords] = useState<IpItem[]>([]);
 
   /** 当前筛选维度对应的枚举选项（有则为第二框下拉） */
   const enumOptions = filterField ? IP_ENUM_OPTIONS[filterField] : undefined;
@@ -212,7 +217,7 @@ function IpListPage() {
           push('释放', () => {
             Modal.confirm({
               title: '释放提醒',
-              content: `确认释放IP ${record.ip} 吗？释放后该地址状态为未分配。`,
+              content: `确认释放IP ${record.ip} 吗？`,
               onOk: () => {
                 releaseIp(record.id).then(() => {
                   message.success('释放成功');
@@ -252,11 +257,39 @@ function IpListPage() {
   const batchMenu = (
     <Menu
       onClick={({ key }) => {
-        if (selectedRowKeys.length === 0) {
-          message.warning('请先勾选IP');
+        // 批量导出：勾选则导出选中，未勾选确认后导出全部（参考操作日志页批量导出）
+        if (key === 'export') {
+          if (selectedRowKeys.length > 0) {
+            setExportRecords(_.filter(list, (item) => _.includes(selectedRowKeys, item.id)));
+            setExportVisible(true);
+          } else {
+            Modal.confirm({
+              title: '确认导出所有IP信息吗',
+              onOk: () => {
+                setExportRecords(filteredList);
+                setExportVisible(true);
+              },
+              onCancel() {},
+            });
+          }
           return;
         }
-        if (key === 'recycle') {
+        // if (selectedRowKeys.length === 0) {
+        //   message.warning('请先勾选IP');
+        //   return;
+        // }
+        if (key === 'scan') {
+          const hide = message.loading('正在扫描可回收IP...', 0);
+          batchScanIps(selectedRowKeys).then((res) => {
+            hide();
+            notification.open({
+              message: '扫描完成',
+              description: `扫描完成：命中${res.hitCount}个地址，已加入可回收列表`,
+              placement: 'bottomRight',
+              duration: 3,
+            });
+          });
+        } else if (key === 'recycle') {
           Modal.confirm({
             title: `确认回收选中的${selectedRowKeys.length}个IP吗？`,
             content: '回收后地址状态为未分配，资产IP绑定将同步解绑并不再使用。',
@@ -279,11 +312,19 @@ function IpListPage() {
             },
             onCancel() {},
           });
+        } else if (key === 'import') {
+          setImportVisible(true);
+        } else if (key === 'change') {
+          message.info('批量变更功能');
         }
       }}
       items={[
+        { key: 'scan', label: '批量扫描' },
         { key: 'recycle', label: '批量回收' },
         { key: 'delete', label: '批量删除' },
+        { key: 'export', label: '批量导出' },
+        { key: 'import', label: '批量导入' },
+        { key: 'change', label: '批量变更' },
       ]}
     />
   );
@@ -494,6 +535,17 @@ function IpListPage() {
             handleRefresh();
           }}
         />
+        {/* 批量导入 */}
+        <IpImportModal
+          visible={importVisible}
+          onClose={() => setImportVisible(false)}
+          onImported={() => {
+            setImportVisible(false);
+            handleRefresh();
+          }}
+        />
+        {/* 批量导出 */}
+        <IpExportModal visible={exportVisible} records={exportRecords} onClose={() => setExportVisible(false)} />
         </div>
       </div>
     </PageLayout>

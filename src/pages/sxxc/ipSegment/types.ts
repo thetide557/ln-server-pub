@@ -129,6 +129,8 @@ export interface IpItem {
   segment: string;
   groupId: number;
   groupName: string;
+  /** 责任人 */
+  owner?: string;
   assetName?: string;
   mac?: string;
   /** 接入端口 */
@@ -141,6 +143,10 @@ export interface IpItem {
   /** 闲置天数 */
   idleDays?: number;
   note?: string;
+  /** 使用/预留时长数值 */
+  duration?: number;
+  /** 使用/预留时长单位（天/周/月/年） */
+  durationUnit?: string;
 }
 
 /** 地址段内IP统计 */
@@ -198,19 +204,19 @@ export const ruleActionMap: Record<RuleAction, { text: string; tip: string }> = 
   [RuleAction.Auto]: { text: '自动回收', tip: '命中即系统自动回收' },
 };
 
-/** 执行频率：daily-每天 weekly-每周 monthly-每月 quarterly-每季度 */
+/** 执行频率：daily-每天 weekly-每周 monthly-每月 yearly-每年（每年 freqValue 存「M月D日」，如 3月1日） */
 export enum RuleFreqType {
   Daily = 'daily',
   Weekly = 'weekly',
   Monthly = 'monthly',
-  Quarterly = 'quarterly',
+  Yearly = 'yearly',
 }
 
 export const ruleFreqMap: Record<RuleFreqType, { text: string; valueLabel: string }> = {
   [RuleFreqType.Daily]: { text: '每天', valueLabel: '' },
   [RuleFreqType.Weekly]: { text: '每周', valueLabel: '星期' },
   [RuleFreqType.Monthly]: { text: '每月', valueLabel: '日期' },
-  [RuleFreqType.Quarterly]: { text: '每季度', valueLabel: '日期' },
+  [RuleFreqType.Yearly]: { text: '每年', valueLabel: '月/日' },
 };
 
 /** 回收规则 */
@@ -230,7 +236,7 @@ export interface RecycleRule {
   freqType: RuleFreqType;
   /** 日期/星期值 */
   freqValue: string;
-  /** 执行时间 HH:mm */
+  /** 执行时间 HH:mm:ss */
   execTime: string;
   /** 累计命中次数 */
   hitCount: number;
