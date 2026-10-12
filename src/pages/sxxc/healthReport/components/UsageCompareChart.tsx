@@ -3,20 +3,27 @@ import ChartCard from './ChartCard';
 import EChart from './EChart';
 import { CHART_COLORS, TOOLTIP_STYLE } from './chartTheme';
 import { formatChartNumber } from '../resourceAnalysisData';
-import type { ZoneArchUsage } from '../resourceAnalysisData';
+
+/** 对比图数据项（label 已带单位，如 vCPU(核)） */
+export interface UsageCompareDatum {
+  label: string;
+  total: number;
+  allocated: number;
+}
 
 interface UsageCompareChartProps {
   title: string;
-  unit: string;
-  data: ZoneArchUsage[];
+  /** 数值单位（tooltip 与 y 轴名；多维资源混排时不传） */
+  unit?: string;
+  data: UsageCompareDatum[];
   /** 总量柱颜色 */
   totalColor: string;
   /** 已分配柱颜色 */
   allocatedColor: string;
 }
 
-/** 总量与已分配对比柱状图（vCPU / 内存） */
-const UsageCompareChart: React.FC<UsageCompareChartProps> = ({ title, unit, data, totalColor, allocatedColor }) => {
+/** 总量与已分配对比柱状图 */
+const UsageCompareChart: React.FC<UsageCompareChartProps> = ({ title, unit = '', data, totalColor, allocatedColor }) => {
   const option = useMemo(
     () => ({
       backgroundColor: 'transparent',

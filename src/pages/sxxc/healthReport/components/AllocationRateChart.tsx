@@ -2,10 +2,14 @@ import React, { useMemo } from 'react';
 import ChartCard from './ChartCard';
 import EChart from './EChart';
 import { CHART_COLORS, TOOLTIP_STYLE } from './chartTheme';
-import type { AllocationRate } from '../resourceAnalysisData';
+/** 分配率数据项（label 已带单位，rate 为 0-100 数值） */
+export interface AllocationRateDatum {
+  label: string;
+  rate: number;
+}
 
 interface AllocationRateChartProps {
-  data: AllocationRate[];
+  data: AllocationRateDatum[];
 }
 
 /** 分配率越高，条形颜色越亮 */

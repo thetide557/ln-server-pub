@@ -3,12 +3,13 @@ import ChartCard from './ChartCard';
 import EChart from './EChart';
 import { CHART_COLORS, TOOLTIP_STYLE } from './chartTheme';
 import { formatChartNumber } from '../resourceAnalysisData';
-import type { ZoneArchUsage } from '../resourceAnalysisData';
+import type { UsageCompareDatum } from './UsageCompareChart';
 
 interface VcpuStackChartProps {
   title: string;
-  unit: string;
-  data: ZoneArchUsage[];
+  /** 数值单位（tooltip 与 y 轴名；多维资源混排时不传） */
+  unit?: string;
+  data: UsageCompareDatum[];
   /** 已分配柱颜色（底部） */
   allocatedColor: string;
   /** 剩余柱颜色（顶部） */
@@ -16,9 +17,9 @@ interface VcpuStackChartProps {
 }
 
 /** 已分配 / 剩余 堆叠柱状图 */
-const VcpuStackChart: React.FC<VcpuStackChartProps> = ({ title, unit, data, allocatedColor, restColor }) => {
+const VcpuStackChart: React.FC<VcpuStackChartProps> = ({ title, unit = '', data, allocatedColor, restColor }) => {
   const option = useMemo(() => {
-    const rest = data.map((item) => Math.round((item.total - item.allocated) * 100) / 100);
+    const rest = data.map((item) => Math.floor((item.total - item.allocated) * 100) / 100);
     return {
       backgroundColor: 'transparent',
       grid: { left: 4, right: 4, top: 46, bottom: 0, containLabel: true },

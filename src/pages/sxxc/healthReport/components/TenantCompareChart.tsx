@@ -3,21 +3,27 @@ import ChartCard from './ChartCard';
 import EChart from './EChart';
 import { CHART_COLORS, TOOLTIP_STYLE } from './chartTheme';
 import { formatChartNumber } from '../resourceAnalysisData';
-import type { TenantUsage } from '../resourceAnalysisData';
+/** 三维对比数据项（已按主机数降序） */
+export interface TenantCompareDatum {
+  label: string;
+  hosts: number;
+  cpu: number;
+  storageGB: number;
+}
 
 interface TenantCompareChartProps {
-  /** 已排序的租户聚合数据（默认按主机数降序） */
-  data: TenantUsage[];
+  data: TenantCompareDatum[];
 }
 
 /** 三个系列的配色：主机（绿）/ CPU（蓝）/ 存储（紫） */
 const SERIES_COLORS = { hosts: '#22b35c', cpu: '#3ba0f5', storage: '#8a63e0' };
 const SERIES_NAMES = { hosts: '主机数(台)', cpu: 'CPU(核)', storage: '存储(×100GB)' } as const;
 
-/** 存储量级远大于主机/CPU，同轴展示时按 ×100GB 缩放 */
+/** 存储量级远大于主机/CPU，同轴展示时按 ×100GB 缩放，截断两位小数（不四舍五入） */
 const STORAGE_SCALE = 100;
 
-const round2 = (value: number) => Math.round(value * 100) / 100;
+/** 截断到小数点后两位（不四舍五入） */
+const truncate2 = (value: number) => Math.floor(value * 100) / 100;
 
 /** 租户资源三维对比：主机 / CPU / 存储(×100GB) 分组横向条形图 */
 const TenantCompareChart: React.FC<TenantCompareChartProps> = ({ data }) => {
@@ -83,14 +89,14 @@ const TenantCompareChart: React.FC<TenantCompareChartProps> = ({ data }) => {
           type: 'bar',
           barWidth: 9,
           itemStyle: { color: SERIES_COLORS.cpu, borderRadius: 3 },
-          data: data.map((item) => Math.round(item.cpuAllocated)),
+          data: data.map((item) => Math.round(item.cpu)),
         },
         {
           name: SERIES_NAMES.storage,
           type: 'bar',
           barWidth: 9,
           itemStyle: { color: SERIES_COLORS.storage, borderRadius: 3 },
-          data: data.map((item) => round2(item.storageGB / STORAGE_SCALE)),
+          data: data.map((item) => truncate2(item.storageGB / STORAGE_SCALE)),
         },
       ],
     }),

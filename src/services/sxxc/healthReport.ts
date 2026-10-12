@@ -1,124 +1,34 @@
 /**
- * 健康报告 · 资源分析模块接口
+ * 分析报表模块接口（服务：ln-server-task，前缀 /biz/analysis）
  *
- * 后端契约约定（路径以后端网关实际配置为准）：
- *   GET /sxxcHealth/resourceAnalysis/units
- *   入参（均可选，空值表示全部）：region / tenant / system / type
- *   返回：{ dat: RawCloudUnitRecord[] }
- *
- * 前端保留全部聚合口径（见 resourceAnalysisData.ts），接口只需返回「上云单位」明细，
- * 页面上的概览指标、图表、明细表、单位卡片均由该明细在前端聚合而来。
+ * 响应统一包装：{ code, msg, data }，业务数据全部在 data 内（拦截器已按 biz/analysis 白名单放行原始数据）。
+ * 文档约定：
+ *   - overview 的 value/subValue 为字符串；resourceUsage 的 total/allocated/remaining 为数字、allocationRate 为字符串；
+ *     detail 的所有值均为字符串（"-" 或数字字符串）；unitDetail 的四个 Count 字段为数字。
+ *   - "-"、"--"、"0%"、"约xx.xx TB" 均为约定展示值，前端原样渲染，不转数字、不替换文案。
+ *   - 数据断流时接口正常返回默认值（0 / "-" / "--" / []），前端无需异常分支。
+ *   - date 不传 = 查 24 小时前；传过去某天 = 该天 23:59:59 快照；传今天 = 当前时刻。
  */
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-/** 资源池配额，单位以各资源自身口径为准（vCPU:核 / 内存:GB / 存储:TB） */
-export interface QuotaRecord {
-  /** 配额总量 */
-  total: number;
-  /** 已分配量 */
-  allocated: number;
-}
-
-export type QuotaKeyRecord = 'cpu' | 'mem' | 'stdBlock' | 'ssd' | 'object' | 'cloudBackup';
-
-/** normalize 后的完整资源池配额，六个资源池均有值（未使用为 0） */
-export type CloudUnitQuotas = Record<QuotaKeyRecord, QuotaRecord>;
-
-/** 上云单位资源明细（前端视图模型，字段与 resourceAnalysisData.ts 的 CloudUnit 同构） */
-export interface CloudUnitRecord {
-  id: string;
-  /** 上云单位（即租户） */
-  name: string;
-  /** 计费类型：商用 / 试用 / 自用 */
-  chargeType: string;
-  /** 区域：专网区 / 互联网区 */
-  region: string;
-  /** 芯片架构：C86 / ARM */
-  arch: string;
-  /** 业务系统 */
-  system: string;
-  /** 资产类型：物理服务器 / 虚拟服务器 */
-  type: string;
-  /** 主机（台） */
-  hosts: number;
-  /** 存储容量（GB），用于上云单位明细卡片 */
-  storageGB: number;
-  /** 各资源池配额 */
-  quotas: CloudUnitQuotas;
-}
-
-/** 后端原始返回：字段可能缺失、quotas 只包含实际使用的资源池 */
-type RawCloudUnitRecord = Partial<Omit<CloudUnitRecord, 'quotas'>> & {
-  quotas?: Partial<CloudUnitQuotas>;
-};
-
-/** 资源分析查询参数，空字符串 / 不传表示「全部」 */
-export interface ResourceAnalysisQuery {
-  /** 查询日期（YYYY-MM-DD），后端按该日资源快照返回 */
+/** 公共筛选参数（全部可选；未选择该维度时不传） */
+export interface AnalysisQuery {
+  /** 查询日期 yyyy-MM-dd，如 "2026-10-09" */
   date?: string;
+  /** 区域（当前监控侧 label 未写入，传参暂不生效） */
   region?: string;
+  /** 租户（同 region，暂不生效） */
   tenant?: string;
-  system?: string;
-  type?: string;
-}
-
-const QUOTA_KEYS: QuotaKeyRecord[] = ['cpu', 'mem', 'stdBlock', 'ssd', 'object', 'cloudBackup'];
-
-const toNumber = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) ? value : 0);
-
-/**
- * 后端明细 → 前端视图模型：补齐 id、缺省资源池与非法数值，
- * 保证下游聚合函数拿到的结构始终完整。
- */
-export const normalizeCloudUnit = (record: RawCloudUnitRecord, index: number): CloudUnitRecord => {
-  const quotas = QUOTA_KEYS.reduce<CloudUnitQuotas>((acc, key) => {
-    const quota = record.quotas?.[key];
-    acc[key] = quota
-      ? { total: toNumber(quota.total), allocated: toNumber(quota.allocated) }
-      : { total: 0, allocated: 0 };
-    return acc;
-  }, {} as CloudUnitQuotas);
-
-  return {
-    id: record.id || `UNIT-${index + 1}`,
-    name: record.name || '',
-    chargeType: record.chargeType || '',
-    region: record.region || '',
-    arch: record.arch || '',
-    system: record.system || '',
-    type: record.type || '',
-    hosts: toNumber(record.hosts),
-    storageGB: toNumber(record.storageGB),
-    quotas,
-  };
-};
-
-/**
- * 联调开关：后端接口未就绪前置 true，由本地 mock 模拟接口返回；
- * 后端就绪后改为 false（并可删除本文件底部的 MOCK 区块）。
- */
-const USE_MOCK = true;
-
-/** 获取资源分析 · 上云单位资源明细列表 */
-export function getResourceUnits(params?: ResourceAnalysisQuery) {
-  if (USE_MOCK) {
-    return getMockResourceUnits(params);
-  }
-  return request(`/sxxcHealth/resourceAnalysis/units`, {
-    method: RequestMethod.Get,
-    params,
-  }).then((res): CloudUnitRecord[] => {
-    const list = (res?.dat ?? []) as RawCloudUnitRecord[];
-    return Array.isArray(list) ? list.map(normalizeCloudUnit) : [];
-  });
+  /** 业务系统名，取 /filters 返回的 businessSystem[].name */
+  busigroup?: string;
+  /** 资产类型，取 /filters 返回的 assetType[].name */
+  assetType?: string;
 }
 
 /* ============================================================================
  * 顶部筛选栏数据接口
  * GET /biz/analysis/filters
- * 返回：{ msg, code, data: { region, tenant, businessSystem, assetType } }
- * 四个数组元素形如 { name: string }，region / tenant 后端可能返回空数组
  * ========================================================================== */
 
 /** 筛选项条目 */
@@ -171,92 +81,205 @@ export function getAnalysisFilters(): Promise<AnalysisFilterOptions> {
 }
 
 /* ============================================================================
- * MOCK 区块（仅 USE_MOCK = true 时使用，后端接口就绪后整段删除即可）
- * 数据口径与改造前的页面演示数据完全一致，结构严格对齐 CloudUnitRecord。
+ * 核心指标概览
+ * GET /biz/analysis/overview → data: 卡片数组（顺序固定）
  * ========================================================================== */
 
-const MOCK_SYSTEMS = ['协同办公', '人力资源', '生产调度', '设备管理', '工业物联', '质量追溯', '采购平台', '供应链', '智慧水务', '客户服务', '数据中台', '运维平台'];
+/** 概览卡片（value/subValue 均为字符串，"--" 表示无数据，原样展示） */
+export interface OverviewCardItem {
+  key: string;
+  name: string;
+  unit: string;
+  /** 副标题，如「含商用」「分配率」 */
+  subLabel: string;
+  value: string;
+  subValue: string;
+}
 
-const round2 = (value: number) => Math.round(value * 100) / 100;
+/** 获取核心指标概览 5 张卡片 */
+export function getAnalysisOverview(params?: AnalysisQuery): Promise<OverviewCardItem[]> {
+  return request(`/biz/analysis/overview`, {
+    method: RequestMethod.Get,
+    params,
+  }).then((res): OverviewCardItem[] => {
+    const list = res?.data;
+    return Array.isArray(list) ? list : [];
+  });
+}
 
-/** 各区域架构下的基准分配率，用于由「已分配」反推「总量」 */
-const MOCK_BASE_RATES: Record<string, Record<QuotaKeyRecord, number>> = {
-  '专网区|C86': { cpu: 0.4478, mem: 0.5322, stdBlock: 0.1929, ssd: 0.4271, object: 0.0059, cloudBackup: 0.007 },
-  '专网区|ARM': { cpu: 0.0784, mem: 0.0692, stdBlock: 0.1929, ssd: 0, object: 0.0059, cloudBackup: 0.007 },
-  '互联网区|C86': { cpu: 0.6021, mem: 0.492, stdBlock: 0.1819, ssd: 0.8106, object: 0.0122, cloudBackup: 0.007 },
-  '互联网区|ARM': { cpu: 0.0903, mem: 0.0884, stdBlock: 0.1226, ssd: 0, object: 0.0489, cloudBackup: 0.007 },
-};
+/* ============================================================================
+ * 资源使用情况（图表数据）
+ * GET /biz/analysis/resourceUsage
+ * ========================================================================== */
 
-/** 云外备份仅部分单位使用：[单位, 计费类型, 总量(TB), 已分配(TB)] */
-const MOCK_CLOUD_BACKUP: [string, string, number, number][] = [
-  ['水发集团', '商用', 400, 2.79],
-  ['环保集团', '试用', 400, 2.8],
-];
+/** 图表分组维度（专网C86 / 专网ARM / 互网C86 / 互网ARM） */
+export interface UsageGroup {
+  key: string;
+  name: string;
+}
 
-/** 上云单位演示数据：[单位, 计费类型, 主机(台), CPU已分配(核), 内存已分配(GB), 存储(GB), 区域, 架构] */
-const MOCK_UNIT_SEEDS: [string, string, number, number, number, number, string, string][] = [
-  ['利用外资', '商用', 76, 856, 1544, 53548, '专网区', 'C86'],
-  ['工业云', '商用', 64, 465, 1329, 27772, '专网区', 'C86'],
-  ['环保集团', '商用', 50, 1232, 3216, 37520, '互联网区', 'C86'],
-  ['国资研究院', '商用', 45, 734, 2276, 38702, '互联网区', 'C86'],
-  ['陕数集团', '商用', 18, 312, 1072, 15000, '专网区', 'ARM'],
-  ['陕药集团', '试用', 17, 136, 816, 12858, '互联网区', 'ARM'],
-  ['环保集团', '试用', 15, 188, 736, 7700, '互联网区', 'C86'],
-  ['丝路数据', '商用', 11, 88, 336, 4140, '互联网区', 'ARM'],
-  ['水发集团', '商用', 9, 136, 576, 13616, '互联网区', 'ARM'],
-  ['农发数智', '商用', 9, 72, 144, 4648, '专网区', 'C86'],
-  ['元景数创', '商用', 12, 288, 1080, 17962, '互联网区', 'C86'],
-  ['华岳国际', '试用', 5, 88, 176, 900, '专网区', 'ARM'],
-  ['国际经贸', '试用', 4, 32, 176, 960, '互联网区', 'ARM'],
-  ['卫健人才', '试用', 1, 8, 16, 250, '互联网区', 'ARM'],
-];
+/** 资源项：总量/已分配/剩余为数字（断流为 0），分配率为 "xx.xx%" 字符串 */
+export interface ResourceUsageItem {
+  key: string;
+  name: string;
+  unit: string;
+  total: number;
+  allocated: number;
+  remaining: number;
+  allocationRate: string;
+}
 
-const buildMockUnits = (): CloudUnitRecord[] =>
-  MOCK_UNIT_SEEDS.map(([name, chargeType, hosts, cpu, mem, storage, region, arch], index) => {
-    const rates = MOCK_BASE_RATES[`${region}|${arch}`];
-    const storageTB = storage / 1024;
-    const stdRatio = arch === 'C86' ? 0.6 : 0.85;
-    const ssdRatio = arch === 'C86' ? 0.25 : 0;
-    const backup = MOCK_CLOUD_BACKUP.find(([unitName, unitCharge]) => unitName === name && unitCharge === chargeType);
-    const toQuota = (allocated: number, rate: number): QuotaRecord => ({
-      allocated: round2(allocated),
-      total: rate > 0 ? round2(allocated / rate) : 0,
-    });
+/** 资源使用率指标定义（PromQL 模板，供单机使用率查询与阈值着色，页面暂不展示） */
+export interface UsageRateDef {
+  name: string;
+  unit: string;
+  /** PromQL 模板，含 $ip、$busigroup 占位符 */
+  metrics: string;
+  maxThreshold: string;
+  minThreshold: string;
+}
 
+export interface ResourceUsageData {
+  groups: UsageGroup[];
+  resources: ResourceUsageItem[];
+  usageRate: UsageRateDef[];
+}
+
+const toNum = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) ? value : 0);
+const toStr = (value: unknown): string => (typeof value === 'string' ? value : '');
+
+/** 获取资源使用情况图表数据 */
+export function getAnalysisResourceUsage(params?: AnalysisQuery): Promise<ResourceUsageData> {
+  return request(`/biz/analysis/resourceUsage`, {
+    method: RequestMethod.Get,
+    params,
+  }).then((res): ResourceUsageData => {
+    const data = res?.data ?? {};
     return {
-      id: `UNIT-${String(index + 1).padStart(2, '0')}`,
-      name,
-      chargeType,
-      region,
-      arch,
-      system: MOCK_SYSTEMS[index % MOCK_SYSTEMS.length],
-      type: index % 5 === 0 ? '物理服务器' : '虚拟服务器',
-      hosts,
-      storageGB: storage,
-      quotas: {
-        cpu: toQuota(cpu, rates.cpu),
-        mem: toQuota(mem, rates.mem),
-        stdBlock: toQuota(storageTB * stdRatio, rates.stdBlock),
-        ssd: toQuota(storageTB * ssdRatio, rates.ssd),
-        object: toQuota(storageTB * 0.15, rates.object),
-        cloudBackup: backup ? { total: backup[2], allocated: backup[3] } : { total: 0, allocated: 0 },
-      },
+      groups: Array.isArray(data.groups)
+        ? data.groups.map((item: any) => ({ key: toStr(item?.key), name: toStr(item?.name) }))
+        : [],
+      resources: Array.isArray(data.resources)
+        ? data.resources.map((item: any) => ({
+            key: toStr(item?.key),
+            name: toStr(item?.name),
+            unit: toStr(item?.unit),
+            total: toNum(item?.total),
+            allocated: toNum(item?.allocated),
+            remaining: toNum(item?.remaining),
+            allocationRate: toStr(item?.allocationRate),
+          }))
+        : [],
+      usageRate: Array.isArray(data.usageRate)
+        ? data.usageRate.map((item: any) => ({
+            name: toStr(item?.name),
+            unit: toStr(item?.unit),
+            metrics: toStr(item?.metrics),
+            maxThreshold: toStr(item?.maxThreshold),
+            minThreshold: toStr(item?.minThreshold),
+          }))
+        : [],
     };
   });
+}
 
-const MOCK_UNITS = buildMockUnits();
+/* ============================================================================
+ * 资源使用明细表
+ * GET /biz/analysis/detail → data: 资源行数组（固定 5 行）
+ * 所有值均为字符串：无数据为 "-"，有数据为数字字符串或 "xx.xx%"，原样渲染
+ * ========================================================================== */
 
-/** 模拟后端筛选行为：入参为空表示「全部」 */
-function getMockResourceUnits(params?: ResourceAnalysisQuery): Promise<CloudUnitRecord[]> {
-  const list = MOCK_UNITS.filter(
-    (unit) =>
-      (!params?.region || unit.region === params.region) &&
-      (!params?.tenant || unit.name === params.tenant) &&
-      (!params?.system || unit.system === params.system) &&
-      (!params?.type || unit.type === params.type),
-  );
-  // 模拟网络耗时，使页面 loading 态可被验证
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(list), 300);
+/** 明细表数值单元格（字符串，"-" 表示无数据） */
+export interface DetailCellItem {
+  total: string;
+  allocated: string;
+  remaining: string;
+  allocationRate: string;
+}
+
+/** 明细表资源行：总体合计 + 各分组明细 */
+export interface DetailResourceItem {
+  key: string;
+  name: string;
+  unit: string;
+  total: string;
+  allocated: string;
+  remaining: string;
+  allocationRate: string;
+  groups: DetailGroupItem[];
+}
+
+/** 分组明细单元格带分组标识 */
+export interface DetailGroupItem extends DetailCellItem {
+  key: string;
+  name: string;
+}
+
+/** 获取资源使用明细表数据 */
+export function getAnalysisDetail(params?: AnalysisQuery): Promise<DetailResourceItem[]> {
+  return request(`/biz/analysis/detail`, {
+    method: RequestMethod.Get,
+    params,
+  }).then((res): DetailResourceItem[] => {
+    const list = res?.data;
+    if (!Array.isArray(list)) return [];
+    return list.map((row: any) => ({
+      key: toStr(row?.key),
+      name: toStr(row?.name),
+      unit: toStr(row?.unit),
+      total: toStr(row?.total),
+      allocated: toStr(row?.allocated),
+      remaining: toStr(row?.remaining),
+      allocationRate: toStr(row?.allocationRate),
+      groups: Array.isArray(row?.groups)
+        ? row.groups.map((group: any) => ({
+            key: toStr(group?.key),
+            name: toStr(group?.name),
+            total: toStr(group?.total),
+            allocated: toStr(group?.allocated),
+            remaining: toStr(group?.remaining),
+            allocationRate: toStr(group?.allocationRate),
+          }))
+        : [],
+    }));
+  });
+}
+
+/* ============================================================================
+ * 上云单位资源明细（同时供三个租户排名图使用，前端复用同一次请求）
+ * GET /biz/analysis/unitDetail
+ * ========================================================================== */
+
+/** 上云单位明细条目（hostCount 只统计在线资产 asset_up==1） */
+export interface UnitDetailItem {
+  name: string;
+  /** 服务类型（商用/试用），label 待接入，当前固定 "--" */
+  serviceType: string;
+  /** 在线主机数（台） */
+  hostCount: number;
+  /** CPU 核数（核） */
+  cpuCount: number;
+  /** 内存总量（GB） */
+  memCount: number;
+  /** 存储总量（GB） */
+  storageCount: number;
+}
+
+/** 获取上云单位资源明细（与三个租户排名图数据同源） */
+export function getAnalysisUnitDetail(params?: AnalysisQuery): Promise<UnitDetailItem[]> {
+  return request(`/biz/analysis/unitDetail`, {
+    method: RequestMethod.Get,
+    params,
+  }).then((res): UnitDetailItem[] => {
+    const list = res?.data;
+    if (!Array.isArray(list)) return [];
+    return list.map((item: any) => ({
+      name: toStr(item?.name),
+      serviceType: toStr(item?.serviceType),
+      hostCount: toNum(item?.hostCount),
+      cpuCount: toNum(item?.cpuCount),
+      memCount: toNum(item?.memCount),
+      storageCount: toNum(item?.storageCount),
+    }));
   });
 }

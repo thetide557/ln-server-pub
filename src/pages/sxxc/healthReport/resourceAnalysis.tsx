@@ -4,12 +4,18 @@ import moment from 'moment';
 import type { Moment } from 'moment';
 import { DownloadOutlined, FileZipOutlined, FundProjectionScreenOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
-import { getAnalysisFilters, getResourceUnits } from '@/services/sxxc/healthReport';
-import type { AnalysisFilterOptions, CloudUnitRecord } from '@/services/sxxc/healthReport';
+import {
+  getAnalysisDetail,
+  getAnalysisFilters,
+  getAnalysisOverview,
+  getAnalysisResourceUsage,
+  getAnalysisUnitDetail,
+} from '@/services/sxxc/healthReport';
+import type { AnalysisFilterOptions } from '@/services/sxxc/healthReport';
 import ReportBody from './components/ReportBody';
 import ReportExportHost from './components/ReportExportHost';
-import { ALL, buildFilterOptions } from './resourceAnalysisData';
-import type { FilterKey, ResourceFilters, SelectOption } from './resourceAnalysisData';
+import { ALL } from './resourceAnalysisData';
+import type { FilterKey, ResourceFilters, ReportData, SelectOption } from './resourceAnalysisData';
 import {
   bundlePdfsToZip,
   captureReportPdfBlob,
@@ -44,6 +50,13 @@ const dateStamp = () => {
 
 type ExportingType = '' | 'current' | 'tenants';
 
+const EMPTY_REPORT: ReportData = {
+  overviewCards: [],
+  resourceUsage: { groups: [], resources: [], usageRate: [] },
+  detailItems: [],
+  unitDetails: [],
+};
+
 const ResourceAnalysis: React.FC = () => {
   // 默认选中昨天，非受控 DatePicker 通过 onChange 触发更新
   const [date, setDate] = useState<Moment>(() => moment().subtract(1, 'day'));
@@ -53,36 +66,47 @@ const ResourceAnalysis: React.FC = () => {
     system: ALL,
     type: ALL,
   });
-  const [allUnits, setAllUnits] = useState<CloudUnitRecord[]>([]);
-  /** 筛选栏接口返回的四个下拉选项；某项为空时回退为从明细数据派生 */
+  const [report, setReport] = useState<ReportData>(EMPTY_REPORT);
+  /** 筛选栏接口返回的四个下拉选项 */
   const [apiFilterOptions, setApiFilterOptions] = useState<Partial<AnalysisFilterOptions>>({});
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState<ExportingType>('');
   const [exportProgress, setExportProgress] = useState({ done: 0, total: 0 });
-  /** 离屏导出宿主当前渲染的租户数据 */
-  const [exportUnits, setExportUnits] = useState<CloudUnitRecord[]>([]);
+  /** 离屏导出宿主当前渲染的报告数据 */
+  const [exportReport, setExportReport] = useState<ReportData>(EMPTY_REPORT);
   /** 离屏导出宿主当前渲染的筛选摘要（按租户导出时租户字段动态替换） */
   const [exportFilterSummary, setExportFilterSummary] = useState<{ label: string; value: string }[]>([]);
 
   const exportBodyRef = useRef<HTMLDivElement>(null);
 
-  // 接口拉取上云单位资源明细，日期或任一筛选条件变化时重新拉取
+  // 检索栏任一条件变化都重新拉取四个数据接口（后端预聚合，前端无需二次计算）
+  const query = useMemo(
+    () => ({
+      date: date.format('YYYY-MM-DD'),
+      // ALL 为空字符串：未选择该维度时不传参，由后端按「全部」口径处理
+      region: filters.region || undefined,
+      tenant: filters.tenant || undefined,
+      busigroup: filters.system || undefined,
+      assetType: filters.type || undefined,
+    }),
+    [date, filters],
+  );
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getResourceUnits({
-      date: date.format('YYYY-MM-DD'),
-      region: filters.region,
-      tenant: filters.tenant,
-      system: filters.system,
-      type: filters.type,
-    })
-      .then((list) => {
-        if (!cancelled) setAllUnits(list);
+    Promise.all([
+      getAnalysisOverview(query),
+      getAnalysisResourceUsage(query),
+      getAnalysisDetail(query),
+      getAnalysisUnitDetail(query),
+    ])
+      .then(([overviewCards, resourceUsage, detailItems, unitDetails]) => {
+        if (!cancelled) setReport({ overviewCards, resourceUsage, detailItems, unitDetails });
       })
       .catch(() => {
         // 全局请求拦截器已有错误提示，这里仅兜底为空数据
-        if (!cancelled) setAllUnits([]);
+        if (!cancelled) setReport(EMPTY_REPORT);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -90,7 +114,7 @@ const ResourceAnalysis: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [date, filters]);
+  }, [query]);
 
   // 顶部筛选栏选项接口：区域 / 租户 / 业务系统 / 资产类型
   useEffect(() => {
@@ -100,32 +124,21 @@ const ResourceAnalysis: React.FC = () => {
         if (!cancelled) setApiFilterOptions(opts);
       })
       .catch(() => {
-        // 接口失败时静默回退：下拉选项从明细数据派生（错误提示由全局拦截器处理）
+        // 接口失败时下拉仅剩「全部」选项（错误提示由全局拦截器处理）
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // 优先使用筛选栏接口返回的选项；接口该项为空（region/tenant 目前为空数组）或失败时，回退为从明细数据派生
-  const filterOptions = useMemo(() => {
-    const derived = buildFilterOptions(allUnits);
-    return {
-      region: apiFilterOptions.region?.length ? apiFilterOptions.region : derived.region,
-      tenant: apiFilterOptions.tenant?.length ? apiFilterOptions.tenant : derived.tenant,
-      system: apiFilterOptions.system?.length ? apiFilterOptions.system : derived.system,
-      type: apiFilterOptions.type?.length ? apiFilterOptions.type : derived.type,
-    };
-  }, [apiFilterOptions, allUnits]);
-
   const options = useMemo(
     () => ({
-      region: withAllOption('全部区域', filterOptions.region),
-      tenant: withAllOption('全部租户', filterOptions.tenant),
-      system: withAllOption('全部业务系统', filterOptions.system),
-      type: withAllOption('全部资产类型', filterOptions.type),
+      region: withAllOption('全部区域', apiFilterOptions.region ?? []),
+      tenant: withAllOption('全部租户', apiFilterOptions.tenant ?? []),
+      system: withAllOption('全部业务系统', apiFilterOptions.system ?? []),
+      type: withAllOption('全部资产类型', apiFilterOptions.type ?? []),
     }),
-    [filterOptions],
+    [apiFilterOptions],
   );
 
   const filterItems: { key: FilterKey; label: string; options: SelectOption[] }[] = [
@@ -139,9 +152,6 @@ const ResourceAnalysis: React.FC = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  // 接口已按筛选条件返回数据，页面直接使用，无需前端二次过滤
-  const units = allUnits;
-
   // 报告顶部的筛选条件摘要，页面与导出共用
   const filterSummary = useMemo(
     () => [
@@ -154,16 +164,20 @@ const ResourceAnalysis: React.FC = () => {
     [date, filters],
   );
 
+  /** 是否有可展示 / 可导出的数据 */
+  const hasData =
+    report.overviewCards.length > 0 || report.detailItems.length > 0 || report.unitDetails.length > 0;
+
   /** 导出当前页（按当前筛选条件所见内容）为 PDF，走离屏宿主以包含筛选摘要 */
   const handleExportCurrent = async () => {
-    if (units.length === 0) {
+    if (!hasData) {
       message.warning('当前没有可导出的数据');
       return;
     }
     setExporting('current');
     const hide = message.loading('正在生成 PDF，请稍候…', 0);
     try {
-      setExportUnits(units);
+      setExportReport(report);
       setExportFilterSummary(filterSummary);
       await waitForPaint();
       await sleep(CHART_SETTLE_MS);
@@ -176,57 +190,63 @@ const ResourceAnalysis: React.FC = () => {
       message.error('PDF 导出失败，请重试');
     } finally {
       hide();
-      setExportUnits([]);
+      setExportReport(EMPTY_REPORT);
       setExportFilterSummary([]);
       setExporting('');
     }
   };
 
-  /** 按租户逐个导出 PDF，并打包为一个 zip 文件夹下载 */
+  /** 按租户（上云单位）逐个导出 PDF，并打包为一个 zip 文件夹下载 */
   const handleExportByTenant = async () => {
-    if (units.length === 0) {
+    if (report.unitDetails.length === 0) {
       message.warning('当前没有可导出的数据');
       return;
     }
-    // 租户清单基于当前筛选结果，区域/业务系统/资产类型等条件同样生效
-    const tenantNames = Array.from(new Set(units.map((unit) => unit.name)));
+    // 单位清单基于当前筛选结果的 unitDetail，区域/业务系统/资产类型等条件同样生效
+    const unitNames = Array.from(new Set(report.unitDetails.map((item) => item.name)));
     setExporting('tenants');
-    setExportProgress({ done: 0, total: tenantNames.length });
-    message.loading({ content: `正在导出租户报告（0/${tenantNames.length}）…`, key: 'tenant-export', duration: 0 });
+    setExportProgress({ done: 0, total: unitNames.length });
+    message.loading({ content: `正在导出租户报告（0/${unitNames.length}）…`, key: 'tenant-export', duration: 0 });
     try {
       const files: { name: string; blob: Blob }[] = [];
-      for (let i = 0; i < tenantNames.length; i += 1) {
-        const tenantName = tenantNames[i];
-        const tenantUnits = units.filter((unit) => unit.name === tenantName);
-        setExportUnits(tenantUnits);
-        // 按租户导出时，摘要中租户字段替换为当前导出的租户名
-        setExportFilterSummary(filterSummary.map((item) => (item.label === '租户' ? { ...item, value: tenantName } : item)));
+      for (let i = 0; i < unitNames.length; i += 1) {
+        const unitName = unitNames[i];
+        const tenantReport: ReportData = {
+          overviewCards: report.overviewCards,
+          resourceUsage: report.resourceUsage,
+          detailItems: report.detailItems,
+          // 按单位导出：明细与排名图只保留该单位
+          unitDetails: report.unitDetails.filter((item) => item.name === unitName),
+        };
+        setExportReport(tenantReport);
+        // 摘要中租户字段替换为当前导出的单位名
+        setExportFilterSummary(filterSummary.map((item) => (item.label === '租户' ? { ...item, value: unitName } : item)));
         await waitForPaint();
         await sleep(CHART_SETTLE_MS);
         if (!exportBodyRef.current) throw new Error('导出容器未就绪');
 
         const blob = await captureReportPdfBlob(exportBodyRef.current);
-        files.push({ name: sanitizeFileName(`资源分析报告_${tenantName}.pdf`), blob });
-        setExportProgress({ done: i + 1, total: tenantNames.length });
-        message.loading({ content: `正在导出租户报告（${i + 1}/${tenantNames.length}）：${tenantName}`, key: 'tenant-export', duration: 0 });
+        files.push({ name: sanitizeFileName(`资源分析报告_${unitName}.pdf`), blob });
+        setExportProgress({ done: i + 1, total: unitNames.length });
+        message.loading({ content: `正在导出租户报告（${i + 1}/${unitNames.length}）：${unitName}`, key: 'tenant-export', duration: 0 });
       }
 
       const folderName = `租户资源分析报告_${dateStamp()}`;
       const zipBlob = await bundlePdfsToZip(folderName, files);
       downloadZip(zipBlob, `${folderName}.zip`);
-      message.success({ content: `已导出 ${tenantNames.length} 个租户的 PDF（打包为 zip）`, key: 'tenant-export' });
+      message.success({ content: `已导出 ${unitNames.length} 个租户的 PDF（打包为 zip）`, key: 'tenant-export' });
     } catch (error) {
       console.error(error);
       message.error({ content: '租户 PDF 批量导出失败，请重试', key: 'tenant-export' });
     } finally {
-      setExportUnits([]);
+      setExportReport(EMPTY_REPORT);
       setExportFilterSummary([]);
       setExportProgress({ done: 0, total: 0 });
       setExporting('');
     }
   };
 
-  const exportDisabled = exporting !== '' || loading || units.length === 0;
+  const exportDisabled = exporting !== '' || loading || !hasData;
 
   return (
     <PageLayout icon={<FundProjectionScreenOutlined />} title={'资源分析'}>
@@ -272,11 +292,16 @@ const ResourceAnalysis: React.FC = () => {
               </div>
             </section>
 
-            <ReportBody units={units} />
+            <ReportBody
+              overviewCards={report.overviewCards}
+              resourceUsage={report.resourceUsage}
+              detailItems={report.detailItems}
+              unitDetails={report.unitDetails}
+            />
           </div>
         </Spin>
       </div>
-      <ReportExportHost units={exportUnits} bodyRef={exportBodyRef} filterSummary={exportFilterSummary} />
+      <ReportExportHost report={exportReport} bodyRef={exportBodyRef} filterSummary={exportFilterSummary} />
     </PageLayout>
   );
 };

@@ -1,11 +1,19 @@
 import React from 'react';
 import ChartCard from './ChartCard';
 import { formatChartNumber } from '../resourceAnalysisData';
-import type { AllocationProgress } from '../resourceAnalysisData';
+/** 分配进度数据项（rate 为 0-100 数值） */
+export interface AllocationProgressDatum {
+  key: string;
+  label: string;
+  rate: number;
+  allocated: number;
+  total: number;
+  color: string;
+}
 
 interface AllocationProgressPanelProps {
   title?: string;
-  data: AllocationProgress[];
+  data: AllocationProgressDatum[];
 }
 
 /** 存储 / 计算 分配进度列表 */
