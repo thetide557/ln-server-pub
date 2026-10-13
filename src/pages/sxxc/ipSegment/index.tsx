@@ -238,12 +238,15 @@ function IpSegmentPage() {
     }
   }, [selectedSegmentId]);
 
-  /** IP 查询维度 → 后端参数（后端支持 query 匹配 IP/资产名/MAC 与 allocation_status） */
+  /** IP 查询维度 → 后端参数（query 匹配 IP/资产名/MAC、allocation_status 已生效；usage_status/online_status/owner 为预埋参数，后端补参后生效） */
   const buildIpQuery = () => {
     const { field, value } = ipSubmittedFilter;
-    if (value === undefined || value === '') return {} as { query?: string; allocStatus?: number };
+    if (value === undefined || value === '') return {} as { query?: string; allocStatus?: number; useStatus?: number; onlineStatus?: number; owner?: string };
     if (field === 'ip' || field === 'assetName' || field === 'mac') return { query: String(value) };
     if (field === 'allocStatus') return { allocStatus: Number(value) };
+    if (field === 'useStatus') return { useStatus: Number(value) };
+    if (field === 'onlineStatus') return { onlineStatus: Number(value) };
+    if (field === 'owner') return { owner: String(value) };
     return {};
   };
 
@@ -257,6 +260,9 @@ function IpSegmentPage() {
       limit: pagination.pageSize,
       query: q.query,
       allocStatus: q.allocStatus,
+      useStatus: q.useStatus,
+      onlineStatus: q.onlineStatus,
+      owner: q.owner,
     })
       .then((res) => {
         setIpList(res.list);
@@ -313,6 +319,10 @@ function IpSegmentPage() {
   // 选中地址段时右侧切换为 IP 视角，地址段列表不可见，无需请求（IP 列表由 fetchIpData 负责）
   useEffect(() => {
     if (selectedSegmentId) return;
+    // 从明细页返回、正在恢复选中分组时跳过本次查询（此时分组未恢复会发全量请求，与恢复后的分组请求竞态互相覆盖）；
+    // 分组恢复后（selectedGroupId === fromGroupId）由本 effect 依赖变化触发按分组查询
+    const fromGroupId = (location.state as { fromGroupId?: number } | undefined)?.fromGroupId;
+    if (fromGroupId && selectedGroupId !== fromGroupId) return;
     fetchTableData();
   }, [selectedGroupId, selectedSegmentId, current, pagination.pageSize, submittedFilter, refreshFlag]);
 
@@ -704,7 +714,7 @@ function IpSegmentPage() {
                 if (!selectedSegmentId) return;
                 const q = buildIpQuery();
                 // 导出当前查询条件下的全部数据（服务端分页下取大 limit 拉全量）
-                const res = await getSegmentAddresses(selectedSegmentId, { page: 1, limit: 100000, query: q.query, allocStatus: q.allocStatus });
+                const res = await getSegmentAddresses(selectedSegmentId, { page: 1, limit: 100000, query: q.query, allocStatus: q.allocStatus, useStatus: q.useStatus, onlineStatus: q.onlineStatus, owner: q.owner });
                 setIpExportTargetIps(_.map(res.list, (item) => item.ip));
                 setIpExportVisible(true);
               },

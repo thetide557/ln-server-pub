@@ -99,12 +99,15 @@ function IpListPage() {
   /** 当前筛选维度对应的枚举选项（有则为第二框下拉） */
   const enumOptions = filterField ? IP_ENUM_OPTIONS[filterField] : undefined;
 
-  /** 查询维度 → 后端参数（后端支持 query 匹配 IP/资产名/MAC 与 allocation_status） */
+  /** 查询维度 → 后端参数（query 匹配 IP/资产名/MAC、allocation_status 已生效；usage_status/online_status/owner 为预埋参数，后端补参后生效） */
   const buildQuery = () => {
     const { field, value } = submittedFilter;
-    if (value === undefined || value === '') return {} as { query?: string; allocStatus?: number };
+    if (value === undefined || value === '') return {} as { query?: string; allocStatus?: number; useStatus?: number; onlineStatus?: number; owner?: string };
     if (field === 'ip' || field === 'assetName' || field === 'mac') return { query: String(value) };
     if (field === 'allocStatus') return { allocStatus: Number(value) };
+    if (field === 'useStatus') return { useStatus: Number(value) };
+    if (field === 'onlineStatus') return { onlineStatus: Number(value) };
+    if (field === 'owner') return { owner: String(value) };
     return {};
   };
 
@@ -118,6 +121,9 @@ function IpListPage() {
       limit: pagination.pageSize,
       query: q.query,
       allocStatus: q.allocStatus,
+      useStatus: q.useStatus,
+      onlineStatus: q.onlineStatus,
+      owner: q.owner,
     })
       .then((res) => {
         setList(res.list);
@@ -277,7 +283,7 @@ function IpListPage() {
                 if (!segmentId) return;
                 const q = buildQuery();
                 // 导出当前查询条件下的全部数据（服务端分页下取大 limit 拉全量）
-                const res = await getSegmentAddresses(segmentId, { page: 1, limit: 100000, query: q.query, allocStatus: q.allocStatus });
+                const res = await getSegmentAddresses(segmentId, { page: 1, limit: 100000, query: q.query, allocStatus: q.allocStatus, useStatus: q.useStatus, onlineStatus: q.onlineStatus, owner: q.owner });
                 setExportTargetIps(_.map(res.list, (item) => item.ip));
                 setExportVisible(true);
               },
