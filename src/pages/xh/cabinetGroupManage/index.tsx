@@ -470,9 +470,10 @@ const CabinetGroupManage: React.FC = () => {
                   <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                     新增
                   </Button>
-                  <Button icon={<UploadOutlined />} onClick={handleOpenImport}>
+                  {/* TODO：导入按钮先隐藏 */}
+                  {/* <Button icon={<UploadOutlined />} onClick={handleOpenImport}>
                     导入
-                  </Button>
+                  </Button> */}
                 </Space>
               </Form.Item>
             </Space>

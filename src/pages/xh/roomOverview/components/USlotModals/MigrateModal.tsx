@@ -204,7 +204,7 @@ const MigrateModal: React.FC<USlotModalBaseProps> = ({ visible, slot, cabinetCod
                   .catch(() => setTargetResult(null));
               } else {
                 const curSlotList: { u_position: number; status: string }[] | null = isSelf
-                  ? allSlots
+                  ? allSlots.map((x) => ({ u_position: x.u_position, status: x.status }))
                   : (targetCabId ? Array.from({ length: targetU }, (_, i) => ({ u_position: i + 1, status: 'idle' as const })) : null);
                 if (curSlotList) {
                   const s = curSlotList.find((x) => x.u_position === startPos);

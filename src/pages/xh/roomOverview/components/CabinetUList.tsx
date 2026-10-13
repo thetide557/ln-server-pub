@@ -7,6 +7,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import { getCabinetUSlots } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
+import { getXhAsset } from '@/services/assets';
 import {
   OccupyModal, ReserveModal, ReleaseModal,
   DisableModal, EnableModal, CancelReserveModal, MigrateModal,
@@ -50,7 +51,10 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
       setLoading(true);
       try {
         const res = await getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode });
-        setAllSlots(res?.dat || []);
+        const rawSlots = res?.dat || [];
+        // 已占用 U 位：额外查资产 health，health=0 视为故障
+        await patchHealthStatus(rawSlots);
+        setAllSlots(rawSlots);
       } finally {
         setLoading(false);
       }
@@ -63,7 +67,9 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     setLoading(true);
     try {
       const res = await getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode });
-      setAllSlots(res?.dat || []);
+      const rawSlots = res?.dat || [];
+      await patchHealthStatus(rawSlots);
+      setAllSlots(rawSlots);
       setSelectedRowKeys([]);
     } finally {
       setLoading(false);
@@ -76,6 +82,28 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
   }, [allSlots, statusFilter]);
 
   // ========== 工具函数 ==========
+
+  /** 已占用 U 位：查资产 health，health=0 改为 fault */
+  const patchHealthStatus = async (slots: CabinetUSlot[]) => {
+    const usedSlots = slots.filter((s) => s.status === 'used' && s.asset_id);
+    if (usedSlots.length === 0) return;
+    const healthResults = await Promise.allSettled(
+      [...new Set(usedSlots.map((s) => s.asset_id!))].map((aid) =>
+        getXhAsset(String(aid)).then(({ dat }) => ({ asset_id: aid, health: dat?.health })),
+      ),
+    );
+    const healthMap = new Map<number, number>();
+    healthResults.forEach((r) => {
+      if (r.status === 'fulfilled' && r.value.health !== undefined && r.value.health !== null) {
+        healthMap.set(r.value.asset_id, Number(r.value.health));
+      }
+    });
+    slots.forEach((s) => {
+      if (s.status === 'used' && s.asset_id && healthMap.get(s.asset_id) === 0) {
+        s.status = 'fault';
+      }
+    });
+  };
 
   /** 更新本地 U 位状态（操作成功后本地 patch 优化体验） */
   const patchSlot = (uPositions: number[], patch: Partial<CabinetUSlot>) => {
