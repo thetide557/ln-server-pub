@@ -23,7 +23,7 @@ import {
   ExclamationCircleOutlined,
   DownloadOutlined,
 } from '@ant-design/icons';
-import type { UploadFile } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
 import moment from 'moment';
 import PageLayout from '@/components/pageLayout';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';

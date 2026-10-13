@@ -348,7 +348,7 @@ const RoomOverview: React.FC = () => {
 
     const filter = (nodes: TreeNodeData[]): TreeNodeData[] => {
       return nodes
-        .map((node) => {
+        .map((node): TreeNodeData | null => {
           const titleMatch = node.title.toLowerCase().includes(searchValue.toLowerCase());
           let children: TreeNodeData[] = [];
           if (node.children) {

@@ -21,7 +21,7 @@ import {
   UploadOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import type { UploadFile } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
 import PageLayout from '@/components/pageLayout';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';
 import {
