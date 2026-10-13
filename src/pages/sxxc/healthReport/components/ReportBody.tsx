@@ -178,9 +178,9 @@ const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(
             <AllocationProgressPanel title="存储分配进度" data={storageProgress} />
           </div>
           <div className="chart-grid chart-grid--3">
-            <TenantRankChart title="各租户主机数量" unit="台" color={TENANT_COLORS.hosts} items={tenantCharts.hostRank} />
-            <TenantRankChart title="各租户CPU配额" unit="核" color={TENANT_COLORS.cpu} items={tenantCharts.cpuRank} />
-            <TenantRankChart title="各租户存储量" unit="GB" color={TENANT_COLORS.storage} items={tenantCharts.storageRank} />
+            <TenantRankChart title="各租户主机数量(台)" unit="台" color={TENANT_COLORS.hosts} items={tenantCharts.hostRank} />
+            <TenantRankChart title="各租户CPU配额(核)" unit="核" color={TENANT_COLORS.cpu} items={tenantCharts.cpuRank} />
+            <TenantRankChart title="各租户存储量(GB)" unit="GB" color={TENANT_COLORS.storage} items={tenantCharts.storageRank} />
           </div>
           <div className="chart-grid chart-grid--1">
             <TenantCompareChart data={tenantCharts.compareData} />

@@ -9,16 +9,19 @@ export default function () {
   const { t } = useTranslation('assets');
 
   const { search } = useLocation();
-  const { mode } = queryString.parse(search);
+  const { mode , from } = queryString.parse(search);
   const [id, setId] = useState(queryString.parse(search)['id']);
 
+  // 从机柜 U 位视图/列表跳转过来的，goBack 回到机房总览；
+  // 从其他页面（资产列表等）跳转的，回到资产清单页
+  const isFromRoomOverview = from === 'roomOverview';
 
   return (
     <PageLayout
       title={id!=null?(mode=="view"?'资产信息查看':'资产信息修改'):'资产信息新增'}
       showBack
-      backPath="/xh/assetmgt"
-      backState={{ isops: true }}
+      backPath={isFromRoomOverview ? undefined : '/xh/assetmgt'}
+      backState={isFromRoomOverview ? undefined : { isops: true }}
     >
       <Form></Form>
     </PageLayout>

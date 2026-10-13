@@ -12,6 +12,10 @@ export interface IpGroup {
   owner: string;
   /** 父分组 id；一级分组不填。分组最多嵌套 3 层 */
   parentId?: number;
+  /** 树接口直传：已用（已分配+预留）IP 数（树节点右侧第一段数字） */
+  usedCount?: number;
+  /** 树接口直传：总 IP 数（树节点右侧第二段数字） */
+  totalCount?: number;
 }
 
 /** 分组最大层级 */
@@ -62,6 +66,10 @@ export interface IpSegment {
   usageRate: number;
   /** 可回收数量 */
   recyclableCount: number;
+  /** 树接口直传：树上段节点展示的已用 IP 数（缺省时按 已分配+预留 计算） */
+  treeUsed?: number;
+  /** 树接口直传：树上段节点展示的总 IP 数（缺省时按掩码计算主机数） */
+  treeTotal?: number;
   note?: string;
   /** 停用原因（仅状态为停用时有值） */
   disableReason?: string;

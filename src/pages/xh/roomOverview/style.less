@@ -1,0 +1,335 @@
+.room-overview {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 110px);
+  background: #f5f7fa;
+  gap: 16px;
+  padding: 16px;
+
+  // 左侧树
+  .room-overview-left {
+    width: 280px;
+    min-width: 280px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .tree-header {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .ant-input {
+        border-radius: 6px;
+      }
+    }
+
+    .tree-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+
+      .ant-tree {
+        background: transparent;
+
+        .ant-tree-treenode {
+          padding: 4px 0;
+
+          .ant-tree-node-content-wrapper {
+            border-radius: 4px;
+
+            &:hover {
+              background: #f0f7ff;
+            }
+
+            &.ant-tree-node-selected {
+              background: #e6f0ff;
+              color: #1890ff;
+            }
+          }
+        }
+      }
+
+      .tree-node {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+       
+
+        .anticon {
+          font-size: 14px;
+          color: #1890ff;
+        }
+
+        .tree-node-title {
+          font-size: 13px;
+        }
+      }
+
+      // .tree-node-room {
+      //   .anticon {
+      //     color: #1890ff;
+      //   }
+      // }
+
+      // .tree-node-cabinetGroup {
+      //   .anticon {
+      //     color: #52c41a;
+      //   }
+      // }
+
+      // .tree-node-cabinet {
+      //   .anticon {
+      //     color: #faad14;
+      //   }
+      // }
+    }
+  }
+
+  // 右侧详情
+  .room-overview-right {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    // 让 Spin 内部也继承 flex column + gap，这样 detail-section / Tabs / device-types-section 之间自动有间距
+    > .ant-spin {
+      width: 100%;
+
+      .ant-spin-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+
+    .right-empty {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    // Tabs 间距修复
+    .ant-tabs {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 16px 24px 24px;
+      margin-bottom: 0;
+
+      .ant-tabs-content {
+        padding-top: 16px;
+      }
+    }
+
+    // 机房/机柜组视图里的裸放 section 也要卡片化 + 间距
+    .device-types-section {
+      margin-bottom: 0;
+    }
+  }
+
+  // 详情区域
+  .detail-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 0;
+    margin-bottom: 16px;
+    overflow: hidden;
+
+    // 顶部标题栏
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 24px;
+      border-bottom: 1px solid #F0F0F0;
+
+      .detail-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1F2329;
+      }
+    }
+
+    // 内容区：左图 + 右表格
+    .detail-body {
+      display: flex;
+      padding: 24px;
+      gap: 32px;
+
+      .detail-body-left {
+        flex-shrink: 0;
+        width: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 100%;
+          height: auto;
+          max-height: 120px;
+          object-fit: contain;
+        }
+      }
+
+      .detail-body-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+    }
+
+    // 信息网格行 —— 统一三列，用 grid 保证对齐
+    .info-grid-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 32px;
+      row-gap: 0;
+
+      // 空占位：为了保持三列对齐，不需要展示任何内容
+      .info-grid-item.empty {
+        visibility: hidden;
+      }
+    }
+
+    .info-grid-item {
+      display: flex;
+      align-items: baseline;
+
+      .info-label {
+        color: #86909C;
+        font-size: 13px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .info-value {
+        color: #1F2329;
+        font-size: 13px;
+        font-weight: 500;
+        word-break: break-all;
+      }
+    }
+  }
+
+  // 设备类型卡片区域
+  .device-types-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 24px;
+
+    .section-title {
+      margin: 0 0 20px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      padding-left: 12px;
+      border-left: 4px solid #1890ff;
+      line-height: 1;
+    }
+
+    .device-type-card {
+      border-radius: 8px;
+      border: 1px solid #e8e8e8;
+      background: linear-gradient(180deg, #dce4fd 0%, #ffffff 100%);
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: #1C76FD;
+        box-shadow: 0 4px 12px rgba(28, 118, 253, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .ant-card-body {
+        padding: 16px;
+      }
+
+      .device-type-content {
+        .device-type-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1F2329;
+          margin-bottom: 12px;
+          text-align: left;
+        }
+
+        .device-type-stats {
+          display: flex;
+          justify-content: space-around;
+          margin-bottom: 12px;
+
+          .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .stat-value {
+              font-size: 18px;
+              font-weight: 600;
+              color: #1F2329;
+              line-height: 1.2;
+            }
+
+            .stat-label {
+              font-size: 11px;
+              color: #86909C;
+              margin-top: 2px;
+            }
+
+            &.online {
+              .stat-value {
+                color: #52c41a;
+              }
+            }
+
+            &.offline {
+              .stat-value {
+                color: #ff4d4f;
+              }
+            }
+          }
+        }
+
+        .device-type-action {
+          text-align: right;
+
+          .action-link {
+            color: #1C76FD;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            transition: all 0.2s;
+
+            &:hover {
+              color: #40a9ff;
+              transform: translateX(2px);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// 占用U位弹窗 —— 占用高度校验提示靠右显示（Modal 渲染到 body，放全局）
+.occupy-height-item {
+  .ant-form-item-control {
+    .ant-form-item-explain {
+      text-align: right;
+    }
+  }
+}

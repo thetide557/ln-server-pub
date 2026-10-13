@@ -463,6 +463,42 @@ export default function () {
   const [scopeTreeFilter, setScopeTreeFilter] = useState<Record<string, any>>({});
   const [scopeTreeNodeType, setScopeTreeNodeType] = useState<string>('root');
 
+  // ===== 机房维度过滤（从机房总览“进入”跳转携带）：room_id / cabinet_group_id / cabinet_id 三选一 =====
+  // 仅当 URL 带有任一维度参数时生效；用 ref 保存，避免路由未变时重复解析
+  const parseRoomFilterFromSearch = (search: string) => {
+    const usp = new URLSearchParams(search);
+    const room_id = usp.get('room_id');
+    const cabinet_group_id = usp.get('cabinet_group_id');
+    const cabinet_id = usp.get('cabinet_id');
+    // 设备类型名（如“Mongodb”），查询时作 device_type 参数传给后端
+    const deviceType = usp.get('device_type');
+    // 三选一，与后端接口约定一致
+    const filter: {
+      room_id?: number;
+      cabinet_group_id?: number;
+      cabinet_id?: number;
+      deviceType?: string;
+    } = {};
+    if (cabinet_id) filter.cabinet_id = Number(cabinet_id);
+    else if (cabinet_group_id) filter.cabinet_group_id = Number(cabinet_group_id);
+    else if (room_id) filter.room_id = Number(room_id);
+    if (deviceType) filter.deviceType = deviceType;
+    return filter;
+  };
+  const roomFilterRef = useRef<any>(parseRoomFilterFromSearch(location.search));
+  const hasRoomFilter = () => !!(
+    roomFilterRef.current.room_id
+    || roomFilterRef.current.cabinet_group_id
+    || roomFilterRef.current.cabinet_id
+    || roomFilterRef.current.deviceType
+  );
+  // 查询时传后端的机房维度参数（device_type 设备类型名）
+  const getRoomFilterParams = () => {
+    const { deviceType, ...rest } = roomFilterRef.current;
+    // 无 device_type 时不传该参数，避免序列化出 device_type=undefined 污染请求
+    return deviceType ? { ...rest, device_type: deviceType } : rest;
+  };
+
   const maintenanceStatusOption = [
     {
       label: '维保中',
@@ -1226,69 +1262,80 @@ export default function () {
       page: current,
       limit: pageSize,
     };
-    if (!isScopeTreeMode) {
-      param['groupIds'] = groupIds?.toString();
+
+    // ===== 机房维度过滤模式（机房总览"进入"跳转）：合并 URL 携带的 room/cabinet/device_type 参数 =====
+    // 左侧组织树已隐藏，跳过 groupIds / typeId / tissueId / scopeTreeFilter 等组织树过滤
+    if (hasRoomFilter()) {
+      Object.assign(param, getRoomFilterParams());
+    } else {
+      if (!isScopeTreeMode) {
+        param['groupIds'] = groupIds?.toString();
+      }
     }
 
     if (searchVal != null && searchVal.length > 0) {
       param['query'] = searchVal;
       treeQuery['query'] = searchVal
     }
-    if (isScopeTreeMode) {
-      Object.entries(scopeTreeFilter).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          param[key] = value;
+
+    if (!hasRoomFilter()) {
+      if (isScopeTreeMode) {
+        Object.entries(scopeTreeFilter).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            param[key] = value;
+          }
+        });
+      } else {
+        if (typeId != null && typeId != '0' && modifyType && parentId) {
+          param['type'] = typeId;
         }
-      });
-    } else {
-      if (typeId != null && typeId != '0' && modifyType && parentId) {
-        param['type'] = typeId;
-      }
-      if (tissueId != null && !parentId) {
-        // param['tissue_tree_id'] = tissueId;
-        param['group_id'] = tissueId;
-      }
-      // 点击全部资产下的查询时，group_id传-1
-      if (isAllAssets) {
-        param["group_id"] = -1;
-        // 根据tissueId的值 查找对应的type_list
         if (tissueId != null && !parentId) {
-          const treeItem = treeList
-            .find((item) => item.id === -1)
-            ?.sub_groups?.find((item) => item.id === tissueId);
-          // console.log('treeItem', treeItem);
-          const typeListNames = treeItem?.type_list
-            ?.map((item) => item.name)
-            .join(",");
-          if (typeListNames) {
-            param["types"] = typeListNames;
-          } else {
-            param["types"] = "";
+          // param['tissue_tree_id'] = tissueId;
+          param['group_id'] = tissueId;
+        }
+        // 点击全部资产下的查询时，group_id传-1
+        if (isAllAssets) {
+          param["group_id"] = -1;
+          // 根据tissueId的值 查找对应的type_list
+          if (tissueId != null && !parentId) {
+            const treeItem = treeList
+              .find((item) => item.id === -1)
+              ?.sub_groups?.find((item) => item.id === tissueId);
+            // console.log('treeItem', treeItem);
+            const typeListNames = treeItem?.type_list
+              ?.map((item) => item.name)
+              .join(",");
+            if (typeListNames) {
+              param["types"] = typeListNames;
+            } else {
+              param["types"] = "";
+            }
           }
         }
-      }
 
-      // switch (tissueId) {
-      //   case 1001:
-      //     param['types'] = "物理服务器,网络设备";
-      //     break;
-      //   case 1002:
-      //     param['types'] = "虚拟服务器";
-      //     break;
-      //     case 1003:
-      //     param['types'] = "MySQL, Redis, Mongodb, VictoriaMetrics, HTTP服务, 网络端点, 应用服务, Rabbitmq, Nginx, Apache, postgresql";
-      //     break;
-      //     case 1004:
-      //     param['types'] = "ln-server";
-      //     break;
-      //     case 1005:
-      //     param['types'] = "log统计";
-      //     break;
-      //   default:
-      //     break;
-      // }
+        // switch (tissueId) {
+        //   case 1001:
+        //     param['types'] = "物理服务器,网络设备";
+        //     break;
+        //   case 1002:
+        //     param['types'] = "虚拟服务器";
+        //     break;
+        //     case 1003:
+        //     param['types'] = "MySQL, Redis, Mongodb, VictoriaMetrics, HTTP服务, 网络端点, 应用服务, Rabbitmq, Nginx, Apache, postgresql";
+        //     break;
+        //     case 1004:
+        //     param['types'] = "ln-server";
+        //     break;
+        //     case 1005:
+        //     param['types'] = "log统计";
+        //     break;
+        //   default:
+        //     break;
+        // }
+      }
     }
 
+    // 两种模式下过滤器都生效：searchVal 选定字段 + filterParam 过滤器字段
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
       treeQuery['filter'] = filterParam
@@ -1298,7 +1345,7 @@ export default function () {
     const hasSearchValue = searchVal != null && searchVal.length > 0;
     const requestFunc = hasSearchValue
       ? getAssetsByN9eCondition
-      : isScopeTreeMode
+      : isScopeTreeMode && !hasRoomFilter()
       ? getAssetScopeTreeAssets
       : getAssetsByCondition;
 
@@ -1824,23 +1871,25 @@ export default function () {
   return (
     <PageLayout icon={<GroupOutlined />} title={"运维资产清单"}>
       <div style={{ display: 'inline-flex' }} className='asset_list_view'>
-        <Resizable
-          style={{
-            marginRight: collapse ? 0 : 10,
-          }}
-          size={{ width: collapse ? 0 : width, height: '100%' }}
-          enable={{
-            right: collapse ? false : true,
-          }}
-          onResizeStop={(e, direction, ref, d) => {
-            let curWidth = width + d.width;
-            if (curWidth < 200) {
-              curWidth = 200;
-            }
-            setWidth(curWidth);
-            localStorage.setItem('leftassetWidth', curWidth.toString());
-          }}
-        >
+        {/* 机房维度过滤模式（机房总览“进入”跳转）：不展示左侧组织树，只展示过滤后的资产表格 */}
+        {!hasRoomFilter() && (
+          <Resizable
+            style={{
+              marginRight: collapse ? 0 : 10,
+            }}
+            size={{ width: collapse ? 0 : width, height: '100%' }}
+            enable={{
+              right: collapse ? false : true,
+            }}
+            onResizeStop={(e, direction, ref, d) => {
+              let curWidth = width + d.width;
+              if (curWidth < 200) {
+                curWidth = 200;
+              }
+              setWidth(curWidth);
+              localStorage.setItem('leftassetWidth', curWidth.toString());
+            }}
+          >
           <div className={collapse ? 'left-area collapse' : 'left-area'}>
             <div
               className='collapse-btn'
@@ -1972,6 +2021,7 @@ export default function () {
             </div>
           </div>
         </Resizable>
+        )}
         <div className='asset-operate_xh'>
           <div className='table-content_xh'>
             <Space>
