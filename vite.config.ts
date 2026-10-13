@@ -142,6 +142,11 @@ export default defineConfig(({ mode }) => ({
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
+      "sxxcTask/biz": {
+        // 资源分析模块（sxxc 健康报告）后端服务
+        target: "http://172.16.20.11:17000/",
+        changeOrigin: true,
+      },
       "/sxxcTask": {
         // target: 'http://10.0.20.212:8086/',
         target: baseUrl,
@@ -163,6 +168,8 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     exclude: x6Chunk,
+    // echarts 体积较大，若运行时才被发现会触发二次预构建并阻塞请求，这里提前声明
+    include: ["echarts", "crypto-js"],
   },
   build: {
     target: "chrome63",

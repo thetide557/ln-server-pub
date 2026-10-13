@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, isValidElement } from 'react';
+import React, { ReactNode, useState, isValidElement, ReactElement } from 'react';
 import { copy2ClipBoard } from '@/utils';
 import './index.less';
 interface Props {
@@ -16,17 +16,26 @@ export default function Code(props: Props) {
   const { children } = props;
   const [copied, setCopied] = useState(false);
 
+  const getElementText = (node: ReactNode) => {
+    if (!isValidElement(node)) {
+      return '';
+    }
+    const element = node as ReactElement<{ children?: ReactNode }>;
+    return typeof element.props.children === 'string' ? element.props.children : '';
+  };
+
   const handleCopy = () => {
     setCopied(true);
     if (!isValidElement(children) && typeof children === 'string') {
       copy2ClipBoard(children, true);
-    } else if (isValidElement(children) && typeof (children as React.ReactElement).props.children === 'string') {
-      copy2ClipBoard((children as React.ReactElement).props.children as string, true);
+    } else if (getElementText(children)) {
+      copy2ClipBoard(getElementText(children), true);
     } else if (Array.isArray(children)) {
       let text = '';
       children.forEach((item: ReactNode) => {
-        if (isValidElement(item) && typeof (item as React.ReactElement).props.children === 'string') {
-          text += (item as React.ReactElement).props.children + '\n';
+        const itemText = getElementText(item);
+        if (itemText) {
+          text += itemText + '\n';
         }
       });
       copy2ClipBoard(text, true);

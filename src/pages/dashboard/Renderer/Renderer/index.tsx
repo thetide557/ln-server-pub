@@ -19,7 +19,7 @@ import _ from 'lodash';
 import classNames from 'classnames';
 import { useInViewport } from 'ahooks';
 import { useTranslation } from 'react-i18next';
-import { Dropdown, Menu, Tooltip, Space, Button, Modal } from 'antd';
+import { Dropdown, Menu, Tooltip, Space, Button, Modal, Select } from 'antd';
 import {
   InfoCircleOutlined,
   MoreOutlined,
@@ -70,11 +70,12 @@ interface IProps {
   onFullScreenClick?: () => void;
   onEditClick?: () => void;
   onDeleteClick?: () => void;
+  onTopNChange?: (topN: number) => void;
 }
 
 function index(props: IProps) {
   const { t } = useTranslation('dashboard');
-  const { datasourceValue, themeMode, dashboardId, id, variableConfig, isPreview, onCloneClick, onShareClick, onEditClick, onDeleteClick, onFullScreenClick, isHome } = props;
+  const { datasourceValue, themeMode, dashboardId, id, variableConfig, isPreview, onCloneClick, onShareClick, onEditClick, onDeleteClick, onFullScreenClick, onTopNChange, isHome } = props;
   const [time, setTime] = useState(props.time);
   const [visible, setVisible] = useState(false);
   const values = _.cloneDeep(props.values);
@@ -186,6 +187,25 @@ function index(props: IProps) {
                 <div className='renderer-header-desc'>{description ? <InfoCircleOutlined /> : <LinkOutlined />}</div>
               </Tooltip>
             ) : null}
+            {values.type === 'barGauge' && values.custom?.showTopN && onTopNChange && (
+              <div style={{ marginLeft: 18, display: 'flex', alignItems: 'center' }}>
+                <span>Top&nbsp;</span>
+                <Select
+                  size='small'
+                  value={values.custom?.topN ?? 0}
+                  onChange={(v) => onTopNChange(Number(v))}
+                  style={{ width: 90, marginLeft: 'auto', flexShrink: 0 }}
+                  dropdownMatchSelectWidth={false}
+                >
+                  <Select.Option value={5}>1-5</Select.Option>
+                  <Select.Option value={10}>1-10</Select.Option>
+                  <Select.Option value={15}>1-15</Select.Option>
+                  <Select.Option value={20}>1-20</Select.Option>
+                  <Select.Option value={0}>全部</Select.Option>
+                </Select>
+              </div>
+
+            )}
           </div>
           <div
             className='renderer-header-controllers'

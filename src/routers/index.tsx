@@ -51,9 +51,11 @@ import ObjectExplore from '@/pages/monitor/object';
 import Shield, { Add as AddShield, Edit as ShieldEdit } from '@/pages/warning/shield';
 import Subscribe, { Add as SubscribeAdd, Edit as SubscribeEdit } from '@/pages/warning/subscribe';
 import Event from '@/pages/event';
+import EventShanshu from '@/pages/event/shanshu';
 import EventDetail from '@/pages/event/detail';
 import orderformDetail from '@/pages/event/orderformdetail';
 import historyEvents from '@/pages/historyEvents';
+import historyEventsShanshu from '@/pages/historyEvents/shanshu';
 import XhAssetMgt from '@/pages/xh/assetmgt';
 import XhAssetAdd from '@/pages/xh/assetmgt/Add';
 import IotAssetMgt from '@/pages/sxxc/iotAssetMgt';
@@ -108,6 +110,7 @@ import DataRoom from '@/pages/dataRoom';
 import ScreenView from '@/pages/sxxc/screenView';
 import { List as Dashboardxc, Detail as DashboardDetailxc, Share as DashboardSharexc } from '@/pages/sxxc/dashboardxc';
 import healthReport from '@/pages/sxxc/healthReport'
+import resourceAnalysis from '@/pages/sxxc/healthReport/resourceAnalysis'
 import workOrder from '@/pages/sxxc/workorder'
 import productionPlan from '@/pages/sxxc/productionPlan'
 // import serverVideoAsset from "@/pages/sxxc/serverVideoAsset";
@@ -146,6 +149,8 @@ import '@/pages/logExplorer/style.less';
 // 未登录访问是先绕一趟 /login（含 SSO）再回来（lead 拍板 L-06，用户已确认）。
 import OAuthConsent from '@/pages/oauthConsent';
 import '@/pages/oauthConsent/locale';
+import IpSegmentPage from '@/pages/sxxc/ipSegment';
+import IpSegmentIpList from '@/pages/sxxc/ipSegment/ipList';
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -239,11 +244,15 @@ export default function Content() {
         ]}
 
         <Route exact path='/alert-cur-events' component={Event} />
+        <Route exact path='/alert-events-shanshu-cur' component={EventShanshu} />
         <Route exact path='/alert-his-events' component={historyEvents} />
+        <Route exact path='/alert-events-shanshu-his' component={historyEventsShanshu} />
         <Route exact path='/alert-orderform-events' component={orderformEvents} />
         <Route exact path='/alert-orderform-events/:eventId' component={orderformDetail} />
         <Route exact path='/alert-cur-events/:eventId' component={EventDetail} />
         <Route exact path='/alert-his-events/:eventId' component={EventDetail} />
+        <Route exact path='/alert-events-shanshu-his/:eventId' component={EventDetail} />
+        <Route exact path='/alert-events-shanshu-cur/:eventId' component={EventDetail} />
         <Route exact path='/targets' component={Targets} />
 
         <Route exact path='/assetmgt' component={AssetMgt} />
@@ -313,6 +322,10 @@ export default function Content() {
         <Route exact path='/dashboardsxc' component={Dashboardxc} />
         <Route exact path='/autoInspect' component={autoInspect} />
         <Route exact path='/healthReport' component={healthReport} />
+        <Route exact path='/healthReport/resourceAnalysis' component={resourceAnalysis} />
+        <Route exact path='/resourceAnalysis'>
+          <Redirect to='/healthReport/resourceAnalysis' />
+        </Route>
         <Route exact path='/workOrder' component={workOrder} />
         <Route exact path='/productionplan' component={productionPlan} />
         {/* <Route path='/serverVideoAsset' component={serverVideoAsset} exact /> */}
@@ -327,6 +340,8 @@ export default function Content() {
         <Route exact path='/inspection/inspectionReport/:inspectionId?' component={InspectionReport} />
         <Route exact path='/taskManage/strategy' component={TaskStrategy} />
         <Route exact path='/sxxc/dutyManage' component={DutyManage} />
+        <Route exact path='/ipSegment' component={IpSegmentPage} />
+        <Route exact path='/ipSegment/ip/:segmentId' component={IpSegmentIpList} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

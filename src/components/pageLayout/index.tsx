@@ -15,7 +15,7 @@
  *
  */
 import React, { ReactNode, useContext } from 'react';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory, Link, useLocation } from 'react-router-dom';
 import Icon, { RollbackOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { Menu, Dropdown, Space } from 'antd';
@@ -49,7 +49,9 @@ interface IPageLayoutProps {
 const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introIcon, children, customArea, showBack, backPath, backState, docFn, desc }) => {
   const { t, i18n } = useTranslation('pageLayout');
   const history = useHistory();
+  const location = useLocation();
   const { profile } = useContext(CommonStateContext);
+  const isShanshuRoute = location.pathname === '/alert-events-shanshu-cur' || location.pathname === '/alert-events-shanshu-his';
 
   const menu = (
     <Menu>
@@ -89,7 +91,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
         <div className={'page-top-header'}>{customArea}</div>
       ) : (
         <div className={'page-top-header'}>
-          <div className={'page-header-content'}>
+          <div className={'page-header-content'} style={isShanshuRoute ? { height: 0, padding: 0 } : undefined}>
             <div className={'page-header-title'}>
               {showBack && (
                 <RollbackOutlined

@@ -20,7 +20,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import queryString from 'query-string';
 import { Button, Card, message, Space, Spin, Tag, Tooltip, Typography } from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '@/components/pageLayout';
@@ -107,7 +107,8 @@ const EventDetailPage: React.FC = () => {
     }
   };
   const history = useHistory();
-  const isHistory = history.location.pathname.includes('alert-his-events');
+  const isHistory = history.location.pathname.includes('alert-his-events') || history.location.pathname.includes('alert-events-shanshu-his');
+  const isShanshuRoute = history.location.pathname.includes('alert-events-shanshu');
   const [eventDetail, setEventDetail] = useState<any>();
   // ---- N19 W-A：ES 事件详情要把 index_pattern 的 id 换成名字显示，所以先把索引模式列表拉下来。
   // 照 fe ee48e701 src/pages/event/DetailNG/index.tsx:46-61，但羚牛这张老详情页没有分享链接的 token 场景，
@@ -122,18 +123,204 @@ const EventDetailPage: React.FC = () => {
   }, [eventDetail?.cate]);
   if (eventDetail) eventDetail.cate = eventDetail.cate || 'prometheus'; // TODO: 兼容历史的告警事件
   const parsedEventDetail = parseValues(eventDetail);
+
+  /**
+   * 将 tags 数组（如 ["asset_type=交换机", "asset_name=xxx", ...]）解析为 key-value 对象
+   */
+  const parseTags = (tags: string[]): Record<string, string> => {
+    const result: Record<string, string> = {};
+    if (!tags || !Array.isArray(tags)) return result;
+    tags.forEach((tag) => {
+      const idx = tag.indexOf('=');
+      if (idx > 0) {
+        const key = tag.substring(0, idx).trim();
+        const value = tag.substring(idx + 1).trim();
+        result[key] = value;
+      }
+    });
+    return result;
+  };
+
+  /**
+   * 渲染回放按钮
+   * 数据来源：rule_config.queries（原始 PromQL，不替换 $asset_id）
+   * 与原 PromQL脚本 字段后的回放按钮逻辑保持一致
+   */
+  const renderReplayBtn = () => {
+    let queries = _.get(eventDetail?.rule_config, 'queries', []);
+    if (!queries || queries.length === 0) return null;
+    return (
+      <Space style={{ marginLeft: 8 }}>
+        {_.map(queries, (query, index) => {
+          const { prom_ql } = query;
+          if (!prom_ql) return null;
+          return (
+            <Button
+              key={prom_ql + index}
+              type='ghost'
+              size='small'
+              onClick={() => {
+                history.push({
+                  pathname: '/metric/explorer',
+                  search: queryString.stringify({
+                    prom_ql,
+                    data_source_name: 'prometheus',
+                    data_source_id: eventDetail.datasource_id,
+                    mode: 'graph',
+                    start: moment.unix(eventDetail.trigger_time).subtract(30, 'minutes').unix(),
+                    end: moment.unix(eventDetail.trigger_time).add(30, 'minutes').unix(),
+                  }),
+                });
+              }}
+            >
+              回放{queries.length > 1 ? index + 1 : ''}
+              <PlayCircleOutlined style={{ marginLeft: 2 }} />
+            </Button>
+          );
+        })}
+      </Space>
+    );
+  };
+
+  /**
+   * 根据资产类型将 tags + 触发值拼成一句可读的事件描述
+   * 参考指标合并简表，按资产类型选取关键标签字段组合语句
+   *
+   * 标签字段映射（来自指标合并简表）：
+   * - 网络设备(交换机/路由器/防火墙): ifname(接口名), ip(管理地址)
+   * - 物理服务器带外(IPMI): collector(采集器如bmc), name(传感器名), type(传感器类型)
+   * - 主机/服务器: instance(实例地址), interface(网卡名)
+   * - 数据库(MySQL/达梦): address(服务实例地址)
+   * - RabbitMQ: node(节点), exchange(交换机名), vhost(虚拟主机)
+   * - HTTP/Ping探测: target(探测目标), method(请求方法)
+   */
+  const renderEventContent = (tags: string[]) => {
+    const tagMap = parseTags(tags);
+    const assetType = tagMap['asset_type'] || '';
+    const assetName = tagMap['asset_name'] || eventDetail?.asset_name || '';
+    const ruleName = tagMap['rulename'] || eventDetail?.rule_name || '';
+    const triggerValue = eventDetail?.trigger_value || '';
+
+    let sentence = '';
+    switch (assetType) {
+      case '交换机':
+      case '防火墙':
+      case 'waf': {
+        // 网络设备：资产名(管理地址) ifname 接口产生了什么告警
+        const ifname = tagMap['ifname'];
+        const ip = tagMap['ip'];
+        const ipInfo = ip ? `(ip:${ip})` : '';
+        sentence = `${assetName}${ifname ? ` ${ifname} 接口` : ''}产生了 ${ruleName} 告警`;
+        break;
+      }
+      case '物理服务器带外': {
+        // IPMI 带外管理：区分传感器告警(ipmi_sensor_state)和远控状态告警(ipmi_up)
+        const sensorName = tagMap['name'];
+        const collector = tagMap['collector'];
+
+        if (sensorName) {
+          // 传感器类告警：ipmi_sensor_state
+          sentence = `${assetName}的${sensorName}传感器 产生了 ${ruleName} 告警`;
+        } else if (collector) {
+          // 远控状态类告警：ipmi_up
+          sentence = `${assetName}的${collector}采集模块 产生了 ${ruleName} 告警`;
+        } else {
+          sentence = `${assetName}产生了 ${ruleName} 告警`;
+        }
+        break;
+      }
+      case '物理服务器':
+      case '服务器':
+      case '主机': {
+        // 主机/物理服务器：资产名的 name(磁盘) 或 interface(网卡) 产生了什么告警
+        const deviceName = tagMap['name'];
+        const iface = tagMap['interface'];
+        if (deviceName) {
+          sentence = `${assetName}的 ${deviceName} 产生了 ${ruleName} 告警`;
+        } else if (iface) {
+          sentence = `${assetName}的 ${iface} 网卡产生了 ${ruleName} 告警`;
+        } else {
+          sentence = `${assetName}产生了 ${ruleName} 告警`;
+        }
+        break;
+      }
+      case 'MySQL': {
+        // MySQL：MySQL 资产名(address)产生了什么告警
+        const address = tagMap['address'];
+        sentence = `${assetName}${address ? `(${address})` : ''}产生了 ${ruleName} 告警`;
+        break;
+      }
+      case '达梦':
+      case '达梦数据库': {
+        // 达梦/数据库：数据库 资产名(target或host:port)产生了什么告警
+        const target = tagMap['target'];
+        const host = tagMap['host'];
+        const port = tagMap['port'];
+        const address = target || (host ? `${host}${port ? `:${port}` : ''}` : '');
+        const dbType = assetType === '达梦' || assetType === '达梦数据库' ? '达梦数据库' : '数据库';
+        sentence = `${assetName}${address ? `(${address})` : ''}产生了 ${ruleName} 告警`;
+        break;
+      }
+      case 'Redis': {
+        const address = tagMap['address'];
+        sentence = `${assetName}${address ? `(${address})` : ''}产生了 ${ruleName} 告警`;
+        break;
+      }
+      case 'RabbitMQ': {
+        // RabbitMQ：根据标签判断是节点级还是交换机级告警
+        const node = tagMap['node'];
+        const exchange = tagMap['exchange'];
+        const vhost = tagMap['vhost'];
+        const exchangeType = tagMap['type'];
+        const url = tagMap['url'];
+        const parts = [`RabbitMQ ${assetName}`];
+        if (url) parts.push(`(${url})`);
+        if (node) parts.push(`的 ${node} 节点`);
+        if (exchange) {
+          let exchangeInfo = exchange;
+          if (exchangeType) exchangeInfo += `(类型：${exchangeType})`;
+          parts.push(`的 ${exchangeInfo} 交换机`);
+        }
+        if (vhost) parts.push(`，vhost：${vhost}`);
+        sentence = `${parts.join('')}产生了 ${ruleName} 告警`;
+        break;
+      }
+      default: {
+        // 通用兜底：尝试用 target 定位，资产名产生了什么告警
+        const target = tagMap['target'];
+        if (assetName && ruleName) {
+          sentence = `${assetName}${target ? `(${target})` : ''}产生了 ${ruleName} 告警`;
+        } else if (ruleName) {
+          sentence = ruleName;
+        }
+        break;
+      }
+    }
+    if (triggerValue) {
+      sentence += `，当前值: ${triggerValue}`;
+    }
+
+    return (
+      <span style={{ lineHeight: '1.8', display: 'flex', alignItems: 'center' }}>
+        {sentence || '-'}
+        { !isShanshuRoute && renderReplayBtn()}
+      </span>
+    );
+  };
+
   const descriptionInfo = [
     {
       label: '告警规则名称',
       key: 'rule_name',
-      render(content, { rule_id }) {
+      render(content, { rule_id, asset_name }) {
+        const displayName = asset_name ? `[${asset_name}] ${content}` : content;
         const eventIdNum = Number(eventId);
         return (
           <Space>
             <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-              history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
-            }}>{content}</div>
-            <AiButton
+              !isShanshuRoute && history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
+            }}>{displayName}</div>
+            {!isShanshuRoute && <AiButton
               size='small'
               queryPageFrom={buildPageFrom({ param: { event_id: eventIdNum } })}
               queryAction={{
@@ -146,7 +333,7 @@ const EventDetailPage: React.FC = () => {
               initialMessage={getAlertEventDetailPrompts(i18n.language)[0]}
             >
               {tAiChat('flash_button.event_analysis')}
-            </AiButton>
+            </AiButton>}
           </Space>
         );
       },
@@ -170,17 +357,17 @@ const EventDetailPage: React.FC = () => {
       align: 'center',
       render: (asset_name, { asset_id }) => {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
+          !isShanshuRoute &&history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
         }}>{asset_name}</div>;
       },
     },
     {
-      label: 'IP地址',
+      label: '资产IP',
       key: 'asset_ip',
       align: 'center',
       render: (asset_ip, { asset_id }) => {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
+          !isShanshuRoute && history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
         }}>{asset_ip}</div>;
       },
     },
@@ -189,7 +376,7 @@ const EventDetailPage: React.FC = () => {
       key: 'group_name',
       render(content, { group_id }) {
         return (
-          <Button size='small' type='link' className='rule-link-btn' onClick={() => handleNavToWarningList(group_id)}>
+          <Button size='small' type='link' className='rule-link-btn' onClick={() => !isShanshuRoute && handleNavToWarningList(group_id)}>
             {content}
           </Button>
         );
@@ -210,36 +397,10 @@ const EventDetailPage: React.FC = () => {
       },
     },
     {
-      label: renderHelpLabel(t('detail.tags'), t('detail.tags'), tagsHelpDescription),
+      label: '事件内容',
       key: 'tags',
       render(tags) {
-        return tags
-          ? tags.map((tag) => (
-            <Tag color='purple' key={tag}>
-              {tag}
-            </Tag>
-          ))
-          : '';
-      },
-    },
-    // ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod) ? [{ label: t('detail.target_note'), key: 'target_note' }] : [false]),
-    // {
-    //   label: t('detail.trigger_time'),
-    //   key: 'trigger_time',
-    //   render(time) {
-    //     return moment(time * 1000).format('YYYY-MM-DD HH:mm:ss');
-    //   },
-    // },
-    {
-      label: t('detail.trigger_value'),
-      key: 'trigger_value',
-      render(val) {
-        return (
-          <span>
-            {val}
-            <PlusLogsDetail data={eventDetail} />
-          </span>
-        );
+        return renderEventContent(tags);
       },
     },
     {
@@ -270,32 +431,19 @@ const EventDetailPage: React.FC = () => {
     //   label: t('detail.cate'),
     //   key: 'cate',
     // },
-    ...(eventDetail?.cate === 'prometheus'
-      ? PrometheusDetail({
-        eventDetail,
-        history,
-      })
-      : [false]),
     // ---- N19 W-A：按源回查的分发分支，顺序与写法照 fe ee48e701 eventDetailByCate.tsx:38-56。
     // 用 DatasourceCateEnum 而不是字面量，是为了 clickhouse 那条不写错成 'clickhouse'（真值是 'ck'）。
-    ...(eventDetail?.cate === DatasourceCateEnum.elasticsearch ? ElasticsearchDetail({ indexPatterns }) : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.opensearch ? ElasticsearchDetail() : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.tdengine ? TDengineDetail(t) : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.loki ? LokiDetail({ eventDetail, history }) : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.mysql ? MySQLDetail() : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.pgsql ? PgsqlDetail() : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.doris ? DorisDetail() : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.victorialogs ? VictorialogsDetail() : [false]),
-    ...(eventDetail?.cate === DatasourceCateEnum.ck ? ClickHouseDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.elasticsearch ? ElasticsearchDetail({ indexPatterns }) : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.opensearch ? ElasticsearchDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.tdengine ? TDengineDetail(t) : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.loki ? LokiDetail({ eventDetail, history }) : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.mysql ? MySQLDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.pgsql ? PgsqlDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.doris ? DorisDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.victorialogs ? VictorialogsDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.ck ? ClickHouseDetail() : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
-    {
-      label: t('detail.prom_eval_interval'),
-      key: 'prom_eval_interval',
-      render(content) {
-        return `${content} s`;
-      },
-    },
     {
       label: '屏蔽状态',
       key: 'is_muted',
@@ -396,7 +544,11 @@ const EventDetailPage: React.FC = () => {
       setEventDetail(detailInfo);
     }).catch(() => {
       setTimeout(() => {
-        history.push('/alert-cur-events');
+        if (isShanshuRoute) {
+          history.push('/alert-events-shanshu-cur');
+        } else {
+          history.push('/alert-cur-events');
+        } 
       }, 1500);
     });
   }, [busiId, eventId]);
@@ -415,7 +567,7 @@ const EventDetailPage: React.FC = () => {
               <div className='alert_detail_action-btns'>
                 <Space>
                   {
-                    eventDetail?.is_muted != 1 && <Button
+                    eventDetail?.is_muted != 1 && !isShanshuRoute && <Button
                       type='primary'
                       onClick={() => {
                         history.push({

@@ -148,7 +148,7 @@ function Card(props: Props, ref) {
       },
     },
     {
-      title: 'IP地址',
+      title: '资产IP',
       dataIndex: 'asset_ip',
       width: 100,
       align: 'center',

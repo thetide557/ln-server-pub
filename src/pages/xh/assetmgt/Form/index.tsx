@@ -25,6 +25,11 @@ dayjs.extend(customParseFormat);
 const { TextArea } = Input;
 const PASSWORD_PLACEHOLDER_VALUE = 'haveValue';
 
+const isServerAssetType = (type?: string) => {
+  const assetType = _.toLower(_.toString(type));
+  return assetType.includes('server') || assetType.includes('服务器') || assetType.includes('宿主机');
+};
+
 const ControlledPasswordField = ({ placeholder, value, onChange, hasStoredValue, onDraftChange }) => {
   const currentValue = value === PASSWORD_PLACEHOLDER_VALUE ? '' : value || '';
 
@@ -139,7 +144,35 @@ export default function () {
       value: 2
     }
   ]
-
+  const assetCategoryOptions = [
+    {
+      label: '物理设备',
+      value: '物理设备'
+    },
+    {
+      label: '虚拟机',
+      value: '虚拟机'
+    },
+    {
+      label: '数据库',
+      value: '数据库'
+    },
+    {
+      label: '中间件',
+      value: '中间件'
+    }
+  ]
+  const cpuArchOptions = [
+    {
+      label: 'ARM',
+      value: 'ARM'
+    },
+    {
+      label: 'X86',
+      value: 'X86'
+    },
+    
+  ]
   const loadManufacturerOptions = useCallback(async (showError = true) => {
     setManufacturerLoading(true);
     try {
@@ -406,8 +439,12 @@ export default function () {
     }
   };
 
-  const handleChange = useCallback((value: string) => {
+  const handleChange = useCallback((value: string, option?: any) => {
     console.log("handleChange", value)
+    // 页面无 IP 表单项，选择/变更探针时直接把探针资产的 ip 作为未注册字段写入 form store，
+    // 保存时由 form.getFieldsValue(true) 一并提交（清空探针时同步清空）
+    const ip = option && !Array.isArray(option) ? option.ip : undefined;
+    form.setFieldsValue({ ip: ip || undefined });
   }, [form]);
 
   // const mockVal = (str: string) => ({
@@ -457,10 +494,10 @@ export default function () {
         id: v.id,
         value: v.ident,
         label: `[${v.type}]-[${v.ip}]-${v.ident}`,
-        type: v.type
+        type: v.type,
+        ip: v.ip,
       })).sort((a, b) => localeCompare(a.label, b.label))
         .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
-
       setAssetOptions(options);
       setAssetList(res.dat?.list.reduce((acc, v) => ({ ...acc, [v.id]: v }), {}));
       if (id) {
@@ -496,6 +533,10 @@ export default function () {
       ...form.getFieldsValue(true),
       ...values,
     };
+
+    if (!isServerAssetType(submitData.type)) {
+      submitData.cpu_arch = '';
+    }
 
     //  检查管理状态，如果是上架状态则清空下架原因
     if (submitData.is_shelf === true) {
@@ -737,7 +778,8 @@ export default function () {
   };
 
 
-  const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
+  const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 16 } };
+  const basicItemLayout = formItemLayout;
   // 获取维保信息详情
   const getMaintenanceInfo = async () => {
     try {
@@ -944,10 +986,11 @@ export default function () {
         </Form.Item>
         {tabIndex == 'base_set' && (
           <div className='card-wrapper'>
-            <Card {...panelBaseProps} className='card_base'>
-              <Row gutter={10}>
+            <Card {...panelBaseProps} title={'基本信息'} className='card_base'>
+              <Row gutter={[24, 12]}>
+                {/* 第 1 行：类型 / 名称 / IP地址 */}
                 <Col span={12}>
-                  <Form.Item label='类型' name='type' rules={[{ required: true }]}>
+                  <Form.Item {...basicItemLayout} label='设备类型' name='type' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
                       options={assetTypes}
@@ -955,6 +998,10 @@ export default function () {
                       disabled={id != null}
                       onChange={(val) => {
                         setCurrentType(val);
+                        if (!isServerAssetType(val)) {
+                          form.setFieldsValue({ cpu_arch: undefined });
+                          setAssetData((prev) => ({ ...prev, type: val, cpu_arch: undefined }));
+                        }
                       }}
                     />
                   </Form.Item>
@@ -1002,8 +1049,34 @@ export default function () {
                     /> */}
                   </Form.Item>
                 </Col>
+
+                {/* 第 2 行：区域 / 租户 / 资产类型 */}
                 <Col span={12}>
-                  <Form.Item label='厂商' name='manufacturers' rules={[{ required: false }]}>
+                  <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请输入区域' }]}>
+                    <Input placeholder='请输入区域' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item {...basicItemLayout} label='租户' name='tenant'>
+                    <Input placeholder='请输入租户' />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item {...basicItemLayout} label='资产类型' name='asset_category'>
+                    <Input placeholder='请输入资产类型' />
+                  </Form.Item>
+                </Col>
+
+                {/* 第 3 行：CPU架构 / 厂商 / 位置 */}
+                {isServerAssetType(currentType) && (
+                  <Col span={12}>
+                    <Form.Item {...basicItemLayout} label='CPU架构' name='cpu_arch'>
+                      <Input placeholder='请输入CPU架构' />
+                    </Form.Item>
+                  </Col>
+                )}
+                <Col span={12}>
+                  <Form.Item {...basicItemLayout} label='厂商' name='manufacturers' rules={[{ required: false }]}>
                     <Select
                       style={{ width: '100%' }}
                       allowClear
@@ -1024,17 +1097,20 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='IP地址' name='ip' rules={[{ required: true }, { validator: validateIP }]}>
-                    <Input placeholder='请输入IP地址' disabled={currentType === "物理服务器" || currentType === "虚拟服务器"} />
+                   <Form.Item label='资产IP' name='asset_ip' rules={[{ validator: validateIP }]}>
+                    <Input placeholder='请输入资产IP，为空时默认填充 IP 地址' />
                   </Form.Item>
+
                 </Col>
                 <Col span={12}>
                   <Form.Item label='位置' name='position' rules={[{ required: false }]}>
                     <Input placeholder='请输入位置' />
                   </Form.Item>
                 </Col>
+
+                {/* 第 4 行：业务组 / 备注 / 管理状态 */}
                 <Col span={12}>
-                  <Form.Item label='业务组' name='group_id' rules={[{ required: true }]}>
+                  <Form.Item {...basicItemLayout} label='业务组' name='group_id' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
                       options={busiGroups.map(({ id, name }) => ({
@@ -1105,6 +1181,8 @@ export default function () {
                     <span className='hsBtn' style={{ fontSize: '12px', position: 'absolute', left: '76%', top: '15%' }} onClick={showAssetReleaseHistory} >上下架历史</span>
                   )}
                 </Col>
+
+                {/* 第 5 行：下架原因（整行） */}
                 {form.getFieldValue('is_shelf') === false && (
                   <Col span={24}>
                     <Form.Item
@@ -1123,6 +1201,9 @@ export default function () {
                       />
                     </Form.Item>
                   </Col>
+
+
+
                 )}
 
               </Row>

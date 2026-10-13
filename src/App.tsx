@@ -250,7 +250,7 @@ function App() {
     // console.log('anonymous', anonymous);
     alertWebsocket.current = new WebSocket(WebSocketURL + 232443);//获取推送过来的告警消息
     alertWebsocket.current.onmessage = e => {
-      if (!anonymous) {
+      if (!anonymous && !path.includes('alert-events-shanshu')) {
         const busiGroups = localStorage.getItem('groupIds')?.split(',').map(id => Number(id));
         let data = JSON.parse(e.data);
         if (busiGroups?.includes(data.dat[0].group_id)) {
@@ -274,7 +274,7 @@ function App() {
     let flag = true
     licenseWebsocket.current = new WebSocket(WebSocketURL + 758493);//获取推送过来的许可到期的消息
     licenseWebsocket.current.onmessage = e => {
-      if (!anonymous && flag) {
+      if (!anonymous && flag && !path.includes('alert-events-shanshu')) {
         let data = JSON.parse(e.data);
         Modal.warning({
           title: '许可信息提醒',
@@ -405,18 +405,18 @@ function App() {
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
                 <AiRobotSse />
-                <div className='content-box'>
+                <div className='content-box' style={path.includes('alert-events-shanshu') ? { paddingTop: 0 } : undefined}>
                   <Content />
                 </div>
               </>
             </Switch>
           </Router>
-          <AiChatContainer />
+          {!path.includes('alert-events-shanshu') && <AiChatContainer />}
           </AiChatProvider>
         </ConfigProvider>
       </CommonStateContext.Provider>
 
-      <div className='special_alert_dialog' style={dialogShow == '0' ? { display: 'none' } : { display: 'block' }}>
+      <div className='special_alert_dialog' style={dialogShow == '0' || path.includes('alert-events-shanshu') ? { display: 'none' } : { display: 'block' }}>
         <div className='close_button'>
           <p>告警提醒</p>
           <span

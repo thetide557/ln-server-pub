@@ -509,7 +509,7 @@ const calculateDialogSize = () => {
   }, [aiShow]);
   return (
     <>
-      {!pathname.startsWith("/login") && deepseekShow && (
+      {!pathname.startsWith("/login") && !pathname.startsWith("/alert-events-shanshu") && deepseekShow && (
         <Draggable
           bounds="parent"
           handle=".robot"

@@ -33,8 +33,36 @@ export const getAssetsByCondition = function (params) {
   // })
 };
 
+export const getAssetsByN9eCondition = function (params) {
+  return request("/api/takin/xh/assets/filter", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
 export const getAssetsByConditionSimple = function (params) {
   return request("/api/takin/xh/assets/simple", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+export const getAssetScopeTreeChildren = function (params) {
+  return request("/api/takin/assets/scope-tree/children", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+export const getAssetScopeTree = function (params) {
+  return request("/api/takin/assets/scope-tree", {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+
+export const getAssetScopeTreeAssets = function (params) {
+  return request("/api/takin/assets/scope-tree/assets", {
     method: RequestMethod.Get,
     params,
   });
@@ -99,7 +127,7 @@ export const addXHAssetExpansion = function (data, asset, type) {
     {
       method: RequestMethod.Put,
       data,
-    }
+    },
   );
 };
 
@@ -149,14 +177,14 @@ export const getAssetsIdents = function () {
 export const getAssetsMonitor = function (
   start_at: number,
   end_at: number,
-  monitorids: number[]
+  monitorids: number[],
 ) {
   return request(
     "/api/takin/xh/monitoring/data?start=" + start_at + "&end=" + end_at,
     {
       method: RequestMethod.Post,
       data: { ids: monitorids },
-    }
+    },
   );
 };
 
@@ -419,7 +447,7 @@ export const getMaintenanceHistory = function ({
       actual_maintenance_date,
     {
       method: RequestMethod.Get,
-    }
+    },
   );
 };
 

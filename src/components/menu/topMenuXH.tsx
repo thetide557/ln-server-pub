@@ -214,7 +214,12 @@ const getMenuList = (t) => {
         {
           key: '/healthReport',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('健康报告'),
+          label: t('巡检指标'),
+        },
+        {
+          key: '/healthReport/resourceAnalysis',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('分析报表'),
         },
       ]
     },
@@ -429,6 +434,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('自动化检测'),
         },
+        {
+          key: '/ipSegment',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('IP地址段管理'),
+        },
         // {
         //   key: '/safety/certification',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
@@ -583,6 +593,7 @@ export default function () {//{ selectMenu?:any }
       location.pathname.startsWith('/screenView') ||
       location.pathname.startsWith('/dashboards/share/') ||
       location.pathname.startsWith('/callback') ||
+      location.pathname.startsWith('/alert-events-shanshu') ||
       location.pathname.indexOf('/polaris/screen') === 0
     ) {
       return true;

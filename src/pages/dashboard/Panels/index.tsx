@@ -202,6 +202,16 @@ function index(props: IProps) {
                         },
                       });
                     }}
+                    onTopNChange={(topN) => {
+                      const newPanel = { ...item, custom: { ...item.custom, topN } };
+                      const newPanels = updatePanelsWithNewPanel(panels, newPanel);
+                      setPanels(newPanels);
+                      updateDashboardConfigs(dashboard.id, {
+                        configs: panelsMergeToConfigs(dashboard.configs, newPanels),
+                      }).then((res) => {
+                        onUpdated(res);
+                      });
+                    }}
                   />
                 ) : (
                   <div className='dashboards-panels-item-invalid'>
