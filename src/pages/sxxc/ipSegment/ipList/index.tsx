@@ -11,9 +11,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ColumnsType } from 'antd/lib/table';
 import PageLayout from '@/components/pageLayout';
 import usePagination from '@/components/usePagination';
-import { assignIp, changeIp, deleteIp, getIpDetail, getSegmentAddresses, recycleOneIp, releaseIp, reserveIp } from '@/services/sxxc/ipam';
-// 批量扫描后端暂未提供对应接口，仍走 mock
-import { batchScanIps } from '../mock';
+import { assignIp, batchChangeIps, batchDeleteIps, batchRecycleIps, batchScanIps, changeIp, deleteIp, getIpDetail, getSegmentAddresses, recycleOneIp, releaseIp, reserveIp } from '@/services/sxxc/ipam';
 import {
   IpAllocStatus,
   ipAllocStatusMap,
@@ -25,7 +23,8 @@ import {
   IpUseStatus,
   ipUseStatusMap,
 } from '../types';
-import { IpAssignModal, IpChangeModal, IpExportModal, IpImportModal, IpRecycleModal, IpReserveModal, IpViewModal } from './components/IpModals';
+import ChangeLogModal from '../components/ChangeLogModal';
+import { IpAssignModal, IpBatchChangeModal, IpChangeModal, IpExportModal, IpImportModal, IpRecycleModal, IpReserveModal, IpViewModal } from './components/IpModals';
 import '../index.less';
 
 type IpActionType = 'view' | 'recycle' | 'reserve' | 'assign' | 'change' | 'release';
@@ -91,7 +90,11 @@ function IpListPage() {
   // 批量导入/导出弹窗
   const [importVisible, setImportVisible] = useState(false);
   const [exportVisible, setExportVisible] = useState(false);
-  const [exportRecords, setExportRecords] = useState<IpItem[]>([]);
+  /** 批量导出目标 IP（走后端 CSV 接口） */
+  const [exportTargetIps, setExportTargetIps] = useState<string[]>([]);
+  // 批量变更 / 变更记录弹窗
+  const [batchChangeVisible, setBatchChangeVisible] = useState(false);
+  const [changeLogVisible, setChangeLogVisible] = useState(false);
 
   /** 当前筛选维度对应的枚举选项（有则为第二框下拉） */
   const enumOptions = filterField ? IP_ENUM_OPTIONS[filterField] : undefined;
@@ -270,10 +273,10 @@ function IpListPage() {
   const batchMenu = (
     <Menu
       onClick={({ key }) => {
-        // 批量导出：勾选则导出选中，未勾选确认后导出全部（参考操作日志页批量导出）
+        // 批量导出：勾选则导出选中，未勾选确认后导出全部（走后端 CSV 接口）
         if (key === 'export') {
           if (selectedRowKeys.length > 0) {
-            setExportRecords(_.filter(list, (item) => _.includes(selectedRowKeys, item.ip)));
+            setExportTargetIps(selectedRowKeys);
             setExportVisible(true);
           } else {
             Modal.confirm({
@@ -283,7 +286,7 @@ function IpListPage() {
                 const q = buildQuery();
                 // 导出当前查询条件下的全部数据（服务端分页下取大 limit 拉全量）
                 const res = await getSegmentAddresses(segmentId, { page: 1, limit: 100000, query: q.query, allocStatus: q.allocStatus });
-                setExportRecords(res.list);
+                setExportTargetIps(_.map(res.list, (item) => item.ip));
                 setExportVisible(true);
               },
               onCancel() {},
@@ -296,15 +299,17 @@ function IpListPage() {
         //   return;
         // }
         if (key === 'scan') {
-          const hide = message.loading('正在扫描可回收IP...', 0);
-          batchScanIps(selectedRowKeys).then((res) => {
+          if (!segmentId) return;
+          const hide = message.loading('正在批量扫描...', 0);
+          batchScanIps(segmentId, selectedRowKeys).then((res) => {
             hide();
             notification.open({
               message: '扫描完成',
-              description: `扫描完成：命中${res.hitCount}个地址，已加入可回收列表`,
+              description: `批量扫描完成：成功${res.success}个，失败${res.failed}个`,
               placement: 'bottomRight',
               duration: 3,
             });
+            handleRefresh();
           });
         } else if (key === 'recycle') {
           Modal.confirm({
@@ -312,8 +317,8 @@ function IpListPage() {
             content: '回收后地址状态为未分配，资产IP绑定将同步解绑并不再使用。',
             onOk: async () => {
               if (!segmentId) return;
-              await Promise.all(_.map(selectedRowKeys, (ip) => recycleOneIp({ ip, segmentId }, '批量回收')));
-              message.success('回收成功');
+              const res = await batchRecycleIps(segmentId, selectedRowKeys, '批量回收');
+              message.success(`批量回收完成：成功${res.success}个，失败${res.failed}个`);
               setSelectedRowKeys([]);
               handleRefresh();
             },
@@ -324,8 +329,8 @@ function IpListPage() {
             title: `是否确认删除选中的${selectedRowKeys.length}个IP？`,
             onOk: async () => {
               if (!segmentId) return;
-              await Promise.all(_.map(selectedRowKeys, (ip) => deleteIp({ ip, segmentId })));
-              message.success('删除成功');
+              const res = await batchDeleteIps(segmentId, selectedRowKeys);
+              message.success(`批量删除完成：成功${res.success}个，失败${res.failed}个`);
               setSelectedRowKeys([]);
               handleRefresh();
             },
@@ -334,7 +339,7 @@ function IpListPage() {
         } else if (key === 'import') {
           setImportVisible(true);
         } else if (key === 'change') {
-          message.info('批量变更功能');
+          setBatchChangeVisible(true);
         }
       }}
       items={[
@@ -469,7 +474,11 @@ function IpListPage() {
                 <span
                   className='link-btn'
                   onClick={() => {
-                    message.info('暂无变更记录');
+                    if (!segmentId) {
+                      message.warning('请先选择地址段');
+                      return;
+                    }
+                    setChangeLogVisible(true);
                   }}
                 >
                   变更记录
@@ -564,6 +573,7 @@ function IpListPage() {
         {/* 批量导入 */}
         <IpImportModal
           visible={importVisible}
+          segmentId={segmentId}
           onClose={() => setImportVisible(false)}
           onImported={() => {
             setImportVisible(false);
@@ -571,7 +581,28 @@ function IpListPage() {
           }}
         />
         {/* 批量导出 */}
-        <IpExportModal visible={exportVisible} records={exportRecords} onClose={() => setExportVisible(false)} />
+        <IpExportModal visible={exportVisible} segmentId={segmentId} ips={exportTargetIps} onClose={() => setExportVisible(false)} />
+        {/* 批量变更 */}
+        <IpBatchChangeModal
+          visible={batchChangeVisible}
+          count={selectedRowKeys.length}
+          onClose={() => setBatchChangeVisible(false)}
+          onOk={async (values) => {
+            if (!segmentId) return;
+            const res = await batchChangeIps(segmentId, { ips: selectedRowKeys, ...values });
+            message.success(`批量变更完成：成功${res.success}个，失败${res.failed}个`);
+            setBatchChangeVisible(false);
+            setSelectedRowKeys([]);
+            handleRefresh();
+          }}
+        />
+        {/* 变更记录 */}
+        <ChangeLogModal
+          visible={changeLogVisible}
+          segmentId={segmentId}
+          segmentName={segmentInfo?.fullSegment}
+          onClose={() => setChangeLogVisible(false)}
+        />
         </div>
       </div>
     </PageLayout>

@@ -15,6 +15,8 @@ import moment from 'moment';
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import {
+  ChangeLogAction,
+  ChangeLogItem,
   IpAllocStatus,
   IpGroup,
   IpItem,
@@ -180,6 +182,33 @@ export interface IpamExecuteVO {
   recycled: number;
   candidates?: IpamAddressVO[];
   message: string;
+}
+
+/** 变更记录 VO */
+export interface IpamChangeLogVO {
+  id: number;
+  subnet_id: number;
+  family: number;
+  ip: string;
+  action: string;
+  before_data: string;
+  after_data: string;
+  reason: string;
+  created_at: number;
+  created_by: string;
+}
+
+/** 批量操作结果（IP / 地址段通用；地址段回收时带各段 recycled） */
+export interface IpamBatchResultVO {
+  success: number;
+  failed: number;
+  results?: Array<{
+    ip?: string;
+    subnet_id?: number;
+    ok: boolean;
+    error?: string;
+    recycled?: number;
+  }>;
 }
 
 
@@ -362,6 +391,67 @@ export const getIpamRecyclable = (params: { subnet_id?: number; rule_id?: number
 /** 批量回收（已分配/预留统一变为未分配，单条失败跳过不中断整批） */
 export const recycleIpamBatch = (data: { reason?: string; items: Array<{ subnet_id: number; ip: string }> }) =>
   request('/api/takin/ipam/addresses/recycle-batch', { method: RequestMethod.Post, data });
+
+/** 变更记录列表（分配/预留/回收/释放/变更/删除/扫描/导入等写操作追加记录） */
+export const getIpamChangeLogs = (
+  subnetId: number,
+  params: { ip?: string; action?: string; begin?: number; end?: number; page?: number | string; limit?: number | string },
+) => request(`/api/takin/ipam/subnets/${subnetId}/addresses/change-logs`, { method: RequestMethod.Get, params });
+
+/** IP 批量扫描（刷新台账+资产推导状态，非 ICMP 探测） */
+export const scanIpamAddressesBatch = (subnetId: number, ips: string[]) =>
+  request(`/api/takin/ipam/subnets/${subnetId}/addresses/scan-batch`, { method: RequestMethod.Post, data: { ips } });
+
+/** IP 批量回收（已分配或预留 → 未分配） */
+export const recycleIpamAddressesBatch = (subnetId: number, ips: string[], reason?: string) =>
+  request(`/api/takin/ipam/subnets/${subnetId}/addresses/recycle-batch`, { method: RequestMethod.Post, data: { ips, reason } });
+
+/** IP 批量删除（仅未分配可删，写入排除表） */
+export const deleteIpamAddressesBatch = (subnetId: number, ips: string[]) =>
+  request(`/api/takin/ipam/subnets/${subnetId}/addresses/delete-batch`, { method: RequestMethod.Post, data: { ips } });
+
+/** IP 批量变更（对选中的已分配 IP 写入同一套字段） */
+export const changeIpamAddressesBatch = (
+  subnetId: number,
+  data: {
+    ips: string[];
+    asset_name: string;
+    mac: string;
+    port?: string;
+    is_gateway?: boolean;
+    is_temporary?: boolean;
+    duration_value?: number;
+    duration_unit?: string;
+    remark?: string;
+  },
+) => request(`/api/takin/ipam/subnets/${subnetId}/addresses/change-batch`, { method: RequestMethod.Post, data });
+
+/** IP 批量导出（返回 CSV 文件流，responseType blob 走 request.ts 原样返回） */
+export const exportIpamAddresses = (subnetId: number, ips: string[]) =>
+  request(`/api/takin/ipam/subnets/${subnetId}/addresses/export`, { method: RequestMethod.Post, data: { ips }, responseType: 'blob' });
+
+/** 下载导入模板（返回 CSV 文件流：表头 + 一行示例，对应导入弹窗「下载模板」） */
+export const getIpamImportTemplate = (subnetId: number) =>
+  request(`/api/takin/ipam/subnets/${subnetId}/addresses/import-template`, { method: RequestMethod.Get, responseType: 'blob' });
+
+/** IP 批量导入（multipart/form-data，字段名 file，CSV；未分配→分配，已分配→变更） */
+export const importIpamAddresses = (subnetId: number, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return request(`/api/takin/ipam/subnets/${subnetId}/addresses/import`, { method: RequestMethod.Post, data: formData });
+};
+
+/** 地址段批量扫描（刷新使用/分配/在线统计，非 ICMP） */
+export const scanIpamSubnetsBatch = (subnetIds: number[]) =>
+  request('/api/takin/ipam/subnets/scan-batch', { method: RequestMethod.Post, data: { subnet_ids: subnetIds } });
+
+/** 地址段批量回收（回收段内全部已分配+预留；停用段不可回收） */
+export const recycleIpamSubnetBatch = (subnetIds: number[], reason?: string) =>
+  request('/api/takin/ipam/subnets/recycle-batch', { method: RequestMethod.Post, data: { subnet_ids: subnetIds, reason } });
+
+/** 地址段批量删除（仅停用可删） */
+export const deleteIpamSubnetBatch = (subnetIds: number[]) =>
+  request('/api/takin/ipam/subnets/delete-batch', { method: RequestMethod.Post, data: { subnet_ids: subnetIds } });
 
 
 // ==================== 枚举/字段映射 ====================
@@ -1144,4 +1234,161 @@ export async function recycleBatchIps(items: Array<{ ip: string; segmentId: numb
   });
   const dat = (res.dat || {}) as { recycled?: number };
   return { recycled: dat.recycled || 0 };
+}
+
+// ==================== 变更记录与批量操作（页面适配函数） ====================
+
+/** 批量操作结果解析：{ success, failed, recycled? } */
+function parseBatchResult(res: { dat?: unknown }): { success: number; failed: number; recycled: number } {
+  const dat = (res.dat || {}) as IpamBatchResultVO;
+  return {
+    success: dat.success || 0,
+    failed: dat.failed || 0,
+    recycled: _.sumBy(dat.results || [], (r) => r.recycled || 0),
+  };
+}
+
+/** 变更记录列表（服务端分页 + 查询；startTime/endTime YYYY-MM-DD → Unix 秒） */
+export async function getChangeLogs(
+  segmentId: number,
+  params: { ip?: string; action?: string; startTime?: string; endTime?: string; page?: number; limit?: number },
+): Promise<{ list: ChangeLogItem[]; total: number }> {
+  const query: { ip?: string; action?: string; begin?: number; end?: number; page?: number | string; limit?: number | string } = {
+    page: params.page || 1,
+    limit: params.limit || 20,
+  };
+  if (params.ip) query.ip = params.ip;
+  if (params.action) query.action = params.action;
+  if (params.startTime) query.begin = moment(params.startTime, 'YYYY-MM-DD').startOf('day').unix();
+  if (params.endTime) query.end = moment(params.endTime, 'YYYY-MM-DD').endOf('day').unix();
+  const res = await getIpamChangeLogs(segmentId, query);
+  const dat = (res.dat || {}) as { list?: IpamChangeLogVO[]; total?: number };
+  return {
+    list: _.map(dat.list || [], (vo) => ({
+      id: vo.id,
+      subnetId: vo.subnet_id,
+      ip: vo.ip,
+      action: vo.action,
+      beforeData: vo.before_data || '',
+      afterData: vo.after_data || '',
+      reason: vo.reason || '',
+      createdAt: moment.unix(vo.created_at).format('YYYY-MM-DD HH:mm:ss'),
+      createdBy: vo.created_by || '',
+    })),
+    total: dat.total ?? (dat.list || []).length,
+  };
+}
+
+/** IP 批量扫描（刷新台账+资产推导状态，返回成功/失败条数） */
+export async function batchScanIps(segmentId: number, ips: string[]): Promise<{ success: number; failed: number }> {
+  const res = await scanIpamAddressesBatch(segmentId, ips);
+  return parseBatchResult(res);
+}
+
+/** IP 批量回收（段内选定 IP） */
+export async function batchRecycleIps(segmentId: number, ips: string[], reason?: string): Promise<{ success: number; failed: number }> {
+  const res = await recycleIpamAddressesBatch(segmentId, ips, reason);
+  return parseBatchResult(res);
+}
+
+/** IP 批量删除（仅未分配可删，写入排除表） */
+export async function batchDeleteIps(segmentId: number, ips: string[]): Promise<{ success: number; failed: number }> {
+  const res = await deleteIpamAddressesBatch(segmentId, ips);
+  return parseBatchResult(res);
+}
+
+/** IP 批量变更（对选中的已分配 IP 写入同一套字段） */
+export async function batchChangeIps(
+  segmentId: number,
+  data: { ips: string[]; assetName: string; mac: string; port?: string; gateway?: boolean; tempIp?: boolean; duration?: number; durationUnit?: string; note?: string },
+): Promise<{ success: number; failed: number }> {
+  const res = await changeIpamAddressesBatch(segmentId, {
+    ips: data.ips,
+    asset_name: data.assetName,
+    mac: data.mac || '',
+    port: data.port,
+    is_gateway: !!data.gateway,
+    is_temporary: !!data.tempIp,
+    duration_value: data.duration || 0,
+    duration_unit: DURATION_UNIT_TO_API[data.durationUnit || '天'] || 'day',
+    remark: data.note,
+  });
+  return parseBatchResult(res);
+}
+
+/** IP 批量导入（multipart/form-data 上传 CSV） */
+export async function importIps(segmentId: number, file: File): Promise<{ success: number; failed: number }> {
+  const res = await importIpamAddresses(segmentId, file);
+  return parseBatchResult(res);
+}
+
+/** 下载导入模板（后端 CSV 流，浏览器触发下载；错误 JSON 壳转业务错误提示） */
+export async function downloadImportTemplate(segmentId: number): Promise<void> {
+  const res = (await getIpamImportTemplate(segmentId)) as unknown as Blob;
+  if (res.type.includes('application/json')) {
+    const text = await res.text();
+    let msg = text;
+    try {
+      const data = JSON.parse(text);
+      msg = data.error || data.err || text;
+    } catch (e) {
+      // 保持原文
+    }
+    throw new Error(msg);
+  }
+  const url = URL.createObjectURL(res);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ipam_import_template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/**
+ * IP 批量导出（后端 CSV 流，浏览器触发下载）
+ * umi-request 对 responseType=blob 已解析为 Blob（request.ts 拦截器透传）；后端出错返回 JSON（带 err/error）时转为业务错误提示
+ */
+export async function exportIps(segmentId: number, ips: string[]): Promise<void> {
+  const res = (await exportIpamAddresses(segmentId, ips)) as unknown as Blob;
+  // 后端失败时返回 application/json 错误壳（Blob.type 可区分）
+  if (res.type.includes('application/json')) {
+    const text = await res.text();
+    let msg = text;
+    try {
+      const data = JSON.parse(text);
+      msg = data.error || data.err || text;
+    } catch (e) {
+      // 保持原文
+    }
+    throw new Error(msg);
+  }
+  const url = URL.createObjectURL(res);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ipam_addresses.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // 延迟回收：立即 revoke 可能导致部分浏览器下载中断
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** 地址段批量扫描（刷新统计） */
+export async function batchScanSegments(subnetIds: number[]): Promise<{ success: number; failed: number }> {
+  const res = await scanIpamSubnetsBatch(subnetIds);
+  return parseBatchResult(res);
+}
+
+/** 地址段批量回收（段内全部已分配+预留；停用段不可回收，返回回收总数） */
+export async function batchRecycleSegments(subnetIds: number[], reason?: string): Promise<{ success: number; failed: number; recycled: number }> {
+  const res = await recycleIpamSubnetBatch(subnetIds, reason);
+  return parseBatchResult(res);
+}
+
+/** 地址段批量删除（仅停用可删） */
+export async function batchDeleteSegments(subnetIds: number[]): Promise<{ success: number; failed: number }> {
+  const res = await deleteIpamSubnetBatch(subnetIds);
+  return parseBatchResult(res);
 }

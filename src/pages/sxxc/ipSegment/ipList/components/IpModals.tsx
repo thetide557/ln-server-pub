@@ -4,11 +4,11 @@
  * 查看 / 回收提醒 / 预留IP / 分配IP / 变更IP
  */
 import React, { useEffect, useState } from 'react';
-import { AutoComplete, Button, Col, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Switch, Upload } from 'antd';
+import { AutoComplete, Button, Col, Form, Input, InputNumber, message, Modal, Row, Select, Switch, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { IpItem, ipAllocStatusMap, ipOnlineStatusMap, ipUseStatusMap } from '../../types';
-import { downloadIpImportTemplate, exportIpsToFile, IpExportType } from '../../ipExport';
+import { exportIps, importIps, downloadImportTemplate } from '@/services/sxxc/ipam';
 
 // ==================== 查看IP ====================
 // 查看仍用表单形态展示，但所有控件禁用（只读），与预留/分配等弹窗风格一致
@@ -304,10 +304,11 @@ export function IpAssignModal(props: {
 }
 
 // ==================== 批量导入（参考资产清单「导入设备」弹窗） ====================
-export function IpImportModal(props: { visible: boolean; onClose: () => void; onImported: () => void }) {
-  const { visible } = props;
+export function IpImportModal(props: { visible: boolean; segmentId?: number; onClose: () => void; onImported: () => void }) {
+  const { visible, segmentId } = props;
   const [fileName, setFileName] = useState<string>();
   const [fileList, setFileList] = useState<any[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -327,18 +328,41 @@ export function IpImportModal(props: { visible: boolean; onClose: () => void; on
     return false;
   };
 
-  const handleOk = () => {
+  const handleDownloadTemplate = async () => {
+    if (!segmentId) {
+      message.warning('请先选择地址段');
+      return;
+    }
+    try {
+      await downloadImportTemplate(segmentId);
+    } catch (e) {
+      // 错误由全局请求封装统一提示
+    }
+  };
+
+  const handleOk = async () => {
     if (!fileList.length) {
       message.error('请选择要导入的文件');
       return;
     }
-    // mock 阶段不解析文件，后端导入接口就绪后替换为 FormData 上传
-    message.success('批量导入成功');
-    props.onImported();
+    if (!segmentId) {
+      message.warning('请先选择地址段');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await importIps(segmentId, fileList[0] as File);
+      message.success(`批量导入完成：成功${res.success}个，失败${res.failed}个`);
+      props.onImported();
+    } catch (e) {
+      // 错误由全局请求封装统一提示
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <Modal title='数据导入' visible={visible} onOk={handleOk} onCancel={props.onClose} destroyOnClose>
+    <Modal title='数据导入' visible={visible} onOk={handleOk} onCancel={props.onClose} confirmLoading={submitting} destroyOnClose>
       <Form labelCol={{ flex: '90px' }}>
         <Form.Item label='选择文件' required>
           <div style={{ display: 'inline-flex', alignItems: 'center', columnGap: 8 }}>
@@ -348,7 +372,7 @@ export function IpImportModal(props: { visible: boolean; onClose: () => void; on
                 浏览
               </Button>
             </Upload>
-            <Button type='link' style={{ padding: 0, color: '#40A2EC' }} onClick={() => downloadIpImportTemplate()}>
+            <Button type='link' style={{ padding: 0, color: '#40A2EC' }} onClick={handleDownloadTemplate}>
               下载模板
             </Button>
           </div>
@@ -358,35 +382,121 @@ export function IpImportModal(props: { visible: boolean; onClose: () => void; on
   );
 }
 
-// ==================== 批量导出（参考操作日志「批量导出」弹窗） ====================
-export function IpExportModal(props: { visible: boolean; records: IpItem[]; onClose: () => void }) {
-  const { visible, records, onClose } = props;
-  const [fileType, setFileType] = useState<IpExportType>(1);
+// ==================== 批量导出（后端 CSV 文件流，浏览器触发下载） ====================
+export function IpExportModal(props: { visible: boolean; segmentId?: number; ips: string[]; onClose: () => void }) {
+  const { visible, ips } = props;
+  const [exporting, setExporting] = useState(false);
 
-  useEffect(() => {
-    if (visible) setFileType(1);
-  }, [visible]);
+  const handleOk = async () => {
+    if (!props.segmentId) {
+      message.warning('请先选择地址段');
+      return;
+    }
+    if (!ips.length) {
+      message.warning('没有可导出的IP');
+      return;
+    }
+    setExporting(true);
+    try {
+      await exportIps(props.segmentId, ips);
+      message.success(`已导出${ips.length}个IP`);
+      props.onClose();
+    } catch (e) {
+      // 错误由全局请求封装统一提示
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
+    <Modal title='IP信息导出' visible={visible} onOk={handleOk} onCancel={props.onClose} confirmLoading={exporting} destroyOnClose>
+      <div style={{ textAlign: 'center', padding: '8px 0' }}>将导出 {ips.length} 个IP的 CSV 文件</div>
+    </Modal>
+  );
+}
+
+// ==================== 批量变更（对选中的已分配 IP 写入同一套字段） ====================
+export function IpBatchChangeModal(props: {
+  visible: boolean;
+  count: number;
+  onClose: () => void;
+  onOk: (values: {
+    assetName: string;
+    mac: string;
+    port?: string;
+    gateway?: boolean;
+    tempIp?: boolean;
+    duration?: number;
+    durationUnit?: string;
+    note?: string;
+  }) => Promise<void>;
+}) {
+  const { visible, count } = props;
+  const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
+  useEffect(() => {
+    if (visible) {
+      form.resetFields();
+      form.setFieldsValue({ durationUnit: '天', gateway: false, tempIp: false });
+    }
+  }, [visible]);
+  return (
     <Modal
-      title='IP信息导出'
+      title='批量变更'
       visible={visible}
-      onOk={() => {
-        exportIpsToFile(records, fileType);
-        onClose();
+      onCancel={props.onClose}
+      confirmLoading={submitting}
+      onOk={async () => {
+        const values = await form.validateFields();
+        setSubmitting(true);
+        try {
+          await props.onOk(values);
+        } finally {
+          setSubmitting(false);
+        }
       }}
-      onCancel={onClose}
       destroyOnClose
+      width={520}
     >
-      <Radio.Group
-        value={fileType}
-        onChange={(e) => setFileType(e.target.value)}
-        style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
-      >
-        <Radio value={1}>Excel</Radio>
-        <Radio value={2}>XML</Radio>
-        <Radio value={3}>TXT</Radio>
-      </Radio.Group>
+      <Form form={form} labelCol={{ flex: '90px' }}>
+        <Form.Item label='变更数量'>
+          <span style={{ lineHeight: '32px' }}>已选 {count} 个IP</span>
+        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item label='设为网关' name='gateway' valuePropName='checked' style={{ marginBottom: 8 }}>
+              <Switch size='small' />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label='设为临时IP' name='tempIp' valuePropName='checked' style={{ marginBottom: 8 }}>
+              <Switch size='small' />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Form.Item label='资产名称' name='assetName' rules={[{ required: true, message: '请输入资产名称' }]}>
+          <Input placeholder='请输入' maxLength={50} />
+        </Form.Item>
+        <Form.Item label='MAC地址' name='mac' rules={[{ required: true, message: '请输入MAC地址' }]}>
+          <Input placeholder='请输入' maxLength={30} />
+        </Form.Item>
+        <Form.Item label='端口' name='port'>
+          <Input placeholder='请输入' maxLength={20} />
+        </Form.Item>
+        <Form.Item label='使用时长'>
+          <div style={{ display: 'flex', columnGap: 8 }}>
+            <Form.Item name='duration' noStyle>
+              <InputNumber min={1} max={36500} placeholder='请输入' style={{ width: '90%' }} />
+            </Form.Item>
+            <Form.Item name='durationUnit' noStyle>
+              <Select style={{ width: 80 }} options={_.map(DURATION_UNITS, (u) => ({ value: u, label: u }))} />
+            </Form.Item>
+          </div>
+        </Form.Item>
+        <Form.Item label='备注' name='note'>
+          <Input.TextArea placeholder='请输入备注' maxLength={200} autoSize={{ minRows: 2, maxRows: 4 }} />
+        </Form.Item>
+      </Form>
     </Modal>
   );
 }

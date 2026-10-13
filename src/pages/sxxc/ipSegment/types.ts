@@ -250,3 +250,41 @@ export interface RecycleRule {
   updater: string;
   updateTime: string;
 }
+
+/** 变更记录动作（与后端 change-logs action 对齐） */
+export enum ChangeLogAction {
+  Allocate = 'allocate',
+  Reserve = 'reserve',
+  Recycle = 'recycle',
+  Release = 'release',
+  Update = 'update',
+  Delete = 'delete',
+  Scan = 'scan',
+  Import = 'import',
+}
+
+export const changeLogActionMap: Record<string, string> = {
+  [ChangeLogAction.Allocate]: '分配',
+  [ChangeLogAction.Reserve]: '预留',
+  [ChangeLogAction.Recycle]: '回收',
+  [ChangeLogAction.Release]: '释放',
+  [ChangeLogAction.Update]: '变更',
+  [ChangeLogAction.Delete]: '删除',
+  [ChangeLogAction.Scan]: '扫描',
+  [ChangeLogAction.Import]: '导入',
+};
+
+/** 变更记录条目 */
+export interface ChangeLogItem {
+  id: number;
+  subnetId: number;
+  ip: string;
+  action: string;
+  /** 变更前 JSON 文本 */
+  beforeData: string;
+  /** 变更后 JSON 文本 */
+  afterData: string;
+  reason: string;
+  createdAt: string;
+  createdBy: string;
+}
