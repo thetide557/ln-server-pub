@@ -17,7 +17,6 @@ const METRIC_COLORS = ['#12b3a6', '#22b35c', '#1668dc', '#7e4ce0', '#d9822b'];
 const COMPARE_COLORS = { total: '#1668dc', allocated: '#3ba0f5', rest: '#a9d3f7' };
 /** 存储分配进度配色（标存 / SSD / 对象存） */
 const STORAGE_POOL_COLORS = ['#1668dc', '#5b3fa8', '#0e8f82'];
-const STORAGE_POOL_KEYS = ['standardStorage', 'ssd', 'objectStorage'];
 /** 租户排行 / 三维对比配色：主机（绿）/ CPU（蓝）/ 存储（紫） */
 const TENANT_COLORS = { hosts: '#22b35c', cpu: '#3ba0f5', storage: '#8a63e0' };
 
@@ -34,39 +33,51 @@ const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(
   ({ overviewCards, resourceUsage, detailItems, unitDetails, filterSummary }, ref) => {
     const resources = resourceUsage.resources;
 
-    /** 各资源「总量 / 已分配」对比（vCPU / 内存 / 三个存储池，label 统一为 名称(单位)） */
-    const usageCompareData = useMemo(
-      () =>
-        resources.map((item) => ({
-          label: `${item.name}(${item.unit})`,
-          total: item.total,
-          allocated: item.allocated,
-        })),
-      [resources],
-    );
+    /** vCPU 各分组「总量 / 已分配」对比（专网C86 / 专网ARM / 互网C86 / 互网ARM） */
+    const vcpuGroupData = useMemo(() => {
+      const vcpu = resources.find((item) => item.key === 'vcpu');
+      if (!vcpu || !vcpu.groups || vcpu.groups.length === 0) return [];
+      return vcpu.groups.map((group) => ({
+        label: group.name,
+        total: group.total,
+        allocated: group.allocated,
+      }));
+    }, [resources]);
 
+    /** 内存各分组「总量 / 已分配」对比（专网C86 / 专网ARM / 互网C86 / 互网ARM） */
+    const memoryGroupData = useMemo(() => {
+      const memory = resources.find((item) => item.key === 'memory');
+      if (!memory || !memory.groups || memory.groups.length === 0) return [];
+      return memory.groups.map((group) => ({
+        label: group.name,
+        total: group.total,
+        allocated: group.allocated,
+      }));
+    }, [resources]);
+
+    /** 各资源池分组分配率（vCPU/内存/标存/SSD/对象存 × 各分组，共约 15 行） */
     const allocationRates = useMemo(
       () =>
-        resources.map((item) => ({
-          label: `${item.name}(${item.unit})`,
-          rate: parseRate(item.allocationRate),
-        })),
+        resources.flatMap((item) =>
+          (item.groups || []).map((group) => ({
+            label: `${item.name}-${group.name}`,
+            rate: parseRate(group.allocationRate),
+          })),
+        ),
       [resources],
     );
 
-    /** 三个存储池的分配进度（标存 / SSD / 对象存） */
+    /** 各资源分配进度（取全部 resources，label 取自 progressName） */
     const storageProgress = useMemo(
       () =>
-        resources
-          .filter((item) => STORAGE_POOL_KEYS.includes(item.key))
-          .map((item, index) => ({
-            key: item.key,
-            label: `${item.name}(${item.unit})`,
-            rate: parseRate(item.allocationRate),
-            allocated: item.allocated,
-            total: item.total,
-            color: STORAGE_POOL_COLORS[index % STORAGE_POOL_COLORS.length],
-          })),
+        resources.map((item, index) => ({
+          key: item.key,
+          label: item.progressName || `${item.name}(${item.unit})`,
+          rate: parseRate(item.allocationRate),
+          allocated: item.allocated,
+          total: item.total,
+          color: STORAGE_POOL_COLORS[index % STORAGE_POOL_COLORS.length],
+        })),
       [resources],
     );
 
@@ -89,6 +100,22 @@ const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(
         })),
       };
     }, [unitDetails]);
+
+    /**
+     * 概览卡片副文本：
+     *  - 无数据：`${subLabel} --`
+     *  - subLabel / subValue 同为 "/" 分隔且段数一致（如 商用/试用/自用 ↔ 203/69/64）→ 逐段合并成 商用 203 / 试用 69 / 自用 64
+     *  - 其余（含商用 ↔ 7户、分配率 ↔ 17.04%）→ 前置 subLabel，如 含商用 7户
+     */
+    const cardNote = (subLabel: string, subValue: string): string => {
+      if (subValue === '--') return `${subLabel} --`;
+      const labels = subLabel.split('/').map((part) => part.trim());
+      const values = subValue.split('/').map((part) => part.trim());
+      if (labels.length > 1 && labels.length === values.length) {
+        return labels.map((label, index) => `${label} ${values[index]}`).join(' / ');
+      }
+      return subLabel ? `${subLabel} ${subValue}` : subValue;
+    };
 
     return (
       <div className="report-body" ref={ref}>
@@ -113,7 +140,7 @@ const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(
                   {card.value}
                   {card.value !== '--' && card.unit && <small>{card.unit}</small>}
                 </div>
-                <div className="overview-card-note">{card.subValue === '--' ? `${card.subLabel} --` : card.subValue}</div>
+                <div className="overview-card-note">{cardNote(card.subLabel, card.subValue)}</div>
               </div>
             ))}
           </div>
@@ -123,20 +150,31 @@ const ReportBody = forwardRef<HTMLDivElement, ReportBodyProps>(
           <h2 className="section-title">资源使用情况</h2>
           <div className="chart-grid chart-grid--2">
             <UsageCompareChart
-              title="各资源总量与已分配对比"
-              data={usageCompareData}
+              title="vCPU 总量与已分配对比"
+              unit="核"
+              data={vcpuGroupData}
               totalColor={COMPARE_COLORS.total}
               allocatedColor={COMPARE_COLORS.allocated}
             />
+            <UsageCompareChart
+              title="内存总量与已分配对比"
+              unit="GB"
+              data={memoryGroupData}
+              totalColor={COMPARE_COLORS.total}
+              allocatedColor={COMPARE_COLORS.allocated}
+            />
+          </div>
+          <div className="chart-grid chart-grid--1">
+            <AllocationRateChart data={allocationRates} />
+          </div>
+          <div className="chart-grid chart-grid--2">
             <VcpuStackChart
-              title="各资源堆叠分布（已分配 / 剩余）"
-              data={usageCompareData}
+              title="vCPU 堆叠分布（已分配 / 剩余）"
+              unit="核"
+              data={vcpuGroupData}
               allocatedColor={COMPARE_COLORS.allocated}
               restColor={COMPARE_COLORS.rest}
             />
-          </div>
-          <div className="chart-grid chart-grid--2">
-            <AllocationRateChart data={allocationRates} />
             <AllocationProgressPanel title="存储分配进度" data={storageProgress} />
           </div>
           <div className="chart-grid chart-grid--3">

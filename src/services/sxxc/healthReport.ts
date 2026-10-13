@@ -118,6 +118,16 @@ export interface UsageGroup {
   name: string;
 }
 
+/** 资源项分组明细（数字类型，与 resourceUsage 顶层 total/allocated 同口径） */
+export interface ResourceUsageGroup {
+  key: string;
+  name: string;
+  total: number;
+  allocated: number;
+  remaining: number;
+  allocationRate: string;
+}
+
 /** 资源项：总量/已分配/剩余为数字（断流为 0），分配率为 "xx.xx%" 字符串 */
 export interface ResourceUsageItem {
   key: string;
@@ -127,6 +137,10 @@ export interface ResourceUsageItem {
   allocated: number;
   remaining: number;
   allocationRate: string;
+  /** 存储分配进度展示名称 */
+  progressName: string;
+  /** 分组明细（vCPU 项有此字段，其余资源可能为空数组） */
+  groups: ResourceUsageGroup[];
 }
 
 /** 资源使用率指标定义（PromQL 模板，供单机使用率查询与阈值着色，页面暂不展示） */
@@ -168,6 +182,17 @@ export function getAnalysisResourceUsage(params?: AnalysisQuery): Promise<Resour
             allocated: toNum(item?.allocated),
             remaining: toNum(item?.remaining),
             allocationRate: toStr(item?.allocationRate),
+            progressName: toStr(item?.progressName),
+            groups: Array.isArray(item?.groups)
+              ? item.groups.map((group: any) => ({
+                  key: toStr(group?.key),
+                  name: toStr(group?.name),
+                  total: toNum(group?.total),
+                  allocated: toNum(group?.allocated),
+                  remaining: toNum(group?.remaining),
+                  allocationRate: toStr(group?.allocationRate),
+                }))
+              : [],
           }))
         : [],
       usageRate: Array.isArray(data.usageRate)
