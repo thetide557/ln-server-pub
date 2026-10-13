@@ -3,6 +3,7 @@ import { Row, Col, Empty, Spin, Tag, Button } from 'antd';
 import { useHistory } from 'react-router-dom';
 import { getCabinetUSlots } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
+import { getXhAsset } from '@/services/assets';
 import {
   OccupyModal, ReserveModal, ReleaseModal,
   DisableModal, EnableModal, CancelReserveModal, MigrateModal,
@@ -43,7 +44,28 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     setLoading(true);
     try {
       const res = await getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode });
-      setSlots(res?.dat || []);
+      const rawSlots = res?.dat || [];
+      // 已占用 U 位：额外查资产 health，health=0 视为故障
+      const usedSlots = rawSlots.filter((s) => s.status === 'used' && s.asset_id);
+      if (usedSlots.length > 0) {
+        const healthResults = await Promise.allSettled(
+          [...new Set(usedSlots.map((s) => s.asset_id!))].map((aid) =>
+            getXhAsset(String(aid)).then(({ dat }) => ({ asset_id: aid, health: dat?.health })),
+          ),
+        );
+        const healthMap = new Map<number, number>();
+        healthResults.forEach((r) => {
+          if (r.status === 'fulfilled' && r.value.health !== undefined && r.value.health !== null) {
+            healthMap.set(r.value.asset_id, Number(r.value.health));
+          }
+        });
+        rawSlots.forEach((s) => {
+          if (s.status === 'used' && s.asset_id && healthMap.get(s.asset_id) === 0) {
+            s.status = 'fault';
+          }
+        });
+      }
+      setSlots(rawSlots);
       setSelected(null);
     } finally {
       setLoading(false);
@@ -70,15 +92,15 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     for (let i = 0; i < slots.length; i++) {
       const s = slots[i];
       if (seen.has(s.u_position)) continue;
-      // 可合并的状态：used（按资产名）、reserved（按预留原因）、disabled（按禁用原因）
-      const isMergeable = s.status === 'used' || s.status === 'reserved' || s.status === 'disabled';
+      // 可合并的状态：used/fault（按资产名）、reserved（按预留原因）、disabled（按禁用原因）
+      const isMergeable = s.status === 'used' || s.status === 'fault' || s.status === 'reserved' || s.status === 'disabled';
       if (!isMergeable) {
         result.push(s);
         continue;
       }
       // 合并 key：状态 + 资产名/原因
-      const mergeKey = s.status === 'used'
-        ? `used:${s.asset_name || ''}`
+      const mergeKey = s.status === 'used' || s.status === 'fault'
+        ? `${s.status}:${s.asset_name || ''}`
         : s.status === 'reserved'
           ? `reserved:${s.reserved_reason || ''}`
           : `disabled:${s.disabled_reason || ''}`;
@@ -87,8 +109,8 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
       let count = 1;
       while (j < slots.length) {
         const next = slots[j];
-        const nextKey = next.status === 'used'
-          ? `used:${next.asset_name || ''}`
+        const nextKey = next.status === 'used' || next.status === 'fault'
+          ? `${next.status}:${next.asset_name || ''}`
           : next.status === 'reserved'
             ? `reserved:${next.reserved_reason || ''}`
             : `disabled:${next.disabled_reason || ''}`;
@@ -300,16 +322,16 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                         flex: 1, background: sty.bg, border: `1px solid ${sty.border}`,
                         borderRadius: 3, padding: '6px 10px',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        minHeight: 22 + item.count * 12,
+                        // minHeight: 22 + item.count * 12,
                       }}>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 500 }}>
-                            {s.status === 'used' ? (s.asset_name || '-')
+                            {s.status === 'used' || s.status === 'fault' ? (s.asset_name || '-')
                               : s.status === 'reserved' ? '预留'
                               : '禁用'}
                           </div>
                           <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2 }}>
-                            {s.status === 'used' ? ` ${s.asset_ip || '-'} · ${item.end}U-${item.start}U`
+                            {s.status === 'used' || s.status === 'fault' ? `${s.asset_ip || '-'} · ${item.end}U-${item.start}U`
                               : s.status === 'reserved' ? `${s.reserved_reason || '预留说明'} · ${item.end}U-${item.start}U`
                               : `${s.disabled_reason || '禁用说明'} · ${item.end}U-${item.start}U`}
                           </div>

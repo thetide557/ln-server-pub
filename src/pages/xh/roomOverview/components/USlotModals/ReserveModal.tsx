@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, message } from 'antd';
 import { reserveU, segmentCheck } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
-import { FORM_LAYOUT, type USlotModalBaseProps } from './types';
+import { FORM_LAYOUT } from './types';
+import type { USlotModalBaseProps } from './types';
 import { validateContiguousIdle } from './helper';
 
 /** 预留 U 位弹窗 */

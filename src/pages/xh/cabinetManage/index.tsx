@@ -23,7 +23,7 @@ import {
   UploadOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import type { UploadFile } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
 import PageLayout from '@/components/pageLayout';
 import { useHistory } from 'react-router-dom';
 import { useAntdResizableHeader } from 'use-antd-resizable-header';
@@ -577,9 +577,10 @@ const CabinetManage: React.FC = () => {
                   <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                     新增
                   </Button>
-                  <Button icon={<UploadOutlined />} onClick={handleOpenImport}>
+                  {/* TODO：导入按钮先隐藏 */}
+                  {/* <Button icon={<UploadOutlined />} onClick={handleOpenImport}>
                     导入
-                  </Button>
+                  </Button> */}
                 </Space>
               </Form.Item>
             </Space>

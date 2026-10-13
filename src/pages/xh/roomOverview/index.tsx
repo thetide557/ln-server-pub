@@ -347,19 +347,18 @@ const RoomOverview: React.FC = () => {
     if (!searchValue.trim()) return treeData;
 
     const filter = (nodes: TreeNodeData[]): TreeNodeData[] => {
-      return nodes
-        .map((node) => {
-          const titleMatch = node.title.toLowerCase().includes(searchValue.toLowerCase());
-          let children: TreeNodeData[] = [];
-          if (node.children) {
-            children = filter(node.children);
-          }
-          if (titleMatch || children.length > 0) {
-            return { ...node, children: children.length > 0 ? children : node.children };
-          }
-          return null;
-        })
-        .filter((n): n is TreeNodeData => n !== null);
+      const result: TreeNodeData[] = [];
+      nodes.forEach((node) => {
+        const titleMatch = node.title.toLowerCase().includes(searchValue.toLowerCase());
+        let children: TreeNodeData[] = [];
+        if (node.children) {
+          children = filter(node.children);
+        }
+        if (titleMatch || children.length > 0) {
+          result.push({ ...node, children: children.length > 0 ? children : node.children });
+        }
+      });
+      return result;
     };
 
     return filter(treeData);

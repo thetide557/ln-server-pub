@@ -4,7 +4,8 @@ import { migrateU, segmentCheck, getCabinetSummary } from '@/services/assets/dc-
 import { getRoomAll } from '@/services/assets/dc-room';
 import { getCabinetGroupAll } from '@/services/assets/cabinet-group';
 import { getCabinetAll } from '@/services/assets/dc-cabinet';
-import { FORM_LAYOUT, type USlotModalBaseProps } from './types';
+import { FORM_LAYOUT } from './types';
+import type { USlotModalBaseProps } from './types';
 import { getAssetUPositions } from './helper';
 
 /** 迁移 U 位弹窗 */
@@ -202,8 +203,8 @@ const MigrateModal: React.FC<USlotModalBaseProps> = ({ visible, slot, cabinetCod
                   })
                   .catch(() => setTargetResult(null));
               } else {
-                const curSlotList = isSelf
-                  ? allSlots
+                const curSlotList: { u_position: number; status: string }[] | null = isSelf
+                  ? allSlots.map((x) => ({ u_position: x.u_position, status: x.status }))
                   : (targetCabId ? Array.from({ length: targetU }, (_, i) => ({ u_position: i + 1, status: 'idle' as const })) : null);
                 if (curSlotList) {
                   const s = curSlotList.find((x) => x.u_position === startPos);
