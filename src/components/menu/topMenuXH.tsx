@@ -40,24 +40,31 @@ const getMenuList = (t) => {
           label: t('运维资产清单'),
         },
         {
-          key: '/xh/roomOverview',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('机房总览'),
-        },
-        {
-          key: '/xh/roomManage',
+          key: 'room',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('机房管理'),
-        },
-        {
-          key: '/xh/cabinetGroupManage',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('机柜组管理'),
-        },
-        {
-          key: '/xh/cabinetManage',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('机柜管理'),
+          children: [
+            {
+              key: '/xh/roomOverview',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
+              label: t('机房总览'),
+            },
+            {
+              key: '/xh/roomManage',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
+              label: t('机房管理'),
+            },
+            {
+              key: '/xh/cabinetGroupManage',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
+              label: t('机柜组管理'),
+            },
+            {
+              key: '/xh/cabinetManage',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
+              label: t('机柜管理'),
+            },
+          ],
         },
         {
           key: '/xh/iotassetmgt',
