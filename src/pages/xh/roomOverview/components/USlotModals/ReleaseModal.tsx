@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, message } from 'antd';
 import { releaseU } from '@/services/assets/dc-overview';
-import { type USlotModalBaseProps } from './types';
+import type { USlotModalBaseProps } from './types';
 import { getAssetUPositions } from './helper';
 
 /** 释放 U 位弹窗 */

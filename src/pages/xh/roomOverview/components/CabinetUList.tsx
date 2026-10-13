@@ -6,9 +6,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { DownOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import { getCabinetUSlots } from '@/services/assets/dc-overview';
-import {
-  type CabinetUSlot,
-} from '@/services/assets/dc-overview';
+import type { CabinetUSlot } from '@/services/assets/dc-overview';
 import {
   OccupyModal, ReserveModal, ReleaseModal,
   DisableModal, EnableModal, CancelReserveModal, MigrateModal,

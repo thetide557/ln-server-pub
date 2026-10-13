@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, message } from 'antd';
 import {disableU} from '@/services/assets/dc-overview';
-import { type USlotModalBaseProps } from './types';
+import type { USlotModalBaseProps } from './types';
 
 /** 禁用 U 位弹窗 */
 const DisableModal: React.FC<USlotModalBaseProps> = ({ visible, slot, cabinetId, onClose, onSuccess, reload }) => {

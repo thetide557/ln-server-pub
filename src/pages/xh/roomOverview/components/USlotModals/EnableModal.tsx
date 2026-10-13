@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, message } from 'antd';
 import { enableU } from '@/services/assets/dc-overview';
-import { type USlotModalBaseProps } from './types';
+import type { USlotModalBaseProps } from './types';
 
 /** 启用 U 位弹窗（纯确认） */
 const EnableModal: React.FC<USlotModalBaseProps> = ({ visible, slot, cabinetId, allSlots, onClose, onSuccess, reload }) => {

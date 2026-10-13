@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, message } from 'antd';
 import { cancelReserveU } from '@/services/assets/dc-overview';
-import { type USlotModalBaseProps } from './types';
+import type { USlotModalBaseProps } from './types';
 
 /** 取消预留弹窗（纯确认） */
 const CancelReserveModal: React.FC<USlotModalBaseProps> = ({ visible, slot, cabinetId, allSlots, onClose, onSuccess, reload }) => {

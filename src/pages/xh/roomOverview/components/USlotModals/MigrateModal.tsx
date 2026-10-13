@@ -4,7 +4,8 @@ import { migrateU, segmentCheck, getCabinetSummary } from '@/services/assets/dc-
 import { getRoomAll } from '@/services/assets/dc-room';
 import { getCabinetGroupAll } from '@/services/assets/cabinet-group';
 import { getCabinetAll } from '@/services/assets/dc-cabinet';
-import { FORM_LAYOUT, type USlotModalBaseProps } from './types';
+import { FORM_LAYOUT } from './types';
+import type { USlotModalBaseProps } from './types';
 import { getAssetUPositions } from './helper';
 
 /** 迁移 U 位弹窗 */

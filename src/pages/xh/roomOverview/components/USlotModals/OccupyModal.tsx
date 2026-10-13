@@ -3,7 +3,8 @@ import { Modal, Form, Input, InputNumber, Select, message } from 'antd';
 import { getBusiGroups } from '@/services/common';
 import { getAssetsByGroup, occupyU, segmentCheck } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
-import { FORM_LAYOUT, type USlotModalBaseProps } from './types';
+import { FORM_LAYOUT } from './types';
+import type { USlotModalBaseProps } from './types';
 import { validateContiguousIdle } from './helper';
 
 /** 占用 U 位弹窗 */
