@@ -8,7 +8,7 @@ import { Dropdown, Input, Menu } from 'antd';
 import { CaretDownOutlined, CaretRightOutlined, HomeOutlined, SearchOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { IpGroup, IpSegment, MAX_GROUP_LEVEL } from '../types';
-import { collectGroupIds, hostCount } from '../mock';
+import { hostCount } from '../mock';
 
 interface GroupTreeProps {
   groups: IpGroup[];
@@ -53,24 +53,19 @@ export default function GroupTree(props: GroupTreeProps) {
   // 平铺分组 → 树形结构（递归聚合各组的已用/总IP数）
   const treeData = useMemo<TreeNodeData[]>(() => {
     const build = (list: IpGroup[], parentId: number | undefined, level: number): TreeNodeData[] => {
-      const groupIdsOf = (groupId: number): number[] => collectGroupIds(groupId, list);
       return _.chain(list)
         .filter((item) => (item.parentId ?? undefined) === parentId)
         .map((item) => {
           const subGroups = build(list, item.id, level + 1);
           const segmentList = _.filter(segments, { groupId: item.id });
-          // 聚合：本组 + 全部子孙组直属段
-          const groupIds = groupIdsOf(item.id);
-          const aggregatedSegments = _.filter(segments, (seg) => groupIds.includes(seg.groupId));
-          const totalCount = _.sumBy(aggregatedSegments, (seg) => hostCount(seg.mask));
-          const usedCount = _.sumBy(aggregatedSegments, (seg) => seg.allocatedCount + seg.reservedIpCount);
           return {
             ...item,
             level,
             subGroups,
             segmentList,
-            usedCount,
-            totalCount,
+            // 已用/总IP数：直接取树接口返回的分组数值（不再前端聚合孙代段）
+            usedCount: item.usedCount || 0,
+            totalCount: item.totalCount || 0,
           };
         })
         .value();
@@ -205,8 +200,9 @@ export default function GroupTree(props: GroupTreeProps) {
             {node.segmentList.length === 0 && node.subGroups.length === 0 && <div className='group-empty-tip'>（暂无地址段）</div>}
             {_.map(node.segmentList, (segment) => {
               const isSegActive = selectedSegmentId === segment.id;
-              const segTotal = hostCount(segment.mask);
-              const segUsed = segment.allocatedCount + segment.reservedIpCount;
+              // 段节点数值：直接取树接口返回值（缺省时回退按掩码/已分配+预留计算）
+              const segTotal = segment.treeTotal ?? hostCount(segment.mask);
+              const segUsed = segment.treeUsed ?? (segment.allocatedCount + segment.reservedIpCount);
               return (
                 <div
                   key={segment.id}

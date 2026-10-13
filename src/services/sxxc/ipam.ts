@@ -519,6 +519,8 @@ function subnetNodeToSegment(node: IpamTreeNode, parentId?: number, parentName?:
     offlineCount: 0,
     usageRate: 0,
     recyclableCount: 0,
+    treeUsed: node.used,
+    treeTotal: node.total,
   };
 }
 
@@ -705,7 +707,8 @@ export async function getTreeData(): Promise<{ groups: IpGroup[]; segments: IpSe
   const walk = (list: IpamTreeNode[], parentId?: number, parentName?: string) => {
     _.forEach(list, (node) => {
       if (node.node_type === 'group') {
-        groups.push({ id: node.id, name: node.label, owner: '', parentId });
+        // 分组节点数值直接取树接口返回的 used/total
+        groups.push({ id: node.id, name: node.label, owner: '', parentId, usedCount: node.used, totalCount: node.total });
         walk(node.children || [], node.id, node.label);
       } else if (node.node_type === 'subnet') {
         segments.push(subnetNodeToSegment(node, parentId, parentName));
