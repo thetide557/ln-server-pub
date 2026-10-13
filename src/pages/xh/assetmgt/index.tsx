@@ -1262,69 +1262,80 @@ export default function () {
       page: current,
       limit: pageSize,
     };
-    if (!isScopeTreeMode) {
-      param['groupIds'] = groupIds?.toString();
+
+    // ===== 机房维度过滤模式（机房总览"进入"跳转）：合并 URL 携带的 room/cabinet/device_type 参数 =====
+    // 左侧组织树已隐藏，跳过 groupIds / typeId / tissueId / scopeTreeFilter 等组织树过滤
+    if (hasRoomFilter()) {
+      Object.assign(param, getRoomFilterParams());
+    } else {
+      if (!isScopeTreeMode) {
+        param['groupIds'] = groupIds?.toString();
+      }
     }
 
     if (searchVal != null && searchVal.length > 0) {
       param['query'] = searchVal;
       treeQuery['query'] = searchVal
     }
-    if (isScopeTreeMode) {
-      Object.entries(scopeTreeFilter).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          param[key] = value;
+
+    if (!hasRoomFilter()) {
+      if (isScopeTreeMode) {
+        Object.entries(scopeTreeFilter).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            param[key] = value;
+          }
+        });
+      } else {
+        if (typeId != null && typeId != '0' && modifyType && parentId) {
+          param['type'] = typeId;
         }
-      });
-    } else {
-      if (typeId != null && typeId != '0' && modifyType && parentId) {
-        param['type'] = typeId;
-      }
-      if (tissueId != null && !parentId) {
-        // param['tissue_tree_id'] = tissueId;
-        param['group_id'] = tissueId;
-      }
-      // 点击全部资产下的查询时，group_id传-1
-      if (isAllAssets) {
-        param["group_id"] = -1;
-        // 根据tissueId的值 查找对应的type_list
         if (tissueId != null && !parentId) {
-          const treeItem = treeList
-            .find((item) => item.id === -1)
-            ?.sub_groups?.find((item) => item.id === tissueId);
-          // console.log('treeItem', treeItem);
-          const typeListNames = treeItem?.type_list
-            ?.map((item) => item.name)
-            .join(",");
-          if (typeListNames) {
-            param["types"] = typeListNames;
-          } else {
-            param["types"] = "";
+          // param['tissue_tree_id'] = tissueId;
+          param['group_id'] = tissueId;
+        }
+        // 点击全部资产下的查询时，group_id传-1
+        if (isAllAssets) {
+          param["group_id"] = -1;
+          // 根据tissueId的值 查找对应的type_list
+          if (tissueId != null && !parentId) {
+            const treeItem = treeList
+              .find((item) => item.id === -1)
+              ?.sub_groups?.find((item) => item.id === tissueId);
+            // console.log('treeItem', treeItem);
+            const typeListNames = treeItem?.type_list
+              ?.map((item) => item.name)
+              .join(",");
+            if (typeListNames) {
+              param["types"] = typeListNames;
+            } else {
+              param["types"] = "";
+            }
           }
         }
-      }
 
-      // switch (tissueId) {
-      //   case 1001:
-      //     param['types'] = "物理服务器,网络设备";
-      //     break;
-      //   case 1002:
-      //     param['types'] = "虚拟服务器";
-      //     break;
-      //     case 1003:
-      //     param['types'] = "MySQL, Redis, Mongodb, VictoriaMetrics, HTTP服务, 网络端点, 应用服务, Rabbitmq, Nginx, Apache, postgresql";
-      //     break;
-      //     case 1004:
-      //     param['types'] = "ln-server";
-      //     break;
-      //     case 1005:
-      //     param['types'] = "log统计";
-      //     break;
-      //   default:
-      //     break;
-      // }
+        // switch (tissueId) {
+        //   case 1001:
+        //     param['types'] = "物理服务器,网络设备";
+        //     break;
+        //   case 1002:
+        //     param['types'] = "虚拟服务器";
+        //     break;
+        //     case 1003:
+        //     param['types'] = "MySQL, Redis, Mongodb, VictoriaMetrics, HTTP服务, 网络端点, 应用服务, Rabbitmq, Nginx, Apache, postgresql";
+        //     break;
+        //     case 1004:
+        //     param['types'] = "ln-server";
+        //     break;
+        //     case 1005:
+        //     param['types'] = "log统计";
+        //     break;
+        //   default:
+        //     break;
+        // }
+      }
     }
 
+    // 两种模式下过滤器都生效：searchVal 选定字段 + filterParam 过滤器字段
     if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
       treeQuery['filter'] = filterParam
@@ -1334,7 +1345,7 @@ export default function () {
     const hasSearchValue = searchVal != null && searchVal.length > 0;
     const requestFunc = hasSearchValue
       ? getAssetsByN9eCondition
-      : isScopeTreeMode
+      : isScopeTreeMode && !hasRoomFilter()
       ? getAssetScopeTreeAssets
       : getAssetsByCondition;
 
