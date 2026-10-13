@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { message, Modal, Table } from 'antd';
 import _ from 'lodash';
 import { ColumnsType } from 'antd/lib/table';
-import { getRecyclableIps, recycleIps } from '../mock';
+import { getRecyclableIps, recycleBatchIps } from '@/services/sxxc/ipam';
 import { IpItem, ipAllocStatusMap, ipOnlineStatusMap, ipUseStatusMap } from '../types';
 
 interface RecycleModalProps {
@@ -21,24 +21,25 @@ interface RecycleModalProps {
 export default function RecycleModal(props: RecycleModalProps) {
   const { visible, segmentId } = props;
   const [list, setList] = useState<IpItem[]>([]);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  // 后端按 ip + subnet_id 定位（虚拟行 id=0 会重复），勾选值改用 ip
+  const [selectedIps, setSelectedIps] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     if (visible && segmentId) {
       setLoading(true);
-      setSelectedIds([]);
+      setSelectedIps([]);
       getRecyclableIps(segmentId)
         .then((res) => {
           setList(res);
           // 默认全选，与原型一致
-          setSelectedIds(res.map((item) => item.id));
+          setSelectedIps(res.map((item) => item.ip));
         })
         .finally(() => setLoading(false));
     } else {
       setList([]);
-      setSelectedIds([]);
+      setSelectedIps([]);
     }
   }, [visible, segmentId]);
 
@@ -88,14 +89,20 @@ export default function RecycleModal(props: RecycleModalProps) {
       confirmLoading={confirmLoading}
       onCancel={props.onClose}
       onOk={async () => {
-        if (selectedIds.length === 0) {
+        if (selectedIps.length === 0) {
           message.warning('请选择需要回收的IP');
           return;
         }
         setConfirmLoading(true);
         try {
-          await recycleIps(selectedIds);
-          message.success('回收成功');
+          const items = _.compact(
+            _.map(selectedIps, (ip) => {
+              const item = _.find(list, { ip });
+              return item ? { ip: item.ip, segmentId: item.segmentId || segmentId! } : undefined;
+            }),
+          );
+          const res = await recycleBatchIps(items);
+          message.success(`回收成功（${res.recycled}个）`);
           props.onOk();
           props.onClose();
         } finally {
@@ -106,16 +113,16 @@ export default function RecycleModal(props: RecycleModalProps) {
       <div style={{ marginBottom: 8, color: '#767676' }}>可回收清单（{props.segmentName || '-'}）</div>
       <Table
         size='small'
-        rowKey='id'
+        rowKey='ip'
         loading={loading}
         columns={columns}
         dataSource={list}
         pagination={false}
         scroll={{ x: 1100, y: 320 }}
         rowSelection={{
-          selectedRowKeys: selectedIds,
+          selectedRowKeys: selectedIps,
           onChange: (keys) => {
-            setSelectedIds(keys as number[]);
+            setSelectedIps(keys as string[]);
           },
         }}
       />

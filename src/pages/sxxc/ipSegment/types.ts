@@ -160,16 +160,16 @@ export interface IpStats {
   total: number;
 }
 
-/** 回收规则触发条件 */
+/** 回收规则触发条件（取值与后端接口一致） */
 export enum RuleTriggerType {
   /** 长期未上线（最后在线时间超阈值） */
   LongOffline = 'long_offline',
   /** 分配后未投入使用 */
-  AssignedUnused = 'assigned_unused',
+  AssignedUnused = 'unused_after_alloc',
   /** 资产已下架/报废但IP仍占用 */
-  AssetOffline = 'asset_offline',
+  AssetOffline = 'asset_offshelf',
   /** 预留超期未使用 */
-  ReservedExpired = 'reserved_expired',
+  ReservedExpired = 'reserve_expired',
 }
 
 export const ruleTriggerMap: Record<RuleTriggerType, { text: string; thresholdLabel: string | null; tip: string }> = {
@@ -229,8 +229,8 @@ export interface RecycleRule {
   groupName: string;
   /** 适用范围：all-当前分组全部地址段 custom-指定地址段 */
   scopeType: 'all' | 'custom';
-  /** 指定地址段(fullSegment 列表) */
-  customSegments: string[];
+  /** 指定地址段（段 ID 列表） */
+  customSegments: number[];
   triggerType: RuleTriggerType;
   /** 阈值天数（资产已下架时为空） */
   thresholdDays?: number;
@@ -245,8 +245,8 @@ export interface RecycleRule {
   /** 最近执行时间 */
   lastExecTime: string;
   enabled: boolean;
-  /** 回收白名单（不参与回收的IP段/IP） */
-  whitelist: string[];
+  /** 回收白名单（不参与回收的地址段 ID / IP，混合存储） */
+  whitelist: Array<number | string>;
   updater: string;
   updateTime: string;
 }

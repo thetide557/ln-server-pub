@@ -3,7 +3,7 @@
  * 对应原型：回收规则列表弹框（从组织树"回收规则"入口打开）
  */
 import React, { useEffect, useState } from 'react';
-import { Button, Dropdown, Form, Input, Menu, message, Modal, Switch, Table } from 'antd';
+import { Button, Dropdown, Form, Input, Menu, message, Modal, notification, Switch, Table } from 'antd';
 import _ from 'lodash';
 import moment from 'moment';
 import { ColumnsType } from 'antd/lib/table';
@@ -13,9 +13,11 @@ import {
   addRecycleRule,
   deleteRecycleRule,
   editRecycleRule,
+  executeRecycleRule,
+  getRecycleRuleDetail,
   getRecycleRules,
   toggleRecycleRule,
-} from '../mock';
+} from '@/services/sxxc/ipam';
 import {
   IpGroup,
   IpSegment,
@@ -71,52 +73,82 @@ export default function RuleListModal(props: RuleListModalProps) {
   const [editingRule, setEditingRule] = useState<RecycleRule>();
   const [viewRule, setViewRule] = useState<RecycleRule>();
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
+  /**
+   * 刷新列表数据
+   * 注意：列 render: (_, record) 的首参会遮蔽 lodash 的 _，render 内不能直接用 _.uniqueId，
+   * 统一通过本函数刷新（定义在组件体内，_ 指向 lodash）
+   */
+  const handleRefresh = () => setRefreshFlag(_.uniqueId('refresh_'));
+  /**
+   * 打开规则弹窗：查看/编辑前先按 id 拉取详情（GET /ipam/recycle-rules/{id}，列表行字段可能不全）
+   * 注意：列 render 内不能直接用本函数体内以外的 lodash 调用，此处定义在组件体内不受首参 _ 遮蔽影响
+   */
+  const openRuleForm = (rule: RecycleRule, mode: 'view' | 'edit') => {
+    getRecycleRuleDetail(rule.id)
+      .then((detail) => {
+        if (mode === 'edit') {
+          setEditingRule(detail);
+          setFormModalVisible(true);
+        } else {
+          setViewRule(detail);
+        }
+      })
+      .catch(() => {});
+  };
   const pagination = usePagination({ PAGESIZE_KEY: 'ip_recycle_rules' });
+  const [total, setTotal] = useState(0);
   // antd 日期范围（非受控，与 log/operlog 页同款写法规避 @types/react 多版本冲突；传参格式 YYYY-MM-DD）
   const [timeRange, setTimeRange] = useState<[moment.Moment, moment.Moment]>();
   // 重置时通过 key 重挂载清空日期输入框
   const [pickerKey, setPickerKey] = useState(0);
+  /**
+   * 已提交的查询条件（合并 state：翻页/查询/重置都只改它，fetch effect 单次触发避免重复请求）
+   * 点击「查询」才生效；page 为服务端分页页码
+   */
+  const [query, setQuery] = useState<{ page: number; name?: string; startTime?: string; endTime?: string }>({ page: 1 });
 
   const onTimeRangeChange = (value: DatePickerProps['value'] | RangePickerProps['value']) => {
     const dates = value as [moment.Moment, moment.Moment];
     setTimeRange(dates && dates[0] && dates[1] ? [dates[0], dates[1]] : undefined);
   };
 
-  const fetchList = (override?: { startTime?: string; endTime?: string }) => {
+  /** 拉取规则列表（服务端分页 + 服务端查询） */
+  const fetchList = () => {
     if (!group && !segment) return;
     setLoading(true);
-    const values = form.getFieldsValue();
     getRecycleRules({
       ...(group ? { groupId: group.id } : {}),
-      ...(segment ? { segment: segment.fullSegment } : {}),
-      name: values.name,
-      // 重置时 override 传空对象强制清空时间，其余读取当前选取
-      startTime: override ? override.startTime : timeRange?.[0]?.format('YYYY-MM-DD'),
-      endTime: override ? override.endTime : timeRange?.[1]?.format('YYYY-MM-DD'),
+      ...(segment ? { segmentId: segment.id } : {}),
+      name: query.name,
+      startTime: query.startTime,
+      endTime: query.endTime,
+      page: query.page,
+      limit: pagination.pageSize,
     })
       .then((res) => {
         setList(res.list);
+        setTotal(res.total);
       })
       .finally(() => setLoading(false));
   };
 
-  // 弹窗打开 / 切换目标分组(地址段)时：重置全部查询条件（fetchList({}) 强制清空时间，规避读取旧 state 闭包）
+  useEffect(() => {
+    if (props.visible && (group || segment)) {
+      fetchList();
+    }
+  }, [props.visible, group, segment, query, refreshFlag, pagination.pageSize]);
+
+  // 弹窗打开 / 切换目标分组(地址段)时：重置全部查询条件并回到第一页
+  // （query 引用保稳：已是初始条件时不换引用，避免 visible 变化 + query 变化双重触发 fetch）
   useEffect(() => {
     if (props.visible && (group || segment)) {
       form.resetFields();
       setTimeRange(undefined);
       setPickerKey((key) => key + 1);
       setSelectedKeys([]);
-      fetchList({});
+      setQuery((prev) => (_.isEqual(prev, { page: 1 }) ? prev : { page: 1 }));
     }
   }, [props.visible, group, segment]);
-
-  // 新增/编辑/删除/启停后刷新列表：保留当前查询条件
-  useEffect(() => {
-    if (props.visible && (group || segment)) {
-      fetchList();
-    }
-  }, [refreshFlag]);
 
   const columns: ColumnsType<RecycleRule> = [
     { title: '规则名称', dataIndex: 'name', width: 130, ellipsis: true },
@@ -127,7 +159,9 @@ export default function RuleListModal(props: RuleListModalProps) {
       width: 130,
       render: (val, record) => {
         if (val === 'all') return '当前分组全部地址段';
-        return `指定地址段（${(record.customSegments || []).join('、')}）`;
+        // customSegments 为段 ID，展示时转换为段名
+        const segNames = (record.customSegments || []).map((id) => segments?.find((s) => s.id === id)?.fullSegment || String(id));
+        return `指定地址段（${segNames.join('、')}）`;
       },
     },
     { title: '触发条件', width: 180, ellipsis: true, render: (_, record) => triggerText(record) },
@@ -151,7 +185,7 @@ export default function RuleListModal(props: RuleListModalProps) {
           onChange={(checked) => {
             toggleRecycleRule(record.id, checked).then(() => {
               message.success(checked ? '已启用' : '已停用');
-              setRefreshFlag(_.uniqueId('refresh_'));
+              handleRefresh();
             });
           }}
         />
@@ -162,21 +196,38 @@ export default function RuleListModal(props: RuleListModalProps) {
     {
       title: '操作',
       key: 'action',
-      width: 130,
+      width: 170,
       fixed: 'right',
       render: (_, record) => (
         <>
-          <Button type='link' size='small' style={{ padding: 0 }} onClick={() => setViewRule(record)}>
+          {/* 行内执行/扫描：按规则适用范围执行（mark 命中入可回收清单 / auto 直接回收） */}
+          <Button
+            type='link'
+            size='small'
+            style={{ padding: 0 }}
+            onClick={() => {
+              executeRecycleRule(record.id).then((res) => {
+                notification.open({
+                  message: '扫描完成',
+                  description: res.message,
+                  placement: 'bottomRight',
+                  duration: 3,
+                });
+                handleRefresh();
+              });
+            }}
+          >
+            执行
+          </Button>
+          {/* 查看：以详情接口为准（列表行字段可能不全），先查详情再打开弹窗 */}
+          <Button type='link' size='small' style={{ padding: 0, marginLeft: 8 }} onClick={() => openRuleForm(record, 'view')}>
             查看
           </Button>
           <Button
             type='link'
             size='small'
             style={{ padding: 0, marginLeft: 8 }}
-            onClick={() => {
-              setEditingRule(record);
-              setFormModalVisible(true);
-            }}
+            onClick={() => openRuleForm(record, 'edit')}
           >
             编辑
           </Button>
@@ -191,7 +242,7 @@ export default function RuleListModal(props: RuleListModalProps) {
                 onOk: () => {
                   deleteRecycleRule(record.id).then(() => {
                     message.success('删除成功');
-                    setRefreshFlag(_.uniqueId('refresh_'));
+                    handleRefresh();
                   });
                 },
                 onCancel() {},
@@ -226,7 +277,18 @@ export default function RuleListModal(props: RuleListModalProps) {
             <RangePickerFC key={pickerKey} onChange={onTimeRangeChange} />
           </Form.Item>
           <Form.Item>
-            <Button type='primary' onClick={() => fetchList()}>
+            <Button
+              type='primary'
+              onClick={() => {
+                const values = form.getFieldsValue();
+                setQuery({
+                  page: 1,
+                  name: values.name,
+                  startTime: timeRange?.[0]?.format('YYYY-MM-DD'),
+                  endTime: timeRange?.[1]?.format('YYYY-MM-DD'),
+                });
+              }}
+            >
               查询
             </Button>
           </Form.Item>
@@ -236,7 +298,7 @@ export default function RuleListModal(props: RuleListModalProps) {
                 form.resetFields();
                 setTimeRange(undefined);
                 setPickerKey((key) => key + 1);
-                fetchList({});
+                setQuery({ page: 1 });
               }}
             >
               重置
@@ -268,7 +330,7 @@ export default function RuleListModal(props: RuleListModalProps) {
                         Promise.all(_.map(selectedKeys, (id) => deleteRecycleRule(id))).then(() => {
                           message.success('删除成功');
                           setSelectedKeys([]);
-                          setRefreshFlag(_.uniqueId('refresh_'));
+                          handleRefresh();
                         });
                       },
                       onCancel() {},
@@ -277,7 +339,7 @@ export default function RuleListModal(props: RuleListModalProps) {
                   }
                   Promise.all(_.map(selectedKeys, (id) => toggleRecycleRule(id, key === 'enable'))).then(() => {
                     message.success(key === 'enable' ? '批量启用成功' : '批量停用成功');
-                    setRefreshFlag(_.uniqueId('refresh_'));
+                    handleRefresh();
                   });
                 }}
                 items={[
@@ -298,7 +360,14 @@ export default function RuleListModal(props: RuleListModalProps) {
         loading={loading}
         columns={columns}
         dataSource={list}
-        pagination={{ ...pagination, total: list.length }}
+        pagination={{
+          ...pagination,
+          current: query.page,
+          total,
+          onChange: (page) => {
+            setQuery((prev) => ({ ...prev, page }));
+          },
+        }}
         scroll={{ x: 1400, y: 360 }}
         rowSelection={{
           selectedRowKeys: selectedKeys,
@@ -321,13 +390,14 @@ export default function RuleListModal(props: RuleListModalProps) {
               whitelist: values.whitelist || [],
             };
             if (editingRule) {
-              await editRecycleRule(editingRule.id, payload);
+              // PUT 需全量字段，归属分组沿用编辑对象
+              await editRecycleRule(editingRule.id, { ...payload, groupId: editingRule.groupId });
             } else {
               await addRecycleRule({ ...payload, groupId: targetGroup.id });
             }
             message.success(editingRule ? '编辑成功' : '新增成功');
             setFormModalVisible(false);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
       )}

@@ -11,8 +11,9 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ColumnsType } from 'antd/lib/table';
 import PageLayout from '@/components/pageLayout';
 import usePagination from '@/components/usePagination';
-import { assignIp, changeIp, getIpDetail, getSegmentAddresses, recycleOneIp, releaseIp, reserveIp } from '@/services/sxxc/ipam';
-import { batchScanIps, deleteIp } from '../mock';
+import { assignIp, changeIp, deleteIp, getIpDetail, getSegmentAddresses, recycleOneIp, releaseIp, reserveIp } from '@/services/sxxc/ipam';
+// 批量扫描后端暂未提供对应接口，仍走 mock
+import { batchScanIps } from '../mock';
 import {
   IpAllocStatus,
   ipAllocStatusMap,
@@ -247,7 +248,7 @@ function IpListPage() {
             Modal.confirm({
               title: '是否确认删除该IP？',
               onOk: () => {
-                deleteIp(record.ip).then(() => {
+                deleteIp({ ip: record.ip, segmentId: segmentId || record.segmentId }).then(() => {
                   message.success('删除成功');
                   handleRefresh();
                 });
@@ -322,7 +323,8 @@ function IpListPage() {
           Modal.confirm({
             title: `是否确认删除选中的${selectedRowKeys.length}个IP？`,
             onOk: async () => {
-              await Promise.all(_.map(selectedRowKeys, (ip) => deleteIp(ip)));
+              if (!segmentId) return;
+              await Promise.all(_.map(selectedRowKeys, (ip) => deleteIp({ ip, segmentId })));
               message.success('删除成功');
               setSelectedRowKeys([]);
               handleRefresh();

@@ -1,6 +1,6 @@
 /**
  * IP地址管理（IPAM）后端接口与页面适配层
- * 接口文档：《IP地址管理-分组-地址段相关接口》《IP地址管理-地址详情页》
+ * 接口文档：《IP地址管理-分组-地址段相关接口》《IP地址管理-地址详情页》《IP回收相关接口》《IP地址管理-删除IP》
  *
  * 结构说明：
  * 1. 底层接口函数与文档路径 1:1 对应，返回统一响应壳 { dat, err, success }（request.ts 拦截器处理）
@@ -8,7 +8,7 @@
  *    内部完成 IpamXxxVO → 页面类型（@/pages/sxxc/ipSegment/types）的转换，页面与组件保持既有渲染逻辑
  * 3. 后端 IP 行操作按「ip 字符串 + subnet_id」定位（未落库的虚拟行 id=0），页面适配函数相应改传
  *    含 { ip, segmentId } 的对象；IP 列表 rowKey 请使用 'ip'
- * 4. 文档未覆盖的功能（回收规则、扫描、删除IP、可回收清单、批量操作等）仍走模块内 mock.ts
+ * 4. 文档未覆盖的功能（批量扫描等）仍走模块内 mock.ts
  */
 import _ from 'lodash';
 import moment from 'moment';
@@ -22,6 +22,10 @@ import {
   IpStats,
   IpUseStatus,
   IpOnlineStatus,
+  RecycleRule,
+  RuleAction,
+  RuleFreqType,
+  RuleTriggerType,
   SegmentStats,
   SegmentStatus,
 } from '@/pages/sxxc/ipSegment/types';
@@ -134,6 +138,50 @@ export interface IpamAddressesVO {
   list?: IpamAddressVO[];
   total?: number;
 }
+
+/** 回收规则对象 */
+export interface IpamRecycleRuleVO {
+  id: number;
+  group_id: number;
+  name: string;
+  scope_type: 'all_group_subnets' | 'specified_subnets';
+  scope_subnet_ids?: number[];
+  trigger_type: 'long_offline' | 'unused_after_alloc' | 'asset_offshelf' | 'reserve_expired';
+  idle_threshold_days?: number;
+  action: 'mark' | 'auto';
+  freq_type: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  /** 每年类型：月份 1-12；其余频率为 0/缺省 */
+  freq_month?: number;
+  freq_day?: number;
+  freq_time?: string;
+  enabled: boolean;
+  hit_count: number;
+  last_run_at?: number;
+  remark?: string;
+  created_at?: number;
+  updated_at?: number;
+  created_by?: string;
+  updated_by?: string;
+  group_name?: string;
+  whitelist?: { subnet_ids?: number[]; ips?: string[] };
+}
+
+/** 规则列表响应（/ipam/recycle-rules 与 /ipam/subnets/{id}/recycle-rules 通用） */
+export interface IpamRecycleRulesVO {
+  list?: IpamRecycleRuleVO[];
+  subnet?: IpamSubnetVO;
+  total?: number;
+}
+
+/** 执行扫描结果 */
+export interface IpamExecuteVO {
+  hit_count: number;
+  action: 'mark' | 'auto';
+  recycled: number;
+  candidates?: IpamAddressVO[];
+  message: string;
+}
+
 
 // ==================== 底层接口（与文档 1:1） ====================
 
@@ -251,6 +299,71 @@ export const reserveIpamAddress = (
 export const releaseIpamAddress = (subnetId: number, data: { ip: string }) =>
   request(`/api/takin/ipam/subnets/${subnetId}/addresses/release`, { method: RequestMethod.Post, data });
 
+/** 删除IP（隐藏：写入排除表，仅未分配可删；成功时通常只有 err 无 dat） */
+export const hideIpamAddress = (subnetId: number, ip: string) =>
+  request(`/api/takin/ipam/subnets/${subnetId}/addresses/delete`, { method: RequestMethod.Post, data: { ip } });
+
+/** 回收规则：规则列表（group_id 不传查全部；query 按名称模糊；begin/end Unix 秒） */
+export const getIpamRecycleRules = (params: { group_id?: number; page?: number | string; limit?: number | string; query?: string; begin?: number; end?: number }) =>
+  request('/api/takin/ipam/recycle-rules', { method: RequestMethod.Get, params });
+
+/** 回收规则：新增规则 */
+export const createIpamRecycleRule = (data: {
+  group_id: number;
+  name: string;
+  scope_type: string;
+  scope_subnet_ids: number[];
+  trigger_type: string;
+  idle_threshold_days: number;
+  action: string;
+  freq_type: string;
+  /** 每年类型：月份 1-12；其余频率传 0 */
+  freq_month: number;
+  freq_day: number;
+  freq_time: string;
+  whitelist?: { subnet_ids: number[]; ips: string[] };
+  enabled?: boolean;
+  remark?: string;
+}) => request('/api/takin/ipam/recycle-rules', { method: RequestMethod.Post, data });
+
+/** 回收规则：修改规则（字段同新增，另带 id） */
+export const updateIpamRecycleRule = (id: number, data: Omit<Parameters<typeof createIpamRecycleRule>[0], 'group_id'> & { group_id: number }) =>
+  request('/api/takin/ipam/recycle-rules', { method: RequestMethod.Put, data: { id, ...data } });
+
+/** 回收规则：预计覆盖（表单下方提示文案） */
+export const previewIpamRecycleScope = (data: { group_id: number; scope_type: string; scope_subnet_ids?: number[] }) =>
+  request('/api/takin/ipam/recycle-rules/preview-scope', { method: RequestMethod.Post, data });
+
+/** 回收规则：规则详情 */
+export const getIpamRecycleRule = (ruleId: number) => request(`/api/takin/ipam/recycle-rules/${ruleId}`, { method: RequestMethod.Get });
+
+/** 回收规则：删除规则 */
+export const deleteIpamRecycleRule = (ruleId: number) =>
+  request(`/api/takin/ipam/recycle-rules/${ruleId}`, { method: RequestMethod.Delete });
+
+/** 回收规则：启停规则 */
+export const toggleIpamRecycleRule = (ruleId: number, enabled: boolean) =>
+  request(`/api/takin/ipam/recycle-rules/${ruleId}/enabled`, { method: RequestMethod.Post, data: { enabled } });
+
+/** 回收规则：执行扫描（mark 命中入可回收清单 / auto 命中即回收） */
+export const executeIpamRecycleRule = (ruleId: number) =>
+  request(`/api/takin/ipam/recycle-rules/${ruleId}/execute`, { method: RequestMethod.Post });
+
+/** 段上回收规则列表（点地址段「扫描可回收IP」先弹此列表，按该段所属分组过滤） */
+export const getIpamSubnetRecycleRules = (
+  subnetId: number,
+  params: { page?: number | string; limit?: number | string; query?: string; begin?: number; end?: number },
+) => request(`/api/takin/ipam/subnets/${subnetId}/recycle-rules`, { method: RequestMethod.Get, params });
+
+/** 可回收清单（标记落库后的待回收列表） */
+export const getIpamRecyclable = (params: { subnet_id?: number; rule_id?: number; page?: number | string; limit?: number | string }) =>
+  request('/api/takin/ipam/recyclable', { method: RequestMethod.Get, params });
+
+/** 批量回收（已分配/预留统一变为未分配，单条失败跳过不中断整批） */
+export const recycleIpamBatch = (data: { reason?: string; items: Array<{ subnet_id: number; ip: string }> }) =>
+  request('/api/takin/ipam/addresses/recycle-batch', { method: RequestMethod.Post, data });
+
+
 // ==================== 枚举/字段映射 ====================
 
 const SUBNET_STATUS_TO_ENUM: Record<string, SegmentStatus> = {
@@ -286,8 +399,8 @@ const fmtTime = (unix?: number) => (unix ? moment.unix(unix).format('YYYY-MM-DD 
 /** 按掩码位数计算可用主机数（IPv4，不含网络号/广播） */
 const hostCountOf = (mask: number) => (mask >= 31 ? Math.pow(2, 32 - mask) : Math.pow(2, 32 - mask) - 2);
 
-/** 组织树 subnet 节点 → 页面 IpSegment（仅树展示字段，完整字段待列表接口填充） */
-function subnetNodeToSegment(node: IpamTreeNode, parentId?: number): IpSegment {
+/** 组织树 subnet 节点 → 页面 IpSegment（仅树展示字段，完整字段待列表接口填充；groupName 取父分组名，供树上段节点菜单弹窗展示归属） */
+function subnetNodeToSegment(node: IpamTreeNode, parentId?: number, parentName?: string): IpSegment {
   const parts = (node.cidr || '').split('/');
   return {
     id: node.id,
@@ -295,7 +408,7 @@ function subnetNodeToSegment(node: IpamTreeNode, parentId?: number): IpSegment {
     mask: Number(parts[1] || 24),
     fullSegment: node.cidr || node.label,
     groupId: parentId || 0,
-    groupName: '',
+    groupName: parentName || '',
     status: SUBNET_STATUS_TO_ENUM[node.status || ''] ?? SegmentStatus.InUse,
     vlan: undefined,
     owner: '',
@@ -371,6 +484,117 @@ function addressVOToItem(vo: IpamAddressVO): IpItem {
   };
 }
 
+// ---------- 回收规则映射 ----------
+
+/** 星期中文（页面 weekly 存值）↔ 后端 freq_day 1-7 */
+const WEEKDAY_CN = '一二三四五六日';
+
+/**
+ * 页面 freqValue（weekly 星期中文 / monthly 几号 / yearly «M月D日»）→ 后端 { freq_month, freq_day }
+ * yearly 拆出月与日；其余频率 freq_month 恒为 0；daily 或解析失败 freq_day 为 0
+ */
+function freqToApi(freqType: string, freqValue?: string): { freq_month: number; freq_day: number } {
+  if (!freqValue) return { freq_month: 0, freq_day: 0 };
+  if (freqType === 'weekly') {
+    const i = WEEKDAY_CN.indexOf(String(freqValue));
+    return { freq_month: 0, freq_day: i > -1 ? i + 1 : 0 };
+  }
+  if (freqType === 'monthly') return { freq_month: 0, freq_day: Number(freqValue) || 0 };
+  if (freqType === 'yearly') {
+    const m = String(freqValue).match(/(\d+)月(\d+)日/);
+    return m ? { freq_month: Number(m[1]) || 0, freq_day: Number(m[2]) || 0 } : { freq_month: 0, freq_day: 0 };
+  }
+  return { freq_month: 0, freq_day: 0 };
+}
+
+/** 后端 freq_month/freq_day → 页面 freqValue；yearly 用接口返回的月份回显 «M月D日» */
+function freqFromApi(freqType: string, freqMonth?: number, freqDay?: number): string {
+  const day = freqDay || 0;
+  if (freqType === 'weekly') return WEEKDAY_CN[day - 1] || '';
+  if (freqType === 'monthly') return day ? String(day) : '';
+  if (freqType === 'yearly') return day ? `${freqMonth || 1}月${day}日` : '';
+  return '';
+}
+
+/** 页面白名单（段 ID（数字或纯数字串）+ IP 混合）→ 后端 { subnet_ids, ips } */
+function whitelistToApi(list?: Array<number | string>) {
+  const subnetIds: number[] = [];
+  const ips: string[] = [];
+  _.forEach(list, (v) => {
+    // 纯数字（段 ID，tags 模式下为字符串）归为白名单地址段；其余视为 IP 文本
+    if (typeof v === 'number' || /^\d+$/.test(String(v))) {
+      subnetIds.push(Number(v));
+    } else {
+      ips.push(String(v));
+    }
+  });
+  return { subnet_ids: subnetIds, ips };
+}
+
+/** 回收规则 VO → 页面 RecycleRule */
+function ruleVOToRule(vo: IpamRecycleRuleVO): RecycleRule {
+  const trigger = vo.trigger_type as RuleTriggerType;
+  const action = vo.action as RuleAction;
+  const freqType = vo.freq_type as RuleFreqType;
+  return {
+    id: vo.id,
+    name: vo.name,
+    groupId: vo.group_id,
+    groupName: vo.group_name || '',
+    scopeType: vo.scope_type === 'all_group_subnets' ? 'all' : 'custom',
+    customSegments: vo.scope_subnet_ids || [],
+    triggerType: trigger,
+    // 资产下架类无阈值（后端可能存 0，页面显示为空）
+    thresholdDays: trigger === RuleTriggerType.AssetOffline ? undefined : vo.idle_threshold_days || undefined,
+    action,
+    freqType,
+    freqValue: freqFromApi(vo.freq_type, vo.freq_month, vo.freq_day),
+    // 页面格式 HH:mm:ss；后端 HH:MM
+    execTime: vo.freq_time ? `${vo.freq_time}:00`.slice(0, 8) : '02:00:00',
+    hitCount: vo.hit_count || 0,
+    lastExecTime: vo.last_run_at ? moment.unix(vo.last_run_at).format('YYYY-MM-DD HH:mm') : '-',
+    enabled: vo.enabled,
+    whitelist: [...(vo.whitelist?.subnet_ids || []).map(String), ...(vo.whitelist?.ips || [])],
+    updater: vo.updated_by || '',
+    updateTime: vo.updated_at ? moment.unix(vo.updated_at).format('YYYY-MM-DD HH:mm') : '-',
+  };
+}
+
+/** 页面规则表单值 → 后端新增/修改 body */
+function ruleToBody(data: {
+  groupId: number;
+  name: string;
+  scopeType: 'all' | 'custom';
+  customSegments?: number[];
+  triggerType: RuleTriggerType;
+  thresholdDays?: number;
+  action: RuleAction;
+  freqType: RuleFreqType;
+  freqValue?: string;
+  execTime: string;
+  whitelist?: Array<number | string>;
+  enabled?: boolean;
+}) {
+  return {
+    group_id: data.groupId,
+    name: data.name,
+    scope_type: data.scopeType === 'all' ? 'all_group_subnets' : 'specified_subnets',
+    scope_subnet_ids: data.scopeType === 'custom' ? data.customSegments || [] : [],
+    trigger_type: data.triggerType,
+    // 资产下架类无阈值，后端允许 0
+    idle_threshold_days: data.triggerType === RuleTriggerType.AssetOffline ? 0 : data.thresholdDays || 0,
+    action: data.action,
+    freq_type: data.freqType,
+    // yearly 时拆出 freq_month/freq_day（如 3月15日 → freq_month:3, freq_day:15）；其余频率 freq_month 为 0
+    ...freqToApi(data.freqType, data.freqValue),
+    // 页面 HH:mm:ss → 后端 HH:MM
+    freq_time: (data.execTime || '02:00:00').slice(0, 5),
+    whitelist: whitelistToApi(data.whitelist),
+    enabled: data.enabled !== false,
+    remark: '',
+  };
+}
+
 // ==================== 页面适配函数（与模块 mock.ts 同名） ====================
 
 /**
@@ -382,13 +606,13 @@ export async function getTreeData(): Promise<{ groups: IpGroup[]; segments: IpSe
   const res = await getIpamTree();
   const groups: IpGroup[] = [];
   const segments: IpSegment[] = [];
-  const walk = (list: IpamTreeNode[], parentId?: number) => {
+  const walk = (list: IpamTreeNode[], parentId?: number, parentName?: string) => {
     _.forEach(list, (node) => {
       if (node.node_type === 'group') {
         groups.push({ id: node.id, name: node.label, owner: '', parentId });
-        walk(node.children || [], node.id);
+        walk(node.children || [], node.id, node.label);
       } else if (node.node_type === 'subnet') {
-        segments.push(subnetNodeToSegment(node, parentId));
+        segments.push(subnetNodeToSegment(node, parentId, parentName));
       }
     });
   };
@@ -790,4 +1014,134 @@ export async function changeIp(
     remark: data.note,
   });
   return { success: true };
+}
+
+/** 删除IP（按 ip + subnet_id 定位，后端语义为隐藏：仅未分配可删） */
+export async function deleteIp(item: { ip: string; segmentId: number }): Promise<{ success: boolean }> {
+  await hideIpamAddress(item.segmentId, item.ip);
+  return { success: true };
+}
+
+// ==================== 回收规则与回收（页面适配函数） ====================
+
+/**
+ * 回收规则列表（服务端分页 + 服务端查询）
+ * - segmentId：段上规则列表（点「扫描可回收IP」先弹规则列表，按该段所属分组过滤）
+ * - groupId：分组视角规则列表；均不传为全部
+ * - name：规则名称模糊；startTime/endTime（YYYY-MM-DD）→ Unix 秒
+ */
+export async function getRecycleRules(params: {
+  groupId?: number;
+  segmentId?: number;
+  name?: string;
+  startTime?: string;
+  endTime?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ list: RecycleRule[]; total: number }> {
+  const query: { page?: number | string; limit?: number | string; query?: string; begin?: number; end?: number; group_id?: number } = {
+    page: params.page || 1,
+    limit: params.limit || 10,
+  };
+  if (params.groupId) query.group_id = params.groupId;
+  if (params.name) query.query = params.name;
+  if (params.startTime) query.begin = moment(params.startTime, 'YYYY-MM-DD').startOf('day').unix();
+  if (params.endTime) query.end = moment(params.endTime, 'YYYY-MM-DD').endOf('day').unix();
+  const res = params.segmentId
+    ? await getIpamSubnetRecycleRules(params.segmentId, query)
+    : await getIpamRecycleRules(query);
+  const dat = (res.dat || {}) as IpamRecycleRulesVO;
+  return {
+    list: _.map(dat.list || [], ruleVOToRule),
+    total: dat.total ?? (dat.list || []).length,
+  };
+}
+
+/** 新增回收规则 */
+export async function addRecycleRule(data: {
+  name: string;
+  groupId: number;
+  scopeType: 'all' | 'custom';
+  customSegments?: number[];
+  triggerType: RuleTriggerType;
+  thresholdDays?: number;
+  action: RuleAction;
+  freqType: RuleFreqType;
+  freqValue?: string;
+  execTime: string;
+  whitelist?: Array<number | string>;
+  enabled?: boolean;
+}): Promise<{ success: boolean }> {
+  await createIpamRecycleRule(ruleToBody(data));
+  return { success: true };
+}
+
+/** 修改回收规则（PUT 需全量字段，group_id 由页面透传） */
+export async function editRecycleRule(
+  id: number,
+  data: Parameters<typeof ruleToBody>[0],
+): Promise<{ success: boolean }> {
+  await updateIpamRecycleRule(id, ruleToBody(data));
+  return { success: true };
+}
+
+/** 删除回收规则 */
+export async function deleteRecycleRule(id: number): Promise<{ success: boolean }> {
+  await deleteIpamRecycleRule(id);
+  return { success: true };
+}
+
+/** 回收规则详情（查看/编辑弹窗用：以详情接口为准，列表行字段可能不全） */
+export async function getRecycleRuleDetail(id: number): Promise<RecycleRule> {
+  const res = await getIpamRecycleRule(id);
+  return ruleVOToRule((res.dat || {}) as IpamRecycleRuleVO);
+}
+
+/** 启停回收规则 */
+export async function toggleRecycleRule(id: number, enabled: boolean): Promise<{ success: boolean }> {
+  await toggleIpamRecycleRule(id, enabled);
+  return { success: true };
+}
+
+/** 执行回收规则扫描：mark 命中入可回收清单 / auto 命中即回收 */
+export async function executeRecycleRule(id: number): Promise<{ hitCount: number; recycled: number; message: string }> {
+  const res = await executeIpamRecycleRule(id);
+  const dat = (res.dat || {}) as IpamExecuteVO;
+  return {
+    hitCount: dat.hit_count || 0,
+    recycled: dat.recycled || 0,
+    message: dat.message || `扫描完成：命中${dat.hit_count || 0}个地址`,
+  };
+}
+
+/** 预计覆盖（规则表单下方提示，返回后端可直接展示的文案） */
+export async function previewRecycleScope(params: {
+  groupId: number;
+  scopeType: 'all' | 'custom';
+  customSegments?: number[];
+}): Promise<string> {
+  const res = await previewIpamRecycleScope({
+    group_id: params.groupId,
+    scope_type: params.scopeType === 'all' ? 'all_group_subnets' : 'specified_subnets',
+    scope_subnet_ids: params.scopeType === 'custom' ? params.customSegments || [] : [],
+  });
+  const dat = (res.dat || {}) as { subnet_count?: number; ledger_count?: number; message?: string };
+  return dat.message || `预计覆盖${dat.subnet_count || 0}个地址段，约${dat.ledger_count || 0}个已分配和预留地址参与扫描`;
+}
+
+/** 某地址段可回收清单（回收弹窗，一次拉取全部勾选） */
+export async function getRecyclableIps(segmentId: number): Promise<IpItem[]> {
+  const res = await getIpamRecyclable({ subnet_id: segmentId, page: 1, limit: 1000 });
+  const dat = (res.dat || {}) as { list?: IpamAddressVO[] };
+  return _.map(dat.list || [], addressVOToItem);
+}
+
+/** 批量回收（已分配/预留 → 未分配，返回实际回收条数） */
+export async function recycleBatchIps(items: Array<{ ip: string; segmentId: number }>, reason?: string): Promise<{ recycled: number }> {
+  const res = await recycleIpamBatch({
+    reason: reason || '批量回收',
+    items: _.map(items, (item) => ({ subnet_id: item.segmentId, ip: item.ip })),
+  });
+  const dat = (res.dat || {}) as { recycled?: number };
+  return { recycled: dat.recycled || 0 };
 }

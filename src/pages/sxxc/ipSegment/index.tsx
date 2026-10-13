@@ -26,21 +26,25 @@ import {
   assignIp,
   changeIp,
   deleteGroup,
+  deleteIp,
   deleteSegment,
   editGroup,
   editSegment,
   enableSegment,
   getIpDetail,
+  getRecyclableIps,
   getSegmentAddresses,
   getSegmentList,
   getSubnetDetail,
   getTreeData,
   IpamGroupVO,
+  recycleBatchIps,
   recycleOneIp,
   releaseIp,
   reserveIp,
 } from '@/services/sxxc/ipam';
-import { batchScanIps, collectGroupIds, deleteIp, getRecyclableIps, recycleIps, scanRecyclable } from './mock';
+// 批量扫描后端暂未提供对应接口，仍走 mock
+import { batchScanIps, collectGroupIds, scanRecyclable } from './mock';
 import {
   IpAllocStatus,
   ipAllocStatusMap,
@@ -302,20 +306,19 @@ function IpSegmentPage() {
     setSubmittedFilter({ field: filterField, value: filterValue });
   };
 
+  /**
+   * 刷新列表数据
+   * 注意：列 render: (_, record) 的首参会遮蔽 lodash 的 _，render 内不能直接用 _.uniqueId，
+   * 统一通过本函数刷新（定义在组件体内，_ 指向 lodash）
+   */
+  const handleRefresh = () => setRefreshFlag(_.uniqueId('refresh_'));
+
   const showScanNotification = (hitCount: number) => {
     notification.open({
       message: '扫描完成',
       description: `扫描完成：命中${hitCount}个地址，已加入可回收列表`,
       placement: 'bottomRight',
       duration: 3,
-    });
-  };
-
-  const handleScan = (segmentId: number) => {
-    const hide = message.loading('正在扫描可回收IP...', 0);
-    scanRecyclable(segmentId).then((res) => {
-      hide();
-      showScanNotification(res.hitCount);
     });
   };
 
@@ -404,7 +407,7 @@ function IpSegmentPage() {
                   onOk: () => {
                     enableSegment(record.id).then(() => {
                       message.success('启用成功');
-                      setRefreshFlag(_.uniqueId('refresh_'));
+                      handleRefresh();
                     });
                   },
                   onCancel() {},
@@ -427,11 +430,12 @@ function IpSegmentPage() {
           </Button>
           {record.status === SegmentStatus.InUse && (
             <>
+              {/* 扫描可回收IP：先弹该段所属分组的回收规则列表，行内「执行」触发扫描（后端文档交互） */}
               <Button
                 type='link'
                 size='small'
                 style={{ padding: 0, marginLeft: 8 }}
-                onClick={() => handleScan(record.id)}
+                onClick={() => setRuleSegment(record)}
               >
                 扫描可回收IP
               </Button>
@@ -460,7 +464,7 @@ function IpSegmentPage() {
                       if (selectedSegmentId === record.id) {
                         setSelectedSegmentId(undefined);
                       }
-                      setRefreshFlag(_.uniqueId('refresh_'));
+                      handleRefresh();
                     });
                   },
                   onCancel() {},
@@ -490,11 +494,13 @@ function IpSegmentPage() {
         } else if (key === 'recycle') {
           const hide = message.loading('正在回收...', 0);
           const lists = await Promise.all(_.map(selectedRowKeys, (id) => getRecyclableIps(id)));
-          const ids = _.flatten(_.map(lists, (list) => _.map(list, (item) => item.id)));
-          await recycleIps(ids);
+          const items = _.flatten(
+            _.map(lists, (list) => _.map(list, (item) => ({ ip: item.ip, segmentId: item.segmentId }))),
+          );
+          const res = await recycleBatchIps(items);
           hide();
-          message.success(`已回收${ids.length}个IP`);
-          setRefreshFlag(_.uniqueId('refresh_'));
+          message.success(`已回收${res.recycled}个IP`);
+          handleRefresh();
         } else if (key === 'delete') {
           Modal.confirm({
             title: `是否确认删除选中的${selectedRowKeys.length}个地址段？`,
@@ -502,7 +508,7 @@ function IpSegmentPage() {
               await Promise.all(_.map(selectedRowKeys, (id) => deleteSegment(id)));
               message.success('删除成功');
               setSelectedRowKeys([]);
-              setRefreshFlag(_.uniqueId('refresh_'));
+              handleRefresh();
             },
             onCancel() {},
           });
@@ -608,7 +614,7 @@ function IpSegmentPage() {
                     onOk: () => {
                       releaseIp(record).then(() => {
                         message.success('释放成功');
-                        setRefreshFlag(_.uniqueId('refresh_'));
+                        handleRefresh();
                       });
                     },
                     onCancel() {},
@@ -638,9 +644,9 @@ function IpSegmentPage() {
                   Modal.confirm({
                     title: '是否确认删除该IP？',
                     onOk: () => {
-                      deleteIp(record.ip).then(() => {
+                      deleteIp({ ip: record.ip, segmentId: record.segmentId }).then(() => {
                         message.success('删除成功');
-                        setRefreshFlag(_.uniqueId('refresh_'));
+                        handleRefresh();
                       });
                     },
                     onCancel() {},
@@ -713,7 +719,7 @@ function IpSegmentPage() {
               await Promise.all(_.map(ipSelectedRowKeys, (ip) => recycleOneIp({ ip, segmentId: selectedSegmentId }, '批量回收')));
               message.success('回收成功');
               setIpSelectedRowKeys([]);
-              setRefreshFlag(_.uniqueId('refresh_'));
+              handleRefresh();
             },
             onCancel() {},
           });
@@ -721,10 +727,11 @@ function IpSegmentPage() {
           Modal.confirm({
             title: `是否确认删除选中的${ipSelectedRowKeys.length}个IP？`,
             onOk: async () => {
-              await Promise.all(_.map(ipSelectedRowKeys, (ip) => deleteIp(ip)));
+              if (!selectedSegmentId) return;
+              await Promise.all(_.map(ipSelectedRowKeys, (ip) => deleteIp({ ip, segmentId: selectedSegmentId })));
               message.success('删除成功');
               setIpSelectedRowKeys([]);
-              setRefreshFlag(_.uniqueId('refresh_'));
+              handleRefresh();
             },
             onCancel() {},
           });
@@ -802,7 +809,7 @@ function IpSegmentPage() {
                     }
                     message.success('删除成功');
                     if (selectedGroupId === group.id) setSelectedGroupId(undefined);
-                    setRefreshFlag(_.uniqueId('refresh_'));
+                    handleRefresh();
                   });
                 },
                 onCancel() {},
@@ -827,7 +834,7 @@ function IpSegmentPage() {
                     if (selectedSegmentId === segment.id) {
                       setSelectedSegmentId(undefined);
                     }
-                    setRefreshFlag(_.uniqueId('refresh_'));
+                    handleRefresh();
                   });
                 },
                 onCancel() {},
@@ -1143,7 +1150,7 @@ function IpSegmentPage() {
             await recycleOneIp(currentIp, values.reason);
             message.success('回收成功');
             setIpAction(undefined);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
         <IpReserveModal
@@ -1155,7 +1162,7 @@ function IpSegmentPage() {
             await reserveIp(currentIp, values);
             message.success('预留成功');
             setIpAction(undefined);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
         <IpAssignModal
@@ -1167,7 +1174,7 @@ function IpSegmentPage() {
             await assignIp(currentIp, values);
             message.success('分配成功');
             setIpAction(undefined);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
         <IpChangeModal
@@ -1179,7 +1186,7 @@ function IpSegmentPage() {
             await changeIp(currentIp, values);
             message.success('变更成功');
             setIpAction(undefined);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
         {/* IP 批量导入/导出弹窗 */}
@@ -1188,7 +1195,7 @@ function IpSegmentPage() {
           onClose={() => setIpImportVisible(false)}
           onImported={() => {
             setIpImportVisible(false);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
         <IpExportModal visible={ipExportVisible} records={ipExportRecords} onClose={() => setIpExportVisible(false)} />
@@ -1213,7 +1220,7 @@ function IpSegmentPage() {
             }
             setGroupFormVisible(false);
             setAddSubGroupParent(undefined);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
         {/* 新增/编辑地址段 */}
@@ -1244,7 +1251,7 @@ function IpSegmentPage() {
             }
             setSegmentFormVisible(false);
             setEditingSegment(undefined);
-            setRefreshFlag(_.uniqueId('refresh_'));
+            handleRefresh();
           }}
         />
         {/* 查看地址段 */}

@@ -4,7 +4,7 @@
  * 动态逻辑：触发条件切换阈值标签与说明文案、回收动作切换说明文案、
  * 适用范围切换指定地址段多选、预计覆盖提示
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, InputNumber, Modal, Select, TimePicker } from 'antd';
 import _ from 'lodash';
 import moment from 'moment';
@@ -19,7 +19,7 @@ import {
   RuleTriggerType,
   ruleTriggerMap,
 } from '../types';
-import { getWhitelistOptions } from '../mock';
+import { previewRecycleScope } from '@/services/sxxc/ipam';
 
 /** 每周可选星期（存值与 mock 一致：一~日） */
 const WEEK_OPTIONS = _.map(['一', '二', '三', '四', '五', '六', '日'], (w) => ({ value: w, label: `周${w}` }));
@@ -48,14 +48,14 @@ interface RuleFormModalProps {
   onOk: (values: {
     name: string;
     scopeType: 'all' | 'custom';
-    customSegments: string[];
+    customSegments: number[];
     triggerType: RuleTriggerType;
     thresholdDays?: number;
     action: RuleAction;
     freqType: RuleFreqType;
     freqValue: string;
     execTime: string;
-    whitelist: string[];
+    whitelist: Array<number | string>;
     enabled: boolean;
   }) => Promise<void>;
 }
@@ -63,6 +63,8 @@ interface RuleFormModalProps {
 export default function RuleFormModal(props: RuleFormModalProps) {
   const { visible, rule, group, segments } = props;
   const [form] = Form.useForm();
+  /** 预计覆盖提示（后端 preview-scope 返回文案） */
+  const [previewMessage, setPreviewMessage] = useState('');
 
   useEffect(() => {
     if (visible) {
@@ -110,16 +112,23 @@ export default function RuleFormModal(props: RuleFormModalProps) {
   const actionMeta = ruleActionMap[watchAction] || ruleActionMap[RuleAction.Mark];
   // 每年：按已选月份过滤有效日选项（2月28天、4/6/9/11月30天、其余31天）
   const yearDayOptions = _.map(_.range(1, daysInMonth(watchFreqMonth) + 1), (d) => ({ value: d, label: `${d}日` }));
-  // 回收白名单可选项：全部地址段 + 全部已有 IP（下拉多选）
-  const whitelistOptions = getWhitelistOptions();
+  // 回收白名单可选项：地址段（value 为段 ID 字符串，tags 模式要求字符串值）；IP 可通过 tags 自由输入
+  const whitelistOptions = _.map(segments, (item) => ({ value: String(item.id), label: item.fullSegment }));
 
-  // 预计覆盖估算
-  const scopeSegments =
-    watchScopeType === 'custom'
-      ? _.filter(segments, (item) => _.includes(watchCustomSegments, item.fullSegment))
-      : segments;
-  const coverCount = scopeSegments.length;
-  const coverIpCount = _.sumBy(scopeSegments, (item) => item.allocatedCount + item.reservedIpCount);
+  // 预计覆盖范围（适用范围变更时防抖调后端 preview-scope，展示返回文案）
+  useEffect(() => {
+    if (!visible) return undefined;
+    const timer = setTimeout(() => {
+      previewRecycleScope({
+        groupId: group?.id || 0,
+        scopeType: watchScopeType === 'custom' ? 'custom' : 'all',
+        customSegments: watchCustomSegments,
+      })
+        .then(setPreviewMessage)
+        .catch(() => {});
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [visible, group, watchScopeType, watchCustomSegments]);
 
   return (
     <Modal
@@ -141,6 +150,11 @@ export default function RuleFormModal(props: RuleFormModalProps) {
     >
       <Form form={form} labelCol={{ flex: '90px' }} className='rule-form-modal' disabled={props.disabled}>
         <Form.Item
+          label='归属'
+        >
+          <div>{group?.name}</div>
+        </Form.Item>
+        <Form.Item
           label='规则名称'
           name='name'
           rules={[
@@ -149,11 +163,6 @@ export default function RuleFormModal(props: RuleFormModalProps) {
           ]}
         >
           <Input placeholder='请输入规则名称' maxLength={30} />
-        </Form.Item>
-        <Form.Item
-          label='归属'
-        >
-          <div>{group?.name}</div>
         </Form.Item>
         <Form.Item label='适用范围' name='scopeType' style={{ marginBottom: 8 }} rules={[{ required: true, message: '请选择适用范围' }]}>
           <Select
@@ -173,19 +182,19 @@ export default function RuleFormModal(props: RuleFormModalProps) {
             style={{ marginBottom: 8 }}
             rules={[{ required: true, message: '请选择地址段' }]}
           >
+            {/* 选项 value 为段 ID，提交后端 scope_subnet_ids */}
             <Select mode='multiple' style={{ width: '100%' }} placeholder='请选择'>
               {_.map(segments, (item) => (
-                <Select.Option key={item.id} value={item.fullSegment}>
+                <Select.Option key={item.id} value={item.id}>
                   {item.fullSegment}
                 </Select.Option>
               ))}
             </Select>
           </Form.Item>
         )}
-        <div
-          className='rule-scope-tip'
-          style={{ marginLeft: 90, marginBottom: 12 }}
-        >{`预计覆盖${coverCount}个地址段，约${coverIpCount}个已分配和预留地址参与扫描`}</div>
+        <div className='rule-scope-tip' style={{ marginLeft: 90, marginBottom: 12 }}>
+          {previewMessage || '预计覆盖范围计算中...'}
+        </div>
         <Form.Item label='触发条件' name='triggerType' style={{ marginBottom: 8 }} rules={[{ required: true, message: '请选择触发条件' }]}>
           <Select
             style={{ width: 320 }}
@@ -298,8 +307,9 @@ export default function RuleFormModal(props: RuleFormModalProps) {
           </div>
         </Form.Item>
         <Form.Item label='回收白名单' name='whitelist' style={{ marginBottom: 12 }}>
+          {/* tags：地址段从下拉选（value 为段 ID），IP 可自由输入；提交时拆分为 subnet_ids / ips */}
           <Select
-            mode='multiple'
+            mode='tags'
             style={{ width: '100%' }}
             placeholder='请选择不参与回收的IP段/IP'
             options={whitelistOptions}

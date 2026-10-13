@@ -407,6 +407,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('自动化检测'),
         },
+        {
+          key: '/ipSegment',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('IP地址段管理'),
+        },
         // {
         //   key: '/safety/certification',
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,

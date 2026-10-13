@@ -267,7 +267,7 @@ const rules: RecycleRule[] = [
     name: '指定地址段分配未使用回收',
     groupId: 1,
     scopeType: 'custom',
-    customSegments: ['10.20.3.0/24'],
+    customSegments: [2],
     triggerType: RuleTriggerType.AssignedUnused,
     action: RuleAction.Auto,
     freqType: RuleFreqType.Weekly,
@@ -652,12 +652,12 @@ export function getRecycleRules(params?: RuleQueryParams): Promise<{ list: Recyc
   if (params?.segment) {
     const seg = _.find(segments, (item) => item.fullSegment === params.segment);
     const segGroupIds = seg ? collectGroupIds(seg.groupId) : [];
-    // 适用范围命中该地址段：本组（含子孙组）的全部段规则，或指定段包含该段
+    // 适用范围命中该地址段：本组（含子孙组）的全部段规则，或指定段（ID）包含该段
     list = _.filter(
       list,
       (item) =>
         (item.scopeType === 'all' && segGroupIds.includes(item.groupId)) ||
-        (item.customSegments || []).includes(params.segment!),
+        (!!seg && (item.customSegments || []).includes(seg.id)),
     );
   }
   if (params?.name) list = _.filter(list, (item) => item.name.indexOf(params.name!) > -1);
