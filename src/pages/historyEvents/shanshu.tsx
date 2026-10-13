@@ -126,13 +126,13 @@ const Event: React.FC = () => {
             <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={() => {
               getHistoryEventsById(id)
                 .then((res) => {
-                  history.push(`/alert-his-events-shanshu/${id}?from=history`);
+                  history.push(`/alert-events-shanshu/${id}?from=history`);
                 }).catch(_ => {
                 })
             }}>
               {title}
             </div>
-            {/* <Link to={`/alert-his-events-shanshu/${id}?from=history`}>{title}</Link> */}
+            {/* <Link to={`/alert-events-shanshu/${id}?from=history`}>{title}</Link> */}
           </>
         );
       },
@@ -264,7 +264,7 @@ const Event: React.FC = () => {
                 onClick={() => {
                   getHistoryEventsById(record.id)
                     .then((res) => {
-                      history.push(`/alert-his-events-shanshu/${record.id}?from=history`);
+                      history.push(`/alert-events-shanshu/${record.id}?from=history`);
                     }).catch(_ => {
                     })
                 }}

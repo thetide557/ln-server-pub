@@ -77,8 +77,8 @@ const EventDetailPage: React.FC = () => {
     }
   };
   const history = useHistory();
-  const isHistory = history.location.pathname.includes('alert-his-events') || history.location.pathname.includes('alert-his-events-shanshu');
-  const isShanshuRoute = history.location.pathname.includes('alert-his-events-shanshu');
+  const isHistory = history.location.pathname.includes('alert-his-events') || history.location.pathname.includes('alert-events-shanshu-his');
+  const isShanshuRoute = history.location.pathname.includes('alert-events-shanshu');
   const [eventDetail, setEventDetail] = useState<any>();
   if (eventDetail) eventDetail.cate = eventDetail.cate || 'prometheus'; // TODO: 兼容历史的告警事件
   const parsedEventDetail = parseValues(eventDetail);
@@ -473,7 +473,11 @@ const EventDetailPage: React.FC = () => {
       setEventDetail(detailInfo);
     }).catch(() => {
       setTimeout(() => {
-        history.push('/alert-cur-events');
+        if (isShanshuRoute) {
+          history.push('/alert-events-shanshu-cur');
+        } else {
+          history.push('/alert-cur-events');
+        } 
       }, 1500);
     });
   }, [busiId, eventId]);

@@ -550,7 +550,7 @@ export default function () {//{ selectMenu?:any }
       location.pathname.startsWith('/screenView') ||
       location.pathname.startsWith('/dashboards/share/') ||
       location.pathname.startsWith('/callback') ||
-      location.pathname.startsWith('/alert-his-events-shanshu') ||
+      location.pathname.startsWith('/alert-events-shanshu') ||
       location.pathname.indexOf('/polaris/screen') === 0
     ) {
       return true;

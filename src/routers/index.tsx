@@ -51,6 +51,7 @@ import ObjectExplore from '@/pages/monitor/object';
 import Shield, { Add as AddShield, Edit as ShieldEdit } from '@/pages/warning/shield';
 import Subscribe, { Add as SubscribeAdd, Edit as SubscribeEdit } from '@/pages/warning/subscribe';
 import Event from '@/pages/event';
+import EventShanshu from '@/pages/event/shanshu';
 import EventDetail from '@/pages/event/detail';
 import orderformDetail from '@/pages/event/orderformdetail';
 import historyEvents from '@/pages/historyEvents';
@@ -214,13 +215,15 @@ export default function Content() {
         ]}
 
         <Route exact path='/alert-cur-events' component={Event} />
+        <Route exact path='/alert-events-shanshu-cur' component={EventShanshu} />
         <Route exact path='/alert-his-events' component={historyEvents} />
-        <Route exact path='/alert-his-events-shanshu' component={historyEventsShanshu} />
+        <Route exact path='/alert-events-shanshu-his' component={historyEventsShanshu} />
         <Route exact path='/alert-orderform-events' component={orderformEvents} />
         <Route exact path='/alert-orderform-events/:eventId' component={orderformDetail} />
         <Route exact path='/alert-cur-events/:eventId' component={EventDetail} />
         <Route exact path='/alert-his-events/:eventId' component={EventDetail} />
-        <Route exact path='/alert-his-events-shanshu/:eventId' component={EventDetail} />
+        <Route exact path='/alert-events-shanshu-his/:eventId' component={EventDetail} />
+        <Route exact path='/alert-events-shanshu-cur/:eventId' component={EventDetail} />
         <Route exact path='/targets' component={Targets} />
 
         <Route exact path='/assetmgt' component={AssetMgt} />

@@ -48,7 +48,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
   const history = useHistory();
   const location = useLocation();
   const { profile } = useContext(CommonStateContext);
-  const isShanshuRoute = location.pathname === '/alert-his-events-shanshu';
+  const isShanshuRoute = location.pathname === '/alert-events-shanshu-cur' || location.pathname === '/alert-events-shanshu-his';
 
   const menu = (
     <Menu>
