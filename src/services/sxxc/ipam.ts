@@ -475,10 +475,16 @@ const ALLOC_STATUS_TO_ENUM: Record<string, IpAllocStatus> = {
 };
 
 const ALLOC_STATUS_FROM_ENUM: Record<number, string> = {
-  [IpAllocStatus.Unallocated]: 'unallocated',
   [IpAllocStatus.Allocated]: 'allocated',
   [IpAllocStatus.Reserved]: 'reserved',
+  [IpAllocStatus.Unallocated]: 'unallocated',
 };
+
+/** 使用状态 → 后端参数（后端补参后生效） */
+const USE_STATUS_FROM_ENUM: Record<number, string> = { 1: 'used', 0: 'unused' };
+
+/** 在线状态 → 后端参数（后端补参后生效） */
+const ONLINE_STATUS_FROM_ENUM: Record<number, string> = { 1: 'online', 0: 'offline' };
 
 /** 页面时长单位（天/月）→ 后端单位（当前仅 day） */
 const DURATION_UNIT_TO_API: Record<string, string> = { 天: 'day', 月: 'month' };
@@ -793,20 +799,32 @@ export async function getSegmentList(params: {
  */
 export async function getSegmentAddresses(
   segmentId: number,
-  params: { page?: number; limit?: number; query?: string; allocStatus?: number },
+  params: { page?: number; limit?: number; query?: string; allocStatus?: number; useStatus?: number; onlineStatus?: number; owner?: string },
 ): Promise<{ list: IpItem[]; total: number; segment?: IpSegment; stats: IpStats }> {
-  const query: { page: number | string; limit: number | string; query?: string; allocation_status?: string } = {
+  const query: {
+    page: number | string;
+    limit: number | string;
+    query?: string;
+    allocation_status?: string;
+    /** 以下三个过滤参数后端暂未支持：传参预埋，后端补参后自动生效（当前后端忽略） */
+    usage_status?: string;
+    online_status?: string;
+    owner?: string;
+  } = {
     page: params.page || 1,
     limit: params.limit || 10,
   };
   if (params.query) query.query = params.query;
   if (params.allocStatus !== undefined) query.allocation_status = ALLOC_STATUS_FROM_ENUM[params.allocStatus];
+  if (params.useStatus !== undefined) query.usage_status = USE_STATUS_FROM_ENUM[params.useStatus];
+  if (params.onlineStatus !== undefined) query.online_status = ONLINE_STATUS_FROM_ENUM[params.onlineStatus];
+  if (params.owner) query.owner = params.owner;
   const res = await getIpamAddresses(segmentId, query);
   const dat = (res.dat || {}) as IpamAddressesVO;
   const subnet = dat.subnet ? subnetVOToSegment(dat.subnet) : undefined;
   const list = _.map(dat.list || [], addressVOToItem);
   const stats: IpStats = {
-    total: dat.total || dat.subnet?.host_count || 0,
+    total: dat.subnet?.host_count || 0,
     allocated: dat.subnet?.allocated_count || 0,
     reserved: dat.subnet?.reserved_count || 0,
     online: dat.subnet?.online_count || 0,
