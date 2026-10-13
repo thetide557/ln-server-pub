@@ -96,7 +96,7 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
             <span style={{ margin: '0 8px' }}>/</span>
             <Form.Item name='mask' noStyle rules={[{ required: true, message: '请选择掩码' }]}>
               <Select style={{ width: 80 }}>
-                {_.range(8, 33).map((mask) => (
+                {_.range(16, 33).map((mask) => (
                   <Select.Option key={mask} value={mask}>
                     {mask}
                   </Select.Option>
@@ -142,7 +142,7 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
                 >
                   <Input.TextArea placeholder='请输入停用原因' maxLength={200} autoSize={{ minRows: 2, maxRows: 4 }} />
                 </Form.Item>
-                {/* <div
+                <div
                   style={{
                     background: '#fdf2e2',
                     color: '#d97a08',
@@ -153,7 +153,7 @@ export default function SegmentFormModal(props: SegmentFormModalProps) {
                   }}
                 >
                   停用后将自动收回该地址段所有已分配/预留/已使用地址
-                </div> */}
+                </div>
               </>
             )}
           </>

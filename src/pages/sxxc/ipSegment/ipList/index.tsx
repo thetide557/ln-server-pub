@@ -151,14 +151,6 @@ function IpListPage() {
     setRefreshFlag(_.uniqueId('refresh_'));
   };
 
-  /** 判断是否为"全新空IP"（未分配且无任何使用痕迹） */
-  const isBlankIp = (record: IpItem) =>
-    record.allocStatus === IpAllocStatus.Unallocated &&
-    record.useStatus === IpUseStatus.Unused &&
-    record.onlineStatus === IpOnlineStatus.None &&
-    !record.assetName &&
-    record.idleDays === undefined;
-
   const columns: ColumnsType<IpItem> = [
     { title: 'IP地址', dataIndex: 'ip', width: 120, fixed: 'left' },
     {
@@ -243,8 +235,8 @@ function IpListPage() {
               onCancel() {},
             });
           }, true);
-        } else if (isBlankIp(record)) {
-          // 全新空IP：预留、分配、删除
+        } else if (record.allocStatus === IpAllocStatus.Unallocated && record.useStatus === IpUseStatus.Unused) {
+          // 未分配且未使用：预留、分配、删除（不区分是否留有使用痕迹）
           push('预留', openAction('reserve'));
           push('分配', openAction('assign'));
           push('删除', () => {

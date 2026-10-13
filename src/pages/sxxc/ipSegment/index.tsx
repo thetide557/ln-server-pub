@@ -538,13 +538,10 @@ function IpSegmentPage() {
     />
   );
 
-  /** IP 视角「全新空IP」判断（未分配且无任何使用痕迹） */
+  /** 未分配且未使用 → 预留/分配/删除（不区分是否留有使用痕迹） */
   const isBlankIp = (record: IpItem) =>
     record.allocStatus === IpAllocStatus.Unallocated &&
-    record.useStatus === IpUseStatus.Unused &&
-    record.onlineStatus === IpOnlineStatus.None &&
-    !record.assetName &&
-    record.idleDays === undefined;
+    record.useStatus === IpUseStatus.Unused;
 
   /** IP 视角表格列（与 IP 明细页一致；行操作按状态组合） */
   const ipColumns: ColumnsType<IpItem> = [
