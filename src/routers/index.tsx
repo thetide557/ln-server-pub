@@ -58,6 +58,10 @@ import historyEvents from '@/pages/historyEvents';
 import historyEventsShanshu from '@/pages/historyEvents/shanshu';
 import XhAssetMgt from '@/pages/xh/assetmgt';
 import XhAssetAdd from '@/pages/xh/assetmgt/Add';
+import RoomOverview from '@/pages/xh/roomOverview';
+import RoomManage from '@/pages/xh/roomManage';
+import CabinetGroupManage from '@/pages/xh/cabinetGroupManage';
+import CabinetManage from '@/pages/xh/cabinetManage';
 import IotAssetMgt from '@/pages/sxxc/iotAssetMgt';
 import IotAssetMgtView from '@/pages/sxxc/iotAssetMgt/Form';
 import XhMonitor from '@/pages/xh/monitor';
@@ -172,6 +176,10 @@ export default function Content() {
         <Route path='/log/syslog' component={LogSystem} exact />
         <Route path='/xh/assetmgt' component={XhAssetMgt} exact />
         <Route path='/xh/assetmgt/add' component={XhAssetAdd} exact />
+        <Route path='/xh/roomOverview' component={RoomOverview} exact />
+        <Route path='/xh/roomManage' component={RoomManage} exact />
+        <Route path='/xh/cabinetGroupManage' component={CabinetGroupManage} exact />
+        <Route path='/xh/cabinetManage' component={CabinetManage} exact />
         <Route path='/xh/iotassetmgt' component={IotAssetMgt} exact /> // 物联网资产管理
         <Route path='/xh/iotassetmgt/view' component={IotAssetMgtView} exact /> // 物联网资产管理查看操作
 
