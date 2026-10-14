@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Row, Col, Empty, Spin, Tag, Button } from 'antd';
 import { useHistory } from 'react-router-dom';
-import { getCabinetUSlots } from '@/services/assets/dc-overview';
+import { getCabinetUSlots, getCabinetSummary } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
 import { getXhAsset } from '@/services/assets';
 import {
@@ -26,24 +26,19 @@ const STATUS_STYLES: Record<
 interface Props {
   cabinetId: number | string;
   cabinetCode: string;
-  /** 机柜汇总数据（来自 getCabinetSummary 接口） */
-  summary?: {
-    occupied_u: number;
-    reserved_u: number;
-    fault_u: number;
-    free_u: number;
-    disabled_u: number;
-    u_used_rate: number;
-  };
   /** U 位变更（占用/释放/迁移等）后通知父级刷新设备统计 */
   onSlotsChange?: () => void;
 }
 
 /** 机柜 U 位视图 —— 统计卡 + 过滤器 + 方格可视化 + 右侧详情面板 */
-const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, summary, onSlotsChange }) => {
+const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }) => {
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [slots, setSlots] = useState<CabinetUSlot[]>([]);
+  const [summaryData, setSummaryData] = useState<{
+    occupied_u: number; reserved_u: number; fault_u: number;
+    free_u: number; disabled_u: number; u_used_rate: number;
+  } | null>(null);
   const [selected, setSelected] = useState<CabinetUSlot | null>(null);
   // 弹窗状态
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -52,8 +47,12 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, summary, onSlot
   const reload = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode });
-      const rawSlots = res?.dat || [];
+      // 并行加载 U 位列表 + 机柜汇总
+      const [slotRes, sumRes] = await Promise.all([
+        getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode }),
+        getCabinetSummary(cabinetId),
+      ]);
+      const rawSlots = slotRes?.dat || [];
       // 已占用 U 位：额外查资产 health，health=0 视为故障
       const usedSlots = rawSlots.filter((s) => s.status === 'used' && s.asset_id);
       if (usedSlots.length > 0) {
@@ -76,6 +75,20 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, summary, onSlot
       }
       setSlots(rawSlots);
       setSelected(null);
+      // 汇总数据
+      const d = sumRes?.dat;
+      if (d && typeof d.occupied_u === 'number') {
+        setSummaryData({
+          occupied_u: d.occupied_u,
+          reserved_u: d.reserved_u,
+          fault_u: d.fault_u,
+          free_u: d.free_u,
+          disabled_u: d.disabled_u,
+          u_used_rate: d.u_used_rate,
+        });
+      } else {
+        setSummaryData(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -85,26 +98,22 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, summary, onSlot
     if (cabinetId) reload();
   }, [cabinetId]);
 
-  // 统计：优先用接口返回的 summary，无 summary 时从本地 slots 计算兜底
+  // 统计：直接用接口返回的 summaryData
   const stats = useMemo(() => {
-    if (summary) {
-      const rate = Math.round((summary.u_used_rate || 0) * 100);
-      return {
-        total: summary.occupied_u + summary.reserved_u + summary.fault_u + summary.free_u + summary.disabled_u,
-        rate,
-        used: summary.occupied_u,
-        idle: summary.free_u,
-        reserved: summary.reserved_u,
-        fault: summary.fault_u,
-        disabled: summary.disabled_u,
-      };
+    if (!summaryData) {
+      return { total: 0, rate: 0, used: 0, idle: 0, reserved: 0, fault: 0, disabled: 0 };
     }
-    const total = slots.length;
-    const s = { used: 0, idle: 0, reserved: 0, fault: 0, disabled: 0 };
-    slots.forEach((x) => { s[x.status]++; });
-    const rate = total > 0 ? Math.round(((total - s.idle - s.disabled) / total) * 100) : 0;
-    return { total, rate, ...s };
-  }, [slots, summary]);
+    const rate = Math.round((summaryData.u_used_rate || 0) * 100);
+    return {
+      total: summaryData.occupied_u + summaryData.reserved_u + summaryData.fault_u + summaryData.free_u + summaryData.disabled_u,
+      rate,
+      used: summaryData.occupied_u,
+      idle: summaryData.free_u,
+      reserved: summaryData.reserved_u,
+      fault: summaryData.fault_u,
+      disabled: summaryData.disabled_u,
+    };
+  }, [summaryData]);
 
   // 把连续同状态、同资产/同原因的 U 位合并为一个块（多 U 时只显示一次）
   const mergedSlots = useMemo(() => {

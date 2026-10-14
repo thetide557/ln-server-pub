@@ -556,7 +556,7 @@ const RoomOverview: React.FC = () => {
                   </div>
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="U位视图" key="uview">
-                  <CabinetUView cabinetId={selectedCabinet.id} cabinetCode={selectedCabinet.code} summary={selectedCabinet.raw} onSlotsChange={() => loadCabinetDetail(selectedCabinet.id)} />
+                  <CabinetUView cabinetId={selectedCabinet.id} cabinetCode={selectedCabinet.code} onSlotsChange={() => loadCabinetDetail(selectedCabinet.id)} />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="U位列表" key="ulist">
                   <CabinetUList cabinetId={selectedCabinet.id} cabinetCode={selectedCabinet.code} onSlotsChange={() => loadCabinetDetail(selectedCabinet.id)} />
