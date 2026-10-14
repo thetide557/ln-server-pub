@@ -26,12 +26,21 @@ const STATUS_STYLES: Record<
 interface Props {
   cabinetId: number | string;
   cabinetCode: string;
+  /** 机柜汇总数据（来自 getCabinetSummary 接口） */
+  summary?: {
+    occupied_u: number;
+    reserved_u: number;
+    fault_u: number;
+    free_u: number;
+    disabled_u: number;
+    u_used_rate: number;
+  };
   /** U 位变更（占用/释放/迁移等）后通知父级刷新设备统计 */
   onSlotsChange?: () => void;
 }
 
 /** 机柜 U 位视图 —— 统计卡 + 过滤器 + 方格可视化 + 右侧详情面板 */
-const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }) => {
+const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, summary, onSlotsChange }) => {
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [slots, setSlots] = useState<CabinetUSlot[]>([]);
@@ -76,14 +85,26 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     if (cabinetId) reload();
   }, [cabinetId]);
 
-  // 统计
+  // 统计：优先用接口返回的 summary，无 summary 时从本地 slots 计算兜底
   const stats = useMemo(() => {
+    if (summary) {
+      const rate = Math.round((summary.u_used_rate || 0) * 100);
+      return {
+        total: summary.occupied_u + summary.reserved_u + summary.fault_u + summary.free_u + summary.disabled_u,
+        rate,
+        used: summary.occupied_u,
+        idle: summary.free_u,
+        reserved: summary.reserved_u,
+        fault: summary.fault_u,
+        disabled: summary.disabled_u,
+      };
+    }
     const total = slots.length;
     const s = { used: 0, idle: 0, reserved: 0, fault: 0, disabled: 0 };
     slots.forEach((x) => { s[x.status]++; });
     const rate = total > 0 ? Math.round(((total - s.idle - s.disabled) / total) * 100) : 0;
     return { total, rate, ...s };
-  }, [slots]);
+  }, [slots, summary]);
 
   // 把连续同状态、同资产/同原因的 U 位合并为一个块（多 U 时只显示一次）
   const mergedSlots = useMemo(() => {
@@ -239,20 +260,15 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     <Spin spinning={loading}>
       {/* 顶部统计卡 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col span={8}>
-          <div style={{
-            background: '#fff', borderRadius: 6, padding: '14px 16px',
-            border: '1px solid #E5E6EB', height: '100%',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          }}>
-            <div style={{ fontSize: 13, color: '#86909C' }}>U位使用率</div>
-            <div style={{ fontSize: 28, fontWeight: 600, color: '#1C76FD', marginTop: 4 }}>
-              {stats.rate}%
-            </div>
-          </div>
-        </Col>
-        {(['idle', 'reserved', 'fault', 'disabled'] as const).map((st) => (
-          <Col span={4} key={st}>
+        {([
+          { key: 'rate', label: 'U位使用率', value: `${stats.rate}%`, color: '#1C76FD' },
+          { key: 'used', label: '已占用', value: `${stats.used}U`, color: STATUS_STYLES.used.text },
+          { key: 'idle', label: '闲置', value: `${stats.idle}U`, color: STATUS_STYLES.idle.text },
+          { key: 'reserved', label: '预留', value: `${stats.reserved}U`, color: STATUS_STYLES.reserved.text },
+          { key: 'fault', label: '故障', value: `${stats.fault}U`, color: STATUS_STYLES.fault.text },
+          { key: 'disabled', label: '禁用', value: `${stats.disabled}U`, color: STATUS_STYLES.disabled.text },
+        ] as const).map((item) => (
+          <Col span={4} key={item.key}>
             <div style={{
               background: '#fff',
               borderRadius: 6, padding: '14px 16px',
@@ -261,10 +277,10 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
               display: 'flex', flexDirection: 'column', justifyContent: 'center',
             }}>
               <div style={{ fontSize: 13, color: '#86909C' }}>
-                {STATUS_STYLES[st].label}
+                {item.label}
               </div>
-              <div style={{ fontSize: 28, fontWeight: 600, color: STATUS_STYLES[st].text, marginTop: 4 }}>
-                {stats[st]}U
+              <div style={{ fontSize: 28, fontWeight: 600, color: item.color, marginTop: 4 }}>
+                {item.value}
               </div>
             </div>
           </Col>
@@ -272,16 +288,18 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
       </Row>
 
       {/* 状态图例 */}
-      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 24 }}>
+      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
         {(['used', 'reserved', 'fault', 'disabled', 'idle'] as const).map((st) => (
-          <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{
-              width: 14, height: 14, borderRadius: 2,
-              background: STATUS_STYLES[st].bg,
-              border: `1px solid ${STATUS_STYLES[st].border}`,
-            }} />
-            <span style={{ fontSize: 13, color: '#4E5969' }}>{STATUS_STYLES[st].label}</span>
-          </div>
+          <span key={st} style={{
+            display: 'inline-block',
+            padding: '2px 10px',
+            borderRadius: 4,
+            fontSize: 12,
+            color: STATUS_STYLES[st].text,
+            background: STATUS_STYLES[st].bg,
+            border: `1px solid ${STATUS_STYLES[st].border}`,
+            lineHeight: '20px',
+          }}>{STATUS_STYLES[st].label}</span>
         ))}
       </div>
 
