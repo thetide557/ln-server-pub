@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Row, Col, Empty, Spin, Tag, Button } from 'antd';
+import { Row, Col, Empty, Spin, Tag, Button, message } from 'antd';
 import { useHistory } from 'react-router-dom';
 import { getCabinetUSlots, getCabinetSummary } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
-import { getXhAsset } from '@/services/assets';
 import {
   OccupyModal, ReserveModal, ReleaseModal,
   DisableModal, EnableModal, CancelReserveModal, MigrateModal,
@@ -53,26 +52,6 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
         getCabinetSummary(cabinetId),
       ]);
       const rawSlots = slotRes?.dat || [];
-      // 已占用 U 位：额外查资产 health，health=0 视为故障
-      const usedSlots = rawSlots.filter((s) => s.status === 'used' && s.asset_id);
-      if (usedSlots.length > 0) {
-        const healthResults = await Promise.allSettled(
-          [...new Set(usedSlots.map((s) => s.asset_id!))].map((aid) =>
-            getXhAsset(String(aid)).then(({ dat }) => ({ asset_id: aid, health: dat?.health })),
-          ),
-        );
-        const healthMap = new Map<number, number>();
-        healthResults.forEach((r) => {
-          if (r.status === 'fulfilled' && r.value.health !== undefined && r.value.health !== null) {
-            healthMap.set(r.value.asset_id, Number(r.value.health));
-          }
-        });
-        rawSlots.forEach((s) => {
-          if (s.status === 'used' && s.asset_id && healthMap.get(s.asset_id) === 0) {
-            s.status = 'fault';
-          }
-        });
-      }
       setSlots(rawSlots);
       setSelected(null);
       // 汇总数据
@@ -240,6 +219,10 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
   };
 
   const openModal = (type: ModalType, slot: CabinetUSlot) => {
+    if (type === 'migrate' && slot.asset_deleted) {
+      message.warning('资产已删除，无法迁移');
+      return;
+    }
     setCurrentSlot(slot);
     setModalType(type);
   };
@@ -502,7 +485,10 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                     <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
                       <Button type="primary" style={{ background: '#1C76FD', borderColor: '#1C76FD' }} onClick={() => openModal('migrate', selected)}>迁移</Button>
                       <Button style={{ borderColor: '#F79F07', color: '#F79F07' }} onClick={() => openModal('release', selected)}>释放U位</Button>
-                      <Button onClick={() => selected.asset_id && history.push(`/xh/assetmgt/add?mode=view&id=${selected.asset_id}&from=roomOverview`)}>查看资产详情</Button>
+                      <Button onClick={() => {
+                        if (selected.asset_deleted) { message.warning('资产已删除，无法查看详情'); return; }
+                        if (selected.asset_id) history.push(`/xh/assetmgt/add?mode=view&id=${selected.asset_id}&from=roomOverview`);
+                      }}>查看资产详情</Button>
                     </div>
                   </div>
                 );

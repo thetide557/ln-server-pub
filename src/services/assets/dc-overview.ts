@@ -141,6 +141,7 @@ export interface USectionRaw {
   note: string;
   updated_by: string;
   updated_at: string;
+  asset_deleted?: boolean;
 }
 
 /** U 位列表响应（6.6，按区段返回） */
@@ -446,6 +447,8 @@ export interface CabinetUSlot {
   update_time?: string;
   reserved_reason?: string;
   disabled_reason?: string;
+  /** U 位关联的资产已删除 */
+  asset_deleted?: boolean;
 }
 
 /** 接口状态 → 前端状态 */
@@ -491,6 +494,7 @@ export const getCabinetUSlots = async function (
         update_time: section.updated_at || undefined,
         reserved_reason: section.status === 'RESERVED' ? (section.note || undefined) : undefined,
         disabled_reason: section.status === 'DISABLED' ? (section.note || undefined) : undefined,
+        asset_deleted: section.asset_deleted || undefined,
       });
     }
   });
