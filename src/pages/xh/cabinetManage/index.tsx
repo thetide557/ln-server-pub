@@ -67,6 +67,7 @@ interface DcCabinet {
   weight_kg?: number;
   area_sqm?: number;
   u_used_rate?: number;
+  custom_seq?: number;
   created_at?: string;
   updated_at?: string;
   created_by?: string;
@@ -244,6 +245,7 @@ const CabinetManage: React.FC = () => {
         row_no: detail.row_no,
         col_no: detail.col_no,
         u_capacity: detail.u_capacity,
+        custom_seq: detail.custom_seq,
         cabinet_type: detail.cabinet_type,
         business_zone: detail.business_zone,
         duty_persons: detail.owner_name ? detail.owner_name.split(',') : [''],
@@ -327,6 +329,7 @@ const CabinetManage: React.FC = () => {
         row_no: values.row_no,
         col_no: values.col_no,
         u_capacity: values.u_capacity,
+        custom_seq: values.custom_seq,
         cabinet_type: values.cabinet_type,
         business_zone: values.business_zone,
         owner_name: (values.duty_persons || []).filter(Boolean).join(','),
@@ -686,17 +689,28 @@ const CabinetManage: React.FC = () => {
                   <InputNumber min={0} placeholder="请输入所在列" style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
-              <Col span={24}>
+              <Col span={12}>
                 <Form.Item
                   label="U位数"
                   name="u_capacity"
                   rules={[{ required: true, message: '请输入U数' }]}
+                  {...expandFormItemLayout}
                 >
                   <InputNumber
                     min={1}
                     placeholder="请输入机柜U数，≥1"
                     style={{ width: '100%' }}
                   />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label="显示顺序"
+                  name="custom_seq"
+                  tooltip="机柜在机柜组内的显示顺序，数字越小越靠前"
+                  {...expandFormItemLayout}
+                >
+                  <InputNumber min={0} placeholder="请输入显示顺序" style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col span={12}>

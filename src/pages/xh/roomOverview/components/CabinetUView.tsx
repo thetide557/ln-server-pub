@@ -10,6 +10,9 @@ import {
 
 type ModalType = null | 'occupy' | 'disable' | 'enable' | 'release' | 'cancelReserve' | 'reserve' | 'migrate';
 
+/** 每个 U 位行占用的垂直高度（px），合并块 = count × 此值 */
+const U_ROW_HEIGHT = 40;
+
 // 状态颜色 & 样式（方格背景用带透明度的边框色，text 用于统计卡片数字颜色）
 const STATUS_STYLES: Record<
   CabinetUSlot['status'],
@@ -319,6 +322,7 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                       style={{
                         display: 'flex', alignItems: 'stretch', gap: 8,
                         marginBottom: 4, cursor: 'pointer',
+                        height: item.count * U_ROW_HEIGHT,
                       }}
                     >
                       <div style={{
@@ -332,7 +336,6 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                         flex: 1, background: sty.bg, border: `1px solid ${sty.border}`,
                         borderRadius: 3, padding: '6px 10px',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        // minHeight: 22 + item.count * 12,
                       }}>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 500 }}>
@@ -359,11 +362,15 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                     onClick={() => handleSlotClick(s)}
                     title={s.status === 'idle' ? '点击占用' : sty.label}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
+                      display: 'flex', alignItems: 'stretch', gap: 8,
                       marginBottom: 4, cursor: 'pointer',
+                      height: U_ROW_HEIGHT,
                     }}
                   >
-                    <div style={{ width: 42, color: '#86909C', fontSize: 12, textAlign: 'right' }}>
+                    <div style={{
+                      width: 42, color: '#86909C', fontSize: 12, textAlign: 'right',
+                      display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                    }}>
                       {s.u_position}U
                     </div>
                     <div style={{

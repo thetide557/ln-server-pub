@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Table, Tag, Select, Space, Button, Dropdown, Menu, message,
+  Table, Tag, Select, Space, Button, Dropdown, Menu, Tooltip, message,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import { getCabinetUSlots } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
@@ -185,7 +185,20 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     { title: '资产类型', dataIndex: 'asset_type', key: 'asset_type', width: 120, render: (v) => v || '-' },
     { title: '资产型号', dataIndex: 'asset_model', key: 'asset_model', width: 140, render: (v) => v || '-' },
     { title: '责任人', dataIndex: 'duty_person', key: 'duty_person', width: 90, render: (v) => v || '-' },
-    { title: '更新人', dataIndex: 'update_by', key: 'update_by', width: 90, render: (v) => v || '-' },
+    {
+      title: (
+        <span>
+          更新人
+          <Tooltip title="更新人 system，表示系统自动巡检变更，非人工操作">
+            <QuestionCircleOutlined style={{ marginLeft: 4, color: '#8C8C8C', cursor: 'help' }} />
+          </Tooltip>
+        </span>
+      ),
+      dataIndex: 'update_by',
+      key: 'update_by',
+      width: 110,
+      render: (v) => v || '-',
+    },
     { title: '更新时间', dataIndex: 'update_time', key: 'update_time', width: 160, render: (v) => v || '-' },
     { title: '操作', key: 'action', fixed: 'right', width: 220, render: (_, r) => renderActions(r) },
   // eslint-disable-next-line react-hooks/exhaustive-deps

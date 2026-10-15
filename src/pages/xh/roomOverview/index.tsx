@@ -13,6 +13,7 @@ import {
 } from '@/services/assets/dc-overview';
 import CabinetUView from './components/CabinetUView';
 import CabinetUList from './components/CabinetUList';
+import CabinetGroupUOverview from './components/CabinetGroupUOverview';
 import './style.less';
 
 // 树节点类型
@@ -410,6 +411,38 @@ const RoomOverview: React.FC = () => {
     }
   };
 
+  // 从树数据中找出指定机柜组下的机柜列表（按 custom_seq 升序排序，无值排最后）
+  const getCabinetsOfGroup = (groupId: number) => {
+    for (const room of treeData) {
+      const group = room.children?.find((g) => g.type === 'cabinetGroup' && Number(g.id) === Number(groupId));
+      if (group?.children) {
+        const cabinets = group.children
+          .filter((c) => c.type === 'cabinet')
+          .map((c) => ({
+            id: c.id,
+            code: c.raw?.cabinet_code || String(c.title),
+            name: c.raw?.cabinet_name || String(c.title),
+            custom_seq: c.raw?.custom_seq,
+          }));
+        // 按 custom_seq 升序，null/undefined 排末尾
+        cabinets.sort((a, b) => {
+          const aSeq = a.custom_seq ?? Number.MAX_SAFE_INTEGER;
+          const bSeq = b.custom_seq ?? Number.MAX_SAFE_INTEGER;
+          return aSeq - bSeq;
+        });
+        return cabinets;
+      }
+    }
+    return [];
+  };
+
+  // 缓存机柜列表，避免每次 render 返回新数组引用导致子组件重复请求
+  const cabinetsOfSelectedGroup = useMemo(
+    () => (detailInfo?.type === 'cabinetGroup' ? getCabinetsOfGroup(detailInfo.id!) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [detailInfo?.id, detailInfo?.type, treeData],
+  );
+
   return (
     <PageLayout icon={<HomeOutlined />} title="机房总览">
       <div className="room-overview">
@@ -650,15 +683,15 @@ const RoomOverview: React.FC = () => {
                       </div>
                       <div className="info-grid-row">
                         <div className="info-grid-item">
-                          <span className="info-label">行：</span>
+                          <span className="info-label">列：</span>
                           <span className="info-value">{detailInfo.row ?? '-'}</span>
                         </div>
                         <div className="info-grid-item">
-                          <span className="info-label">开始列：</span>
+                          <span className="info-label">开始行：</span>
                           <span className="info-value">{detailInfo.startColumn ?? '-'}</span>
                         </div>
                         <div className="info-grid-item">
-                          <span className="info-label">结束列：</span>
+                          <span className="info-label">结束行：</span>
                           <span className="info-value">{detailInfo.endColumn ?? '-'}</span>
                         </div>
                       </div>
@@ -721,6 +754,15 @@ const RoomOverview: React.FC = () => {
                   <Empty description="暂无设备类型数据" />
                 )}
               </div>
+              {/* 机柜组下机柜 U 位概览（仅机柜组选中时显示） */}
+              {detailInfo?.type === 'cabinetGroup' && (
+                <div className="cabinet-u-overview-section">
+                  <CabinetGroupUOverview
+                    groupId={detailInfo.id!}
+                    cabinets={cabinetsOfSelectedGroup}
+                  />
+                </div>
+              )}
             </Spin>
           )}
         </div>
