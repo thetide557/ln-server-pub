@@ -611,6 +611,9 @@ export default function () {
       align: 'center',
       width: 120,
       ellipsis: true,
+      sorter: (a, b) => {
+        return a.region.localeCompare(b.region);
+      },
     },
     {
       title: '租户',
@@ -618,6 +621,9 @@ export default function () {
       align: 'center',
       width: 120,
       ellipsis: true,
+      sorter: (a, b) => {
+        return a.tenant.localeCompare(b.tenant);
+      },
     },
     {
       title: '资产类型',
@@ -625,6 +631,9 @@ export default function () {
       align: 'center',
       width: 120,
       ellipsis: true,
+      sorter: (a, b) => {
+        return a.asset_category.localeCompare(b.asset_category);
+      },
     },
     {
       title: 'CPU架构',
@@ -632,6 +641,9 @@ export default function () {
       align: 'center',
       width: 120,
       ellipsis: true,
+      sorter: (a, b) => {
+        return a.cpu_arch.localeCompare(b.cpu_arch);
+      },
     },
     {
       title: 'IP地址',
@@ -1346,8 +1358,8 @@ export default function () {
     const requestFunc = hasSearchValue
       ? getAssetsByN9eCondition
       : isScopeTreeMode && !hasRoomFilter()
-      ? getAssetScopeTreeAssets
-      : getAssetsByCondition;
+        ? getAssetScopeTreeAssets
+        : getAssetsByCondition;
 
     requestFunc(param).then(({ dat }) => {
       // dat.list.forEach((entity, index) => {
@@ -1890,40 +1902,40 @@ export default function () {
               localStorage.setItem('leftassetWidth', curWidth.toString());
             }}
           >
-          <div className={collapse ? 'left-area collapse' : 'left-area'}>
-            <div
-              className='collapse-btn'
-              onClick={() => {
-                localStorage.setItem('left_asset_list', !collapse ? '1' : '0');
-                setCollapse(!collapse);
-              }}
-            >
-              {!collapse ? <LeftOutlined /> : <RightOutlined />}
-            </div>
-            <div className='left_tree' style={{ display: 'inline-block' }}>
-              <div className='asset_organize_cls'>
-                <div className='asset-organize-title'>
+            <div className={collapse ? 'left-area collapse' : 'left-area'}>
+              <div
+                className='collapse-btn'
+                onClick={() => {
+                  localStorage.setItem('left_asset_list', !collapse ? '1' : '0');
+                  setCollapse(!collapse);
+                }}
+              >
+                {!collapse ? <LeftOutlined /> : <RightOutlined />}
+              </div>
+              <div className='left_tree' style={{ display: 'inline-block' }}>
+                <div className='asset_organize_cls'>
+                  <div className='asset-organize-title'>
                     <span className='asset-organize-title-bar' />
                     <span>资产范围树</span>
+                  </div>
+                  {false &&
+                    (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && <span
+                      className="add_group"
+                      onClick={() => {
+                        setOpen(true);
+                        setCurGroup({});
+                        setTitle("新增分组");
+                        setLevel(1);
+                        setParentId(null);
+                      }}
+                    >
+                      新增分组
+                    </span>
+                  }
                 </div>
-                {false &&
-                  (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && <span
-                    className="add_group"
-                    onClick={() => {
-                      setOpen(true);
-                      setCurGroup({});
-                      setTitle("新增分组");
-                      setLevel(1);
-                      setParentId(null);
-                    }}
-                  >
-                    新增分组
-                  </span>
-                }
-              </div>
-              <div className='tree-list'>
-                <AssetTree data={treeList} expandedIds={assetTreeExpandedIds} setExpandedIds={setAssetTreeExpandedIds} />
-                {/* {
+                <div className='tree-list'>
+                  <AssetTree data={treeList} expandedIds={assetTreeExpandedIds} setExpandedIds={setAssetTreeExpandedIds} />
+                  {/* {
                   _.map(treeList, (item) => {
                     return (
                       <div key={item.name} className='tree-row'>
@@ -1998,9 +2010,9 @@ export default function () {
                     )
                   })
                 } */}
-              </div>
-              {/* 分组树 */}
-              {/* <Accordion
+                </div>
+                {/* 分组树 */}
+                {/* <Accordion
                 isAutoInitialized={true}
                 treeData={treeData}
                 addButton={false}
@@ -2018,9 +2030,9 @@ export default function () {
                   }
                 }}
               /> */}
+              </div>
             </div>
-          </div>
-        </Resizable>
+          </Resizable>
         )}
         <div className='asset-operate_xh'>
           <div className='table-content_xh'>
