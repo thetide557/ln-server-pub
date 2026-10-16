@@ -23,6 +23,7 @@ import { defaultValues, defaultCustomValuesMap } from './config';
 import Options from './Options';
 import Collapse, { Panel } from './Components/Collapse';
 import VariableConfig, { IVariable } from '../VariableConfig';
+import { ASSET_TYPE_VAR_NAME } from '../Detail/assetTypeCharts';
 import Renderer from '../Renderer/Renderer';
 import QueryEditor from './QueryEditor';
 import Design from '@/pages/topoGraph/Designer';
@@ -102,11 +103,17 @@ function FormCpt(props: IProps, ref) {
                     return (
                       <div style={{ height: 'calc(100% - 310px)', overflowY: 'auto' }}>
                         <div style={{ marginBottom: 10 }}>
+                          {/* 资产类型变量在编辑器内隐藏（由外部工具栏统一选择）：编辑器展示的视图由外部当前选择决定，
+                              避免编辑器内切换资产类型污染看板全局变量值（URL/localStorage）导致外层查询异常 */}
                           <VariableConfig
                             onChange={(value, bool, withOptions) => {
-                              setVariableConfigWithOptions(withOptions || []);
+                              // 编辑器内已隐藏资产类型选择，这里把资产类型按外部传入值合并回完整列表，保证 PromQL 变量替换与预览查询仍能取到它
+                              const merged = _.map(props.variableConfigWithOptions, (item) =>
+                                item.name === ASSET_TYPE_VAR_NAME ? item : _.find(withOptions || [], { name: item.name }) || item,
+                              );
+                              setVariableConfigWithOptions(merged);
                             }}
-                            value={variableConfigWithOptions}
+                            value={_.filter(variableConfigWithOptions, (item) => item.name !== ASSET_TYPE_VAR_NAME)}
                             editable={false}
                             range={range}
                             id={id}

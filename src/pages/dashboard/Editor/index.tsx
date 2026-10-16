@@ -167,7 +167,7 @@ function index(props: IProps) {
           range={range}
           id={id}
           dashboardId={dashboardId}
-          key={initialValues.type} // 每次切换图表类型，都重新渲染
+          key={initialValues.type}
         />
       )}
     </Modal>

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useContext, useCallback, useMemo } from 'react';
 import _ from 'lodash';
 import moment from 'moment';
 import semver from 'semver';
@@ -28,6 +28,7 @@ import PageLayout from '@/components/pageLayout';
 import { IRawTimeRange, getDefaultValue, isValid } from '@/components/TimeRangePicker';
 import { Dashboard } from '@/store/dashboardInterface';
 import { getDashboard, updateDashboardConfigs, getDashboardPure, getBuiltinDashboard } from '@/services/dashboardV2';
+import { getAssetstypes } from '@/services/assets';
 import { SetTmpChartData } from '@/services/metric';
 import { CommonStateContext } from '@/App';
 import MigrationModal from '@/pages/help/migrate/MigrationModal';
@@ -41,6 +42,7 @@ import { JSONParse } from '../utils';
 import Editor from '../Editor';
 import { defaultCustomValuesMap, defaultOptionsValuesMap } from '../Editor/config';
 import { sortPanelsByGridLayout, panelsMergeToConfigs, updatePanelsInsertNewPanelToGlobal } from '../Panels/utils';
+import { ASSET_TYPE_VAR_NAME, ASSET_TYPE_OVERRIDES_KEY, buildNetworkChartRender, isNetworkPlugin, SWITCHABLE_PANEL_NAMES } from './assetTypeCharts';
 import { useGlobalState } from '../globalState';
 import './style.less';
 import './dark.antd.less';
@@ -126,8 +128,6 @@ export default function DetailV2(props: IProps) {
   let { id } = useParams<URLParam>();
 
   if (isHome) {
-    // 陕数工业云工作台默认首页
-    // id = '455950'
     id = _.toString(profile.board_id) || '1'
   }
   const query = queryString.parse(useLocation().search);
@@ -148,6 +148,43 @@ export default function DetailV2(props: IProps) {
     initialValues: {} as any,
   });
   let updateAtRef = useRef<number>();
+  // 网络设备专属指标集（配合看板原生变量 asset_type）：
+  // 看板已配置 Query 型变量 asset_type（选项动态来自 label_values(asset_type)），主机类查询已引用 $asset_type；
+  // 当选中的资产类型全部属于网络设备族（switch_legacy 插件）时，Top 图表整体切换为 switch_legacy 专属指标集
+  const hasAssetTypeVariable = useMemo(() => _.some(variableConfig, (item) => item?.name === ASSET_TYPE_VAR_NAME), [variableConfig]);
+  const hasSwitchablePanels = useMemo(() => _.some(panels, (p) => SWITCHABLE_PANEL_NAMES.indexOf(p.name) > -1), [panels]);
+  const [assetTypes, setAssetTypes] = useState<any[]>([]);
+  useEffect(() => {
+    if (!hasAssetTypeVariable || !hasSwitchablePanels) return;
+    getAssetstypes()
+      .then((res) => {
+        setAssetTypes(res.dat || []);
+      })
+      .catch(() => {});
+  }, [hasAssetTypeVariable, hasSwitchablePanels]);
+
+  // 原生变量当前选中的资产类型（多选）
+  const selectedAssetTypeValues = useMemo(() => {
+    const variable = _.find(variableConfigWithOptions, { name: ASSET_TYPE_VAR_NAME });
+    const value = variable?.value;
+    if (!value) return [] as string[];
+    return _.filter(_.isArray(value) ? value : [value], (item) => item !== 'all');
+  }, [variableConfigWithOptions]);
+
+  // 选中值全部为网络设备族时，Top 图表整体切换为专属指标集（仅渲染层；已保存的网络图表自定义从 configs 读取）；
+  // 图表编辑器随视图一致展示，保存后通过 Panels 持久化到 configs.assetTypeChartOverrides
+  const networkChartOverrides = useMemo(() => (dashboard.configs as any)?.[ASSET_TYPE_OVERRIDES_KEY] || {}, [dashboard]);
+  const renderPanels = useMemo(() => {
+    if (!hasAssetTypeVariable || !hasSwitchablePanels || _.isEmpty(selectedAssetTypeValues) || _.isEmpty(assetTypes)) {
+      return panels;
+    }
+    const allNetwork = _.every(selectedAssetTypeValues, (name) => {
+      const typeDef = _.find(assetTypes, (t) => t.name === name);
+      return isNetworkPlugin(typeDef?.plugin);
+    });
+    return allNetwork ? buildNetworkChartRender(panels, networkChartOverrides) : panels;
+  }, [panels, selectedAssetTypeValues, assetTypes, networkChartOverrides, hasAssetTypeVariable, hasSwitchablePanels]);
+
   const refresh = async (cbk?: () => void) => {
     fetchDashboard({
       id,
@@ -318,6 +355,7 @@ export default function DetailV2(props: IProps) {
               isHome={isHome}
               editable={editable}
               panels={panels}
+              renderPanels={renderPanels}
               setPanels={setPanels}
               dashboard={dashboard}
               range={range}
