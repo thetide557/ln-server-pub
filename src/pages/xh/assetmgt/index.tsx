@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
+import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip, Spin } from 'antd';
 import { PlusSquareOutlined, MinusSquareOutlined, FileOutlined, PlusOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
@@ -32,9 +32,11 @@ import _ from 'lodash';
 import { Resizable } from 're-resizable';
 import Accordion from './Accordion';
 import AccordionModal from './Accordion/accordionModal';
+import RegionModal from './RegionModal';
+import { HW_SW_OPTIONS, normalizeScopeTreeData, collectScopeTreeExpandedIds, findScopeTreeNode, getScopeSearchParams } from './scopeTree';
 import { assetsType, metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
-import { batchShelfXhAssets, deleteXhAssets, getAssetScopeTree, getAssetScopeTreeAssets, getAssetScopeTreeChildren, getAssetsByN9eCondition, getAssetstypesByParams, getAssetsByCondition, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
+import { batchShelfXhAssets, deleteXhAssets, getAssetScopeTree, getAssetScopeTreeAssets, getAssetsByCondition, getAssetsByN9eCondition, getAssetstypesByParams, getAssetstypesNew, delAssetstypesNew, delXhAssetstypesNew } from '@/services/assets';
 import { getDictDataListByType } from '@/services/system/dict';
 
 import RefreshIcon from '@/components/RefreshIcon';
@@ -74,6 +76,7 @@ let queryFilter = [
   { name: 'asset_ip', label: '资产IP', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'region', label: '区域', type: 'input' },
+  { name: 'hw_sw', label: '软硬件', type: 'select' },
   { name: 'tenant', label: '租户', type: 'input' },
   { name: 'asset_category', label: '资产类型', type: 'input' },
   { name: 'cpu_arch', label: 'CPU架构', type: 'input' },
@@ -136,270 +139,6 @@ function getAssetTreeExpandIdsForSelection(
   return new Set(path);
 }
 
-function isServerAssetCategory(category?: string) {
-  const value = _.toLower(_.toString(category));
-  return value.includes('server') || value.includes('服务器') || value.includes('物理设备') || value.includes('虚拟机');
-}
-
-function createScopeTreeNode({
-  id,
-  name,
-  nodeType,
-  count,
-  groupLevel,
-  scopeValues = {},
-  children = [],
-}: {
-  id: string;
-  name: string;
-  nodeType: string;
-  count?: number;
-  groupLevel: number;
-  scopeValues?: Record<string, any>;
-  children?: any[];
-}) {
-  return {
-    id,
-    name,
-    node_type: nodeType,
-    count,
-    group_level: groupLevel,
-    scopeValues,
-    sub_groups: children,
-    type_list: [],
-    isScopeTreeNode: true,
-  };
-}
-
-function getScopeValueKey(nodeType?: string) {
-  const type = _.toString(nodeType);
-  if (['region', 'tenant_set', 'tenant', 'asset_category', 'cpu_arch'].includes(type)) {
-    return type;
-  }
-  return '';
-}
-
-function normalizeScopeTreeNode(node: any, indexPath = '0', groupLevel = 1, parentScopeValues: Record<string, any> = {}) {
-  const nodeType = node?.node_type || node?.nodeType || (groupLevel === 1 ? 'root' : '');
-  const name = node?.label || node?.name || node?.title || node?.key || node?.id || '';
-  const scopeValues = {
-    ...parentScopeValues,
-    ...(node?.scopeValues || {}),
-  };
-  const scopeKey = getScopeValueKey(nodeType);
-  if (scopeKey && name !== '') {
-    scopeValues[scopeKey] = node?.[scopeKey] || node?.value || node?.key || name;
-  }
-  if (node?.tenant_set) {
-    scopeValues.tenant_set = node.tenant_set;
-  }
-
-  const rawChildren = node?.sub_groups || node?.children || node?.nodes || [];
-  return createScopeTreeNode({
-    id: `scope-${indexPath}`,
-    name: _.toString(name || '未命名'),
-    nodeType,
-    count: node?.count,
-    groupLevel,
-    scopeValues,
-    children: rawChildren.map((child: any, index: number) => normalizeScopeTreeNode(child, `${indexPath}-${index}`, groupLevel + 1, scopeValues)),
-  });
-}
-
-function normalizeScopeTreeData(data: any) {
-  const nodes = data?.nodes || data?.list || data?.tree || (Array.isArray(data) ? data : []);
-  if (!Array.isArray(nodes) || !nodes.length) {
-    return SCOPE_TREE_DATA;
-  }
-  const normalizedNodes = nodes.map((node: any, index: number) => normalizeScopeTreeNode(node, `${index}`, 2, {}));
-  if (normalizedNodes.length === 1 && normalizedNodes[0].node_type === 'root') {
-    return normalizedNodes;
-  }
-  return [
-    createScopeTreeNode({
-      id: 'scope-all-assets',
-      name: '陕西工业云',
-      nodeType: 'root',
-      groupLevel: 1,
-      scopeValues: {},
-      children: normalizedNodes,
-    }),
-  ];
-}
-
-const SCOPE_TREE_DATA = [
-  createScopeTreeNode({
-    id: 'scope-all-assets',
-    name: '陕西工业云',
-    nodeType: 'root',
-    groupLevel: 1,
-    scopeValues: {},
-    children: [
-      createScopeTreeNode({
-        id: 'scope-region-xian',
-        name: '西安区域',
-        nodeType: 'region',
-        groupLevel: 2,
-        scopeValues: { region: '西安区域' },
-        children: [
-          createScopeTreeNode({
-            id: 'scope-region-xian-tenant-a',
-            name: '默认租户',
-            nodeType: 'tenant',
-            groupLevel: 3,
-            scopeValues: { region: '西安区域', tenant_set: '默认租户集', tenant: '默认租户' },
-            children: [
-              createScopeTreeNode({
-                id: 'scope-region-xian-tenant-a-server',
-                name: '服务器',
-                nodeType: 'asset_category',
-                groupLevel: 4,
-                scopeValues: { region: '西安区域', tenant_set: '默认租户集', tenant: '默认租户', asset_category: 'server' },
-                children: [
-                  createScopeTreeNode({
-                    id: 'scope-region-xian-tenant-a-server-x86',
-                    name: 'x86_64',
-                    nodeType: 'cpu_arch',
-                    count: 15,
-                    groupLevel: 5,
-                    scopeValues: { region: '西安区域', tenant_set: '默认租户集', tenant: '默认租户', asset_category: 'server', cpu_arch: 'x86_64' },
-                  }),
-                  createScopeTreeNode({
-                    id: 'scope-region-xian-tenant-a-server-arm',
-                    name: 'aarch64',
-                    nodeType: 'cpu_arch',
-                    count: 5,
-                    groupLevel: 5,
-                    scopeValues: { region: '西安区域', tenant_set: '默认租户集', tenant: '默认租户', asset_category: 'server', cpu_arch: 'aarch64' },
-                  }),
-                ],
-              }),
-              createScopeTreeNode({
-                id: 'scope-region-xian-tenant-a-network',
-                name: '网络设备',
-                nodeType: 'asset_category',
-                groupLevel: 4,
-                scopeValues: { region: '西安区域', tenant_set: '默认租户集', tenant: '默认租户', asset_category: 'network' },
-              }),
-              createScopeTreeNode({
-                id: 'scope-region-xian-tenant-a-db',
-                name: '数据库',
-                nodeType: 'asset_category',
-                groupLevel: 4,
-                scopeValues: { region: '西安区域', tenant_set: '默认租户集', tenant: '默认租户', asset_category: 'database' },
-              }),
-            ],
-          }),
-          createScopeTreeNode({
-            id: 'scope-region-xian-tenant-b',
-            name: '业务租户',
-            nodeType: 'tenant',
-            groupLevel: 3,
-            scopeValues: { region: '西安区域', tenant_set: '业务租户集', tenant: '业务租户' },
-            children: [
-              createScopeTreeNode({
-                id: 'scope-region-xian-tenant-b-server',
-                name: '服务器',
-                nodeType: 'asset_category',
-                groupLevel: 4,
-                scopeValues: { region: '西安区域', tenant_set: '业务租户集', tenant: '业务租户', asset_category: 'server' },
-                children: [
-                  createScopeTreeNode({
-                    id: 'scope-region-xian-tenant-b-server-x86',
-                    name: 'x86_64',
-                    nodeType: 'cpu_arch',
-                    count: 8,
-                    groupLevel: 5,
-                    scopeValues: { region: '西安区域', tenant_set: '业务租户集', tenant: '业务租户', asset_category: 'server', cpu_arch: 'x86_64' },
-                  }),
-                  createScopeTreeNode({
-                    id: 'scope-region-xian-tenant-b-server-arm',
-                    name: 'aarch64',
-                    nodeType: 'cpu_arch',
-                    count: 2,
-                    groupLevel: 5,
-                    scopeValues: { region: '西安区域', tenant_set: '业务租户集', tenant: '业务租户', asset_category: 'server', cpu_arch: 'aarch64' },
-                  }),
-                ],
-              }),
-            ],
-          }),
-        ],
-      }),
-      createScopeTreeNode({
-        id: 'scope-region-beijing',
-        name: '北京区域',
-        nodeType: 'region',
-        groupLevel: 2,
-        scopeValues: { region: '北京区域' },
-        children: [
-          createScopeTreeNode({
-            id: 'scope-region-beijing-tenant-a',
-            name: '云平台租户',
-            nodeType: 'tenant',
-            groupLevel: 3,
-            scopeValues: { region: '北京区域', tenant_set: '云平台租户集', tenant: '云平台租户' },
-            children: [
-              createScopeTreeNode({
-                id: 'scope-region-beijing-tenant-a-server',
-                name: '服务器',
-                nodeType: 'asset_category',
-                groupLevel: 4,
-                scopeValues: { region: '北京区域', tenant_set: '云平台租户集', tenant: '云平台租户', asset_category: 'server' },
-                children: [
-                  createScopeTreeNode({
-                    id: 'scope-region-beijing-tenant-a-server-x86',
-                    name: 'x86_64',
-                    nodeType: 'cpu_arch',
-                    count: 11,
-                    groupLevel: 5,
-                    scopeValues: { region: '北京区域', tenant_set: '云平台租户集', tenant: '云平台租户', asset_category: 'server', cpu_arch: 'x86_64' },
-                  }),
-                ],
-              }),
-              createScopeTreeNode({
-                id: 'scope-region-beijing-tenant-a-storage',
-                name: '存储设备',
-                nodeType: 'asset_category',
-                groupLevel: 4,
-                scopeValues: { region: '北京区域', tenant_set: '云平台租户集', tenant: '云平台租户', asset_category: 'storage' },
-              }),
-            ],
-          }),
-        ],
-      }),
-    ],
-  }),
-];
-
-function collectScopeTreeExpandedIds(nodes: any[] = []) {
-  return nodes.reduce((ids: (number | string)[], node: any) => {
-    ids.push(node.id);
-    if (node.sub_groups?.length) {
-      ids.push(...collectScopeTreeExpandedIds(node.sub_groups));
-    }
-    return ids;
-  }, []);
-}
-
-function updateScopeTreeChildren(nodes: any[] = [], nodeId: string, children: any[]): any[] {
-  return nodes.map((node) => {
-    if (node.id === nodeId) {
-      return {
-        ...node,
-        scopeChildrenLoaded: true,
-        sub_groups: children,
-      };
-    }
-    if (node.sub_groups?.length) {
-      return {
-        ...node,
-        sub_groups: updateScopeTreeChildren(node.sub_groups, nodeId, children),
-      };
-    }
-    return node;
-  });
-}
 
 export default function () {
   const { t } = useTranslation('assets');
@@ -434,13 +173,12 @@ export default function () {
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
   const [title, setTitle] = useState<any>('');
-  const groupIds = busiGroups?.map(item => item.id)
-  // console.log(groupIds);
 
   // 资产分组
   let treeQuery = {}
   const [treeList, setTreeList] = useState<any>([])
   const [open, setOpen] = useState<boolean>(false)
+  const [regionModalOpen, setRegionModalOpen] = useState(false);
   const [curGroup, setCurGroup] = useState<any>({})
   const [isShow, setIsShow] = useLocalStorage('left_tissueId', Number(-1))
   // const [activeColor, setActiveColor] = useLocalStorage('left_asset_type', Number(-1))
@@ -453,15 +191,15 @@ export default function () {
   // 树展开状态提升到页面级：仅页面刷新或重新进入路由时展开第一层，其余保持最新状态
   const [assetTreeExpandedIds, setAssetTreeExpandedIds] = useState<Set<number | string>>(() => new Set());
   const assetTreeInitialExpandDone = useRef(false);
-  // 首次进入路由/刷新页面时，避免重复请求
-  const skipNextGetTableDataRef = useRef(false);
   // 用useRef保存递增计数器（每个组件实例独立，不共享）
   const requestIdCounter = useRef(0);
   const [manufacturerOptions, setManufacturerOptions] = useState<{ value: string; label: string }[]>([]);
   // 物理资源下的设备类型
   const [oidTreeList, setOidTreeList] = useState<any[]>([]);
   const [scopeTreeFilter, setScopeTreeFilter] = useState<Record<string, any>>({});
-  const [scopeTreeNodeType, setScopeTreeNodeType] = useState<string>('root');
+  const scopeSelectionRef = useRef<Record<string, any>>({});
+  const scopeTreeRequestId = useRef(0);
+  const [treeLoading, setTreeLoading] = useState(false);
 
   // ===== 机房维度过滤（从机房总览“进入”跳转携带）：room_id / cabinet_group_id / cabinet_id 三选一 =====
   // 仅当 URL 带有任一维度参数时生效；用 ref 保存，避免路由未变时重复解析
@@ -514,6 +252,7 @@ export default function () {
     }
   ]
   const filterOptions = {
+    hw_sw: HW_SW_OPTIONS,
     status: [
       { value: '1', label: '正常' },
       { value: '0', label: '离线' },
@@ -614,6 +353,13 @@ export default function () {
       sorter: (a, b) => {
         return a.region.localeCompare(b.region);
       },
+    },
+    {
+      title: '软硬件',
+      dataIndex: 'hw_sw',
+      align: 'center',
+      width: 120,
+      ellipsis: true,
     },
     {
       title: '租户',
@@ -898,15 +644,15 @@ export default function () {
     }
   ];
 
-  const headerHelpByBaseColumnIndex: Record<number, { field: string; description: string }> = {
-    10: { field: '资产状态', description: '反映资产是否在线的状态。' },
-    11: { field: '运行状态', description: '反映部署在资产上的探针、Agent或数据采集服务的运行是否正常的状态。' },
-    14: { field: '管理状态', description: '反映资产在平台中是否已上下架的状态（已下架的资产，不纳入监控范围）。' },
-    15: { field: '管理时长', description: '反映资产在平台中的有效管理周期。' },
+  const headerHelpByColumnLabel: Record<string, { field: string; description: string }> = {
+    '资产状态': { field: '资产状态', description: '反映资产是否在线的状态。' },
+    '运行状态': { field: '运行状态', description: '反映部署在资产上的探针、Agent或数据采集服务的运行是否正常的状态。' },
+    '管理状态': { field: '管理状态', description: '反映资产在平台中是否已上下架的状态（已下架的资产，不纳入监控范围）。' },
+    '管理时长': { field: '管理时长', description: '反映资产在平台中的有效管理周期。' },
   };
 
   const baseColumns: any[] = rawBaseColumns.map((column, index) => {
-    const help = headerHelpByBaseColumnIndex[index];
+    const help = headerHelpByColumnLabel[getColumnLabel(column)];
     if (!help) {
       return column;
     }
@@ -999,7 +745,7 @@ export default function () {
   const [defaultValues, setDefaultValues] = useLocalStorage<string[]>('ASSET_SELECTED_COLUMNS', Array.from(new Set(baseColumns.map((obj) => getColumnLabel(obj)))));
   const [optionColumns, setOptionColumns] = useState<any[]>(baseColumns); // 可选列
   const [selectColumns, setSelectColumns] = useState<any[]>(baseColumns.concat(fixColumns));
-  const addedAssetColumnLabels = ['区域', '租户', '资产类型', 'CPU架构'];
+  const addedAssetColumnLabels = ['区域', '软硬件', '租户', '资产类型', 'CPU架构'];
 
   useEffect(() => {
     const currentLabels = defaultValues || [];
@@ -1160,18 +906,48 @@ export default function () {
     })
     return sortedNodes;
   }
-  const getAssetTree = () => {
-    getAssetScopeTree({})
-      .then((res) => {
-        setTreeList(normalizeScopeTreeData(res?.dat));
-        setOidTreeList([]);
-      })
-      .catch(() => {
-        setTreeList(SCOPE_TREE_DATA);
-        setOidTreeList([]);
-        message.error('资产范围树加载失败');
-      });
-  }
+  const getAssetTree = async () => {
+    if (hasRoomFilter()) {
+      setRefreshKey(_.uniqueId('refreshKey_'));
+      return;
+    }
+    const requestId = ++scopeTreeRequestId.current;
+    setTreeLoading(true);
+    try {
+      const { dat } = await getAssetScopeTree(getScopeSearchParams(filterParam, searchVal));
+      if (requestId !== scopeTreeRequestId.current) return;
+      const nodes = normalizeScopeTreeData(dat);
+      const hasSearch = Object.keys(getScopeSearchParams(filterParam, searchVal)).length > 0;
+      const selected = findScopeTreeNode(nodes, scopeSelectionRef.current);
+      // Keep the selected path when search hides its branch so list filters still intersect.
+      if (selected || !hasSearch) {
+        const activeNode = selected || nodes[0];
+        scopeSelectionRef.current = activeNode.scopeValues;
+        setScopeTreeFilter((prev) => _.isEqual(prev, activeNode.scopeValues) ? prev : activeNode.scopeValues);
+        localStorage.setItem('left_asset_type', activeNode.id);
+      } else {
+        localStorage.removeItem('left_asset_type');
+      }
+      setTreeList(nodes);
+      setOidTreeList([]);
+      if (!assetTreeInitialExpandDone.current) {
+        assetTreeInitialExpandDone.current = true;
+        setAssetTreeExpandedIds(new Set(collectScopeTreeExpandedIds(nodes)));
+        removeParId();
+        setTissueId(-1);
+        setTypeId('0');
+        setIsAllAssets(true);
+      } else if (hasSearch) {
+        setAssetTreeExpandedIds(new Set(collectScopeTreeExpandedIds(nodes)));
+      }
+    } catch {
+      if (requestId === scopeTreeRequestId.current) {
+        setTreeList(normalizeScopeTreeData(undefined));
+      }
+    } finally {
+      if (requestId === scopeTreeRequestId.current) setTreeLoading(false);
+    }
+  };
 
   useEffect(() => {
     getDictDataListByType('manufacturer')
@@ -1229,183 +1005,48 @@ export default function () {
     });
   }, []);
 
-  // 首次进入路由或刷新页面：展开第一层，默认选中全部资产并高亮，表格请求全部资产数据。
-  // 从运维表单返回（state.isops=true）时：保持离开前的组织树展开与选中（路径展开 + expandedIds）。
   useEffect(() => {
-    if (!treeList?.length || assetTreeInitialExpandDone.current) return;
-    assetTreeInitialExpandDone.current = true;
-    const fromOpsForm = (location.state as { isops?: boolean } | null)?.isops === true;
-    console.log('fromOpsForm', fromOpsForm);
-    skipNextGetTableDataRef.current = !fromOpsForm;
-    setAssetTreeExpandedIds(new Set(collectScopeTreeExpandedIds(treeList)));
-    localStorage.setItem('left_asset_type', '-1');
-    removeParId();
-    setTissueId(-1);
-    setTypeId('0');
-    setIsAllAssets(true);
-    setRefreshKey(_.uniqueId('refreshKey_'));
-  }, [treeList]);
+    if (hasRoomFilter()) return;
+    const timer = window.setTimeout(() => { getAssetTree(); }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      scopeTreeRequestId.current += 1;
+      requestIdCounter.current += 1;
+    };
+  }, [searchVal, filterParam]);
 
   useEffect(() => {
-    getAssetTree()
-  }, [searchVal]);
-
-  useEffect(() => {
-    if (!treeList?.length) return; // 未加载组织树前不请求表格，避免多余请求
-    if (skipNextGetTableDataRef.current) {
-      skipNextGetTableDataRef.current = false;
-      return;
-    }
+    if (!hasRoomFilter() && !treeList.length) return;
     getTableData();
-  }, [typeId, refreshKey, tissueId, treeList, isAllAssets, scopeTreeFilter]);
+  }, [refreshKey, current, pageSize, treeList, scopeTreeFilter, searchVal, filterParam]);
 
   useInterval(() => {
     setRefreshKey(_.uniqueId('refreshKey_'));
   }, 1000 * 30);
 
   const getTableData = () => {
-    // 1. 生成当前请求的唯一ID（组件内独立递增）
     const requestId = ++requestIdCounter.current;
-    const parentId = localStorage.getItem('left_parId')
-    // console.log(requestIdCounter);
-    // console.log(requestId);
-    const isScopeTreeMode = treeList?.[0]?.isScopeTreeNode;
-    const param: Record<string, any> = {
+    const roomMode = hasRoomFilter();
+    const searchParams = getScopeSearchParams(filterParam, searchVal);
+    const param = {
+      ...(roomMode ? getRoomFilterParams() : scopeTreeFilter),
+      ...searchParams,
       page: current,
       limit: pageSize,
     };
-
-    // ===== 机房维度过滤模式（机房总览"进入"跳转）：合并 URL 携带的 room/cabinet/device_type 参数 =====
-    // 左侧组织树已隐藏，跳过 groupIds / typeId / tissueId / scopeTreeFilter 等组织树过滤
-    if (hasRoomFilter()) {
-      Object.assign(param, getRoomFilterParams());
-    } else {
-      if (!isScopeTreeMode) {
-        param['groupIds'] = groupIds?.toString();
-      }
-    }
-
-    if (searchVal != null && searchVal.length > 0) {
-      param['query'] = searchVal;
-      treeQuery['query'] = searchVal
-    }
-
-    if (!hasRoomFilter()) {
-      if (isScopeTreeMode) {
-        Object.entries(scopeTreeFilter).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            param[key] = value;
-          }
-        });
-      } else {
-        if (typeId != null && typeId != '0' && modifyType && parentId) {
-          param['type'] = typeId;
-        }
-        if (tissueId != null && !parentId) {
-          // param['tissue_tree_id'] = tissueId;
-          param['group_id'] = tissueId;
-        }
-        // 点击全部资产下的查询时，group_id传-1
-        if (isAllAssets) {
-          param["group_id"] = -1;
-          // 根据tissueId的值 查找对应的type_list
-          if (tissueId != null && !parentId) {
-            const treeItem = treeList
-              .find((item) => item.id === -1)
-              ?.sub_groups?.find((item) => item.id === tissueId);
-            // console.log('treeItem', treeItem);
-            const typeListNames = treeItem?.type_list
-              ?.map((item) => item.name)
-              .join(",");
-            if (typeListNames) {
-              param["types"] = typeListNames;
-            } else {
-              param["types"] = "";
-            }
-          }
-        }
-
-        // switch (tissueId) {
-        //   case 1001:
-        //     param['types'] = "物理服务器,网络设备";
-        //     break;
-        //   case 1002:
-        //     param['types'] = "虚拟服务器";
-        //     break;
-        //     case 1003:
-        //     param['types'] = "MySQL, Redis, Mongodb, VictoriaMetrics, HTTP服务, 网络端点, 应用服务, Rabbitmq, Nginx, Apache, postgresql";
-        //     break;
-        //     case 1004:
-        //     param['types'] = "ln-server";
-        //     break;
-        //     case 1005:
-        //     param['types'] = "log统计";
-        //     break;
-        //   default:
-        //     break;
-        // }
-      }
-    }
-
-    // 两种模式下过滤器都生效：searchVal 选定字段 + filterParam 过滤器字段
-    if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
-      param['filter'] = filterParam;
-      treeQuery['filter'] = filterParam
-    }
     setQueryCondition(param);
-
-    const hasSearchValue = searchVal != null && searchVal.length > 0;
-    const requestFunc = hasSearchValue
-      ? getAssetsByN9eCondition
-      : isScopeTreeMode && !hasRoomFilter()
-        ? getAssetScopeTreeAssets
-        : getAssetsByCondition;
-
+    const requestFunc = roomMode
+      ? (searchParams.query ? getAssetsByN9eCondition : getAssetsByCondition)
+      : getAssetScopeTreeAssets;
     requestFunc(param).then(({ dat }) => {
-      // dat.list.forEach((entity, index) => {
-      //   let expands = entity.exps;
-      //   if (expands != null && expands.length > 0) {
-      //     const map = new Map();
-      //     expands.forEach((item, index, arr) => {
-      //       if (!map.has(item.config_category)) {
-      //         map.set(
-      //           item.config_category,
-      //           arr.filter((a) => a.config_category == item.config_category),
-      //         );
-      //       }
-      //     });
-      //     //以上分组加载数据
-      //     let mapValues = {};
-      //     map.forEach(function (value, key) {
-      //       const formDataMap = new Map();
-      //       value.forEach((item, index, arr) => {
-      //         if (!formDataMap.has(item.group_id)) {
-      //           formDataMap.set(
-      //             item.group_id,
-      //             arr.filter((a) => a.group_id == item.group_id),
-      //           );
-      //         }
-      //       });
-      //       let group: any = [];
-      //       formDataMap.forEach(function (value, i) {
-      //         let itemsChars = '';
-      //         value.forEach((item, index, arr) => {
-      //           itemsChars += '"' + item.name + '":"' + item.value + '",';
-      //         });
-      //         itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
-      //         group.push(JSON.parse(itemsChars));
-      //       });
-      //       mapValues[key] = group;
-      //     });
-      //     entity.expands = mapValues;
-      //   }
-      // });
-      // console.log('1111list', dat.list);
-
-      // 2. 只有本次请求ID等于最新计数器值，才更新数据
       if (requestId === requestIdCounter.current) {
-        setList(dat.list || []);
-        setTotal(dat.total);
+        setList(dat?.list || []);
+        setTotal(dat?.total || 0);
+      }
+    }).catch(() => {
+      if (requestId === requestIdCounter.current) {
+        setList([]);
+        setTotal(0);
       }
     });
   };
@@ -1629,8 +1270,8 @@ export default function () {
   // const handleClickTree = (item: any, par: any) => {
   const handleClickTree = (item: any, par: any, isAllAssets: boolean) => {
     if (item?.isScopeTreeNode) {
+      scopeSelectionRef.current = item.scopeValues || {};
       setScopeTreeFilter(item.scopeValues || {});
-      setScopeTreeNodeType(item.node_type || 'root');
       setCurrent(1);
       setIsAllAssets(item.node_type === 'root');
       setTypeId('0');
@@ -1663,52 +1304,16 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   }
 
-  const loadScopeCpuChildren = async (item: any) => {
-    if (
-      !item?.isScopeTreeNode ||
-      item.node_type !== 'asset_category' ||
-      !isServerAssetCategory(item.scopeValues?.asset_category) ||
-      item.scopeChildrenLoaded
-    ) {
-      return;
-    }
 
-    try {
-      const { dat } = await getAssetScopeTreeChildren({
-        region: item.scopeValues?.region,
-        tenant_set: item.scopeValues?.tenant_set || item.scopeValues?.tenant,
-        tenant: item.scopeValues?.tenant,
-        asset_category: item.scopeValues?.asset_category,
-      });
-      const nodes = dat?.nodes || [];
-      if (!nodes.length) {
-        return;
-      }
-      const children = nodes.map((node, index) => createScopeTreeNode({
-        id: `${item.id}-cpu-${index}`,
-        name: node.label || node.key,
-        nodeType: node.node_type || 'cpu_arch',
-        count: node.count,
-        groupLevel: item.group_level + 1,
-        scopeValues: {
-          ...item.scopeValues,
-          cpu_arch: node.key,
-        },
-      }));
-      setTreeList((prev) => updateScopeTreeChildren(prev, item.id, children));
-    } catch (error) {
-      // 后端 children 接口暂不可用时，保留本地示例 CPU 架构节点。
-    }
-  };
 
   /** 资产树组件 */
   // isAllAssets：一个布尔值，用于标记当前节点是否是"全部资产"的子节点。
   const TreeNode = ({ item, expandedIds, onToggle, isAllAssets = false }) => {
     const isExpanded = expandedIds.has(item.id);
-    const canExpand = item.sub_groups?.length > 0 && (item.node_type !== 'asset_category' || isServerAssetCategory(item.scopeValues?.asset_category));
+    const canExpand = item.sub_groups?.length > 0;
     const displayChildren = canExpand ? item.sub_groups : [];
     return (
-      <div key={item.name} className="tree-row">
+      <div key={item.id} className="tree-row">
         <div
           className="tree-group"
           style={{ marginLeft: `${(item.group_level - 1) * 20}px` }}
@@ -1717,7 +1322,6 @@ export default function () {
             onClick={() => {
               if (canExpand) {
                 onToggle(item.id);
-                loadScopeCpuChildren(item);
               }
             }}
           >
@@ -1918,23 +1522,22 @@ export default function () {
                     <span className='asset-organize-title-bar' />
                     <span>资产范围树</span>
                   </div>
-                  {false &&
-                    (profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && <span
-                      className="add_group"
-                      onClick={() => {
-                        setOpen(true);
-                        setCurGroup({});
-                        setTitle("新增分组");
-                        setLevel(1);
-                        setParentId(null);
-                      }}
+                  {(profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && (
+                    <Button
+                      type='link'
+                      size='small'
+                      icon={<PlusOutlined />}
+                      className='add_group'
+                      onClick={() => setRegionModalOpen(true)}
                     >
                       新增分组
-                    </span>
-                  }
+                    </Button>
+                  )}
                 </div>
                 <div className='tree-list'>
-                  <AssetTree data={treeList} expandedIds={assetTreeExpandedIds} setExpandedIds={setAssetTreeExpandedIds} />
+                  <Spin spinning={treeLoading}>
+                    <AssetTree data={treeList} expandedIds={assetTreeExpandedIds} setExpandedIds={setAssetTreeExpandedIds} />
+                  </Spin>
                   {/* {
                   _.map(treeList, (item) => {
                     return (
@@ -2039,13 +1642,13 @@ export default function () {
             <Space>
               <RefreshIcon
                 onClick={() => {
-                  setRefreshKey(_.uniqueId('refreshKey_'));
+                  getAssetTree();
                 }}
               />
               <div className='table-handle-search'>
                 <Space>
                   <Select
-                    defaultValue={filterParam}
+                    value={filterParam}
                     placeholder='选择过滤器'
                     style={{ width: 120 }}
                     // allowClear
@@ -2251,6 +1854,16 @@ export default function () {
             </div>
           </div>
         </div>
+        {regionModalOpen && (
+          <RegionModal
+            onCancel={() => setRegionModalOpen(false)}
+            onCreated={() => {
+              message.success('新增成功');
+              setRegionModalOpen(false);
+              getAssetTree();
+            }}
+          />
+        )}
         {/* 分组弹窗 */}
         {open && (
           <AccordionModal
