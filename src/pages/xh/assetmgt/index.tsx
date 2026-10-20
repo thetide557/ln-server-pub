@@ -1522,7 +1522,7 @@ export default function () {
                     <span className='asset-organize-title-bar' />
                     <span>资产范围树</span>
                   </div>
-                  {(profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && (
+                  {/* {(profile.roles?.includes("Admin") || permList.includes("/xh/assetmgt/addGroup")) && (
                     <Button
                       type='link'
                       size='small'
@@ -1532,7 +1532,7 @@ export default function () {
                     >
                       新增分组
                     </Button>
-                  )}
+                  )} */}
                 </div>
                 <div className='tree-list'>
                   <Spin spinning={treeLoading}>
@@ -1720,7 +1720,7 @@ export default function () {
                       }}
                       type='primary'
                     >
-                      {t('新增')}
+                      {t('新增资产')}
                     </Button>
                   </div>
                 }

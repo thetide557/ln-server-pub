@@ -173,9 +173,10 @@ function IpListPage() {
     },
     {
       title: '资产在线状态',
-      dataIndex: 'onlineStatus',
+      dataIndex: 'onlineStatusText',
       width: 100,
-      render: (val) => <Tag color={ipOnlineStatusMap[val]?.color}>{ipOnlineStatusMap[val]?.text}</Tag>,
+      // 后端返回什么显示什么（在线/离线/未纳管），空显示 -；颜色沿用枚举（在线绿，其余灰）
+      render: (val, record) => (val ? <Tag color={ipOnlineStatusMap[record.onlineStatus]?.color || 'default'}>{val}</Tag> : '-'),
     },
     { title: '资产名称', dataIndex: 'assetName', width: 130, ellipsis: true, render: (val) => val || '-' },
     { title: 'MAC地址', dataIndex: 'mac', width: 140, ellipsis: true, render: (val) => val || '-' },

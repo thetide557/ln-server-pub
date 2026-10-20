@@ -65,12 +65,10 @@ export default function RecycleModal(props: RecycleModalProps) {
     },
     {
       title: '资产在线状态',
-      dataIndex: 'onlineStatus',
+      dataIndex: 'onlineStatusText',
       width: 95,
-      render: (val) => {
-        const item = ipOnlineStatusMap[val];
-        return <span className={`ant-tag ant-tag-${item?.color}`}>{item?.text}</span>;
-      },
+      // 后端返回什么显示什么（在线/离线/未纳管），空显示 -
+      render: (val, record) => (val ? <span className={`ant-tag ant-tag-${ipOnlineStatusMap[record.onlineStatus]?.color || 'default'}`}>{val}</span> : '-'),
     },
     { title: '资产名称', dataIndex: 'assetName', width: 110, ellipsis: true, render: (val) => val || '-' },
     { title: 'MAC地址', dataIndex: 'mac', width: 130, ellipsis: true, render: (val) => val || '-' },

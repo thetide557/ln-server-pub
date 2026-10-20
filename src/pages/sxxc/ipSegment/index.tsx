@@ -48,6 +48,7 @@ import {
   recycleOneIp,
   releaseIp,
   reserveIp,
+  scanSegment,
 } from '@/services/sxxc/ipam';
 // mock 仅保留分组树归属计算
 import { collectGroupIds } from './mock';
@@ -306,6 +307,7 @@ function IpSegmentPage() {
       status: q.status,
     })
       .then((res) => {
+        console.log(res);
         setTableData(res.list);
         setServerTotal(res.total);
         if (res.stats) setStats(res.stats);
@@ -394,7 +396,7 @@ function IpSegmentPage() {
     {
       title: '操作',
       key: 'action',
-      width: 260,
+      width: 300,
       fixed: 'right',
       render: (_, record) => (
         <>
@@ -446,6 +448,29 @@ function IpSegmentPage() {
           </Button>
           {record.status === SegmentStatus.InUse && (
             <>
+              {/* 扫描（ICMP 探测整段，接口文档 addresses-scan-batch）：扫完后按台账重算统计，列表与树刷新后同步 */}
+              <Button
+                type='link'
+                size='small'
+                style={{ padding: 0, marginLeft: 8 }}
+                onClick={() => {
+                  const hide = message.loading('正在扫描该地址段...', 0);
+                  scanSegment(record.id)
+                    .then((res) => {
+                      hide();
+                      notification.open({
+                        message: '扫描完成',
+                        description: `地址段 ${record.fullSegment} ICMP 扫描完成，成功${res.success}个，失败${res.failed}个`,
+                        placement: 'bottomRight',
+                        duration: 3,
+                      });
+                      handleRefresh();
+                    })
+                    .catch(() => hide());
+                }}
+              >
+                扫描
+              </Button>
               {/* 扫描可回收IP：先弹该段所属分组的回收规则列表，行内「执行」触发扫描（后端文档交互） */}
               <Button
                 type='link'
@@ -570,9 +595,10 @@ function IpSegmentPage() {
     },
     {
       title: '资产在线状态',
-      dataIndex: 'onlineStatus',
+      dataIndex: 'onlineStatusText',
       width: 100,
-      render: (val) => <Tag color={ipOnlineStatusMap[val]?.color}>{ipOnlineStatusMap[val]?.text}</Tag>,
+      // 后端返回什么显示什么（在线/离线/未纳管），空显示 -；颜色沿用枚举（在线绿，其余灰）
+      render: (val, record) => (val ? <Tag color={ipOnlineStatusMap[record.onlineStatus]?.color || 'default'}>{val}</Tag> : '-'),
     },
     { title: '资产名称', dataIndex: 'assetName', width: 130, ellipsis: true, render: (val) => val || '-' },
     { title: 'MAC地址', dataIndex: 'mac', width: 140, ellipsis: true, render: (val) => val || '-' },

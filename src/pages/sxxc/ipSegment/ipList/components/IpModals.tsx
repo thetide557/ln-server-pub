@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { AutoComplete, Button, Col, Form, Input, InputNumber, message, Modal, Row, Select, Switch, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import _ from 'lodash';
-import { IpItem, ipAllocStatusMap, ipOnlineStatusMap, ipUseStatusMap } from '../../types';
+import { IpItem, ipAllocStatusMap, ipUseStatusMap } from '../../types';
 import { exportIps, importIps, downloadImportTemplate } from '@/services/sxxc/ipam';
 
 // ==================== 查看IP ====================
@@ -17,7 +17,6 @@ export function IpViewModal(props: { visible: boolean; ip?: IpItem; onClose: () 
   if (!ip) return null;
   const alloc = ipAllocStatusMap[ip.allocStatus];
   const use = ipUseStatusMap[ip.useStatus];
-  const online = ipOnlineStatusMap[ip.onlineStatus];
   return (
     <Modal title='查看IP' visible={visible} footer={null} onCancel={props.onClose} width={620}>
       <Form labelCol={{ flex: '90px' }} disabled className='ip-view-form'>
@@ -37,7 +36,7 @@ export function IpViewModal(props: { visible: boolean; ip?: IpItem; onClose: () 
           <Input value={use?.text} />
         </Form.Item>
         <Form.Item label='资产在线状态'>
-          <Input value={online?.text} />
+          <Input value={ip.onlineStatusText || '-'} />
         </Form.Item>
         <Form.Item label='资产名称'>
           <Input value={ip.assetName || '-'} />
