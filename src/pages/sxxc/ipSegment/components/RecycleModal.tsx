@@ -72,7 +72,7 @@ export default function RecycleModal(props: RecycleModalProps) {
     },
     { title: '资产名称', dataIndex: 'assetName', width: 110, ellipsis: true, render: (val) => val || '-' },
     { title: 'MAC地址', dataIndex: 'mac', width: 130, ellipsis: true, render: (val) => val || '-' },
-    { title: '接入端口', dataIndex: 'port', width: 80, render: (val) => val || '-' },
+    // { title: '接入端口', dataIndex: 'port', width: 80, render: (val) => val || '-' },
     { title: '临时IP', dataIndex: 'isTempIp', width: 70, render: (val) => (val === -1 ? '-' : val === 1 ? '是' : '否') },
     { title: '网关', dataIndex: 'isGateway', width: 60, render: (val) => (val === -1 ? '-' : val === 1 ? '是' : '否') },
     { title: '最后在线时间', dataIndex: 'lastOnlineTime', width: 140, render: (val) => val || '-' },

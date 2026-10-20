@@ -44,9 +44,9 @@ export function IpViewModal(props: { visible: boolean; ip?: IpItem; onClose: () 
         <Form.Item label='MAC地址'>
           <Input value={ip.mac || '-'} />
         </Form.Item>
-        <Form.Item label='接入端口'>
+        {/* <Form.Item label='接入端口'>
           <Input value={ip.port || '-'} />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item label='临时IP'>
           <Input value={ip.isTempIp === -1 ? '-' : ip.isTempIp === 1 ? '是' : '否'} />
         </Form.Item>
@@ -222,7 +222,8 @@ export function IpAssignModal(props: {
         assetName: ip?.assetName,
         mac: ip?.mac,
         port: ip?.port && ip.port !== '-' ? ip.port : undefined,
-        durationUnit: '天',
+        // 使用时长：目前不用，暂时注释
+        // durationUnit: '天',
         gateway: false,
         tempIp: false,
         note: ip?.note,
@@ -284,6 +285,7 @@ export function IpAssignModal(props: {
         <Form.Item label='端口' name='port'>
           <Input placeholder='请输入' maxLength={20} />
         </Form.Item>
+        {/* 使用时长：目前不用，暂时注释
         <Form.Item label='使用时长' required>
           <div style={{ display: 'flex', columnGap: 8 }}>
             <Form.Item name='duration' noStyle rules={[{ required: true, message: '请输入使用时长' }]}>
@@ -294,6 +296,7 @@ export function IpAssignModal(props: {
             </Form.Item>
           </div>
         </Form.Item>
+        */}
         <Form.Item label='备注' name='note'>
           <Input.TextArea placeholder='请输入备注' maxLength={200} autoSize={{ minRows: 2, maxRows: 4 }} />
         </Form.Item>

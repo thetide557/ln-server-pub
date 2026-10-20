@@ -407,7 +407,7 @@ function IpListPage() {
           onChange={setActiveTab}
         >
           <Tabs.TabPane tab='IP列表' key='ip-list' />
-          <Tabs.TabPane tab='IP视图' key='ip-view' />
+          {/* <Tabs.TabPane tab='IP视图' key='ip-view' /> */}
         </Tabs>
         {activeTab === 'ip-list' ? (
           <>
