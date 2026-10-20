@@ -1042,14 +1042,15 @@ export default function () {
 
                 {/* 第 2 行：区域 / 租户 / 资产类型 */}
                 <Col span={12}>
-                  <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请选择区域' }]}>
-                    <Select
+                  <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请输入区域' }]}>
+                    {/* <Select
                       showSearch
                       optionFilterProp='label'
                       options={regionOptions}
                       loading={regionLoading}
                       placeholder='请选择区域'
-                    />
+                    /> */}
+                    <Input placeholder='请输入区域' />
                   </Form.Item>
                 </Col>
                 <Col span={12}>

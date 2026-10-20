@@ -139,13 +139,13 @@ export const addAsset = function (data: assetsType) {
 
 //针对西航项目
 export const insertXHAsset = function (data) {
-  return request("/api/takin/xh/assets/", {
+  return request("/api/takin/xh/assets", {
     method: RequestMethod.Post,
     data,
   });
 };
 export const updateXHAsset = function (data) {
-  return request("/api/takin/xh/assets/", {
+  return request("/api/takin/xh/assets", {
     method: RequestMethod.Put,
     data,
   });
