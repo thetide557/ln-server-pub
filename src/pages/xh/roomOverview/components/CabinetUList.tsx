@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Table, Tag, Select, Space, Button, Dropdown, Menu, message,
+  Table, Tag, Select, Space, Button, Dropdown, Menu, Tooltip, message,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import { getCabinetUSlots } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
-import { getXhAsset } from '@/services/assets';
 import {
   OccupyModal, ReserveModal, ReleaseModal,
   DisableModal, EnableModal, CancelReserveModal, MigrateModal,
@@ -51,10 +50,7 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
       setLoading(true);
       try {
         const res = await getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode });
-        const rawSlots = res?.dat || [];
-        // 已占用 U 位：额外查资产 health，health=0 视为故障
-        await patchHealthStatus(rawSlots);
-        setAllSlots(rawSlots);
+        setAllSlots(res?.dat || []);
       } finally {
         setLoading(false);
       }
@@ -67,9 +63,7 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     setLoading(true);
     try {
       const res = await getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode });
-      const rawSlots = res?.dat || [];
-      await patchHealthStatus(rawSlots);
-      setAllSlots(rawSlots);
+      setAllSlots(res?.dat || []);
       setSelectedRowKeys([]);
     } finally {
       setLoading(false);
@@ -83,28 +77,6 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
 
   // ========== 工具函数 ==========
 
-  /** 已占用 U 位：查资产 health，health=0 改为 fault */
-  const patchHealthStatus = async (slots: CabinetUSlot[]) => {
-    const usedSlots = slots.filter((s) => s.status === 'used' && s.asset_id);
-    if (usedSlots.length === 0) return;
-    const healthResults = await Promise.allSettled(
-      [...new Set(usedSlots.map((s) => s.asset_id!))].map((aid) =>
-        getXhAsset(String(aid)).then(({ dat }) => ({ asset_id: aid, health: dat?.health })),
-      ),
-    );
-    const healthMap = new Map<number, number>();
-    healthResults.forEach((r) => {
-      if (r.status === 'fulfilled' && r.value.health !== undefined && r.value.health !== null) {
-        healthMap.set(r.value.asset_id, Number(r.value.health));
-      }
-    });
-    slots.forEach((s) => {
-      if (s.status === 'used' && s.asset_id && healthMap.get(s.asset_id) === 0) {
-        s.status = 'fault';
-      }
-    });
-  };
-
   /** 更新本地 U 位状态（操作成功后本地 patch 优化体验） */
   const patchSlot = (uPositions: number[], patch: Partial<CabinetUSlot>) => {
     setAllSlots((prev) => prev.map((s) =>
@@ -115,6 +87,10 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
   // ========== 弹窗打开 ==========
 
   const openModal = (type: ModalType, slot: CabinetUSlot) => {
+    if (type === 'migrate' && slot.asset_deleted) {
+      message.warning('资产已删除，无法迁移');
+      return;
+    }
     setCurrentSlot(slot);
     setModalType(type);
   };
@@ -154,7 +130,10 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
         return (<>
           {link('释放', () => openModal('release', slot))}
           {link('迁移', () => openModal('migrate', slot))}
-          <a style={{ color: '#1C76FD', cursor: 'pointer' }} onClick={() => slot.asset_id && history.push(`/xh/assetmgt/add?mode=view&id=${slot.asset_id}&from=roomOverview`)}>资产详情</a>
+          <a style={{ color: '#1C76FD', cursor: 'pointer' }} onClick={() => {
+            if (slot.asset_deleted) { message.warning('资产已删除，无法查看详情'); return; }
+            if (slot.asset_id) history.push(`/xh/assetmgt/add?mode=view&id=${slot.asset_id}&from=roomOverview`);
+          }}>资产详情</a>
         </>);
       case 'reserved':
         return link('取消预留', () => openModal('cancelReserve', slot), true);
@@ -206,7 +185,20 @@ const CabinetUList: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     { title: '资产类型', dataIndex: 'asset_type', key: 'asset_type', width: 120, render: (v) => v || '-' },
     { title: '资产型号', dataIndex: 'asset_model', key: 'asset_model', width: 140, render: (v) => v || '-' },
     { title: '责任人', dataIndex: 'duty_person', key: 'duty_person', width: 90, render: (v) => v || '-' },
-    { title: '更新人', dataIndex: 'update_by', key: 'update_by', width: 90, render: (v) => v || '-' },
+    {
+      title: (
+        <span>
+          更新人
+          <Tooltip title="更新人 system，表示系统自动巡检变更，非人工操作">
+            <QuestionCircleOutlined style={{ marginLeft: 4, color: '#8C8C8C', cursor: 'help' }} />
+          </Tooltip>
+        </span>
+      ),
+      dataIndex: 'update_by',
+      key: 'update_by',
+      width: 110,
+      render: (v) => v || '-',
+    },
     { title: '更新时间', dataIndex: 'update_time', key: 'update_time', width: 160, render: (v) => v || '-' },
     { title: '操作', key: 'action', fixed: 'right', width: 220, render: (_, r) => renderActions(r) },
   // eslint-disable-next-line react-hooks/exhaustive-deps

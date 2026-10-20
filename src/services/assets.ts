@@ -68,6 +68,36 @@ export const getAssetScopeTreeAssets = function (params) {
   });
 };
 
+export interface AssetRegion {
+  id: number;
+  name: string;
+  status: number;
+}
+
+export const getAssetRegionList = function (params: { page: number; limit: number; query?: string }) {
+  return request('/api/takin/region/list', { method: RequestMethod.Get, params });
+};
+
+export const getAssetRegionOptions = async function (): Promise<AssetRegion[]> {
+  const regions: AssetRegion[] = [];
+  const limit = 100;
+  let page = 1;
+  while (true) {
+    const { dat } = await getAssetRegionList({ page, limit });
+    const items: AssetRegion[] = dat?.list || [];
+    regions.push(...items);
+    if (!items.length || regions.length >= dat.total || items.length < limit) return regions;
+    page += 1;
+  }
+};
+
+export const createAssetRegion = function (data: { name: string; sort: number; status: number; remark?: string }) {
+  return request('/api/takin/region', {
+    method: RequestMethod.Post,
+    data: { ...data, parent_id: 0, level: 1 },
+  });
+};
+
 export const getAssetsByMonitor = function (params) {
   return request("/api/takin/xh/assets/monitor", {
     method: RequestMethod.Get,
@@ -109,13 +139,13 @@ export const addAsset = function (data: assetsType) {
 
 //针对西航项目
 export const insertXHAsset = function (data) {
-  return request("/api/takin/xh/assets", {
+  return request("/api/takin/xh/assets/", {
     method: RequestMethod.Post,
     data,
   });
 };
 export const updateXHAsset = function (data) {
-  return request("/api/takin/xh/assets", {
+  return request("/api/takin/xh/assets/", {
     method: RequestMethod.Put,
     data,
   });

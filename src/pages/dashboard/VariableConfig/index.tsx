@@ -94,7 +94,9 @@ function index(props: IProps) {
             if (query.__variable_value_fixed === undefined) {
               if (selected === null || (selected && !_.isEmpty(regFilterOptions) && !includes(regFilterOptions, selected))) {
                 const head = regFilterOptions?.[0];
-                const defaultVal = item.multi ? (item.allOption ? ['all'] : head ? [head] : []) : head;
+                // 变量定义中显式配置了默认值时优先使用（需存在于选项列表中），否则沿用首个选项
+                const defaultInOptions = item.defaultValue && regFilterOptions && includes(regFilterOptions, item.defaultValue) ? item.defaultValue : null;
+                const defaultVal = defaultInOptions || (item.multi ? (item.allOption ? ['all'] : head ? [head] : []) : head);
                 setVaraiableSelected({ name: item.name, value: defaultVal, id, urlAttach: true });
               }
             }

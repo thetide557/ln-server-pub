@@ -112,7 +112,8 @@ export interface IpamAddressVO {
   ip: string;
   allocation_status: 'unallocated' | 'allocated' | 'reserved';
   usage_status: 'used' | 'unused';
-  online_status: 'online' | 'offline' | '';
+  /** 在线状态：新口径返回中文（在线/离线/未纳管），兼容旧英文 online/offline/空 */
+  online_status: string;
   asset_name?: string;
   asset_id?: number;
   mac?: string;
@@ -483,8 +484,16 @@ const ALLOC_STATUS_FROM_ENUM: Record<number, string> = {
 /** 使用状态 → 后端参数（后端补参后生效） */
 const USE_STATUS_FROM_ENUM: Record<number, string> = { 1: 'used', 0: 'unused' };
 
-/** 在线状态 → 后端参数（后端补参后生效） */
-const ONLINE_STATUS_FROM_ENUM: Record<number, string> = { 1: 'online', 0: 'offline' };
+/** 在线状态 → 后端参数（后端补参后生效；online_status 新口径为中文） */
+const ONLINE_STATUS_FROM_ENUM: Record<number, string> = { 1: '在线', 0: '离线' };
+
+/** 后端 online_status（新口径中文，兼容旧英文）→ 页面枚举 */
+const ONLINE_STATUS_TO_ENUM: Record<string, IpOnlineStatus> = {
+  在线: IpOnlineStatus.Online,
+  online: IpOnlineStatus.Online,
+  离线: IpOnlineStatus.Offline,
+  offline: IpOnlineStatus.Offline,
+};
 
 /** 页面时长单位（天/月）→ 后端单位（当前仅 day） */
 const DURATION_UNIT_TO_API: Record<string, string> = { 天: 'day', 月: 'month' };
@@ -562,8 +571,10 @@ function addressVOToItem(vo: IpamAddressVO): IpItem {
     ip: vo.ip,
     allocStatus: alloc,
     useStatus: vo.usage_status === 'used' ? IpUseStatus.Used : IpUseStatus.Unused,
-    onlineStatus:
-      vo.online_status === 'online' ? IpOnlineStatus.Online : vo.online_status === 'offline' ? IpOnlineStatus.Offline : IpOnlineStatus.None,
+    // 新口径返回中文（在线/离线/未纳管），兼容旧英文 online/offline；其余（未纳管/空）视为无状态
+    onlineStatus: ONLINE_STATUS_TO_ENUM[vo.online_status] ?? IpOnlineStatus.None,
+    // 原始文案直出：页面显示优先用它，空显示 -
+    onlineStatusText: vo.online_status || undefined,
     segmentId: vo.subnet_id,
     segment: vo.subnet_cidr || '',
     groupId: 0,
@@ -1300,9 +1311,15 @@ export async function getChangeLogs(
   };
 }
 
-/** IP 批量扫描（刷新台账+资产推导状态，返回成功/失败条数） */
+/** IP 批量扫描（选中 IP；与段扫描同路径，仅 ips 不同） */
 export async function batchScanIps(segmentId: number, ips: string[]): Promise<{ success: number; failed: number }> {
   const res = await scanIpamAddressesBatch(segmentId, ips);
+  return parseBatchResult(res);
+}
+
+/** 地址段 ICMP 扫描（整段探测，接口文档 addresses-scan-batch；ips 为空 = 扫该段全部主机） */
+export async function scanSegment(segmentId: number): Promise<{ success: number; failed: number }> {
+  const res = await scanIpamAddressesBatch(segmentId, []);
   return parseBatchResult(res);
 }
 

@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import _, { forEach } from 'lodash';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
-import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory, getAssetShelfHistory } from '@/services/assets';
+import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory, getAssetShelfHistory, getAssetRegionOptions } from '@/services/assets';
+import { HW_SW_OPTIONS } from '../scopeTree';
 import { getDictDataListByType } from '@/services/system/dict';
 import { addDictDataBySingle } from '@/services/system/dictdata';
 
@@ -71,6 +72,8 @@ export default function () {
   const formId = Form.useWatch('id', form);
   const [assetData, setAssetData] = useState<any>({}); // 集中保存提交的数据
   const [currentType, setCurrentType] = useState();
+  const [regionOptions, setRegionOptions] = useState<{ label: string; value: string }[]>([]);
+  const [regionLoading, setRegionLoading] = useState(false);
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [manufacturerOptions, setManufacturerOptions] = useState<{ value: string; label: string }[]>([]);
@@ -216,6 +219,18 @@ export default function () {
     }, 300),
     [],
   );
+  useEffect(() => {
+    let active = true;
+    setRegionLoading(true);
+    getAssetRegionOptions().then((regions) => {
+      if (active) setRegionOptions(regions.map((region) => ({ label: region.name, value: region.name })));
+    }).catch(() => {
+      // Request middleware displays the failure.
+    }).finally(() => {
+      if (active) setRegionLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
 
   const handleAddManufacturer = useCallback(async () => {
     if (addingManufacturerRef.current) {
@@ -542,8 +557,9 @@ export default function () {
     if (submitData.is_shelf === true) {
       submitData.shelf_reason = ''
     }
-    console.log("submitForm111", submitData, assetOptions)
+    console.log(submitData);
 
+    // return false
     if (editType !== 'edit') {
       await insertXHAsset(submitData);
       message.success('添加成功');
@@ -1052,8 +1068,19 @@ export default function () {
 
                 {/* 第 2 行：区域 / 租户 / 资产类型 */}
                 <Col span={12}>
-                  <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请输入区域' }]}>
-                    <Input placeholder='请输入区域' />
+                  <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请选择区域' }]}>
+                    <Select
+                      showSearch
+                      optionFilterProp='label'
+                      options={regionOptions}
+                      loading={regionLoading}
+                      placeholder='请选择区域'
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item {...basicItemLayout} label='软硬件' name='hw_sw' rules={[{ required: true, message: '请选择软硬件' }, { type: 'enum', enum: ['硬件', '软件'], message: '请选择硬件或软件' }]}>
+                    <Select options={HW_SW_OPTIONS} placeholder='请选择软硬件' />
                   </Form.Item>
                 </Col>
                 <Col span={12}>

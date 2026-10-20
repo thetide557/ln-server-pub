@@ -69,7 +69,7 @@ let cardQueryFilter = [
   // { name: 'alert_rule', label: '告警规则', type: 'input' },
 ]
 let listQueryFilter = [
-  { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'asset_ip', label: 'IP地址', type: 'input' },
   { name: 'severity', label: '告警级别', type: 'select' },
   { name: 'rule_name', label: '告警规则名称', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
@@ -85,12 +85,12 @@ const Event: React.FC = () => {
 
   const [searchVal, setSearchVal] = useLocalStorage<any>('current_filter_type', null);
   const [chooseVal,setChooseVal] = useState<any>('severity');
-  const [filterParam, setFilterParam] = useLocalStorage<any>('current_filter_param', "severity");
+  const [filterParam, setFilterParam] = useLocalStorage<any>('current_filter_param-shanshu', "severity");
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [startTime, setStartTime] = useLocalStorage<any>('current_filter_start', null);
-  const [endTime, setEndTime] = useLocalStorage<any>('current_filter_end', null);
+  const [startTime, setStartTime] = useState<any>(null);
+  const [endTime, setEndTime] = useState<any>(null);
   const DateFormat = 'YYYY-MM-DD HH:mm:ss';
   const [display, setDisplay] = useState<any>(localStorage.getItem('current_alert_display') ? _.toString(localStorage.getItem('current_alert_display')) : "table");
 
@@ -98,8 +98,8 @@ const Event: React.FC = () => {
     group_id?: number;
     severity?: number;
     query: string;
-    start: number;
-    end: number;
+    // start: number;
+    // end: number;
   }>(() => {
     // 初始化就读取 range 并算出真实 start/end，避免 mount 后 useEffect 再 setFilter 导致子组件 refreshDeps 变化触发二次请求
     let initialRange: IRawTimeRange = { start: 'now-1h', end: 'now' };
@@ -110,8 +110,8 @@ const Event: React.FC = () => {
     const parsedRange = parseRange(initialRange);
     return {
       query: '',
-      start: moment(parsedRange.start).unix(),
-      end: moment(parsedRange.end).unix(),
+      start: null,
+      end: null,
     };
   });
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
@@ -119,6 +119,22 @@ const Event: React.FC = () => {
   const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [filterType, setFilterType] = useLocalStorage<any>('current_filter_types', "select");
   const [range, setRange] = useLocalStorage<IRawTimeRange>('alert_cur_range', { start: 'now-1h', end: 'now' });
+
+  // 刷新后 chooseVal（useState，不持久化，固定重置为 severity）与 filterType（localStorage 持久化）可能不一致，
+  // 导致下拉显示"告警级别"却渲染输入框；mount 时根据 filterParam 强制三者对齐
+  useEffect(() => {
+    const item = listQueryFilter.find(i => i.name === filterParam);
+    if (item) {
+      setChooseVal(item.name);
+      setFilterType(item.type);
+    } else {
+      // filterParam 为 null 或已不在筛选列表中（如被注释掉的 ip），恢复默认
+      setChooseVal('severity');
+      setFilterParam('severity');
+      setFilterType('select');
+      setSearchVal(null);
+    }
+  }, []);
 
   const onChange = (
     value: DatePickerProps['value'] | RangePickerProps['value'],
@@ -132,8 +148,8 @@ const Event: React.FC = () => {
       setRefreshFlag(_.uniqueId('refresh_'));
       localStorage.setItem('events_current_from',""+1);
     } else {
-      setStartTime(dateString[0])
-      setEndTime(dateString[1])
+      setStartTime(null)
+      setEndTime(null)
       localStorage.setItem('events_current_from',""+1);
     }
   };
@@ -142,11 +158,11 @@ const Event: React.FC = () => {
 
     value?.forEach((element, index) => {
       if (index == 0 && element != null) {
-        filter["start"] = moment(element).unix()
+        // filter["start"] = moment(element).unix()
         setFilter({ ...filter });
       }
       if (index == 1 && element != null) {
-        filter["end"] = moment(element).unix()
+        // filter["end"] = moment(element).unix()
         setFilter({ ...filter });
       }
     });
@@ -171,8 +187,8 @@ const Event: React.FC = () => {
     })
     setFilterOptions({ ...filterOptions })
     const parsedRange = parseRange(range);
-    filter["start"] = moment(parsedRange.start).unix();
-    filter["end"] = moment(parsedRange.end).unix();
+    // filter["start"] = moment(parsedRange.start).unix();
+    // filter["end"] = moment(parsedRange.end).unix();
     setFilter({ ...filter });
     // if (startTime != null && endTime != null) {
     //   filter["start"] = moment(startTime).unix()
@@ -183,8 +199,8 @@ const Event: React.FC = () => {
 
   useEffect(() => {
     const parsedRange = parseRange(range);
-    filter["start"] = moment(parsedRange.start).unix();
-    filter["end"] = moment(parsedRange.end).unix();
+    // filter["start"] = moment(parsedRange.start).unix();
+    // filter["end"] = moment(parsedRange.end).unix();
     setFilter({ ...filter });
 
   }, [JSON.stringify(range)])
@@ -287,7 +303,7 @@ const Event: React.FC = () => {
               placeholder={'选择要筛选的条件'}
             />
           )}
-          <TimeRangePicker value={range} onChange={setRange} dateFormat='YYYY-MM-DD HH:mm:ss' />
+          {/* <TimeRangePicker value={range} onChange={setRange} dateFormat='YYYY-MM-DD HH:mm:ss' /> */}
           {/* <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
@@ -370,8 +386,8 @@ const Event: React.FC = () => {
 
   const filterObj = Object.assign(
     (searchVal != null && searchVal.length > 0) ? { filter: filterParam, query: searchVal } : {},
-    filter.start > 0 ? { start: filter.start } : {},
-    filter.end > 0 ? { end: filter.end } : {},
+    // filter.start > 0 ? { start: filter.start } : {},
+    // filter.end > 0 ? { end: filter.end } : {},
   );
 
   const handleModal = (action: string, row: any[]) => {

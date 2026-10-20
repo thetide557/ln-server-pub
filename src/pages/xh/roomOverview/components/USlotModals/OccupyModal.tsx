@@ -127,10 +127,12 @@ const OccupyModal: React.FC<USlotModalBaseProps> = ({ visible, slot, cabinetCode
           >
             <Form.Item label="所属业务组" name="businessGroupId" rules={[{ required: true, message: '请选择所属业务组' }]}>
               <Select showSearch placeholder="请选择" onChange={onBusinessGroupChange}
-                options={groupOptions.map((g) => ({ label: g.label, value: g.value }))} />
+                options={groupOptions.map((g) => ({ label: g.label, value: g.value }))}
+                filterOption={(input, option) => (option?.label as string)?.toLowerCase().includes(input.toLowerCase())} />
             </Form.Item>
             <Form.Item label="选择资产" name="assetId" rules={[{ required: true, message: '请选择资产' }]}>
-              <Select showSearch placeholder={assetOptions.length === 0 ? '请先选择所属业务组' : '请选择'} options={assetOptions} />
+              <Select showSearch placeholder={assetOptions.length === 0 ? '请先选择所属业务组' : '请选择'} options={assetOptions}
+                filterOption={(input, option) => (option?.label as string)?.toLowerCase().includes(input.toLowerCase())} />
             </Form.Item>
             <Form.Item label="起始U位">
               <Input value={`${slot.u_position}U`} disabled />

@@ -323,6 +323,86 @@
       }
     }
   }
+
+  // 机柜组下机柜 U 位概览区域
+  .cabinet-u-overview-section {
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 24px;
+
+    .cabinet-u-overview-wrapper {
+      .cabinet-u-overview {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+
+        .cabinet-u-overview-column {
+          flex: 0 0 auto;
+          display: flex;
+          flex-direction: column;
+          background: #fff;
+          border: 1px solid #E5E6EB;
+          border-radius: 6px;
+          padding: 12px;
+
+          .cabinet-u-overview-header {
+            margin-bottom: 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #F0F0F0;
+
+            .cabinet-u-overview-name {
+              font-size: 13px;
+              font-weight: 600;
+              color: #1F2329;
+              white-space: nowrap;
+            }
+
+            .cabinet-u-overview-code {
+              font-size: 11px;
+              color: #86909C;
+              white-space: nowrap;
+            }
+          }
+
+          .cabinet-u-overview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .cabinet-u-overview-row {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+
+              .cabinet-u-overview-u-num {
+                width: 28px;
+                font-size: 11px;
+                color: #86909C;
+                text-align: right;
+                flex-shrink: 0;
+              }
+
+              .cabinet-u-overview-cell {
+                width: 100px;
+                height: 18px;
+                border: 1px solid;
+                box-sizing: border-box;
+                border-radius: 3px;
+                flex-shrink: 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 // 占用U位弹窗 —— 占用高度校验提示靠右显示（Modal 渲染到 body，放全局）

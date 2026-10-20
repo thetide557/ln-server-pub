@@ -135,6 +135,8 @@ export interface IpItem {
   allocStatus: IpAllocStatus;
   useStatus: IpUseStatus;
   onlineStatus: IpOnlineStatus;
+  /** 资产在线状态原始文案（后端 online_status 直传，如 在线/离线/未纳管；展示优先用它，空显示 -） */
+  onlineStatusText?: string;
   segmentId: number;
   segment: string;
   groupId: number;

@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Row, Col, Empty, Spin, Tag, Button } from 'antd';
+import { Row, Col, Empty, Spin, Tag, Button, message } from 'antd';
 import { useHistory } from 'react-router-dom';
-import { getCabinetUSlots } from '@/services/assets/dc-overview';
+import { getCabinetUSlots, getCabinetSummary } from '@/services/assets/dc-overview';
 import type { CabinetUSlot } from '@/services/assets/dc-overview';
-import { getXhAsset } from '@/services/assets';
 import {
   OccupyModal, ReserveModal, ReleaseModal,
   DisableModal, EnableModal, CancelReserveModal, MigrateModal,
 } from './USlotModals';
 
 type ModalType = null | 'occupy' | 'disable' | 'enable' | 'release' | 'cancelReserve' | 'reserve' | 'migrate';
+
+/** 每个 U 位行占用的垂直高度（px），合并块 = count × 此值 */
+const U_ROW_HEIGHT = 40;
 
 // 状态颜色 & 样式（方格背景用带透明度的边框色，text 用于统计卡片数字颜色）
 const STATUS_STYLES: Record<
@@ -35,6 +37,10 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [slots, setSlots] = useState<CabinetUSlot[]>([]);
+  const [summaryData, setSummaryData] = useState<{
+    occupied_u: number; reserved_u: number; fault_u: number;
+    free_u: number; disabled_u: number; u_used_rate: number;
+  } | null>(null);
   const [selected, setSelected] = useState<CabinetUSlot | null>(null);
   // 弹窗状态
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -43,30 +49,28 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
   const reload = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode });
-      const rawSlots = res?.dat || [];
-      // 已占用 U 位：额外查资产 health，health=0 视为故障
-      const usedSlots = rawSlots.filter((s) => s.status === 'used' && s.asset_id);
-      if (usedSlots.length > 0) {
-        const healthResults = await Promise.allSettled(
-          [...new Set(usedSlots.map((s) => s.asset_id!))].map((aid) =>
-            getXhAsset(String(aid)).then(({ dat }) => ({ asset_id: aid, health: dat?.health })),
-          ),
-        );
-        const healthMap = new Map<number, number>();
-        healthResults.forEach((r) => {
-          if (r.status === 'fulfilled' && r.value.health !== undefined && r.value.health !== null) {
-            healthMap.set(r.value.asset_id, Number(r.value.health));
-          }
-        });
-        rawSlots.forEach((s) => {
-          if (s.status === 'used' && s.asset_id && healthMap.get(s.asset_id) === 0) {
-            s.status = 'fault';
-          }
-        });
-      }
+      // 并行加载 U 位列表 + 机柜汇总
+      const [slotRes, sumRes] = await Promise.all([
+        getCabinetUSlots(cabinetId, { cabinet_code: cabinetCode }),
+        getCabinetSummary(cabinetId),
+      ]);
+      const rawSlots = slotRes?.dat || [];
       setSlots(rawSlots);
       setSelected(null);
+      // 汇总数据
+      const d = sumRes?.dat;
+      if (d && typeof d.occupied_u === 'number') {
+        setSummaryData({
+          occupied_u: d.occupied_u,
+          reserved_u: d.reserved_u,
+          fault_u: d.fault_u,
+          free_u: d.free_u,
+          disabled_u: d.disabled_u,
+          u_used_rate: d.u_used_rate,
+        });
+      } else {
+        setSummaryData(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -76,14 +80,22 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     if (cabinetId) reload();
   }, [cabinetId]);
 
-  // 统计
+  // 统计：直接用接口返回的 summaryData
   const stats = useMemo(() => {
-    const total = slots.length;
-    const s = { used: 0, idle: 0, reserved: 0, fault: 0, disabled: 0 };
-    slots.forEach((x) => { s[x.status]++; });
-    const rate = total > 0 ? Math.round(((total - s.idle - s.disabled) / total) * 100) : 0;
-    return { total, rate, ...s };
-  }, [slots]);
+    if (!summaryData) {
+      return { total: 0, rate: 0, used: 0, idle: 0, reserved: 0, fault: 0, disabled: 0 };
+    }
+    const rate = Math.round((summaryData.u_used_rate || 0) * 100);
+    return {
+      total: summaryData.occupied_u + summaryData.reserved_u + summaryData.fault_u + summaryData.free_u + summaryData.disabled_u,
+      rate,
+      used: summaryData.occupied_u,
+      idle: summaryData.free_u,
+      reserved: summaryData.reserved_u,
+      fault: summaryData.fault_u,
+      disabled: summaryData.disabled_u,
+    };
+  }, [summaryData]);
 
   // 把连续同状态、同资产/同原因的 U 位合并为一个块（多 U 时只显示一次）
   const mergedSlots = useMemo(() => {
@@ -210,6 +222,10 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
   };
 
   const openModal = (type: ModalType, slot: CabinetUSlot) => {
+    if (type === 'migrate' && slot.asset_deleted) {
+      message.warning('资产已删除，无法迁移');
+      return;
+    }
     setCurrentSlot(slot);
     setModalType(type);
   };
@@ -239,20 +255,15 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
     <Spin spinning={loading}>
       {/* 顶部统计卡 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col span={8}>
-          <div style={{
-            background: '#fff', borderRadius: 6, padding: '14px 16px',
-            border: '1px solid #E5E6EB', height: '100%',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          }}>
-            <div style={{ fontSize: 13, color: '#86909C' }}>U位使用率</div>
-            <div style={{ fontSize: 28, fontWeight: 600, color: '#1C76FD', marginTop: 4 }}>
-              {stats.rate}%
-            </div>
-          </div>
-        </Col>
-        {(['idle', 'reserved', 'fault', 'disabled'] as const).map((st) => (
-          <Col span={4} key={st}>
+        {([
+          { key: 'rate', label: 'U位使用率', value: `${stats.rate}%`, color: '#1C76FD' },
+          { key: 'used', label: '已占用', value: `${stats.used}U`, color: STATUS_STYLES.used.text },
+          { key: 'idle', label: '闲置', value: `${stats.idle}U`, color: STATUS_STYLES.idle.text },
+          { key: 'reserved', label: '预留', value: `${stats.reserved}U`, color: STATUS_STYLES.reserved.text },
+          { key: 'fault', label: '故障', value: `${stats.fault}U`, color: STATUS_STYLES.fault.text },
+          { key: 'disabled', label: '禁用', value: `${stats.disabled}U`, color: STATUS_STYLES.disabled.text },
+        ] as const).map((item) => (
+          <Col span={4} key={item.key}>
             <div style={{
               background: '#fff',
               borderRadius: 6, padding: '14px 16px',
@@ -261,10 +272,10 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
               display: 'flex', flexDirection: 'column', justifyContent: 'center',
             }}>
               <div style={{ fontSize: 13, color: '#86909C' }}>
-                {STATUS_STYLES[st].label}
+                {item.label}
               </div>
-              <div style={{ fontSize: 28, fontWeight: 600, color: STATUS_STYLES[st].text, marginTop: 4 }}>
-                {stats[st]}U
+              <div style={{ fontSize: 28, fontWeight: 600, color: item.color, marginTop: 4 }}>
+                {item.value}
               </div>
             </div>
           </Col>
@@ -272,16 +283,18 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
       </Row>
 
       {/* 状态图例 */}
-      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 24 }}>
+      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
         {(['used', 'reserved', 'fault', 'disabled', 'idle'] as const).map((st) => (
-          <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{
-              width: 14, height: 14, borderRadius: 2,
-              background: STATUS_STYLES[st].bg,
-              border: `1px solid ${STATUS_STYLES[st].border}`,
-            }} />
-            <span style={{ fontSize: 13, color: '#4E5969' }}>{STATUS_STYLES[st].label}</span>
-          </div>
+          <span key={st} style={{
+            display: 'inline-block',
+            padding: '2px 10px',
+            borderRadius: 4,
+            fontSize: 12,
+            color: STATUS_STYLES[st].text,
+            background: STATUS_STYLES[st].bg,
+            border: `1px solid ${STATUS_STYLES[st].border}`,
+            lineHeight: '20px',
+          }}>{STATUS_STYLES[st].label}</span>
         ))}
       </div>
 
@@ -309,6 +322,7 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                       style={{
                         display: 'flex', alignItems: 'stretch', gap: 8,
                         marginBottom: 4, cursor: 'pointer',
+                        height: item.count * U_ROW_HEIGHT,
                       }}
                     >
                       <div style={{
@@ -322,7 +336,6 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                         flex: 1, background: sty.bg, border: `1px solid ${sty.border}`,
                         borderRadius: 3, padding: '6px 10px',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        // minHeight: 22 + item.count * 12,
                       }}>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 500 }}>
@@ -349,11 +362,15 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                     onClick={() => handleSlotClick(s)}
                     title={s.status === 'idle' ? '点击占用' : sty.label}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
+                      display: 'flex', alignItems: 'stretch', gap: 8,
                       marginBottom: 4, cursor: 'pointer',
+                      height: U_ROW_HEIGHT,
                     }}
                   >
-                    <div style={{ width: 42, color: '#86909C', fontSize: 12, textAlign: 'right' }}>
+                    <div style={{
+                      width: 42, color: '#86909C', fontSize: 12, textAlign: 'right',
+                      display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                    }}>
                       {s.u_position}U
                     </div>
                     <div style={{
@@ -475,7 +492,10 @@ const CabinetUView: React.FC<Props> = ({ cabinetId, cabinetCode, onSlotsChange }
                     <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
                       <Button type="primary" style={{ background: '#1C76FD', borderColor: '#1C76FD' }} onClick={() => openModal('migrate', selected)}>迁移</Button>
                       <Button style={{ borderColor: '#F79F07', color: '#F79F07' }} onClick={() => openModal('release', selected)}>释放U位</Button>
-                      <Button onClick={() => selected.asset_id && history.push(`/xh/assetmgt/add?mode=view&id=${selected.asset_id}&from=roomOverview`)}>查看资产详情</Button>
+                      <Button onClick={() => {
+                        if (selected.asset_deleted) { message.warning('资产已删除，无法查看详情'); return; }
+                        if (selected.asset_id) history.push(`/xh/assetmgt/add?mode=view&id=${selected.asset_id}&from=roomOverview`);
+                      }}>查看资产详情</Button>
                     </div>
                   </div>
                 );

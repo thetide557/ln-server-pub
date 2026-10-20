@@ -179,7 +179,7 @@ export default function Title(props: IProps) {
         )}
       </div>
       {
-        <div className='dashboard-detail-header-right' style={{ display: isHome ? 'none' : '' }}>
+        <div className='dashboard-detail-header-right'>
           <Space>
             {isAuthorized && (
               <Dropdown
@@ -209,13 +209,15 @@ export default function Title(props: IProps) {
             {variableConfig && (
               <VariableConfig isPreview={!isAuthorized} onChange={handleVariableChange} value={variableConfig} range={range} id={id} onOpenFire={stopAutoRefresh} />
             )}
-            <TimeRangePickerWithRefresh
-              localKey={dashboardTimeCacheKey}
-              dateFormat='YYYY-MM-DD HH:mm:ss'
-              // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
-              value={range}
-              onChange={setRange}
-            />
+            {!isHome && (
+              <TimeRangePickerWithRefresh
+                localKey={dashboardTimeCacheKey}
+                dateFormat='YYYY-MM-DD HH:mm:ss'
+                // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
+                value={range}
+                onChange={setRange}
+              />
+            )}
             {!isPreview && (
               <>
                  <Button type="primary" onClick={updateBoard}>更新</Button>
@@ -256,7 +258,7 @@ export default function Title(props: IProps) {
                 }}
               />
             )}
-            {!dashboard.tags?.includes('template') && !dashboard.tags?.includes('homepage') && (
+            {!isHome && !dashboard.tags?.includes('template') && !dashboard.tags?.includes('homepage') && (
               <>
                 {/* <Button onClick={() => setHomePage()}>设为首页</Button> */}
                 <Button
@@ -275,22 +277,20 @@ export default function Title(props: IProps) {
                 </Button>
               </>
             )}
+            {isHome && (profile.roles?.includes("Admin") || permList.includes("/home/setBoards")) && (
+              <Button
+                loading={loading}
+                onClick={() => {
+                  // setOpenView(true);
+                  history.push(`/dashboards/${dashboard.id}?${location.search}`);
+                }}
+              >
+                设置
+              </Button>
+            )}
           </Space>
         </div>
       }
-      {isHome && (profile.roles?.includes("Admin") || permList.includes("/home/setBoards")) && (
-        <div className='dashboard-detail-header-right'>
-          <Button
-            loading={loading}
-            onClick={() => {
-              // setOpenView(true);
-              history.push(`/dashboards/${dashboard.id}?${location.search}`);
-            }}
-          >
-            设置
-          </Button>
-        </div>
-      )}
       <Modal
         title={'默认看板设置'}
         visible={defaultModal}

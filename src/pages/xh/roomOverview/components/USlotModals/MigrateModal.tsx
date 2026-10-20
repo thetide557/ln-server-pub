@@ -248,13 +248,16 @@ const MigrateModal: React.FC<USlotModalBaseProps> = ({ visible, slot, cabinetCod
           {!isSelf && (
             <>
               <Form.Item label="迁移机房" name="migrateRoom" rules={[{ required: true, message: '请选择迁移机房' }]}>
-                <Select showSearch placeholder="请选择" options={roomOptions} onChange={onRoomChange} />
+                <Select showSearch placeholder="请选择" options={roomOptions} onChange={onRoomChange}
+                  filterOption={(input, option) => (option?.label as string)?.toLowerCase().includes(input.toLowerCase())} />
               </Form.Item>
               <Form.Item label="迁移机柜组" name="migrateGroup" rules={[{ required: true, message: '请选择迁移机柜组' }]}>
-                <Select showSearch placeholder="请选择" options={groupOptions} onChange={onGroupChange} />
+                <Select showSearch placeholder="请选择" options={groupOptions} onChange={onGroupChange}
+                  filterOption={(input, option) => (option?.label as string)?.toLowerCase().includes(input.toLowerCase())} />
               </Form.Item>
               <Form.Item label="迁移机柜" name="migrateCabinet" rules={[{ required: true, message: '请选择迁移机柜' }]}>
-                <Select showSearch placeholder="请选择" options={cabinetOptions} onChange={onCabinetChange} />
+                <Select showSearch placeholder="请选择" options={cabinetOptions} onChange={onCabinetChange}
+                  filterOption={(input, option) => (option?.label as string)?.toLowerCase().includes(input.toLowerCase())} />
               </Form.Item>
             </>
           )}

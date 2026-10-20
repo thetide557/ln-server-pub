@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { AutoComplete, Button, Col, Form, Input, InputNumber, message, Modal, Row, Select, Switch, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import _ from 'lodash';
-import { IpItem, ipAllocStatusMap, ipOnlineStatusMap, ipUseStatusMap } from '../../types';
+import { IpItem, ipAllocStatusMap, ipUseStatusMap } from '../../types';
 import { exportIps, importIps, downloadImportTemplate } from '@/services/sxxc/ipam';
 
 // ==================== 查看IP ====================
@@ -17,7 +17,6 @@ export function IpViewModal(props: { visible: boolean; ip?: IpItem; onClose: () 
   if (!ip) return null;
   const alloc = ipAllocStatusMap[ip.allocStatus];
   const use = ipUseStatusMap[ip.useStatus];
-  const online = ipOnlineStatusMap[ip.onlineStatus];
   return (
     <Modal title='查看IP' visible={visible} footer={null} onCancel={props.onClose} width={620}>
       <Form labelCol={{ flex: '90px' }} disabled className='ip-view-form'>
@@ -37,7 +36,7 @@ export function IpViewModal(props: { visible: boolean; ip?: IpItem; onClose: () 
           <Input value={use?.text} />
         </Form.Item>
         <Form.Item label='资产在线状态'>
-          <Input value={online?.text} />
+          <Input value={ip.onlineStatusText || '-'} />
         </Form.Item>
         <Form.Item label='资产名称'>
           <Input value={ip.assetName || '-'} />
@@ -45,9 +44,9 @@ export function IpViewModal(props: { visible: boolean; ip?: IpItem; onClose: () 
         <Form.Item label='MAC地址'>
           <Input value={ip.mac || '-'} />
         </Form.Item>
-        <Form.Item label='接入端口'>
+        {/* <Form.Item label='接入端口'>
           <Input value={ip.port || '-'} />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item label='临时IP'>
           <Input value={ip.isTempIp === -1 ? '-' : ip.isTempIp === 1 ? '是' : '否'} />
         </Form.Item>
@@ -223,7 +222,8 @@ export function IpAssignModal(props: {
         assetName: ip?.assetName,
         mac: ip?.mac,
         port: ip?.port && ip.port !== '-' ? ip.port : undefined,
-        durationUnit: '天',
+        // 使用时长：目前不用，暂时注释
+        // durationUnit: '天',
         gateway: false,
         tempIp: false,
         note: ip?.note,
@@ -285,6 +285,7 @@ export function IpAssignModal(props: {
         <Form.Item label='端口' name='port'>
           <Input placeholder='请输入' maxLength={20} />
         </Form.Item>
+        {/* 使用时长：目前不用，暂时注释
         <Form.Item label='使用时长' required>
           <div style={{ display: 'flex', columnGap: 8 }}>
             <Form.Item name='duration' noStyle rules={[{ required: true, message: '请输入使用时长' }]}>
@@ -295,6 +296,7 @@ export function IpAssignModal(props: {
             </Form.Item>
           </div>
         </Form.Item>
+        */}
         <Form.Item label='备注' name='note'>
           <Input.TextArea placeholder='请输入备注' maxLength={200} autoSize={{ minRows: 2, maxRows: 4 }} />
         </Form.Item>

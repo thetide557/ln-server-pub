@@ -365,7 +365,8 @@ function EditItem(props: IProps) {
             type='primary'
             onClick={() => {
               form.validateFields().then((res) => {
-                onOk(res);
+                // 合并保留表单未覆盖的字段（如 defaultValue），避免编辑变量时丢失
+                onOk({ ...data, ...res });
               });
             }}
           >

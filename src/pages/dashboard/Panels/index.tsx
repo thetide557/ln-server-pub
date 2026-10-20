@@ -42,6 +42,7 @@ import {
 } from './utils';
 import Renderer from '../Renderer/Renderer/index';
 import Row from './Row';
+import { ASSET_TYPE_OVERRIDES_KEY, extractNetworkChartOverride } from '../Detail/assetTypeCharts';
 import Editor from '../Editor';
 import './style.less';
 
@@ -58,6 +59,8 @@ interface IProps {
   onShareClick: (panel: any) => void;
   onFullScreenClick?: (panel: any) => void;
   onUpdated: (res: any) => void;
+  // 渲染层面板（如网络设备专属指标集）：仅用于渲染与布局，各交互回调仍作用于 panels 原始面板
+  renderPanels?: any[];
 }
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -66,7 +69,8 @@ function index(props: IProps) {
   const { profile } = useContext(CommonStateContext);
   const location = useLocation();
   const { themeMode } = querystring.parse(location.search);
-  const { editable, dashboard, range, variableConfig, panels, isPreview, setPanels, onShareClick, onUpdated, onFullScreenClick, isHome } = props;
+  const { editable, dashboard, range, variableConfig, panels, isPreview, setPanels, onShareClick, onUpdated, onFullScreenClick, isHome, renderPanels } = props;
+  const renderList = renderPanels ?? panels;
   const roles = _.get(profile, 'roles', []);
   const isAuthorized = !_.some(roles, (item) => item === 'Guest') && !isPreview;
   const layoutInitialized = useRef(false);
@@ -86,11 +90,18 @@ function index(props: IProps) {
     }
     return Promise.reject();
   };
-  const [editorData, setEditorData] = useState({
+  const [editorData, setEditorData] = useState<{
+    mode: string;
+    visible: boolean;
+    id: string;
+    initialValues: any;
+    // 网络设备专属图表（渲染层注入视图）的编辑：编辑器展示当前图表定义，保存写入 configs.assetTypeChartOverrides
+    networkOverride?: boolean;
+  }>({
     mode: 'add',
     visible: false,
     id: '',
-    initialValues: {} as any,
+    initialValues: {},
   });
 
   useEffect(() => {
@@ -100,7 +111,7 @@ function index(props: IProps) {
   return (
     <div className='dashboards-panels scroll-container'>
       <ReactGridLayout
-        layout={buildLayout(panels)}
+        layout={buildLayout(renderList)}
         onLayoutChange={(layout) => {
           if (layoutInitialized.current) {
             const newPanels = sortPanelsByGridLayout(updatePanelsLayout(panels, layout));
@@ -141,7 +152,9 @@ function index(props: IProps) {
         }}
         {...reactGridLayoutDefaultProps}
       >
-        {_.map(panels, (item) => {
+        {_.map(renderList, (item) => {
+          // 渲染层面板可能是注入后的定义（如网络设备专属指标集），交互操作需回带原始面板，避免污染看板配置
+          const rawItem = _.find(panels, { id: item.id }) || item;
           return (
             <div key={item.layout.i} data-id={item.layout.i} style={{display: item.hidden ? 'none': ''}}>
               {item.type !== 'row' ? (
@@ -157,10 +170,10 @@ function index(props: IProps) {
                     variableConfig={variableConfig}
                     onCloneClick={() => {
                       const newPanels = updatePanelsInsertNewPanel(panels, {
-                        ...item,
+                        ...rawItem,
                         id: uuidv4(),
                         layout: {
-                          ...item.layout,
+                          ...rawItem.layout,
                           i: uuidv4(),
                         },
                       });
@@ -175,19 +188,22 @@ function index(props: IProps) {
                       onFullScreenClick && onFullScreenClick(item)
                     }}
                     onEditClick={() => {
+                      // 注入的网络设备图表：编辑器展示当前渲染定义，保存写入网络图表自定义（不碰原始主机面板的查询定义）
+                      const isNetworkView = renderList !== panels && item !== rawItem;
                       setEditorData({
                         mode: 'edit',
                         visible: true,
                         id: item.id,
                         initialValues: {
-                          ...item,
+                          ...(isNetworkView ? item : rawItem),
                           id: item.id,
                         },
+                        networkOverride: isNetworkView,
                       });
                     }}
                     onDeleteClick={() => {
                       Modal.confirm({
-                        title: `是否删除图表：${item.name}`,
+                        title: `是否删除图表：${rawItem.name}`,
                         okText:'确定',
                         cancelText:'取消',
                         onOk: async () => {
@@ -203,7 +219,7 @@ function index(props: IProps) {
                       });
                     }}
                     onTopNChange={(topN) => {
-                      const newPanel = { ...item, custom: { ...item.custom, topN } };
+                      const newPanel = { ...rawItem, custom: { ...rawItem.custom, topN } };
                       const newPanels = updatePanelsWithNewPanel(panels, newPanel);
                       setPanels(newPanels);
                       updateDashboardConfigs(dashboard.id, {
@@ -312,6 +328,21 @@ function index(props: IProps) {
         time={range}
         initialValues={editorData.initialValues}
         onOK={(values, mode) => {
+          if (editorData.networkOverride) {
+            // 网络设备专属图表：定义类字段（标题/查询/单位）写入 configs.assetTypeChartOverrides，仅作用于网络设备视图；
+            // custom（TopN/聚合方式等）写回原始主机面板，保证拖拽/TopN 调整在两套视图下行为一致
+            const originalPanel = _.find(panels, { id: editorData.id });
+            const newPanels = originalPanel && values.custom ? updatePanelsWithNewPanel(panels, { ...originalPanel, custom: values.custom }) : panels;
+            const newConfigs = JSON.parse(panelsMergeToConfigs(dashboard.configs, newPanels));
+            newConfigs[ASSET_TYPE_OVERRIDES_KEY] = {
+              ...(newConfigs[ASSET_TYPE_OVERRIDES_KEY] || {}),
+              [editorData.id]: extractNetworkChartOverride(values),
+            };
+            updateDashboardConfigs(dashboard.id, { configs: JSON.stringify(newConfigs) }).then((res) => {
+              onUpdated(res);
+            });
+            return;
+          }
           const newPanels = mode === 'edit' ? updatePanelsWithNewPanel(panels, values) : updatePanelsInsertNewPanelToRow(panels, editorData.id, values);
           setPanels(newPanels);
           updateDashboardConfigs(dashboard.id, {

@@ -6,6 +6,11 @@ export interface assetsType {
     address: string;
     port: number;
     type: string;
+    region?: string;
+    hw_sw?: string;
+    tenant?: string;
+    asset_category?: string;
+    cpu_arch?: string;
     target: string;
     memo: string;
     optional_metrics: string;
