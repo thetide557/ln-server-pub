@@ -64,6 +64,7 @@ import '@/plugins/clickHouse/locale';
 // src/pages/alertRules/index.tsx:30 注册，本页的 import 链不经过它 —— 这里补一行只做注册的 import。
 import '@/pages/alertRules/locale';
 import './detail.less';
+import GyyTrapPropertyRows from './GyyTrapPropertyRows';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import Solution from './Solution'
 import { AiButton } from '@/components/AiChatNG/FlashAiButton';
@@ -109,6 +110,8 @@ const EventDetailPage: React.FC = () => {
   const history = useHistory();
   const isHistory = history.location.pathname.includes('alert-his-events') || history.location.pathname.includes('alert-events-shanshu-his');
   const isShanshuRoute = history.location.pathname.includes('alert-events-shanshu');
+  const detailScope = `${isHistory ? 'history' : 'current'}:${eventId}`;
+  const [loadedDetailScope, setLoadedDetailScope] = useState('');
   const [eventDetail, setEventDetail] = useState<any>();
   // ---- N19 W-A：ES 事件详情要把 index_pattern 的 id 换成名字显示，所以先把索引模式列表拉下来。
   // 照 fe ee48e701 src/pages/event/DetailNG/index.tsx:46-61，但羚牛这张老详情页没有分享链接的 token 场景，
@@ -526,39 +529,41 @@ const EventDetailPage: React.FC = () => {
   }
 
   useEffect(() => {
+    let active = true;
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
+    setEventDetail(undefined);
+    setLoadedDetailScope('');
     const requestPromise = isHistory ? getHistoryEventsById(eventId) : getAlertEventsById(eventId);
     requestPromise.then(async (res) => {
-      let detailInfo = res.dat;
-      let ruleIds = new Array<number>();
-      ruleIds.push(detailInfo.rule_id)
-      await getStrategiesByRuleIds(ruleIds).then((result) => {
-        let rules = {};
-        result.dat.forEach(rule => {
-          return rules[rule.id] = rule;
-        });
-        if (rules[detailInfo.rule_id]) {
-          detailInfo["rule_config_cn"] = rules[detailInfo.rule_id].rule_config_cn;
-          detailInfo["strategy_id"] = rules[detailInfo.rule_id].strategy_id;
-        }
-      })
+      if (!active) return;
+      const detailInfo = res.dat;
+      const result = await getStrategiesByRuleIds([detailInfo.rule_id]);
+      if (!active) return;
+      const rule = result.dat.find((item) => item.id === detailInfo.rule_id);
+      if (rule) {
+        detailInfo.rule_config_cn = rule.rule_config_cn;
+        detailInfo.strategy_id = rule.strategy_id;
+      }
       setEventDetail(detailInfo);
+      setLoadedDetailScope(detailScope);
     }).catch(() => {
-      setTimeout(() => {
-        if (isShanshuRoute) {
-          history.push('/alert-events-shanshu-cur');
-        } else {
-          history.push('/alert-cur-events');
-        } 
+      if (!active) return;
+      redirectTimer = setTimeout(() => {
+        if (active) history.push(isShanshuRoute ? '/alert-events-shanshu-cur' : '/alert-cur-events');
       }, 1500);
     });
-  }, [busiId, eventId]);
+    return () => {
+      active = false;
+      if (redirectTimer !== undefined) clearTimeout(redirectTimer);
+    };
+  }, [busiId, eventId, isHistory]);
 
   return (
     // <PageLayout title={t('detail.title')} showBack backPath={isHistory ? '/alert-his-events' : '/alert-cur-events'}>
     <PageLayout title={t('detail.title')} showBack>
       <div className='event-detail-container'>
 
-        <Spin spinning={!eventDetail}>
+        <Spin spinning={!eventDetail || loadedDetailScope !== detailScope}>
           <Card
             size='small'
             className='desc-container'
@@ -604,7 +609,7 @@ const EventDetailPage: React.FC = () => {
               </div>,
             ]}
           >
-            {eventDetail && (
+            {eventDetail && loadedDetailScope === detailScope && (
               <div>
                 <PlusPreview data={parsedEventDetail} />
                 {descriptionInfo
@@ -621,6 +626,11 @@ const EventDetailPage: React.FC = () => {
                       </div>
                     );
                   })}
+                <GyyTrapPropertyRows
+                  eventId={eventId}
+                  isHistory={isHistory}
+                  enabled={eventDetail.has_gyy_trap_properties === true}
+                />
                 <Solution ruleId={eventDetail.rule_id} />
               </div>
             )}
