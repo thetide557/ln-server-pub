@@ -2,7 +2,25 @@ const en_US = {
   business_group: 'Business Group',
   search_placeholder: 'Search',
   nodata: 'No Data',
+  // N20（新日志浏览）加的 4 个顶层键，值照 fe ee48e701 src/locales/common/locale/en_US.ts:20-22,188；只加不改（拍板 D-26 / D-27）
+  unit: 'Unit',
+  page_help: 'Help',
+  document_title: 'Documentation',
+  format_sql: 'Format SQL',
+  // N20 第 3 轮加的 2 个键（ck / doris ExplorerNG 的 DocumentDrawer 标题 + 羚牛既有 DocumentDrawer/index.tsx:78 原缺口），值照 fe ee48e701 src/locales/common/locale/en_US.ts:18,24；只加不改（D-29）
+  document_link: 'Document',
+  more_document_link: 'More documents',
   btn: {
+    // N20（新日志浏览）加的键，值照 fe ee48e701 src/locales/common/locale/en_US.ts；只加不改（拍板 D-27）
+    reload: 'Reload',
+    copy2: 'Copy',
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/en_US.ts:68-69 两条。
+    expand: 'Expand',
+    collapse: 'Collapse',
+    // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器的「数据预览」按钮
+    //（`src/plugins/doris/AlertRule/GraphPreview.tsx:101` / `:164`）直接显示键名原文；
+    // 值逐字抄上游 fe `ee48e701:src/locales/common/locale/<lang>.ts` 的 `btn.data_preview`。
+    data_preview: 'Preview',
     add: 'Add',
     create: 'Create',
     modify: 'Modify',
@@ -44,6 +62,8 @@ const en_US = {
     operations: 'Actions',
     total: 'Total {{total}} items',
   },
+  // ---- 第六步 第4段 W2（阶段 2）：fe v9.1.0 src/locales/common/locale/en_US.ts:25 的 and（V2.tsx:70 用）。
+  and: 'And',
   datasource: {
     prod: 'Type',
     name: 'Datasource',
@@ -55,6 +75,22 @@ const en_US = {
       btn1: 'Go to configure',
       btn2: 'OK',
     },
+    // ---- 第六步 第4段 W2（阶段 2）：只追加下面这一段，上面一个字没动。
+    // 来源 fe v9.1.0 src/locales/common/locale/en_US.ts:102,110-120；
+    // preview_unavailable 是羚牛自己加的（后端缺 POST /api/n9e/datasource/query，见 zh_CN.ts 同段注释）。
+    preview: 'Data source preview',
+    queries: {
+      label: 'Data source filter',
+      match_type_0: 'Exact match',
+      match_type_1: 'Fuzzy match',
+      match_type_1_tip: `Supports two wildcards<br>* can match 0 or more arbitrary characters<br>? can only match one arbitrary character`,
+      match_type_2: 'All data sources',
+      op_in: 'In',
+      op_not_in: 'Not in',
+      preview: 'Preview',
+      preview_unavailable: 'Preview unavailable',
+    },
+    managePageLink: 'Click to manage data sources',
   },
   confirm: {
     delete: 'Are you sure to delete?',
@@ -78,6 +114,7 @@ const en_US = {
     import: 'Import Failed',
   },
   time: {
+    day: 'Day', // N20 加（D-27）
     millisecond: 'Millisecond',
     second: 'Second',
     minute: 'Minute',
@@ -171,5 +208,14 @@ const en_US = {
   'msg.clone.success': 'Successfully cloned',
   'msg.clone.error': 'Cloning failed',
   'msg.sort.success': 'Successfully sorted',
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/en_US.ts。
+  // ---- 第六步 N33 批 B（B-1 九种详情抽屉）：clickHouse 的详情抽屉用 t('common:yes') / t('common:no')
+  // 显示「安全连接」「跳过 SSL 验证」这两个开关（src/plugins/clickHouse/Datasource/Detail.tsx:39,42）。
+  // pub 的 common 词条里原来没有这两个键（本批之前 grep 零命中），缺了会把键名原样印在界面上。
+  // 值取自 fe v9.1.0 src/locales/common/locale/en_US.ts:26-27。
+  yes: 'Yes',
+  no: 'No',
+  advanced_settings: 'Advanced settings',
 };
 export default en_US;

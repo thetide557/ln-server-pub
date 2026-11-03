@@ -20,6 +20,7 @@ import { md } from "./plugins/md";
 import plusResolve from "./plugins/plusResolve";
 import { visualizer } from "rollup-plugin-visualizer";
 const reactSvgPlugin = require("./plugins/svg");
+const path = require("path");
 
 const chunk2 = [
   "@codemirror/autocomplete",
@@ -58,6 +59,7 @@ const x6Chunk = [
   "@antv/x6-plugin-transform",
 ];
 const antvChunk = ["@ant-design/graphs", "@ant-design/plots"];
+const baseUrl = "http://127.0.0.1:17000/";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -78,6 +80,24 @@ export default defineConfig(({ mode }) => ({
         find: "@",
         replacement: "/src",
       },
+      // 垫片：vite 2 不认 package.json imports 字段，升 vite 后删
+      // vfile@6（streamdown → remark/unified 链带进来）用 "#minpath"/"#minproc"/"#minurl"
+      // 这种包内子路径导入，vite 2.9.17 自带的 rollup 解析不了，这里手工指到浏览器分支的文件。
+      // 用精确正则（^...$），避免误伤别的 # 开头的东西。
+      {
+        find: /^#minpath$/,
+        replacement: path.resolve(__dirname, "node_modules/vfile/lib/minpath.browser.js"),
+      },
+      // 垫片：vite 2 不认 package.json imports 字段，升 vite 后删
+      {
+        find: /^#minproc$/,
+        replacement: path.resolve(__dirname, "node_modules/vfile/lib/minproc.browser.js"),
+      },
+      // 垫片：vite 2 不认 package.json imports 字段，升 vite 后删
+      {
+        find: /^#minurl$/,
+        replacement: path.resolve(__dirname, "node_modules/vfile/lib/minurl.browser.js"),
+      },
     ],
   },
   server: {
@@ -88,55 +108,55 @@ export default defineConfig(({ mode }) => ({
       //   changeOrigin: true,
       // },
       "/api/n9e/xh/": {
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/n9e-plus": {
         // target: 'http://10.206.16.17:17001/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/n9e/proxy": {
         //target: 'http://192.168.20.19:17000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/n9e/datasource": {
         //target: 'http://192.168.20.19:17000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/n9e": {
         //target: 'http://192.168.20.19:17000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/api/fc-brain": {
         // target: 'http://10.206.16.17:28000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.20.164:17000/',
         changeOrigin: true,
       },
       "/sxxcTask": {
         // target: 'http://10.0.20.212:8086/',
-        target: "http://172.16.20.11:8090/",
+        target: baseUrl,
         // target: 'http://172.22.1.184:8086/',
         changeOrigin: true,
         // rewrite: path => path.replace(/^\/sxxcTask/, '')
       },
       "/chat": {
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         // target: 'http://10.0.23.134:17000/',
         changeOrigin: true,
       },
       "/v1": {
         // target: 'http://10.250.250.24:18000/',
-        target: "http://172.16.20.11:17000/",
+        target: baseUrl,
         changeOrigin: true,
       },
     },
@@ -145,7 +165,7 @@ export default defineConfig(({ mode }) => ({
     exclude: x6Chunk,
   },
   build: {
-    target: "chrome58",
+    target: "chrome63",
     outDir: "pub",
     chunkSizeWarningLimit: 650,
     sourcemap: true,

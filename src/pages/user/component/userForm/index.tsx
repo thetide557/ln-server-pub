@@ -179,35 +179,37 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
         </>
       )}
       <Row>
-        <Col span={12} key={"item-" + 5}>
-          <Form.Item
-            label={t('account:profile.role')}
-            name='roles'
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <Select
-              mode='multiple'
-              onChange={(values) => {
-                if (values.includes('临时用户')) {
-                  form.setFieldsValue({ roles: ['临时用户'] });
-                }
-              }}
+        {
+          !form.getFieldValue('roles')?.includes("Admin") && <Col span={12} key={"item-" + 5}>
+            <Form.Item
+              label={t('account:profile.role')}
+              name='roles'
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
             >
-              {roleList.map((item, index) => (
-                <Option value={item.name} key={index}>
-                  <div>
-                    <div>{item.name}</div>
-                    <div style={{ color: '#8c8c8c', overflowY: 'auto' }}>{item.note}</div>
-                  </div>
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
+              <Select
+                mode='multiple'
+                onChange={(values) => {
+                  if (values.includes('Guest')) {
+                    form.setFieldsValue({ roles: ['Guest'] });
+                  }
+                }}
+              >
+                {roleList.map((item, index) => (
+                  <Option value={item.name} key={index}>
+                    <div>
+                      <div>{item.name}</div>
+                      <div style={{ color: '#8c8c8c', overflowY: 'auto' }}>{item.note}</div>
+                    </div>
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        }
         <Col span={12} key={"item-" + 6}>
           <Form.Item label={t('account:profile.email')} name='email' rules={[
             {
@@ -245,13 +247,13 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           )
         }
         <Col span={12} key={"item-" + 10}>
-          <Form.Item label={'单一会话'} name='single_session' initialValue={0} rules={[
+          <Form.Item label={'单一会话'} name='single_session' initialValue={2} rules={[
             {
               required: true,
             },
           ]}>
             <Select options={[
-              { label: '关闭', value: 0 },
+              // { label: '关闭', value: 0 },
               { label: '启用', value: 1 },
               { label: '禁用', value: 2 },
             ]}>
@@ -303,7 +305,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
                 shouldUpdate={(prevValues, currentValues) => prevValues.roles !== currentValues.roles}
               >
                 {({ getFieldValue }) =>
-                  getFieldValue('roles')?.includes('临时用户') ? (
+                  getFieldValue('roles')?.includes('Guest') ? (
                     <Form.Item name="temp_user_expire_at" label={t('使用期限至')} rules={[
                       {
                         required: true,
@@ -348,6 +350,13 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
               <Switch
                 checkedChildren="启用"
                 unCheckedChildren="关闭"
+                onChange={(checked) => {
+                  if (checked) {
+                    form.setFieldsValue({ lock_consecutive_days: 90 });
+                  } else {
+                    form.setFieldsValue({ lock_consecutive_days: undefined });
+                  }
+                }}
               />
             </Form.Item>
           </Col>

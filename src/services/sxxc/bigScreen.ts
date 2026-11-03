@@ -104,7 +104,10 @@ export const getBigScreen = function () {
     })
 }
 export const getBigScreen2 = function (busiGroup) {
-    return request(`/api/n9e/bigscreen?busiGroup=${busiGroup}`, {
+    // 业务组为空（未分配 / 空数组 / 0）时不拼 busiGroup 参数，避免发 ?busiGroup= 空值被后端 400（todo③）
+    const value = busiGroup === undefined || busiGroup === null ? '' : String(busiGroup);
+    const query = value === '' || value === '0' ? '' : `?busiGroup=${value}`;
+    return request(`/api/n9e/bigscreen${query}`, {
         method: RequestMethod.Get
     })
 }

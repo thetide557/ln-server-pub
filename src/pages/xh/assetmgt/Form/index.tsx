@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import _, { forEach } from 'lodash';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
-import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory ,getAssetShelfHistory} from '@/services/assets';
+import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion, getMaintenanceInfoById, editMaintenanceInfo, addMaintenanceHistory, getMaintenanceHistory, getAssetShelfHistory } from '@/services/assets';
 import { getDictDataListByType } from '@/services/system/dict';
 import { addDictDataBySingle } from '@/services/system/dictdata';
 
@@ -14,7 +14,7 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import { getAssetsByCondition } from '@/services/assets';
+import { getAssetsByConditionSimple } from '@/services/assets';
 import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import { serviceHierarchyOptions, deviceFormOptions } from '../catalog';
 import { AutoComplete } from 'antd';
@@ -63,6 +63,7 @@ export default function () {
 
   const [params, setParams] = useState<{ label: string; name: string; required?: boolean; type: string; options?: [] }[]>([]);
   const [form] = Form.useForm();
+  const formId = Form.useWatch('id', form);
   const [assetData, setAssetData] = useState<any>({}); // 集中保存提交的数据
   const [currentType, setCurrentType] = useState();
   const [assetList, setAssetList] = useState<any>({});
@@ -71,6 +72,7 @@ export default function () {
   const [manufacturerSearch, setManufacturerSearch] = useState('');
   const [manufacturerLoading, setManufacturerLoading] = useState(false);
   const [addingManufacturer, setAddingManufacturer] = useState(false);
+  const addingManufacturerRef = useRef(false);
   // const [assetOptions1, setAssetOptions1] = useState<any[]>([]);
   const [maintenanceRecordModalOpen, setMaintenanceRecordModalOpen] = useState(false);
   const [maintenanceHistoryModalOpen, setMaintenanceHistoryModalOpen] = useState(false);
@@ -175,7 +177,18 @@ export default function () {
     loadManufacturerOptions();
   }, [loadManufacturerOptions]);
 
+  const debouncedSetManufacturerSearch = useMemo(
+    () => _.debounce((value: string) => {
+      setManufacturerSearch(value);
+    }, 300),
+    [],
+  );
+
   const handleAddManufacturer = useCallback(async () => {
+    if (addingManufacturerRef.current) {
+      return;
+    }
+
     const nextManufacturer = _.trim(manufacturerSearch);
     if (!nextManufacturer) {
       return;
@@ -184,9 +197,11 @@ export default function () {
     const exists = manufacturerOptions.some((item) => item.value === nextManufacturer);
     if (exists) {
       form.setFieldsValue({ manufacturers: nextManufacturer });
+      setAssetData((prev) => ({ ...prev, manufacturers: nextManufacturer }));
       return;
     }
 
+    addingManufacturerRef.current = true;
     setAddingManufacturer(true);
     try {
       await addDictDataBySingle({
@@ -201,15 +216,29 @@ export default function () {
         setManufacturerOptions((prev) => prev.concat([{ value: nextManufacturer, label: nextManufacturer }]));
       }
       form.setFieldsValue({ manufacturers: nextManufacturer });
+      setAssetData((prev) => ({ ...prev, manufacturers: nextManufacturer }));
       setManufacturerSearch('');
       message.success('厂商新增成功');
     } catch (error: any) {
       await loadManufacturerOptions(false);
       message.error(error?.message || '厂商新增失败');
     } finally {
+      addingManufacturerRef.current = false;
       setAddingManufacturer(false);
     }
   }, [form, loadManufacturerOptions, manufacturerOptions, manufacturerSearch]);
+
+  const debouncedAddManufacturer = useMemo(
+    () => _.debounce(handleAddManufacturer, 300, { leading: true, trailing: false }),
+    [handleAddManufacturer],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSetManufacturerSearch.cancel();
+      debouncedAddManufacturer.cancel();
+    };
+  }, [debouncedAddManufacturer, debouncedSetManufacturerSearch]);
 
   const manufacturerNotFoundContent = useMemo(() => {
     if (manufacturerLoading) {
@@ -233,20 +262,20 @@ export default function () {
         }}
       >
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='没有匹配的厂商' />
-        <Button type='link' icon={<PlusOutlined />} loading={addingManufacturer} onClick={handleAddManufacturer}>
+        <Button type='link' icon={<PlusOutlined />} loading={addingManufacturer} disabled={addingManufacturer} onClick={debouncedAddManufacturer}>
           新增厂商 "{nextManufacturer}"
         </Button>
       </div>
     );
-  }, [addingManufacturer, handleAddManufacturer, manufacturerLoading, manufacturerSearch]);
+  }, [addingManufacturer, debouncedAddManufacturer, manufacturerLoading, manufacturerSearch]);
 
   useEffect(() => {
     // 根据选择资产类型生成表单
     const assetType: any = assetTypes.find((v) => v.name === currentType);
-    
+
     if (assetType) {
       setParams(assetType.form || []); // 显示form表单
-      console.log('assetType.form===',assetType.form)
+      console.log('assetType.form===', assetType.form)
       // http服务鉴权字段处理
       if (currentType == 'HTTP服务') {
         let formData = form.getFieldsValue(true);
@@ -360,7 +389,7 @@ export default function () {
           });
           delete dat.exps;
         }
-        console.log("dat===",dat)
+        console.log("dat===", dat)
         const passwordFields = dat?.params?.fields_with_a_password_entered || [];
         const formData = _.cloneDeep(dat);
         passwordFields.forEach((fieldName) => {
@@ -369,8 +398,7 @@ export default function () {
           }
         });
         setFields_with_a_password_entered(passwordFields)
-        const params = { ident: dat.ip }
-        setAssetData({ ...dat, ...params });
+        setAssetData(formData);
         form.resetFields();
         form.setFieldsValue(formData);
         setCurrentType(dat.type);
@@ -379,7 +407,7 @@ export default function () {
   };
 
   const handleChange = useCallback((value: string) => {
-    form.setFieldsValue({ ident: value });
+    console.log("handleChange", value)
   }, [form]);
 
   // const mockVal = (str: string) => ({
@@ -400,7 +428,7 @@ export default function () {
   //     setAssetOptions(assetOptions1)
   //   }
   // }
-  
+
   useEffect(() => {
     const loadData = async () => {
       const { dat } = await getAssetstypes();
@@ -424,27 +452,34 @@ export default function () {
       }
 
       const param = { limit: -1, types };
-      const res = await getAssetsByCondition(param);
+      const res = await getAssetsByConditionSimple(param);
       const options = res.dat?.list.map((v) => ({
-        key: v.id,
-        value: v.ip,
-        label: `[${v.type}]-[${v.ip}]-${v.name}`,
-        type: v.type,
+        id: v.id,
+        value: v.ident,
+        label: `[${v.type}]-[${v.ip}]-${v.ident}`,
+        type: v.type
       })).sort((a, b) => localeCompare(a.label, b.label))
         .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
 
       setAssetOptions(options);
       setAssetList(res.dat?.list.reduce((acc, v) => ({ ...acc, [v.id]: v }), {}));
+      if (id) {
+        loadAssetInfo(id);
+      }
     };
-
     loadData();
   }, [id]);
 
-  useEffect(() => {
-    if (id) {
-      loadAssetInfo(id);
-    }
-  }, [id]);
+  // useEffect(() => {
+  //   if (formId && assetOptions.length > 0) {
+  //     const selectedOption = assetOptions.find((option) => option.ident === form.getFieldValue('ident'));
+  //     console.log("selectedOption", selectedOption);
+  //     if (selectedOption) {
+  //       form.setFieldsValue({ ip: selectedOption.value });
+  //       setAssetData((prev) => ({ ...prev, ip: selectedOption.value }));
+  //     }
+  //   }
+  // }, [formId, assetOptions]);
 
   const TabOperteClick = (tabIndex: string) => {
     setTabIndex(tabIndex);
@@ -455,28 +490,35 @@ export default function () {
     }
   };
 
-  const submitForm = async () => {
-    // 检查管理状态，如果是上架状态则清空下架原因
-    if (assetData.is_shelf === true) {
-      assetData.shelf_reason = ''
+  const submitForm = async (values = {}) => {
+    const submitData = {
+      ...assetData,
+      ...form.getFieldsValue(true),
+      ...values,
+    };
+
+    //  检查管理状态，如果是上架状态则清空下架原因
+    if (submitData.is_shelf === true) {
+      submitData.shelf_reason = ''
     }
-    
+    console.log("submitForm111", submitData, assetOptions)
+
     if (editType !== 'edit') {
-      await insertXHAsset(assetData);
+      await insertXHAsset(submitData);
       message.success('添加成功');
       backToAssetList();
     } else {
-      console.log("submitForm====",assetData,map)
       const keys = Object.keys(map)
+      submitData.params = submitData.params || {};
       keys.forEach(key => {
-        assetData.params[key] = map[key]
+        submitData.params[key] = map[key]
       })
-      delete assetData['tags']; // 更新信息不包括tag，格式不符
-      assetData.id = _.toNumber(id);
-      await updateXHAsset(assetData);
+      delete submitData['tags']; // 更新信息不包括tag，格式不符
+      submitData.id = _.toNumber(id);
+      await updateXHAsset(submitData);
       await formItems.map(async (v) => {
         const subItem: any[] = [];
-        const expData = assetData[v.name]; //[{item}]
+        const expData = submitData[v.name]; //[{item}]
         expData &&
           await expData.map((item) => {
             const groupId = uuidv4();
@@ -496,6 +538,8 @@ export default function () {
       });
       if (form.getFieldsValue().asset_position) {
         saveMaintenanceInfo();
+      } else {
+        message.success('操作成功');
       }
       backToAssetList();
       // loadAssetInfo(id);
@@ -556,19 +600,19 @@ export default function () {
     );
   };
   const renderFormItem = (v) => {
-    
+
     if (v.type === 'select') {
       return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options} onChange={onSelectChange}></Select>;
     }
     if (v.type === 'password') {
-      console.log('password===',form.getFieldsValue(),fields_with_a_password_entered,v)
-      if(mode == 'view'){ //查看
-        return <Input.Password key={'v' + v.name} visibilityToggle={false}/>;
+      // console.log('password===', form.getFieldsValue(), fields_with_a_password_entered, v)
+      if (mode == 'view') { //查看
+        return <Input.Password key={'v' + v.name} visibilityToggle={false} />;
       }
-      if(mode == 'edit' && id){ //编辑
+      if (mode == 'edit' && id) { //编辑
         const hasStoredValue = fields_with_a_password_entered.includes(v.name);
         const placeholder = hasStoredValue ? '请输入密码，不输入代表不更新' : '请输入密码'
-        
+
         return <ControlledPasswordField placeholder={placeholder} hasStoredValue={hasStoredValue} onDraftChange={(nextValue) => { map[v.name] = nextValue; }} />
       }
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
@@ -576,34 +620,34 @@ export default function () {
     if (v.type === 'checkbox') {
       return <Checkbox onChange={onCheckChange}></Checkbox>;
     }
-    if(form.getFieldsValue() && form.getFieldsValue().type && form.getFieldsValue().type == '宿主机'
-  && v.name === 'user'){
-      console.log("suzhuji",v.name)
+    if (form.getFieldsValue() && form.getFieldsValue().type && form.getFieldsValue().type == '宿主机'
+      && v.name === 'user') {
+      console.log("suzhuji", v.name)
       return (
-      <>
-        <Input
-          key={'v' + v.name}
-          placeholder={`请填写${v.label}`}
-          name={v.name}
-          onChange={(e) => {
-            const value = e.target.value;
-            setShowRootWarning(value === 'root'); // 仅当输入 root 时显示提示
-          }}
-        />
-        {showRootWarning && (
-          <div
-            style={{
-              color: '#faad14',
-              fontSize: 12,
-              marginTop: 4,
-              lineHeight: '16px',
+        <>
+          <Input
+            key={'v' + v.name}
+            placeholder={`请填写${v.label}`}
+            name={v.name}
+            onChange={(e) => {
+              const value = e.target.value;
+              setShowRootWarning(value === 'root'); // 仅当输入 root 时显示提示
             }}
-          >
-            请慎用 root 账号，建议使用已开通的监控账号。
-          </div>
-        )}
-      </>
-    );
+          />
+          {showRootWarning && (
+            <div
+              style={{
+                color: '#faad14',
+                fontSize: 12,
+                marginTop: 4,
+                lineHeight: '16px',
+              }}
+            >
+              请慎用 root 账号，建议使用已开通的监控账号。
+            </div>
+          )}
+        </>
+      );
     }
     return <Input key={'v' + v.name} placeholder={`请填写${v.label}`} name={v.name} />;
   };
@@ -665,12 +709,12 @@ export default function () {
   };
 
   const updateData = (changedValues, values) => {
-    // console.log(changedValues);
-    // console.log(values);
-    // const params = { ident: values.ip }
-    // setAssetData({ ...assetData, ...values, ...params });
-    const params = { ident: values.ip }
-    setAssetData({ ...assetData, ...values });
+    // 如果 values 中有 ident，使用 values.ident；否则保持 assetData.ident 不变
+    const newData = { ...assetData, ...values };
+    // if (!values.hasOwnProperty('ident')) {
+    //   newData.ident = assetData.ident;
+    // }
+    setAssetData(newData);
   };
 
   // IP地址校验规则
@@ -757,7 +801,7 @@ export default function () {
       last_maintenace_date: timestamp(formData.last_maintenace_date),
       next_maintenace_date: timestamp(formData.next_maintenace_date),
       maintainers: formData.maintainers,
-      alert_status: formData.alert_status,
+      alert_status: 2,
       maintenance_status: formData.maintenance_status,
     }).then((res) => {
       message.success('操作成功');
@@ -854,8 +898,8 @@ export default function () {
     setAssetReleaseModalOpen(true);
   }
   // 获取资产上下架历史
-  const getAssetReleaseHistory = (date?: number) => { 
-    getAssetShelfHistory({ asset_id: _.toNumber(id) ,date}).then((res) => {
+  const getAssetReleaseHistory = (date?: number) => {
+    getAssetShelfHistory({ asset_id: _.toNumber(id), date }).then((res) => {
       setAssetReleaseHistory(res.dat?.dat);
     });
   }
@@ -924,32 +968,38 @@ export default function () {
                   {/* <Form.Item label='IP地址' name='ip' rules={[{ required: true }]}>
                     <Input placeholder='请输入IP地址' />
                   </Form.Item> */}
-                  <Form.Item label={t('IP地址')} name='ip' rules={[{ required: true }, { validator: validateIP }]}>
-                    {/* <Select
+                  <Form.Item label={t('探针')} name='ident' rules={[{ required: true }]}>
+                    <Select
                       showSearch
-                      options={assetOptions}
-                      placeholder='请选择IP地址'
+                      filterOption={(input, option) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                      }
+                      allowClear={true}
+                      options={sortedAssetOptions}
+                      optionFilterProp={"label"}
+                      placeholder='请选择探针'
                       onChange={handleChange}
-                      // onChange={(v) => {
-                      //   onAssetChange({
-                      //     includes: v !== 0 ? [v] : [],
-                      //     excludes: form.getFieldValue('excludes'),
-                      //   });
-                      //   buildPromqlWithAsset({});
-                      //   setShowExcludes(v === 0);
-                      // }}
-                    /> */}
-                    <AutoComplete
+                      disabled={currentType === "物理服务器" || currentType === "虚拟服务器"}
+                    // onChange={(v) => {
+                    //   onAssetChange({
+                    //     includes: v !== 0 ? [v] : [],
+                    //     excludes: form.getFieldValue('excludes'),
+                    //   });
+                    //   buildPromqlWithAsset({});
+                    //   setShowExcludes(v === 0);
+                    // }}
+                    />
+                    {/* <AutoComplete
                       allowClear={true}
                       disabled={currentType === "物理服务器" || currentType === "虚拟服务器"}
                       options={sortedAssetOptions}
                       onChange={handleChange}
                       // onSearch={(text) => getPanelValue(text)}
                       filterOption={(inputValue, assetOptions) =>
-                        assetOptions!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                        assetOptions!.ip.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                       }
                       placeholder="请输入IP地址"
-                    />
+                    /> */}
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -961,15 +1011,21 @@ export default function () {
                       filterOption
                       optionFilterProp={"label"}
                       onSearch={(value) => {
-                        setManufacturerSearch(value);
+                        debouncedSetManufacturerSearch(value);
                       }}
                       onBlur={() => {
+                        debouncedSetManufacturerSearch.cancel();
                         setManufacturerSearch('');
                       }}
                       notFoundContent={manufacturerNotFoundContent}
                       options={manufacturerOptions}
                       placeholder='请选择厂商'
                     />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label='IP地址' name='ip' rules={[{ required: true }, { validator: validateIP }]}>
+                    <Input placeholder='请输入IP地址' disabled={currentType === "物理服务器" || currentType === "虚拟服务器"} />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -1027,48 +1083,48 @@ export default function () {
                   <Form.Item label='管理状态' name='is_shelf' rules={[{ required: true }]} initialValue={true}>
                     <Select
                       style={{ width: '100%' }}
-                      allowClear 
+                      allowClear
                       placeholder='请选择管理状态'
                     >
                       {mode === 'view' ? (
                         // 查看模式：已上架、已下架
                         <>
-                          <Select.Option value={true}>已上架</Select.Option> 
-                          <Select.Option value={false}>已下架</Select.Option> 
+                          <Select.Option value={true}>已上架</Select.Option>
+                          <Select.Option value={false}>已下架</Select.Option>
                         </>
                       ) : (
                         // 编辑/新增模式：上架资产、下架资产
                         <>
-                          <Select.Option value={true}>上架资产</Select.Option> 
-                          <Select.Option value={false}>下架资产</Select.Option> 
+                          <Select.Option value={true}>上架资产</Select.Option>
+                          <Select.Option value={false}>下架资产</Select.Option>
                         </>
                       )}
                     </Select>
                   </Form.Item>
                   {mode === 'view' && (
-                  <span className='hsBtn' style={{fontSize:'12px',position:'absolute',left:'76%',top:'15%'}} onClick={showAssetReleaseHistory} >上下架历史</span>
+                    <span className='hsBtn' style={{ fontSize: '12px', position: 'absolute', left: '76%', top: '15%' }} onClick={showAssetReleaseHistory} >上下架历史</span>
                   )}
                 </Col>
                 {form.getFieldValue('is_shelf') === false && (
                   <Col span={24}>
-                    <Form.Item 
+                    <Form.Item
                       labelCol={{ span: 4 }}
                       wrapperCol={{ span: 17 }}
-                      label='下架原因' 
-                      name='shelf_reason' 
+                      label='下架原因'
+                      name='shelf_reason'
                       rules={[{
                         required: true,
                         message: '请填写下架原因'
                       }]}
                     >
-                      <Input.TextArea 
-                        placeholder='请填写下架原因' 
+                      <Input.TextArea
+                        placeholder='请填写下架原因'
                         rows={4}
                       />
                     </Form.Item>
                   </Col>
                 )}
-                
+
               </Row>
             </Card>
             {params.length > 0 && (
@@ -1077,7 +1133,7 @@ export default function () {
                   {params.map((v) => {
                     return (
                       <Col span={12} key={`col-${v.name}`}>
-                        <Form.Item  
+                        <Form.Item
                           label={v.label}
                           name={['params', v.name]}
                           key={`formitem=${v.name}`}
@@ -1235,7 +1291,7 @@ export default function () {
                     <Input placeholder='请输入维保人员' />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                {/* <Col span={12}>
                   <Form.Item label='维保提醒' name='alert_status' rules={[{ required: true }]}>
                     <Select
                       style={{ width: '100%' }}
@@ -1243,7 +1299,7 @@ export default function () {
                       placeholder='请选择维保提醒'
                     />
                   </Form.Item>
-                </Col>
+                </Col> */}
                 <Col span={12}>
                   <Form.Item label='维保状态' name='maintenance_status' rules={[{ required: true }]}>
                     {/* disabled={maintenanceStatusNum && maintenanceStatusNum != '2'} */}
@@ -1453,30 +1509,30 @@ export default function () {
       <Modal title="资产上下架历史" width='50%' footer={null} visible={assetReleaseModalOpen} onOk={() => { setAssetReleaseModalOpen(false) }} onCancel={() => { setAssetReleaseModalOpen(false) }}>
         <div style={{ marginBottom: '1rem' }}>
           <span>选择日期&nbsp;&nbsp;</span>
-          <DatePicker allowClear  format='YYYY-MM-DD' style={{ width: '30%' }} onChange={assetReleaseDateChange} placeholder='请选择上下架日期' />
+          <DatePicker allowClear format='YYYY-MM-DD' style={{ width: '30%' }} onChange={assetReleaseDateChange} placeholder='请选择上下架日期' />
         </div>
-        <div style={{ marginLeft: '2rem'}}>
-        <div style={{ marginBottom: '.5rem' }}>共{assetReleaseHistory.length}条记录</div>
-        <Timeline style={{ maxHeight: '500px', overflowY: 'auto', padding: '.5rem 0' }}>
-          {
-            assetReleaseHistory.length && (
-              assetReleaseHistory.map((x, index) => {
-                return (
-                  <Timeline.Item key={index} color="#2977d7">
-                    <Space>
-                      <span>{moment.unix(x.operation_time).format('YYYY-MM-DD HH:mm:ss')} </span>
-                      <Tag color={x.is_shelf ? "success" : "default"}>{x.is_shelf ? "上架资产" : "下架资产"} </Tag>
-                    </Space>
-                    <div style={{ margin: '.5rem 0' }}>操作人：{x.operator}</div>
-                    {!x.is_shelf && (
-                      <div style={{ padding: '.5rem 0', background: '#F2F8FF' }}>下架原因：{x.reason}</div>
-                    )}
-                  </Timeline.Item>
-                )
-              })
-            )
-          }
-        </Timeline>
+        <div style={{ marginLeft: '2rem' }}>
+          <div style={{ marginBottom: '.5rem' }}>共{assetReleaseHistory.length}条记录</div>
+          <Timeline style={{ maxHeight: '500px', overflowY: 'auto', padding: '.5rem 0' }}>
+            {
+              assetReleaseHistory.length && (
+                assetReleaseHistory.map((x, index) => {
+                  return (
+                    <Timeline.Item key={index} color="#2977d7">
+                      <Space>
+                        <span>{moment.unix(x.operation_time).format('YYYY-MM-DD HH:mm:ss')} </span>
+                        <Tag color={x.is_shelf ? "success" : "default"}>{x.is_shelf ? "上架资产" : "下架资产"} </Tag>
+                      </Space>
+                      <div style={{ margin: '.5rem 0' }}>操作人：{x.operator}</div>
+                      {!x.is_shelf && (
+                        <div style={{ padding: '.5rem 0', background: '#F2F8FF' }}>下架原因：{x.reason}</div>
+                      )}
+                    </Timeline.Item>
+                  )
+                })
+              )
+            }
+          </Timeline>
         </div>
       </Modal>
     </div>

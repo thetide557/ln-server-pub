@@ -339,6 +339,7 @@ export default function () {
       ...column,
       columnLabel: '监控状态',
       title: renderHeaderHelpTitle('监控状态', '监控状态', '反映资产对应指标检测是否正常的状态。'),
+      showSorterTooltip: false
     };
   });
   const fixColumns: any[] = [
@@ -917,6 +918,19 @@ export default function () {
       gId: groupIds?.toString()
     };
 
+    // N36-B：业务组列表为空时 groupIds?.toString() 是空串，后端 `router_monitoring.go:245-249` 对
+    // `gId == "" && !isAdmin` 直接回 400「gId 参数不能为空」（A13 OBS-T5-4）。
+    // 后端取参用的是 ginx.QueryStr(c, "gId", "")，所以「不带这个参数」和「带空值」一样会 400，只能不发请求。
+    // 守卫条件照抄后端那一行：Admin 带空值是合法的（不按业务组过滤、看全部），所以 Admin 的行为一行不变。
+    const isAdminUser = !!profile?.roles?.includes('Admin');
+    if (!isAdminUser && !param.gId) {
+      if (requestId === requestIdCounter.current) {
+        setList([]);
+        setTotal(0);
+      }
+      return;
+    }
+
     if (currentAssetId > 0) {
       param['assetId'] = currentAssetId;
     } else {
@@ -1081,7 +1095,7 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack={assetId ? true : false}  backPath="/xh/assetmgt" backState={{ isops: true }}>
+    <PageLayout icon={<GroupOutlined />} title={'监控指标'} showBack={assetId ? true : false}  backPath="/xh/assetmgt" backState={{ isops: true }}>
       <div style={{ display: 'flex' }} className='monitor_list_view'>
         <Resizable
           style={{

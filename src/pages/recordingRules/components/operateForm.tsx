@@ -8,6 +8,8 @@ import { addOrEditRecordingRule, editRecordingRule, deleteRecordingRule } from '
 import PromQLInput from '@/components/PromQLInput';
 import DatasourceValueSelect from '@/pages/alertRules/Form/components/DatasourceValueSelect';
 import { CommonStateContext } from '@/App';
+import { AiButton } from '@/components/AiChatNG/FlashAiButton';
+import { buildPageFrom, getExplorerPrompts } from '@/components/AiChatNG/recommend';
 
 const DATASOURCE_ALL = 0;
 
@@ -31,7 +33,7 @@ function getFirstDatasourceId(datasourceIds = [], datasourceList: { id: number }
 }
 
 const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
-  const { t } = useTranslation('recordingRules');
+  const { t, i18n } = useTranslation('recordingRules');
   const history = useHistory(); // 创建的时候默认选中的值
   const [form] = Form.useForm();
   const { groupedDatasourceList, curBusiId } = useContext(CommonStateContext);
@@ -69,7 +71,7 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
               return true;
             }
           });
-        return isInvalid ? Promise.reject(new Error(t('append_tags_msg'))) : Promise.resolve();
+        return isInvalid ? Promise.reject(new Error(t('标签格式不正确，请检查！'))) : Promise.resolve();
       },
     };
   }
@@ -142,7 +144,7 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
               {
                 required: true,
               },
-              { pattern: new RegExp(/^[0-9a-zA-Z_:]{1,}$/, 'g'), message: 'name_msg' },
+              { pattern: new RegExp(/^[0-9a-zA-Z_]{1,}$/, 'g'), message: '指标名称字段限制只能输入英文、数字、下划线' },
             ]}
           >
             <Input />
@@ -155,17 +157,50 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
           <Form.Item noStyle shouldUpdate={(prevValues, curValues) => prevValues.datasource_ids !== curValues.datasource_ids}>
             {({ getFieldValue, validateFields }) => {
               const datasourceIds = getFieldValue('datasource_ids');
+              const datasourceValue = getFirstDatasourceId(datasourceIds, groupedDatasourceList?.prometheus);
               return (
-                <Form.Item label='PromQL' name='prom_ql' validateTrigger={['onBlur']} trigger='onChange' rules={[{ required: true }]}>
-                  <PromQLInput
-                    datasourceValue={getFirstDatasourceId(datasourceIds, groupedDatasourceList?.prometheus)}
-                    onChange={(val) => {
-                      if (val) {
-                        validateFields(['prom_ql']);
-                      }
-                    }}
-                  />
-                </Form.Item>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                  <Form.Item
+                    label='PromQL'
+                    name='prom_ql'
+                    validateTrigger={['onBlur']}
+                    trigger='onChange'
+                    rules={[{ required: true }]}
+                    style={{ flex: 1, minWidth: 0 }}
+                  >
+                    <PromQLInput
+                      datasourceValue={datasourceValue}
+                      onChange={(val) => {
+                        if (val) {
+                          validateFields(['prom_ql']);
+                        }
+                      }}
+                    />
+                  </Form.Item>
+                  <Form.Item label=' '>
+                    <AiButton
+                      queryPageFrom={buildPageFrom({
+                        param: {
+                          datasource_type: 'prometheus',
+                          datasource_id: datasourceValue,
+                        },
+                      })}
+                      queryAction={{
+                        key: 'query_generator',
+                        param: {
+                          datasource_type: 'prometheus',
+                          datasource_id: datasourceValue,
+                        },
+                      }}
+                      promptList={getExplorerPrompts(i18n.language)}
+                      onExecuteQueryForQueryContent={(promql) => {
+                        form.setFieldsValue({
+                          prom_ql: promql,
+                        });
+                      }}
+                    />
+                  </Form.Item>
+                </div>
               );
             }}
           </Form.Item>

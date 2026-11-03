@@ -88,7 +88,7 @@ const editModal: React.FC<Props> = ({ isModalVisible, editModalFinish }) => {
               return true;
             }
           });
-        return isInvalid ? Promise.reject(new Error(t('append_tags_msg'))) : Promise.resolve();
+        return isInvalid ? Promise.reject(new Error(t('标签格式不正确，请检查！'))) : Promise.resolve();
       },
     };
   }

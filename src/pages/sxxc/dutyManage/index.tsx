@@ -25,7 +25,7 @@ export default function () {
           <TabPane tab="值班人员管理" key="duty">
             <DutyList />
           </TabPane>
-          <TabPane tab="排班管理" key="schedule">
+          <TabPane tab="排班管理" key="schedule"> 
             <ScheduleList />
           </TabPane>
           <TabPane tab="值班日志" key="dutyLogs">

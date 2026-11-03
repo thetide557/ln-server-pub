@@ -71,9 +71,9 @@ export enum ActionType {
   AddUser = '添加成员',
 }
 export enum RoleType {
-  Admin = '管理员',
-  Standard = '普通用户',
-  Guest = '游客',
+  Admin = 'admin',
+  Standard = 'standard',
+  Guest = 'guest',
 }
 export interface Title {
   create: string;

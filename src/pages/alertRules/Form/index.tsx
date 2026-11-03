@@ -44,6 +44,9 @@ interface IProps {
 
 export const FormStateContext = createContext({
   disabled: false,
+  // 第六步 第4段 W3a（拍板-22）：补一个 type，语义就是上面 IProps 的 type（空 = 新增、1 = 编辑、2 = 克隆、3 = 查看），
+  // 和 fe v9.1.0 同名字段一致。doris 的告警编辑器要用它判断「是不是在编辑已有规则」来决定数据库下拉怎么取值。
+  type: undefined as number | undefined,
 });
 
 export default function index(props: IProps) {
@@ -179,6 +182,7 @@ export default function index(props: IProps) {
     <FormStateContext.Provider
       value={{
         disabled,
+        type, // 第六步 第4段 W3a（拍板-22）：就是本组件 props 里的那个 type（:41 注释写了语义），原样往下灌
       }}
     >
       <Form form={form} layout='horizontal' disabled={disabled} >

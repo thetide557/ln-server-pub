@@ -16,7 +16,7 @@ export default function () {
 
   return (
     <PageLayout
-      title={'监控管理'}
+      title={'监控指标'}
       showBack
       {...(backPath ? { backPath, backState } : {})}
     >

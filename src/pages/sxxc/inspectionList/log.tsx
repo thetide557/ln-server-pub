@@ -38,7 +38,7 @@ import { getMonObjectList } from '@/services/targets';
 import Report from './report'
 import './index.less';
 // import './locale';
-import { getAssets1, getAssetsByCondition } from '@/services/assets';
+import { getAssets1, getAssetsByConditionSimple } from '@/services/assets';
 
 const { confirm } = Modal;
 
@@ -335,7 +335,7 @@ const Resource: React.FC = () => {
         //     // console.log('list', list);
         //     setIpList(list)
         // })
-        getAssetsByCondition(query).then(res => {
+        getAssetsByConditionSimple(query).then(res => {
             let list = res.dat?.list?.filter(item => {
                 if (item.status == 1) {
                     if (item.type == '物理服务器' || item.type == '虚拟服务器') {

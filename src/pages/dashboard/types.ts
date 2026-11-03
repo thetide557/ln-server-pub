@@ -30,6 +30,9 @@ export interface ITarget {
   legendFormat: string;
   time?: IRawTimeRange; // 固定时间范围
   step?: number; // 固定时间间隔
+  // 2026-10-05 N16 摞二：query 保持羚牛原窄对象（index/filters/values），全局 ITarget 不改宽——
+  // 改宽会伤羚牛自有大屏 sxxc/dashboardxc 的 ITarget 副本（见 拿不准-W2.md U-1、lead D-10a）。
+  // Renderer/datasource/{registry,target}.ts 要按各数据源读 query.mode/sql/keys 等任意字段，由各新文件内用本地 ITarget 别名把 query 放宽成 any（不出本文件）。
   query?: {
     index: string;
     filters: string;
@@ -39,6 +42,19 @@ export interface ITarget {
   };
   legend?: string;
   instant?: boolean;
+  // 2026-10-05 N16 摞二：以下为逐字抄自 fe ee48e701:src/pages/dashboard/types.ts 的 ITarget 可选字段，
+  // 供 Renderer/datasource/{registry,target}.ts、queryBatchV2.ts 使用（任务书 W-2 第 37 步，只加不改已有字段）。
+  kind?: 'query' | 'expression';
+  __mode__?: '__expr__' | '__query__';
+  datasource?: {
+    cate: string;
+    id: number | string;
+  };
+  resultType?: 'time_series' | 'logs';
+  expression?: string;
+  maxDataPoints?: number;
+  queries?: JsonObject[];
+  hide?: boolean;
 }
 
 export type IType = 'row' | 'timeseries' | 'stat' | 'table' | 'pie' | 'hexbin' | 'barGauge' | 'text' | 'gauge' | 'iframe' | 'topo' | 'column';
@@ -242,4 +258,37 @@ export interface IDashboard {
   links: ILink[];
   var: IVariable[]; // 变量配置
   panels: IPanel[];
+}
+
+// 2026-10-05 N16 摞二：逐字抄自 fe ee48e701:src/pages/dashboard/types.ts:20-24 的 JSON 类型别名，
+// 供 Renderer/datasource/{registry,target}.ts 与 queryBatchV2.ts 引用（任务书 W-2 第 37 步，只加不改）。
+// JsonValue 依赖 JsonPrimitive，故一并补入（三者同源）。
+export type JsonPrimitive = string | number | boolean | null;
+export type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+export interface JsonObject {
+  [key: string]: JsonValue;
+}
+
+// ---- n20 块 0（新日志浏览）在这里加的，只加不改 ----
+// 谁要它：ScopedVariables ← src/pages/dashboard/Renderer/Renderer/TimeSeriesNG/components/Legend/Link.tsx:8；
+//         IStandardOptions ← .../TimeSeriesNG/utils/getLegendData.ts:4。
+// fe 出处：fe ee48e701 同路径 :44-47（ScopedVariable）、:49（ScopedVariables）、:121-128（IStandardOptions），逐字。
+// ScopedVariables 依赖 ScopedVariable，一并补入（两者同源）。
+// 本文件已有的 IOptions.standardOptions（:90-98）是羚牛自己的内联对象（util / customized /
+// customizedUnit 几个字段与 fe 不同），**一个字没动**；新加的 IStandardOptions 是独立的类型，
+// 只给新搬进来的 TimeSeriesNG 图例用。ITarget.query 也一个字没动（n16 D-10a：不许改宽）。
+export interface ScopedVariable {
+  text?: string;
+  value?: string | number | string[];
+}
+
+export type ScopedVariables = Record<string, ScopedVariable>;
+
+export interface IStandardOptions {
+  unit?: string; // 纠正的单位
+  min?: number;
+  max?: number;
+  decimals?: number;
+  dateFormat?: string;
+  displayName?: string;
 }

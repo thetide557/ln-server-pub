@@ -81,12 +81,12 @@ export default function List(props: IProps) {
     { name: 'note', label: '备注', type: 'input' },
   ];
   const filterOptions = {
-    group_id: busiGroups.map((group) => {
+    group_id: [{ value: '0', label: '未归组' }, ...busiGroups.map((group) => {
       return {
         value: _.toString(group.id),
         label: group.name,
       };
-    })
+    })]
   };
 
   const columns: ColumnsType<any> = [

@@ -77,7 +77,6 @@ const Resource: React.FC = () => {
   const [filterParam, setFilterParam] = useState<string>("");
   const [filterName, setFilterName] = useState<string>("");
   const [filterOptions, setFilterOptions] = useState<any>({});
-  const [desc, setDesc] = useState<string>("");
   // const statusOptions =[
   const [filter, setFilter] = useState<{
     datasourceIds: number[];
@@ -150,10 +149,6 @@ const Resource: React.FC = () => {
 
 
   useEffect(() => {
-    if (profile.roles?.includes("临时用户")) {
-      const days = profile?.temp_remaining_days;
-      setDesc(`剩余使用时长：${days}天`);
-    }
     filterOptions["status"] = [{ value: '0', label: '禁用' }, { value: '1', label: '启用' }]
     setFilterOptions({ ...filterOptions })
     getRoles().then((res) => {
@@ -225,9 +220,7 @@ const Resource: React.FC = () => {
       title: t('单一会话'),
       dataIndex: 'single_session',
       render: (val, record) => {
-        if (val === 0) {
-          return "关闭"
-        } else if (val === 1) {
+       if (val === 1) {
           return "启用"
         } else if (val === 2) {
           return "禁用"
@@ -259,7 +252,7 @@ const Resource: React.FC = () => {
         <>
           {
             (profile.roles?.includes("Admin") || (permList.includes("/users/status") && record.id != '1')) && <PoweroffOutlined className='oper-name'
-              title={record.status === 1 ? ('已启用') : ('已禁用')}
+              title={record.status === 1 ? t('user.status_tip_enabled') : t('user.status_tip_disabled')}
               style={{ color: record.status === 1 ? ('green') : ('red') }}
               onClick={e => {
                 if ("" + record.id == "1") {
@@ -510,7 +503,7 @@ const Resource: React.FC = () => {
 
 
   return (
-    <PageLayout title={t('user.title')} icon={<UserOutlined />} desc={desc}>
+    <PageLayout title={t('user.title')} icon={<UserOutlined />}>
       <div style={{ display: 'flex', width: '100%' }} className='user_management'>
         <div style={{ width: '245px', display: 'list-item' }}>
           <div className='sub-title'>

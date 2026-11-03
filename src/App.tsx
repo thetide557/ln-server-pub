@@ -38,6 +38,8 @@ import { getSystemTheme } from '@/services/login';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
 import './App.less';
+import './theme/ai-chat/index.less';
+import { AiChatProvider, AiChatContainer } from '@/components/AiChatNG';
 import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
@@ -104,6 +106,22 @@ export interface ICommonState {
     plugins: any[];
   };
   isPlus: boolean;
+  // ---- n20 块 0（新日志浏览）在这个接口体里加的两个**可选**成员，已有成员一个字没动 ----
+  // fe 出处：fe ee48e701 src/App.tsx:144（darkMode: boolean）、:155（logsDefaultRange: IRawTimeRange）。
+  // 谁要它：darkMode ← src/pages/logExplorer/components/LogsViewer/components/HistogramChart.tsx:16；
+  //        logsDefaultRange ← src/pages/logExplorer/Explorer.tsx:42、Header.tsx:102。
+  // 羚牛的 App 没有暗色模式、也没有「日志默认时间范围」这个用户设置，所以两个都是可选成员：
+  // darkMode **只加类型、不给值**（下面 useState 初始值里没有它），版本 A 恒为 undefined → 走亮色
+  // （和羚牛已有的两处同类处置一致，见 src/components/KQLInput/index.tsx:67-70、
+  // src/pages/explorer/Elasticsearch/QueryBuilder.tsx:42-44 的 `as any` 注释）；
+  // logsDefaultRange **已在下面的 useState 初始值里给了 `{ start: 'now-1h', end: 'now' }`**
+  // （n23 / 用户 M264 ②，照上游 fe ee48e701 src/App.tsx:256；原 n20 块 0 只加类型，见拍板 D-18）。
+  darkMode?: boolean;
+  logsDefaultRange?: IRawTimeRange;
+  // n20 lead 已转正（拍板 D-25）：第 2 轮 W-1（es）加的。
+  // 要它的：src/plugins/elasticsearch/ExplorerNG/index.tsx:34,212、ExplorerNG/SideBarNav/index.tsx:43,188。
+  // fe 出处：fe ee48e701 src/App.tsx:147（`esIndexMode: string;`，必填）、:252（初始值写死 `'all'`，全仓没有 setter）。
+  esIndexMode?: string;
 }
 
 export const initTheme = {
@@ -191,6 +209,20 @@ function App() {
       newVersion: false,
     },
     isPlus,
+    // n23（用户 M264 ②）：给 logsDefaultRange 初值，照上游 fe ee48e701 src/App.tsx:256 一字不差。
+    // 原先只加类型不给值（拍板 D-18），恒为 undefined，新日志页走搬入代码自己的兜底
+    // （src/pages/logExplorer/Explorer.tsx:87,197 的 `?? { start: 'now-5m', end: 'now' }`）→ 默认 5 分钟。
+    // 给了值之后默认 1 小时，与上游 fe 无该用户设置时的表现一致。羚牛没有「日志默认时间范围」
+    // 这个用户设置项，所以这里写死、没有 setter（上游 fe 同样写死、全仓无 setter）。
+    logsDefaultRange: { start: 'now-1h', end: 'now' },
+    // n20 lead 已转正（拍板 D-25）：第 2 轮 W-1（es）加的。
+    // 必须给值、不能只加类型：es ExplorerNG/SideBarNav/index.tsx:188 是
+    // `initialValue={esIndexMode !== 'all' ? esIndexMode : 'indices'} hidden={isOpenSearch || esIndexMode !== 'all'}`，
+    // 取 undefined 时 `!== 'all'` 成立 → mode 初值变 undefined、而且「索引 / 索引模式」选择器被整个藏起来。
+    // 写 'all' 和 fe ee48e701 src/App.tsx:252 一字不差（fe 也是写死、没有 setter），语义是「两种模式都让用户自己选」。
+    // 对羚牛经典 ES 页无影响：src/pages/explorer/Elasticsearch/index.tsx:96,144 只判 'index-patterns' / 'indices'，
+    // 'all' 与原来的 undefined 走同一条分支。
+    esIndexMode: 'all',
   });
 
   // 右下角告警
@@ -201,6 +233,7 @@ function App() {
       setWarnModalShow(false)
       getAlertEventsById(alertId)
         .then((res) => {
+          setDialogShow('0')
           window.location.href = '/alert-cur-events/' + alertId;
         }).catch(_ => {
           setDialogShow('0')
@@ -295,7 +328,13 @@ function App() {
           const defaultBusiId = commonState.curBusiId || busiGroups?.[0]?.id;
           const defaultOrganizationId = commonState.organizationId || 0;
           const queryCondition = commonState.queryCondition || '';
-          window.localStorage.setItem('curBusiId', String(defaultBusiId));
+          // N36-B：业务组列表为空时 defaultBusiId 是 undefined，String(undefined) 会把字面量 'undefined'
+          // 写进 localStorage，上面 `:184` 读回时 Number('undefined') 是 NaN。写空串让它读回 0；
+          // 「空串」而不是「不写」，是为了把上一个账号留下的旧 curBusiId 清掉，别让下一个账号拿着不属于自己的业务组 id 去发请求。
+          window.localStorage.setItem(
+            'curBusiId',
+            defaultBusiId === undefined || defaultBusiId === null ? '' : String(defaultBusiId),
+          );
           window.localStorage.setItem('organizationId', String(defaultOrganizationId));
           window.localStorage.setItem('queryCondition', queryCondition);
           initialized.current = true;
@@ -357,6 +396,7 @@ function App() {
       <audio ref={audioRef} src='/music/y2168.mp3' />
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
+          <AiChatProvider>
           <Router>
             <Switch>
               <Route exact path='/job-task/:busiId/output/:taskId/:outputType' component={TaskOutput} />
@@ -371,6 +411,8 @@ function App() {
               </>
             </Switch>
           </Router>
+          <AiChatContainer />
+          </AiChatProvider>
         </ConfigProvider>
       </CommonStateContext.Provider>
 
@@ -404,3 +446,14 @@ function App() {
 }
 
 export default App;
+
+// ---- n20 块 0（新日志浏览）在这里加的，只加不改 ----
+// 谁要它：src/pages/logExplorer/components/Links.tsx:6 `import { basePrefix } from '@/App'`。
+// fe 出处：fe ee48e701 src/App.tsx:158 `export const basePrefix = import.meta.env.VITE_PREFIX || '';`。
+// 羚牛已经有等价常量 src/utils/basePrefix.ts:3（部署在站点根路径、写死空串，第六步 S3 定的），
+// 所以这里不重新定义一份、只把它从 @/App 这个入口再导出一次，保证两处永远同一个值。
+export { basePrefix } from '@/utils/basePrefix';
+
+// n20 块 0：上面 ICommonState 里新加的 logsDefaultRange 要这个类型。import 放文件末尾（ESM 会提升，
+// 与放在文件头等价），这样 src/App.tsx 这个边界文件的 diff 里只有 `+` 行、没有 `-` 行。
+import type { IRawTimeRange } from '@/components/TimeRangePicker';
