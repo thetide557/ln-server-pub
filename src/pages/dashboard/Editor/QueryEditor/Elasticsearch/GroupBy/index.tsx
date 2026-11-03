@@ -4,7 +4,7 @@ import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { useDebounceFn } from 'ahooks';
 import { useTranslation } from 'react-i18next';
-import { getFields } from '@/pages/explorer/Elasticsearch/services';
+import { getFields, getFullFields } from '@/pages/explorer/Elasticsearch/services';
 import Filters from './Filters';
 import Terms from './Terms';
 import Histgram from './Histgram';
@@ -15,20 +15,29 @@ interface IProps {
   prefixFieldNames?: (string | number)[]; // 前缀字段名路径
   datasourceValue: number;
   index: string; // ES 索引
-  backgroundVisible?: boolean;
   disabled?: boolean;
 }
 
-export default function index({ prefixField = {}, prefixFieldNames = [], parentNames = [], datasourceValue, index, backgroundVisible = true, disabled }: IProps) {
+export default function index({ prefixField = {}, prefixFieldNames = [], parentNames = [], datasourceValue, index, disabled }: IProps) {
   const { t } = useTranslation('alertRules');
   const [fieldsOptions, setFieldsOptions] = useState<any[]>([]);
   const { run } = useDebounceFn(
     () => {
-      getFields(datasourceValue, index).then((res) => {
+      // step6f（ES 升级轮）原注：fe v9.1.0 这里传 `{ includeSubFields: true }`，当时 pub 的 getFullFields
+      // 第三个参数还是老的字符串 type、没有 includeSubFields，所以退成只传前两个参数。
+      // ---- N36 批 H1 第 2 条（后端第九份第二节 2）：那个共享函数后来已经按上游升过了
+      //（`src/pages/explorer/Elasticsearch/services.ts:97-110` 的 options 里就有 includeSubFields，
+      // 实现见 `src/pages/explorer/Elasticsearch/utils/index.tsx:93-120`），这里恢复成上游写法
+      //（上游 fe `ee48e701` 同文件 :29-31 一字不差）。
+      // 不传的话分组字段下拉里只有 `xxx` 这个 text 字段、没有 `xxx.keyword`，用户只能选 text 型，
+      // ES 直接回 `Fielddata is disabled on text fields by default`——后端那条反馈就是这么来的。
+      getFullFields(datasourceValue, index, {
+        includeSubFields: true,
+      }).then((res) => {
         setFieldsOptions(
           _.map(res.allFields, (item) => {
             return {
-              value: item,
+              value: item.name,
             };
           }),
         );
@@ -69,7 +78,7 @@ export default function index({ prefixField = {}, prefixFieldNames = [], parentN
           </div>
           {fields.map((field) => {
             return (
-              <div key={field.key} style={{ marginBottom: backgroundVisible ? 16 : 0 }}>
+              <div key={field.key} style={{ marginBottom: 0 }}>
                 <Form.Item shouldUpdate noStyle>
                   {({ getFieldValue }) => {
                     const cate = getFieldValue([...parentNames, ...prefixFieldNames, 'group_by', field.name, 'cate']);
@@ -78,16 +87,7 @@ export default function index({ prefixField = {}, prefixFieldNames = [], parentN
                     return (
                       <Row gutter={10} align='top'>
                         <Col flex='auto'>
-                          <div
-                            style={
-                              backgroundVisible
-                                ? {
-                                    backgroundColor: '#FAFAFA',
-                                    padding: 16,
-                                  }
-                                : {}
-                            }
-                          >
+                          <div>
                             {cate === 'filters' && <Filters prefixField={field} />}
                             {cate === 'terms' && <Terms prefixField={field} fieldsOptions={fieldsOptions} values={valuesWithoutCount} />}
                             {cate === 'histgram' && <Histgram prefixField={field} />}

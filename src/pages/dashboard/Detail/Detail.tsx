@@ -42,6 +42,9 @@ import Editor from '../Editor';
 import { defaultCustomValuesMap, defaultOptionsValuesMap } from '../Editor/config';
 import { sortPanelsByGridLayout, panelsMergeToConfigs, updatePanelsInsertNewPanelToGlobal } from '../Panels/utils';
 import { useGlobalState } from '../globalState';
+// 2026-10-07 N34-var：把看板变量与时间范围写进 Variables 垫片的全局状态，新套 replaceTemplateVariables
+// 靠它替换面板 SQL / ES filter 里的 ${var}。语义照 fe v9.1.0 Detail/Detail.tsx:97-98,266-282。
+import { setGlobalState as setVariablesGlobalState, toVariablesWithOptions } from '../Variables/utils/n9eShim';
 import './style.less';
 import './dark.antd.less';
 import './dark.less';
@@ -126,7 +129,9 @@ export default function DetailV2(props: IProps) {
   let { id } = useParams<URLParam>();
 
   if (isHome) {
-    id = _.toString(profile.board_id) || '1'
+    // N36-B：board_id 为 0 时 _.toString(0) 是字符串 '0'、是真值，`|| '1'` 兜不住，会拼出 GET /api/n9e/board/0 → 后端 404
+    //（A13 OBS-T5-4，证据 `10-T510-standard-login.txt:142`，404 ×3）。这里改成只认大于 0 的 board_id，其余一律回落到默认首页看板 1。
+    id = profile.board_id ? _.toString(profile.board_id) : '1';
   }
   const query = queryString.parse(useLocation().search);
   if (isBuiltin) {
@@ -199,6 +204,9 @@ export default function DetailV2(props: IProps) {
         dashboardId: _.toString(id),
         variableConfigWithOptions: valueWithOptions,
       });
+      // 2026-10-07 N34-var：同步进垫片存储（fe v9.1.0 这里是 setVariablesWithOptions(newValue)）。
+      // 老套变量对象的 options 是 string[]，新套要 { label, value }[]，过一道 toVariablesWithOptions。
+      setVariablesGlobalState('variablesWithOptions', toVariablesWithOptions(valueWithOptions));
     }
   };
   const stopAutoRefresh = () => {
@@ -215,10 +223,26 @@ export default function DetailV2(props: IProps) {
     });
   };
 
+  // 2026-10-07 N34-var：时间范围变化时同步进垫片存储（照 fe v9.1.0 Detail/Detail.tsx:266-268）。
+  // 面板取数时各数据源会把 range 显式传给 replaceTemplateVariables，这里写的是没显式传时的兜底值。
   useEffect(() => {
+    setVariablesGlobalState('range', range);
+  }, [range]);
+
+  useEffect(() => {
+    // 2026-10-07 N34-var：切换仪表盘时先清空变量，免得用上一个仪表盘的变量值（照 fe v9.1.0
+    // Detail/Detail.tsx:270-282）；组件卸载时同样清空。
+    setVariablesGlobalState('variablesWithOptions', []);
     refresh();
+    return () => {
+      setVariablesGlobalState('variablesWithOptions', []);
+    };
   }, [id]);
 
+  /*
+   * 2026-10-05 N16 todo②（用户 M229 ④）：羚牛自研轮询（fe v9.1.0 与最新均无）；后端免登录入口对私有看板一律 403
+   * （router_board.go:121-122），.then() 从不执行、editable 从未被它改过；注释掉以免每 2 秒刷一条 403。
+   * 保留不删，便于将来公开看板需要时恢复。
   useInterval(() => {
     if (import.meta.env.PROD && dashboard.id) {
       getDashboardPure(_.toString(dashboard.id)).then((res) => {
@@ -230,6 +254,7 @@ export default function DetailV2(props: IProps) {
       });
     }
   }, 2000);
+  */
 
   useEffect(() => {
     if (profile?.roles?.includes("Admin")) return;

@@ -1,133 +1,54 @@
-import _ from 'lodash';
-import moment from 'moment';
-import semver from 'semver';
-import { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
-import { getDsQuery, getESVersion } from '@/services/warning';
-import { normalizeTime } from '@/pages/alertRules/utils';
-import { ITarget } from '../../../types';
-import { IVariable } from '../../../VariableConfig/definition';
-import { replaceExpressionVars } from '../../../VariableConfig/constant';
-import { getSeriesQuery, getLogsQuery } from './queryBuilder';
-import { processResponseToSeries } from './processResponse';
-import { flattenHits } from '@/pages/explorer/Elasticsearch/utils';
-
-interface IOptions {
-  dashboardId: string;
-  datasourceCate: string;
-  datasourceValue: number;
-  id?: string;
-  time: IRawTimeRange;
-  targets: ITarget[];
-  variableConfig?: IVariable[];
-}
-
 /**
- * 根据 target 判断是否为查询 raw data
+ * 第六步 ES 升级轮（step6f）的目录内 shim，不是 fe v9.1.0 的文件。
+ * fe 那个入口文件原样放在同目录的 `query.ts`（除第 7 行 import 外与 fe 逐字相同）。
+ *
+ * 这一层做两件事，依据：顾问意见 X-8 第 2 条与第 3 条「补核 ②」、L 的拍板-32。
+ *
+ * 一、返回值形状对齐（X-8 第 2 条）
+ *   fe v9.1.0 的取数函数返回 `{ series, query }`，而羚牛 pub 的调用方
+ *   `src/pages/dashboard/Renderer/datasource/useQuery.tsx:82-83` 期望的是一个数组
+ *   （`.then((res: any[]) => setSeries(res))`）。`useQuery.tsx` 不在本轮允许改的四层目录里，
+ *   所以在这里把 `series` 取出来。丢掉的 `query` 是给「查询详情」面板看的原始请求 / 响应，
+ *   pub 的 useQuery 里根本没有这个状态（`:56-58` 只有 series / error / loading），丢了无人消费。
+ *
+ * 二、仪表盘变量替换的补位（X-8 第 3 条「补核 ②」）
+ *   pub 旧版取数是自己替变量的：`datasourceValue` 和每个 target 的 `query.filter` 都过一遍
+ *   `replaceExpressionVars(…, variableConfig, …)`（pub 旧 index.ts:48-54）。
+ *   fe v9.1.0 改成靠 v9 的全局变量状态，取数里只留 `replaceTemplateVariables(query.filter, { range })`。
+ *   但羚牛这边那条路是断的：`src/pages/dashboard/Variables/utils/n9eShim.ts:36` 的
+ *   `getGlobalState('variablesWithOptions')` 直接返回 `[]`（step6d L3 登记过的缺角），
+ *   也就是说用户自定义的仪表盘变量在 fe 那条路上替不掉，只有内置的 $__from / $__to 能替。
+ *   pub 的 `Renderer/index.tsx` 又是把原始 targets + variableConfig 交给 useQuery 的，
+ *   所以这里照 pub 旧版的写法先替一遍，再交给 fe 的取数函数——不改 `query.ts` 一个字。
  */
-function isRawDataQuery(target: ITarget) {
-  if (_.size(target.query?.values) === 1) {
-    const func = _.get(target, ['query', 'values', 0, 'func']);
-    return func === 'rawData';
-  }
-  return false;
-}
+import _ from 'lodash';
 
-export default async function elasticSearchQuery(options: IOptions) {
-  const { dashboardId, time, targets, datasourceCate, variableConfig } = options;
-  if (!time.start) return;
-  const parsedRange = parseRange(time);
-  let start = moment(parsedRange.start).valueOf();
-  let end = moment(parsedRange.end).valueOf();
-  let batchDsParams: any[] = [];
-  let batchLogParams: any[] = [];
-  let series: any[] = [];
-  const isInvalid = _.some(targets, (target) => {
-    const query: any = target.query || {};
-    return !query.index || !query.date_field;
-  });
-  const datasourceValue = variableConfig
-    ? (replaceExpressionVars(options.datasourceValue as any, variableConfig, variableConfig.length, dashboardId) as any)
-    : options.datasourceValue;
-  if (targets && datasourceValue && !isInvalid) {
-    _.forEach(targets, (target) => {
-      const query: any = target.query || {};
-      const filter = variableConfig ? replaceExpressionVars(query.filter, variableConfig, variableConfig.length, dashboardId) : query.filter;
-      if (isRawDataQuery(target)) {
-        batchLogParams.push({
-          index: query.index,
-          filter,
-          date_field: query.date_field,
-          limit: query.limit,
-          start,
-          end,
-        });
-      } else {
-        batchDsParams.push({
-          index: query.index,
-          filter,
-          values: query?.values,
-          group_by: query.group_by,
-          date_field: query.date_field,
-          interval: `${normalizeTime(query.interval, query.interval_unit)}s`,
-          start,
-          end,
-        });
-      }
-    });
-    if (!_.isEmpty(batchDsParams)) {
-      let payload = '';
-      let intervalkey = 'interval';
-      try {
-        const version = await getESVersion(datasourceValue);
-        if (semver.gte(version, '8.0.0')) {
-          intervalkey = 'fixed_interval';
-        }
-      } catch (e) {
-        console.error(new Error('get es version error'));
-      }
-      _.forEach(batchDsParams, (item) => {
-        const esQuery = JSON.stringify(getSeriesQuery(item, intervalkey));
-        const header = JSON.stringify({
-          search_type: 'query_then_fetch',
-          ignore_unavailable: true,
-          index: item.index,
-        });
-        payload += header + '\n';
-        payload += esQuery + '\n';
-      });
-      const res = await getDsQuery(datasourceValue, payload);
-      series = _.map(processResponseToSeries(res, batchDsParams), (item) => {
+import { replaceExpressionVars } from '../../../VariableConfig/constant';
+
+import query from './query';
+
+export default function elasticSearchQuery(options: any) {
+  const { dashboardId, variableConfig } = options || {};
+  let normalized = options;
+
+  if (variableConfig) {
+    const n = variableConfig.length;
+    normalized = {
+      ...options,
+      datasourceValue: replaceExpressionVars(options.datasourceValue as any, variableConfig, n, dashboardId) as any,
+      targets: _.map(options.targets, (target) => {
+        const q: any = target?.query;
+        if (!q || q.filter === undefined) return target;
         return {
-          id: _.uniqueId('series_'),
-          ...item,
+          ...target,
+          query: {
+            ...q,
+            filter: replaceExpressionVars(q.filter, variableConfig, n, dashboardId),
+          },
         };
-      });
-    }
-    if (!_.isEmpty(batchLogParams)) {
-      let payload = '';
-      _.forEach(batchLogParams, (item) => {
-        const esQuery = JSON.stringify(getLogsQuery(item));
-        const header = JSON.stringify({
-          search_type: 'query_then_fetch',
-          ignore_unavailable: true,
-          index: item.index,
-        });
-        payload += header + '\n';
-        payload += esQuery + '\n';
-      });
-      const res = await getDsQuery(datasourceValue, payload);
-      _.forEach(res, (item) => {
-        const { docs } = flattenHits(item?.hits?.hits);
-        _.forEach(docs, (doc: any) => {
-          series.push({
-            id: doc._id,
-            name: doc._index,
-            metric: doc.fields,
-            data: [],
-          });
-        });
-      });
-    }
+      }),
+    };
   }
-  return series;
+
+  return query(normalized).then((r: any) => r?.series ?? []);
 }

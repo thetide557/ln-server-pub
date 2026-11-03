@@ -5,8 +5,36 @@ import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { ProSvg } from '@/components/DatasourceSelect';
 import { CommonStateContext } from '@/App';
+import { IS_PLUS, DatasourceCateEnum } from '@/utils/constant';
 
 const defaultDatasourceCate = 'prometheus';
+
+/**
+ * N33 批 A-3：仪表盘「数据源类型」下拉的准入门。
+ *
+ * 原来这里只筛 `!!item.dashboard`，于是 opensearch（baseCates 里 dashboard:true）也进了下拉；
+ * 可是本仓库的查询编辑器没有 opensearch 分支（QueryEditor/index.tsx:63-118 九个分支 + 兜底），
+ * 选中后显示的是 PromQL 输入框（兜底 <Monitoring/>），取数时
+ * `fetchQueryMap['opensearch']` 是 undefined，`fetchQueryMap[cate](props)`
+ * （Renderer/datasource/useQuery.tsx:87）直接抛「不是函数」。
+ * 出处：N29 结论正本 A-4、前端补充-opensearch.md N-os-01。
+ *
+ * 上游 fe 的门是 `cateData?.dashboard === true && (cateData.graphPro ? IS_PLUS : true)`
+ * （fe v9.1.0 同文件 :55）。**不能照抄**：羚牛 baseCates 里 graphPro=true 的有五个
+ * ——ck / doris / mysql / pgsql / opensearch——前四个羚牛已经把开源实现搬进来了
+ * （QueryEditor/index.tsx 有分支、useQuery.tsx 的 fetchQueryMap 有键），照抄会把它们一起挡掉。
+ * 所以照羚牛在日志浏览那道门上已经用过的写法（src/pages/logExplorer/utils/datasourceAvailability.ts:25-27，
+ * 拍板 M239 ②）：先放行自己真接了的那几种，其余仍走上游那道 graphPro 门。
+ *
+ * 加新源时此白名单要与 `Renderer/datasource/useQuery.tsx` 的 `fetchQueryMap` 键、
+ * `QueryEditor/index.tsx` 的分支三处同步。
+ */
+const DASHBOARD_SUPPORTED_PRO_CATES: string[] = [
+  DatasourceCateEnum.ck,
+  DatasourceCateEnum.doris,
+  DatasourceCateEnum.mysql,
+  DatasourceCateEnum.pgsql,
+];
 
 export default function index({ chartForm, variableConfig }) {
   const { t } = useTranslation('dashboard');
@@ -19,7 +47,13 @@ export default function index({ chartForm, variableConfig }) {
     },
   ];
   const cates = _.filter(datasourceCateOptions, (item) => {
-    return !!item.dashboard;
+    if (item.dashboard !== true) {
+      return false;
+    }
+    if (_.includes(DASHBOARD_SUPPORTED_PRO_CATES, item.value)) {
+      return true;
+    }
+    return item.graphPro ? IS_PLUS : true;
   });
   const datasourceVars = _.filter(variableConfig, { type: 'datasource' });
   const getDefaultDatasourceValue = (datasourceCate) => {
