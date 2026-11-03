@@ -21,6 +21,8 @@ import { authCallback, getDeepseektoken } from '@/services/login';
 import { getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
+// N33 批 F：登录成功后的站内回跳（照上游 `ee48e701:src/pages/login/index.tsx:189`）
+import { goAfterLogin } from '@/pages/login/redirect';
 
 export default function index() {
   const location = useLocation();
@@ -43,26 +45,29 @@ export default function index() {
             localStorage.setItem('refresh_token', res.dat.refresh_token);
             // 资产管理默认左侧树
             localStorage.setItem('left_asset_type', '-1');
-            // window.location.href = res.dat.redirect;
-            getBusiGroups().then(res => {
-              let busiGroups = res.dat;
-              let groupIds = ''
-              if (busiGroups.length > 0) {
-                groupIds = busiGroups.map(item => item.id).toString()
-              }
-              getBigScreen2(groupIds).then(res => {
-                const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
-                if (list.length > 0) {
-                  window.location.href = '/screenView'
-                } else {
-                  window.location.href = '/home';
+            // N33 批 F：照上游 `ee48e701:src/pages/login/index.tsx:189` 加回跳；只跳站内路径（`redirect.ts`）
+            // 两个来源：先看本页地址栏的 ?redirect=，再看回调接口回的 res.dat.redirect，两个都要过白名单
+            goAfterLogin(() => {
+              getBusiGroups().then(res => {
+                let busiGroups = res.dat;
+                let groupIds = ''
+                if (busiGroups.length > 0) {
+                  groupIds = busiGroups.map(item => item.id).toString()
                 }
+                getBigScreen2(groupIds).then(res => {
+                  const list = res.dat?.list?.filter((item: any) => item.type == 1) || [];
+                  if (list.length > 0) {
+                    window.location.href = '/screenView'
+                  } else {
+                    window.location.href = '/home';
+                  }
+                }).catch(_ => {
+                  window.location.href = '/home';
+                })
               }).catch(_ => {
                 window.location.href = '/home';
               })
-            }).catch(_ => {
-              window.location.href = '/home';
-            })
+            }, location.search, res.dat.redirect);
             // 获取deepseek的toekn
             getDeepseektoken().then(res => {
               localStorage.setItem('deepseek_token', res.dat.deepseek_token);

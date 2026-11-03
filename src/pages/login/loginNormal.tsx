@@ -32,6 +32,8 @@ import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
 import { aesEncrypt, aesDecrypt } from '@/utils/aes';
+// N33 批 F：登录成功后的站内回跳（照上游 `ee48e701:src/pages/login/index.tsx:189`）
+import { goAfterLogin } from './redirect';
 
 export interface DisplayName {
   oidc: string;
@@ -45,7 +47,6 @@ export default function LoginNormal() {
   const [form] = Form.useForm();
   const location = useLocation();
 
-  const redirect = location.search && new URLSearchParams(location.search).get('redirect');
   const [displayName, setDisplayName] = useState<DisplayName>({
     oidc: 'OIDC',
     cas: 'CAS',
@@ -166,25 +167,28 @@ export default function LoginNormal() {
           localStorage.setItem('deepseek_token', res.dat.deepseek_token);
         })
         if (!err) {
-          getBusiGroups().then(res => {
-            let busiGroups = res.dat;
-            let groupIds = ''
-            if (busiGroups.length > 0) {
-              groupIds = busiGroups.map(item => item.id).toString()
-            }
-            getBigScreen2(groupIds).then(res => {
-              const list = res.dat?.list?.filter((item:any) => item.type == 1) || [];
-              if (list.length > 0) {
-                window.location.href = '/screenView'
-              } else {
-                window.location.href = '/home';
+          // N33 批 F：照上游 `ee48e701:src/pages/login/index.tsx:189` 加回跳；只跳站内路径（`redirect.ts`）
+          goAfterLogin(() => {
+            getBusiGroups().then(res => {
+              let busiGroups = res.dat;
+              let groupIds = ''
+              if (busiGroups.length > 0) {
+                groupIds = busiGroups.map(item => item.id).toString()
               }
+              getBigScreen2(groupIds).then(res => {
+                const list = res.dat?.list?.filter((item:any) => item.type == 1) || [];
+                if (list.length > 0) {
+                  window.location.href = '/screenView'
+                } else {
+                  window.location.href = '/home';
+                }
+              }).catch(_ => {
+                window.location.href = '/home';
+              })
             }).catch(_ => {
               window.location.href = '/home';
             })
-          }).catch(_ => {
-            window.location.href = '/home';
-          })
+          }, location.search);
         }
       })
       .catch(() => {
