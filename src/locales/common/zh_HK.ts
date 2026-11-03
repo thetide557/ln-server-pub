@@ -2,7 +2,25 @@ const zh_HK = {
   business_group: '業務組',
   search_placeholder: '搜尋',
   nodata: '暫無資料',
+  // N20（新日志浏览）加的 4 个顶层键，值照 fe ee48e701 src/locales/common/locale/zh_HK.ts:20-22,188；只加不改（拍板 D-26 / D-27）
+  unit: '單位',
+  page_help: '使用說明',
+  document_title: '說明文檔',
+  format_sql: '格式化 SQL',
+  // N20 第 3 轮加的 2 个键（ck / doris ExplorerNG 的 DocumentDrawer 标题 + 羚牛既有 DocumentDrawer/index.tsx:78 原缺口），值照 fe ee48e701 src/locales/common/locale/zh_HK.ts:18,24；只加不改（D-29）
+  document_link: '使用說明',
+  more_document_link: '更多文檔',
   btn: {
+    // N20（新日志浏览）加的键，值照 fe ee48e701 src/locales/common/locale/zh_HK.ts；只加不改（拍板 D-27）
+    reload: '刷新',
+    copy2: '複製',
+    // ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 src/locales/common/locale/zh_HK.ts:67-68 两条。
+    expand: '展開',
+    collapse: '收起',
+    // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器的「数据预览」按钮
+    //（`src/plugins/doris/AlertRule/GraphPreview.tsx:101` / `:164`）直接显示键名原文；
+    // 值逐字抄上游 fe `ee48e701:src/locales/common/locale/<lang>.ts` 的 `btn.data_preview`。
+    data_preview: '數據預覽',
     add: '新增',
     create: '建立',
     modify: '修改',
@@ -43,6 +61,8 @@ const zh_HK = {
     operations: '操作',
     total: '共 {{total}} 條',
   },
+  // ---- 第六步 第4段 W2（阶段 2）：fe v9.1.0 src/locales/common/locale/zh_HK.ts:25 的 and（V2.tsx:70 用）。
+  and: '且',
   datasource: {
     prod: '監控型別',
     name: '資料來源',
@@ -54,6 +74,22 @@ const zh_HK = {
       btn1: '前往配置',
       btn2: '知道了',
     },
+    // ---- 第六步 第4段 W2（阶段 2）：只追加下面这一段，上面一个字没动。
+    // 来源 fe v9.1.0 src/locales/common/locale/zh_HK.ts:101,108-118；
+    // preview_unavailable 是羚牛自己加的（后端缺 POST /api/n9e/datasource/query，见 zh_CN.ts 同段注释）。
+    preview: '資料來源預覽',
+    queries: {
+      label: '資料來源篩選',
+      match_type_0: '精確匹配',
+      match_type_1: '模糊匹配',
+      match_type_1_tip: `支持兩種通配符<br>* 可以匹配 0 個或多個任意字符<br>? 只能匹配一個任意字符`,
+      match_type_2: '全部資料來源',
+      op_in: '包含',
+      op_not_in: '不包含',
+      preview: '資料預覽',
+      preview_unavailable: '預覽不可用',
+    },
+    managePageLink: '點選前往資料來源管理',
   },
   confirm: {
     delete: '確認刪除嗎？',
@@ -77,6 +113,7 @@ const zh_HK = {
     import: '匯入失敗',
   },
   time: {
+    day: '天', // N20 加（D-27）
     millisecond: '毫秒',
     second: '秒',
     minute: '分鐘',
@@ -160,6 +197,15 @@ const zh_HK = {
   'msg.clone.success': '克隆成功',
   'msg.clone.error': '克隆失敗',
   'msg.sort.success': '排序成功',
+  // ---- 第六步 L1（多数据源）：mysql / doris / clickHouse 表单的「高级设置」用 t('common:advanced_settings')，
+  // 取自 fe v9.1.0 src/locales/common/locale/zh_HK.ts。
+  // ---- 第六步 N33 批 B（B-1 九种详情抽屉）：clickHouse 的详情抽屉用 t('common:yes') / t('common:no')
+  // 显示「安全连接」「跳过 SSL 验证」这两个开关（src/plugins/clickHouse/Datasource/Detail.tsx:39,42）。
+  // pub 的 common 词条里原来没有这两个键（本批之前 grep 零命中），缺了会把键名原样印在界面上。
+  // 值取自 fe v9.1.0 src/locales/common/locale/zh_HK.ts:26-27。
+  yes: '是',
+  no: '否',
+  advanced_settings: '高級設定',
 };
 
 export default zh_HK;

@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu, Dropdown, Space } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { Logout } from '@/services/login';
+import { AI_CHAT_CACHED_SESSION_KEY } from '@/components/AiChatNG/context';
 import AdvancedWrap, { License } from '@/components/AdvancedWrap';
 import { CommonStateContext } from '@/App';
 import Version from './Version';
@@ -41,6 +42,8 @@ interface IPageLayoutProps {
   backState?: Record<string, unknown>;
   docFn?: Function;
   desc?: string;
+  /** 第六步d：fe v9.1.0 的 PageLayout 实为 PageLayoutWithTabs、认这个文档链接属性；pub 这版只接受不渲染，现有页面 0 处传它 */
+  doc?: string;
 }
 
 const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introIcon, children, customArea, showBack, backPath, backState, docFn, desc }) => {
@@ -60,6 +63,8 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
+            // 登出时清掉本地缓存的 AI 会话 id（todo①）
+            localStorage.removeItem(AI_CHAT_CACHED_SESSION_KEY);
             Cookies.remove('access_token');
             Cookies.remove('refresh_token');
             localStorage.removeItem('access_token');
