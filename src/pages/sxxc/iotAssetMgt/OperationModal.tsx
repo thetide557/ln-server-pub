@@ -511,7 +511,7 @@ export const OperationModal = ({
               <Button
                 className="down_load_button"
                 onClick={async (event) => {
-                  let url = "/api/takin/xh/asset/templet";
+                  let url = "/api/n9e/xh/asset/templet";
                   let params = {};
                   let exportTitle = "资产";
                   exportTemplet(url, params).then((res) => {
@@ -598,7 +598,7 @@ export const OperationModal = ({
       }
       let formData = new FormData();
       formData.append("file", fileList[0]);
-      let url = "/api/takin/xh/asset/import-xls";
+      let url = "/api/n9e/xh/asset/import-xls";
       console.log("批量导入", url);
       importXhAssetSetData(url, formData).then((res) => {
         message.success("批量导入成功");
@@ -624,7 +624,7 @@ export const OperationModal = ({
         return
       }
       // TODO:构建导出 API 的 URL
-      let url = "/api/takin/iot/device/export?typeId=" + typeId;
+      let url = "/api/n9e/iot/device/export?typeId=" + typeId;
       let exportTitle = "物联网资产";
       exportTemplet(url, params).then((res) => {
         const url = window.URL.createObjectURL(

@@ -14,7 +14,7 @@ interface Props {
 export default ({ value, onChange, datasource }: Props) => {
   const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
   const promQLInputRef = useRef<any>(null);
-  const url = '/api/takin/proxy';
+  const url = '/api/n9e/proxy';
 
   const openModal = () => {
     PromQueryBuilderModal({

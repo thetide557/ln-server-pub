@@ -19,9 +19,9 @@ import { RequestMethod } from '@/store/common';
 
 // 获取监控对象列表
 export function getMonObjectList(params) {
-  let url = '/api/takin/targets';
+  let url = '/api/n9e/targets';
   if (import.meta.env.VITE_IS_PRO === 'true') {
-    url = '/api/takin-plus/targets';
+    url = '/api/n9e-plus/targets';
   }
   return request(url, {
     method: RequestMethod.Get,
@@ -39,7 +39,7 @@ export function unbindTags(data) {
 
 // 获取监控对象标签列表
 export function getTargetTags(params) {
-  return request(`/api/takin/targets/tags`, {
+  return request(`/api/n9e/targets/tags`, {
     method: RequestMethod.Get,
     params,
   });
@@ -47,7 +47,7 @@ export function getTargetTags(params) {
 
 // 绑定/解绑标签
 export function bindOrUnbindTags(isBind, data) {
-  return request(`/api/takin/targets/tags`, {
+  return request(`/api/n9e/targets/tags`, {
     method: isBind ? RequestMethod.Post : RequestMethod.Delete,
     data,
   });
@@ -55,7 +55,7 @@ export function bindOrUnbindTags(isBind, data) {
 
 // 修改/移出业务组
 export function moveTargetBusi(data) {
-  return request(`/api/takin/targets/bgid`, {
+  return request(`/api/n9e/targets/bgid`, {
     method: RequestMethod.Put,
     data: Object.assign({ bgid: 0 }, data),
   });
@@ -63,7 +63,7 @@ export function moveTargetBusi(data) {
 
 // 修改对象备注
 export function updateTargetNote(data) {
-  return request(`/api/takin/targets/note`, {
+  return request(`/api/n9e/targets/note`, {
     method: RequestMethod.Put,
     data,
   });
@@ -71,14 +71,14 @@ export function updateTargetNote(data) {
 
 // 删除对象
 export function deleteTargets(data) {
-  return request(`/api/takin/targets`, {
+  return request(`/api/n9e/targets`, {
     method: RequestMethod.Delete,
     data,
   });
 }
 
 export function getTargetList(data) {
-  return request(`/api/takin/target/list`, {
+  return request(`/api/n9e/target/list`, {
     method: RequestMethod.Post,
     data,
   });
@@ -86,14 +86,14 @@ export function getTargetList(data) {
 
 // 获取探针可使用版本
 export function getTargetVersion(ident) {
-  return request(`/api/takin/target/${ident}/version`, {
+  return request(`/api/n9e/target/${ident}/version`, {
     method: RequestMethod.Get
   })
 }
 
 // 更新探针目标版本
 export function updateTargetVersion(ident, data) {
-  return request(`/api/takin/target/${ident}/version`, {
+  return request(`/api/n9e/target/${ident}/version`, {
     method: RequestMethod.Put,
     data
   })
@@ -101,7 +101,7 @@ export function updateTargetVersion(ident, data) {
 
 // 上传探针版本
 export function uploadTargetVersion(data) {
-  return request(`/api/takin/target/version`, {
+  return request(`/api/n9e/target/version`, {
     method: RequestMethod.Post,
     requestType: "form",
     data
@@ -110,7 +110,7 @@ export function uploadTargetVersion(data) {
 
 
 export const getAllVersion = function (params) {
-  return request('/api/takin/target/getAll', {
+  return request('/api/n9e/target/getAll', {
     method: RequestMethod.Get,
     params,
   });
@@ -118,7 +118,7 @@ export const getAllVersion = function (params) {
 
 // 更新探针
 export const updateTarget = function (data) {
-  return request('/api/takin/target/version/batch-update', {
+  return request('/api/n9e/target/version/batch-update', {
     method: RequestMethod.Post,
     data,
   });

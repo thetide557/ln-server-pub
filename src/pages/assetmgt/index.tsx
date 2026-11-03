@@ -75,7 +75,7 @@ export default function (props: IProps) {
     { id: 0, name: '根节点', parent_id: 0, children: [] },
     { id: -1, name: '全部', parent_id: 0, children: [] },
   ]);
-  const { url = '/api/takin/proxy', datasourceValue = 0, promQL } = props;
+  const { url = '/api/n9e/proxy', datasourceValue = 0, promQL } = props;
 
   const [modifyType, setModifyType] = useState<boolean>(false);
   const [curValue, setcurValue] = useState<string>('');

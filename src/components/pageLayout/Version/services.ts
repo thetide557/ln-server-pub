@@ -10,7 +10,7 @@ export interface Versions {
 }
 
 export const getVersions = function (): Promise<Versions> {
-  return request('/api/takin/versions', {
+  return request('/api/n9e/versions', {
     method: RequestMethod.Get,
   }).then((res) => {
     const data = _.isPlainObject(res.dat) ? res.dat : {};

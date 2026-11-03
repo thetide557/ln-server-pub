@@ -228,7 +228,7 @@ export default function () {
         //console.log("FFFFFFFFFF",filterName)
       }
       params["ftype"] = ftype;
-      let url = "/api/takin/operation-log/export-xls";
+      let url = "/api/n9e/operation-log/export-xls";
       let exportTitle = "操作日志信息";
       exportTemplet(url, filter, params).then((res) => {
         const url = window.URL.createObjectURL(new Blob([res],

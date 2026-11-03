@@ -18,7 +18,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getDeviceType = function (params) {
-  return request('/api/takin/device-type', {
+  return request('/api/n9e/device-type', {
     method: RequestMethod.Get,
     params
   });

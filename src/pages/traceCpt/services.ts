@@ -31,7 +31,7 @@ export const getDataSourceList = () => {
 };
 
 export const getTraceServices = (data_source_id) => {
-  return request(`/api/takin/proxy/${data_source_id}/api/services`, {
+  return request(`/api/n9e/proxy/${data_source_id}/api/services`, {
     method: RequestMethod.Get,
   }).then((res) => {
     return res.data;
@@ -39,26 +39,26 @@ export const getTraceServices = (data_source_id) => {
 };
 
 export const getTraceOperation = (data_source_id, service) => {
-  return request(`/api/takin/proxy/${data_source_id}/api/services/${service}/operations`, {
+  return request(`/api/n9e/proxy/${data_source_id}/api/services/${service}/operations`, {
     method: RequestMethod.Get,
   }).then((res) => res.data);
 };
 
 export const getTraceSearch = (data: SearchTraceType) => {
-  return request(`/api/takin/proxy/${data.data_source_id}/api/traces`, {
+  return request(`/api/n9e/proxy/${data.data_source_id}/api/traces`, {
     method: RequestMethod.Get,
     params: _.omit(data, 'data_source_id'),
   }).then((res) => res.data);
 };
 
 export const getTraceByID = (data: SearchTraceIDType) => {
-  return request(`/api/takin/proxy/${data.data_source_id}/api/traces/${data.traceID}`, {
+  return request(`/api/n9e/proxy/${data.data_source_id}/api/traces/${data.traceID}`, {
     method: RequestMethod.Get,
   }).then((res) => res.data);
 };
 
 export const getTraceDependencies = (id) => {
-  return request(`/api/takin/proxy/${id}/api/dependencies`, {
+  return request(`/api/n9e/proxy/${id}/api/dependencies`, {
     method: RequestMethod.Get,
     params: {
       endTs: Date.now(),

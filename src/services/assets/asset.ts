@@ -17,56 +17,56 @@ import { RequestMethod } from '@/store/common';
 import { json2csv } from 'json-2-csv';
 //添加资产
 export const insertAsset = function (data) {
-  return request('/api/takin/asset-basic', {
+  return request('/api/n9e/asset-basic', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const insertAssetAlert = function (data) {
-  return request('/api/takin/asset-alter', {
+  return request('/api/n9e/asset-alter', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const insertAssetMaintenance = function (data) {
-  return request('/api/takin/asset-maintenance', {
+  return request('/api/n9e/asset-maintenance', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const updateAssetMaintenance = function (data) {
-  return request('/api/takin/asset-maintenance', {
+  return request('/api/n9e/asset-maintenance', {
     method: RequestMethod.Put,
     data,
   });
 };
 
 export const insertAssetManagement = function (data) {
-  return request('/api/takin/asset-management', {
+  return request('/api/n9e/asset-management', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const insertDeviceOnline = function (data) {
-  return request('/api/takin/device-online', {
+  return request('/api/n9e/device-online', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const deleteDeviceOnline = function (data) {
-  return request('/api/takin/asset-basic/del', {
+  return request('/api/n9e/asset-basic/del', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const updateAssetManagement = function (data) {
-  return request('/api/takin/asset-management', {
+  return request('/api/n9e/asset-management', {
     method: RequestMethod.Put,
     data,
   });
@@ -74,11 +74,11 @@ export const updateAssetManagement = function (data) {
 
 export const getAssetTableByTypeAndId = function (type, id) {
   if (type === 'maintenance') {
-    return request('/api/takin/asset-maintenance/asset?asset=' + id, {
+    return request('/api/n9e/asset-maintenance/asset?asset=' + id, {
       method: RequestMethod.Get,
     });
   } else if (type === 'management') {
-    return request('/api/takin/asset-management/asset?asset=' + id, {
+    return request('/api/n9e/asset-management/asset?asset=' + id, {
       method: RequestMethod.Get,
     });
   }
@@ -86,14 +86,14 @@ export const getAssetTableByTypeAndId = function (type, id) {
 };
 
 export const getAssetAlerts = function (params) {
-  return request('/api/takin/asset-alter/asset', {
+  return request('/api/n9e/asset-alter/asset', {
     method: RequestMethod.Get,
     params,
   });
 };
 //资产统计
 export const getAssetStatistic = function () {
-  return request('/api/takin/asset-basic/statistics', {
+  return request('/api/n9e/asset-basic/statistics', {
     method: RequestMethod.Get,
   });
 };
@@ -103,7 +103,7 @@ export const getAssetsList = function (data) {
   let limit = data['limit'];
   delete data['limit'];
   delete data['page'];
-  return request('/api/takin/asset-basic/list?limit=' + limit + '&page=' + page, {
+  return request('/api/n9e/asset-basic/list?limit=' + limit + '&page=' + page, {
     method: RequestMethod.Post,
     data,
   });
@@ -113,14 +113,14 @@ export const getAssetsListByFilter = function (data) {
   let limit = data['limit'];
   delete data['limit'];
   delete data['page'];
-  return request('/api/takin/asset-basic/list/query?limit=' + limit + '&page=' + page, {
+  return request('/api/n9e/asset-basic/list/query?limit=' + limit + '&page=' + page, {
     method: RequestMethod.Post,
     data,
   });
 };
 //获取资产树 包含：设备类型，厂商，资产信息
 export const getAssetsTree = function (status) {
-  return request('/api/takin/asset-tree/data', {
+  return request('/api/n9e/asset-tree/data', {
     method: RequestMethod.Get,
     params: {
       status,
@@ -129,7 +129,7 @@ export const getAssetsTree = function (status) {
 };
 //asset-basic
 export const exportAssetTemplet = function () {
-  return request('/api/takin/asset-basic/templet', {
+  return request('/api/n9e/asset-basic/templet', {
     method: RequestMethod.Post,
     responseType: 'blob',
   });
@@ -152,7 +152,7 @@ export const importAssetSetData = function (url, data) {
   });
 };
 export const importtAssets = function (data) {
-  return request('/api/takin/asset-basic/import-xls', {
+  return request('/api/n9e/asset-basic/import-xls', {
     headers: {
       enctype: 'multipart/form-data',
     },
@@ -163,7 +163,7 @@ export const importtAssets = function (data) {
 
 //获取资产 《POST 参数》
 export const queryAboutTable = function (table, data) {
-  return request('/api/takin/asset-basic/table?query=' + table, {
+  return request('/api/n9e/asset-basic/table?query=' + table, {
     method: RequestMethod.Post,
     data,
   });
@@ -171,7 +171,7 @@ export const queryAboutTable = function (table, data) {
 
 //添加扩展 《功能：增删改一体》
 export const insertAssetExtends = function (data) {
-  return request('/api/takin/asset-expansion', {
+  return request('/api/n9e/asset-expansion', {
     method: RequestMethod.Put,
     data,
   });
@@ -179,14 +179,14 @@ export const insertAssetExtends = function (data) {
 
 //更新资产信息 《主表》
 export const updateAsset = function (data) {
-  return request('/api/takin/asset-basic', {
+  return request('/api/n9e/asset-basic', {
     method: RequestMethod.Put,
     data,
   });
 };
 
 export const batchUpdateByProperties = function (data) {
-  return request('/api/takin/asset-basic/batch-update', {
+  return request('/api/n9e/asset-basic/batch-update', {
     method: RequestMethod.Post,
     data,
   });
@@ -194,27 +194,27 @@ export const batchUpdateByProperties = function (data) {
 
 //根据资产Id获取资产主表数据
 export const getAssetById = function (id) {
-  return request('/api/takin/asset-basic/' + id, {
+  return request('/api/n9e/asset-basic/' + id, {
     method: RequestMethod.Get,
   });
 };
 
 export const getAssetTreeByDeviceType = function (deviceType, status) {
-  return request('/api/takin/asset-tree/part', {
+  return request('/api/n9e/asset-tree/part', {
     method: RequestMethod.Get,
     params: { type: deviceType, status: status },
   });
 };
 
 export const getAssetExtendsById = function (data: {}) {
-  return request('/api/takin/asset-expansion/map', {
+  return request('/api/n9e/asset-expansion/map', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const getAssetStatus = function () {
-  return request('/api/takin/assets', {
+  return request('/api/n9e/assets', {
     method: RequestMethod.Get,
   });
 };

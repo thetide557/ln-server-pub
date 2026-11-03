@@ -302,7 +302,7 @@ const ScheduleList: React.FC = () => {
       onOk: () => {
         setIsExporting(true);
         let url =
-          "/api/takin/xh/schedule/export-xls?month=" +
+          "/api/n9e/xh/schedule/export-xls?month=" +
           selectedMonth.format("YYYY-MM");
         let params = {};
         let exportTitle = `${selectedMonth.format("YYYY-MM")}月排班表`;
@@ -888,8 +888,8 @@ const ScheduleList: React.FC = () => {
           setRefreshKey(_.uniqueId("refreshKey_"));
         }}
         importConfig={{
-          templateUrl: "/api/takin/busi-group/schedule/template",
-          importUrl: "/api/takin/xh/schedule/import-xls",
+          templateUrl: "/api/n9e/busi-group/schedule/template",
+          importUrl: "/api/n9e/xh/schedule/import-xls",
           templateTitle: "排班数据",
         }}
       />

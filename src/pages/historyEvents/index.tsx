@@ -520,7 +520,7 @@ const Event: React.FC = () => {
       }
       filter['ftype'] = ftype;
       filter['alert_type'] = 2;
-      let url = '/api/takin/alert-events/export-xls';
+      let url = '/api/n9e/alert-events/export-xls';
       let exportTitle = '告警信息';
       exportTemplet(url, filter, params).then((res) => {
         const url = window.URL.createObjectURL(

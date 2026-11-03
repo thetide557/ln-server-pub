@@ -22,7 +22,7 @@ export const getScrapList = function (params) {
   let limit= params["limit"];
   delete params["limit"];
   delete params["page"];
-  return request('/api/takin/device-scrap?limit='+limit+'&page='+page, {
+  return request('/api/n9e/device-scrap?limit='+limit+'&page='+page, {
     method: RequestMethod.Get,
     params
   });
@@ -32,7 +32,7 @@ export const getScrapList = function (params) {
 export const addScrap = function (data) {
   let  tree = data["tree"];
   delete data["tree"];
-  return request('/api/takin/device-scrap?tree='+tree, {
+  return request('/api/n9e/device-scrap?tree='+tree, {
        method: RequestMethod.Post,
        data
   });

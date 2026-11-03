@@ -25,7 +25,7 @@ const getBase64 = (img: RcFile, callback: (url: string) => void) => {
 
 export default function () {
   const { t } = useTranslation('assets');
-  let imageURL = "/api/takin/"
+  let imageURL = "/api/n9e/"
   const commonState = useContext(CommonStateContext);
   const { profile, permList } = useContext(CommonStateContext);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
@@ -177,7 +177,7 @@ export default function () {
 
   const props: UploadProps = {
     name: 'file',
-    action: '/api/takin/user-config/picture?logoName=' + logoName,
+    action: '/api/n9e/user-config/picture?logoName=' + logoName,
     headers: {
       authorization: `Bearer ${Cookies.get('access_token') || ''}`,
     },
