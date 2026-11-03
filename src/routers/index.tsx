@@ -122,6 +122,30 @@ import InspectionList from '@/pages/sxxc/inspectionList'
 import InspectionLog from '@/pages/sxxc/inspectionList/log'
 import InspectionReport from '@/pages/sxxc/inspectionReport'
 import DutyManage from '@/pages/sxxc/dutyManage'
+// 第六步d：AI 配置三页（照 fe v9.1.0 src/pages/aiConfig/）。pub 没有 lazy/Suspense，直接 import；
+// 三行 locale 是因为 pub 的 i18n 不自动收集词条，得有人 import 才会注册。
+import AiConfigAgentList from '@/pages/aiConfig/agents/pages/List';
+import AiConfigLLMConfigList from '@/pages/aiConfig/llmConfigs/pages/List';
+import AiConfigSkillList from '@/pages/aiConfig/skills/pages/List';
+import '@/pages/aiConfig/agents/locale';
+import '@/pages/aiConfig/llmConfigs/locale';
+import '@/pages/aiConfig/skills/locale';
+// N20（新日志浏览）：照夜莺 fe ee48e701 的做法，新页挂 /log/explorer 进菜单，老经典页改挂 /log/explorer-legacy、菜单撤、功能留（拍板 M239 ③）。
+// fe 用 src/pages/logExplorer/entry.tsx + import.meta.glob 自动注册；pub 没有这套机制（src/utils/index.ts 只有 dynamicPackages），
+// 这里照上面 aiConfig 那段手写一条（n20 拍板 D-3），并把 entry.tsx 里的两个副作用 import（locale / style.less）搬到这里——
+// 不搬 locale 那行，新页所有文案会显示成 log_explorer.xxx 的键原文；不搬 style.less，页面没样式。entry.tsx 本身照搬进来但没人 import。
+import LogExplorerNG from '@/pages/logExplorer';
+import '@/pages/logExplorer/locale';
+import '@/pages/logExplorer/style.less';
+
+// N33 批 E（后端交接 FE-OAUTH-CONSENT-01）：内置 OAuth 授权服务器的「同意页」，照夜莺 fe ee48e701
+// src/pages/oauthConsent/。fe 那边是 React.lazy（fe routers/index.tsx:42），pub 没有 lazy/Suspense
+// （同本文件 :125 那条注释），所以直接 import；locale 那行是副作用 import，不搬它页面文案会显示成
+// oauthConsent.xxx 的键原文（照上面 aiConfig / logExplorer 两段的做法）。
+// 这页在**登录态路由**里，不加进 src/App.tsx 的 anonymousRoutes——上游 index.tsx:18-25 的注释写明
+// 未登录访问是先绕一趟 /login（含 SSO）再回来（lead 拍板 L-06，用户已确认）。
+import OAuthConsent from '@/pages/oauthConsent';
+import '@/pages/oauthConsent/locale';
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -162,8 +186,12 @@ export default function Content() {
         <Route path='/callback' component={LoginCallback} exact />
         <Route path='/callback/cas' component={LoginCallbackCAS} exact />
         <Route path='/callback/oauth' component={LoginCallbackOAuth} exact />
+        {/* N33 批 E：OAuth 同意页，后端 GET /oauth/authorize 校验完会 302 跳到这条根路径（mcpConsentPath = "/oauth-consent"）。走登录态路由，不进 anonymousRoutes。 */}
+        <Route path='/oauth-consent' component={OAuthConsent} exact />
         <Route path='/metric/explorer' component={MetricExplore} exact />
-        <Route path='/log/explorer' component={LogExplore} exact />
+        {/* N20：/log/explorer 换成新日志浏览页，老页改挂 /log/explorer-legacy（照 fe src/routers/index.tsx:222，菜单不加老页入口） */}
+        <Route path='/log/explorer' component={LogExplorerNG} exact />
+        <Route path='/log/explorer-legacy' component={LogExplore} exact />
         <Route path='/log/operlog' component={LogOperate} exact />
         <Route path='/log/syslog' component={LogSystem} exact />
         <Route path='/xh/assetmgt' component={XhAssetMgt} exact />
@@ -245,6 +273,9 @@ export default function Content() {
         <Route exact path='/help/source/:action/:type' component={DatasourceAdd} />
         <Route exact path='/help/source/:action/:type/:id' component={DatasourceAdd} />
         <Route exact path='/help/sso' component={SSOConfigs} />
+        <Route exact path='/ai-config/agents' component={AiConfigAgentList} />
+        <Route exact path='/ai-config/llm-configs' component={AiConfigLLMConfigList} />
+        <Route exact path='/ai-config/skills' component={AiConfigSkillList} />
          <Route exact path='/license/base' component={LicenseBase} />
          <Route exact path='/license/base/:id' component={LicenseBaseLic} />
          <Route exact path='/license/device' component={LicenseDevice} /> 
