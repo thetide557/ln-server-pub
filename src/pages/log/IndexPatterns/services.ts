@@ -18,7 +18,7 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export const getESIndexPatterns = function (datasource_id?: number) {
-  return request('/api/takin/es-index-pattern-list', {
+  return request('/api/n9e/es-index-pattern-list', {
     method: RequestMethod.Get,
     params: {
       datasource_id,
@@ -27,7 +27,7 @@ export const getESIndexPatterns = function (datasource_id?: number) {
 };
 
 export const getESIndexPattern = function (id: number) {
-  return request('/api/takin/es-index-pattern', {
+  return request('/api/n9e/es-index-pattern', {
     method: RequestMethod.Get,
     params: {
       id,
@@ -36,14 +36,14 @@ export const getESIndexPattern = function (id: number) {
 };
 
 export const postESIndexPattern = function (data: any) {
-  return request('/api/takin/es-index-pattern', {
+  return request('/api/n9e/es-index-pattern', {
     method: RequestMethod.Post,
     data,
   });
 };
 
 export const putESIndexPattern = function (id, data: any) {
-  return request('/api/takin/es-index-pattern', {
+  return request('/api/n9e/es-index-pattern', {
     method: RequestMethod.Put,
     params: {
       id,
@@ -53,8 +53,28 @@ export const putESIndexPattern = function (id, data: any) {
 };
 
 export const deleteESIndexPattern = function (id: number) {
-  return request('/api/takin/es-index-pattern', {
+  return request('/api/n9e/es-index-pattern', {
     method: RequestMethod.Delete,
     data: { ids: [id] },
   });
 };
+
+// ---- 第六步 L2（多数据源）：只追加 fe v9.1.0 同文件 :140-152 的 standardizeFieldConfig，0 行删除。
+// 新搬的 src/pages/explorer/components/RenderValue/useFieldConfig.tsx:4 按绝对路径引它。
+// import 放在文件末尾这一块里（ES module 的 import 会被提升），是为了让本文件的 git diff 保持 0 行删除。
+import { FieldConfig, FieldConfigVersion2, convertToVersion2 } from './types';
+
+export function standardizeFieldConfig(fieldConfig: FieldConfig | FieldConfigVersion2): FieldConfigVersion2 {
+  if (fieldConfig.version === 1) {
+    return convertToVersion2(fieldConfig as FieldConfig);
+  }
+
+  if (fieldConfig.version === 2) {
+    return fieldConfig as FieldConfigVersion2;
+  }
+  return {
+    arr: [],
+    linkArr: [],
+    version: 2,
+  };
+}
