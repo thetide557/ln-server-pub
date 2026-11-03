@@ -1,4 +1,10 @@
 const zh_HK = {
+  // ---- N33 批 A-2：兩個保存按鈕的文案，照 fe v9.1.0 src/pages/datasource/locale/zh_CN.ts:152-153 譯繁體
+  test_and_save_btn: '測試連通性並儲存',
+  save_btn: '不測試連通性直接儲存',
+  // 儲存成功、但後端回的 verification 裡帶了 message（典型是 es 留空版本號而自動探測失敗）時的提示
+  verification_failed_title: '已儲存，但連通性未通過驗證',
+  verification_failed_content: '資料來源已經存進來了，但這次沒有驗證成功。請檢查地址、帳號和網路後再試一次查詢。',
   title: '資料來源管理',
   list_title: '已接入的資料來源',
   name: '資料來源名稱',
@@ -26,6 +32,8 @@ const zh_HK = {
     auth: '授權',
     username: '使用者名稱',
     password: '密碼',
+    // N33 批 A-4（B-5）：帳號和口令要麼都填、要麼都不填
+    basic_auth_pair_required: '使用者名稱和密碼要一起填，只填一個後端會拒絕',
     skip_ssl_verify: '跳過 SSL 驗證',
     yes: '是',
     no: '否',
@@ -42,7 +50,10 @@ const zh_HK = {
       url_tip: '常見時序數據庫配置示例（兼容 Prometheus 查詢 API）：',
     },
     es: {
+      enable_write: '允許寫入',
       version: '版本',
+      version_placeholder: '留空將自動獲取版本，沒特殊需求留空即可；如需指定，請按 x.y.z 填寫（例：7.10.2）',
+      version_tip: '留空將自動獲取版本，沒特殊需求留空即可；如需指定，請按 x.y.z 填寫（例：7.10.2）',
       max_shard: '最大併發分片請求數',
       min_interval: '最小時間間隔 (s)',
       min_interval_tip: '按時間間隔自動分組的下限。建議設定為寫入頻率，例如，如果資料每分鐘寫入一次，則為 1m。',

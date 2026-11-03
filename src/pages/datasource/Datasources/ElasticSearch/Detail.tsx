@@ -18,7 +18,11 @@ export default function Index(props: Props) {
         <Row gutter={16}>
           <Col span={24}>URL：</Col>
           <Col span={24} className='second-color'>
-            {data?.http?.url}
+            {data?.http?.urls
+              ? _.map(data?.http?.urls, (url) => {
+                  return <div key={url}>{url}</div>;
+                })
+              : data?.http?.url}
           </Col>
         </Row>
       </div>
@@ -69,6 +73,12 @@ export default function Index(props: Props) {
           </Col>
           <Col span={8} className='second-color'>
             {data.settings?.min_interval || '-'}
+          </Col>
+          <Col span={24} className='mt-2'>
+            {t('form.es.write_config')}:
+          </Col>
+          <Col span={24} className='second-color'>
+            {data.settings?.enable_write ? t('form.es.enable_write') : t('form.es.disable_write')}
           </Col>
         </Row>
         <AdvancedWrap var='VITE_IS_PRO,VITE_IS_ENT'>

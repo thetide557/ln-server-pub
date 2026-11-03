@@ -1,4 +1,10 @@
 const zh_CN = {
+  // ---- N33 批 A-2：两个保存按钮的文案，照 fe v9.1.0 src/pages/datasource/locale/zh_CN.ts:152-153
+  test_and_save_btn: '测试连通性并保存',
+  save_btn: '不测试连通性直接保存',
+  // 保存成功、但后端回的 verification 里带了 message（典型是 es 留空版本号而自动探测失败）时的提示
+  verification_failed_title: '已保存，但连通性未通过验证',
+  verification_failed_content: '数据源已经存进来了，但这次没有验证成功。请检查地址、账号和网络后再试一次查询。',
   title: '数据源管理',
   list_title: '已接入的数据源',
   name: '数据源名称',
@@ -26,6 +32,8 @@ const zh_CN = {
     auth: '授权',
     username: '用户名',
     password: '密码',
+    // N33 批 A-4（B-5）：账号和口令要么都填、要么都不填
+    basic_auth_pair_required: '用户名和密码要一起填，只填一个后端会拒绝',
     skip_ssl_verify: '跳过SSL验证',
     yes: '是',
     no: '否',
@@ -42,7 +50,10 @@ const zh_CN = {
       url_tip: '常见时序数据库配置示例（兼容 Prometheus 查询 API）：',
     },
     es: {
+      enable_write: '允许写入',
       version: '版本',
+      version_placeholder: '留空将自动获取版本，没特殊需求留空即可；如需指定，请按 x.y.z 填写（例：7.10.2）',
+      version_tip: '留空将自动获取版本，没特殊需求留空即可；如需指定，请按 x.y.z 填写（例：7.10.2）',
       max_shard: '最大并发分片请求数',
       min_interval: '最小时间间隔(s)',
       min_interval_tip: '按时间间隔自动分组的下限。建议设置为写入频率，例如，如果数据每分钟写入一次，则为1m。',
