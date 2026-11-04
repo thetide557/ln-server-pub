@@ -27,7 +27,7 @@ export default function Edit() {
   const { t } = useTranslation('alertRules');
   const { id } = useParams<{ id: string }>();
   // const alertRuleId = Number(id.split("?")[0]);
-  const alertRuleId = id;
+  const alertRuleId = id ? id.split('?')[0] : '';
   // const [values, setValues] = useState<any>({});
   const [values, setValues] = useState<any>([]);
   const mode = useSearchParam("mode");
