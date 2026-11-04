@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
 import _, { set } from 'lodash';
 import { useLocalStorage } from 'react-use';
+import { initTheme, normalizeLogoUrl } from '@/App';
 import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
 import { getBusiGroups } from '@/services/common';
 import Cookies from 'js-cookie';
@@ -54,11 +55,7 @@ export default function LoginSso() {
     oauth: 'OAuth',
   });
 
-  const [theme, setTheme] = useLocalStorage("platform_theme", {
-    title: '工控网运维系统',
-    logo: '/image/topmenu/logo.png',
-    icon: '/image/plticon.png',
-  });
+  const [theme, setTheme] = useLocalStorage("platform_theme", initTheme);
 
 
   const [showcaptcha, setShowcaptcha] = useState(false);
@@ -159,6 +156,15 @@ export default function LoginSso() {
     // console.log(form.getFieldsValue(true))
     setRememberLdap(rememberLdap);
 
+    getSystemTheme().then((res) => {
+      if (res?.dat) {
+        setTheme({
+          title: res.dat.login_title || initTheme.title,
+          icon: normalizeLogoUrl(res.dat.logo_title) || initTheme.icon,
+          logo: normalizeLogoUrl(res.dat.logo_top) || initTheme.logo,
+        });
+      }
+    });
     getSsoConfig().then((res) => {
       if (res.dat) {
         setDisplayName({
