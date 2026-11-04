@@ -131,7 +131,7 @@ const EventDetailPage: React.FC = () => {
         return (
           <Space>
             <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-              history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
+              history.push("/alert-rules/edit/" + (eventDetail.strategy_id || eventDetail.rule_id) + "?mode=view")
             }}>{content}</div>
             <AiButton
               size='small'

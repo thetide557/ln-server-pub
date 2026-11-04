@@ -541,7 +541,7 @@ export default function index(props: IProps) {
                         const res = await EditAlertRule(
                           submitArr,
                           initialValues[0]?.group_id,
-                          initialValues[0]?.strategy_id
+                          initialValues[0]?.strategy_id || initialValues[0]?.id
                         );
                         handleMessage(res);
                       } else {
