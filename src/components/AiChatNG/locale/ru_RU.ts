@@ -209,6 +209,7 @@ const ru_RU = {
   },
   empty: {
     greeting_prefix: 'Здравствуйте, я',
+    greeting_brand: ' LingNiu AI Agent',
   },
 };
 

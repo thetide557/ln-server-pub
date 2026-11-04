@@ -218,6 +218,7 @@ const en_US = {
   },
   empty: {
     greeting_prefix: 'Hello, I am',
+    greeting_brand: ' LingNiu AI Agent',
   },
 };
 
