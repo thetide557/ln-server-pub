@@ -209,6 +209,7 @@ const ja_JP = {
   },
   empty: {
     greeting_prefix: 'こんにちは、私は',
+    greeting_brand: ' 羚牛 AI Agent 智能体',
   },
 };
 
