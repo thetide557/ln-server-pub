@@ -337,6 +337,7 @@ export function ResponseBlocks(props: IAiChatResponseBlocksProps) {
 export function EmptyConversation({ prompts, onPromptClick, children }: { prompts?: string[]; onPromptClick: (prompt: string) => void; children?: React.ReactNode }) {
   const { t } = useTranslation(NAME_SPACE);
   const greetingPrefix = t('empty.greeting_prefix');
+  const greetingBrand = t('empty.greeting_brand', { defaultValue: ' 羚牛 AI Agent 智能体' });
   const hasCustomContent = children != null;
 
   return (
@@ -345,7 +346,7 @@ export function EmptyConversation({ prompts, onPromptClick, children }: { prompt
         <div className='text-l4 font-bold'>
           <Space align='baseline'>
             <img src='/image/ai-chat/ai.gif' className='w-[24px] h-[24px]' />
-            <TypedGreeting prefix={greetingPrefix} brand='Takin AI' />
+            <TypedGreeting prefix={greetingPrefix} brand={greetingBrand} />
           </Space>
         </div>
       </div>
