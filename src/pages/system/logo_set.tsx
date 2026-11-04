@@ -4,7 +4,7 @@ import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { GroupOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
-import { CommonStateContext, initTheme } from '@/App';
+import { CommonStateContext, initTheme, normalizeLogoUrl } from '@/App';
 import './style.less';
 import _, { now, random, uniqueId } from 'lodash';
 import type { UploadChangeParam } from 'antd/es/upload';
@@ -39,12 +39,17 @@ export default function () {
   useEffect(() => {
 
     getLogInfo().then(({ dat }) => {
-      form.setFieldsValue(dat)
-      if (dat.logo_top != null && dat.logo_top.length > 0) {
-        setTopLogoImageUrl(dat.logo_top);
+      const normalizedDat = {
+        ...dat,
+        logo_top: normalizeLogoUrl(dat.logo_top),
+        logo_title: normalizeLogoUrl(dat.logo_title),
+      };
+      form.setFieldsValue(normalizedDat)
+      if (normalizedDat.logo_top != null && normalizedDat.logo_top.length > 0) {
+        setTopLogoImageUrl(normalizedDat.logo_top);
       }
-      if (dat.logo_title != null && dat.logo_title.length > 0) {
-        setTitleLogoImageUrl(dat.logo_title);
+      if (normalizedDat.logo_title != null && normalizedDat.logo_title.length > 0) {
+        setTitleLogoImageUrl(normalizedDat.logo_title);
       }
     })
   }, []);
@@ -67,17 +72,22 @@ export default function () {
     saveLog(values).then(res => {
       // message.success('表单成功提交');
       getLogInfo().then(({ dat }) => {
+        const normalizedDat = {
+          ...dat,
+          logo_top: normalizeLogoUrl(dat.logo_top),
+          logo_title: normalizeLogoUrl(dat.logo_title),
+        };
         setTheme({
-          title: dat.login_title,
-          icon: dat.logo_title,
-          logo: dat.logo_top,
+          title: normalizedDat.login_title,
+          icon: normalizedDat.logo_title,
+          logo: normalizedDat.logo_top,
         });
-        form.setFieldsValue(dat)
-        if (dat.logo_top != null && dat.logo_top.length > 0) {
-          setTitleLogoImageUrl(dat.logo_title);
+        form.setFieldsValue(normalizedDat)
+        if (normalizedDat.logo_top != null && normalizedDat.logo_top.length > 0) {
+          setTopLogoImageUrl(normalizedDat.logo_top);
         }
-        if (dat.logo_title != null && dat.logo_title.length > 0) {
-          setTopLogoImageUrl(dat.logo_top);
+        if (normalizedDat.logo_title != null && normalizedDat.logo_title.length > 0) {
+          setTitleLogoImageUrl(normalizedDat.logo_title);
         }
         confirm({
           title: '系统提醒',
@@ -101,8 +111,8 @@ export default function () {
         getLogInfo().then(({ dat }) => {
           setTheme({
             title: dat.login_title,
-            logo: dat.logo_top,
-            icon: dat.logo_title
+            logo: normalizeLogoUrl(dat.logo_top),
+            icon: normalizeLogoUrl(dat.logo_title)
           });
           confirm({
             title: '系统提醒',

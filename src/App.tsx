@@ -129,6 +129,17 @@ export const initTheme = {
   logo: '/image/topmenu/favicon.png',
   icon: '/image/plticon.png',
 }
+
+export const normalizeLogoUrl = (val?: string) => {
+  if (!val || typeof val !== 'string') return val;
+  if (val.startsWith('images/') || val.startsWith('etc/picture/')) {
+    return `/api/takin/${val}`;
+  }
+  if (val.startsWith('/api/n9e/images/') || val.startsWith('/api/n9e/etc/picture/')) {
+    return val.replace(/^\/api\/n9e\//, '/api/takin/');
+  }
+  return val;
+};
 // 可以匿名访问的路由 TODO: job-task output 应该也可以匿名访问
 const anonymousRoutes = ['/login', '/callback', '/chart', '/dashboards/share/'];
 // 判断是否是匿名访问的路由
@@ -293,15 +304,20 @@ function App() {
   useEffect(() => {
     getSystemTheme().then((res) => {
       if (res.dat) {
+        const title = res.dat.login_title || initTheme.title;
+        const icon = normalizeLogoUrl(res.dat.logo_title) || initTheme.icon;
+        const logo = normalizeLogoUrl(res.dat.logo_top) || initTheme.logo;
         setTheme({
-          title: res.dat.login_title,
-          icon: res.dat.logo_title,
-          logo: res.dat.logo_top,
+          title,
+          icon,
+          logo,
         });
+        if (link) link.href = icon;
+        setPageTitle(title);
       }
     });
-    link.href = theme?.icon;
-    setPageTitle(theme?.title);
+    if (link) link.href = normalizeLogoUrl(theme?.icon) || initTheme.icon;
+    setPageTitle(theme?.title || initTheme.title);
     try {
       (async () => {
         // 非匿名访问，需要初始化一些公共数据
