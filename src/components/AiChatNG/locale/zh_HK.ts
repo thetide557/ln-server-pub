@@ -218,6 +218,7 @@ const zh_HK = {
   },
   empty: {
     greeting_prefix: '你好,我是',
+    greeting_brand: ' 羚牛 AI Agent 智能體',
   },
 };
 
