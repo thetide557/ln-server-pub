@@ -321,7 +321,7 @@ const EventDetailPage: React.FC = () => {
         return (
           <Space>
             <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-              !isShanshuRoute && history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
+              !isShanshuRoute && history.push("/alert-rules/edit/" + (eventDetail.strategy_id || eventDetail.rule_id) + "?mode=view")
             }}>{displayName}</div>
             {!isShanshuRoute && <AiButton
               size='small'
