@@ -95,6 +95,15 @@ request.interceptors.response.use(
       if (options.responseType == "blob") {
         return response;
       } else {
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("text/html")) {
+          throw {
+            name: "Invalid JSON response",
+            message: `接口返回了非 JSON 页面 (${response.url})`,
+            silence: options.silence,
+            response,
+          };
+        }
         return response
           .clone()
           .json()
