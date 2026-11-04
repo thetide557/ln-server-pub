@@ -31,7 +31,7 @@ export const addDataCenter = function (data) {
 };
 
 export const getDataCenterById = function (id) {
-  return request('api/n9e/datacenter/'+id, {
+  return request('/api/n9e/datacenter/'+id, {
     method: RequestMethod.Get
   });
 };

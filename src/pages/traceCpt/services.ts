@@ -20,7 +20,7 @@ import { RequestMethod } from '@/store/common';
 import { SearchTraceType, SearchTraceIDType } from './type';
 
 export const getDataSourceList = () => {
-  return request(`/api/v1/datasource/list`, {
+  return request(`/api/n9e/datasource/list`, {
     method: RequestMethod.Post,
     data: {
       p: 1,

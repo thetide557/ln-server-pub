@@ -224,7 +224,7 @@ export const deleteUser = function (id: string) {
   }).then((res) => res && res.dat);
 };
 export const deleteUsers = function (data: number[]) {
-  return request(`api/n9e/users/batch-del`, {
+  return request(`/api/n9e/users/batch-del`, {
     method: RequestMethod.Post,
     data
   }).then((res) => res && res.dat);

@@ -336,7 +336,7 @@ export const getAssetstypesNew = function (params: any) {
 // 监控指标组织树列表
 export const getMonitortree = function (params: any) {
   // return request('/api/n9e/assets/monitortree', {
-  return request("/api/n9e/assetss/monitortrees", {
+  return request("/api/n9e/assets/monitortree", {
     method: RequestMethod.Get,
     params,
   });
