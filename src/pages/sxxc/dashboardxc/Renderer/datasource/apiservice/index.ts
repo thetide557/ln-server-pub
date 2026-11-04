@@ -29,7 +29,8 @@ export default async function apiServicequery(options: IOptions) {
   const series: any[] = [];
   if (options.targets) {
     for (const target of options.targets) {
-      const res = await request.get(target.expr, {
+      const url = typeof target.expr === 'string' ? target.expr.replace(/^\/api\/n9e\/api-service\//, '/api/takin/api-service/') : target.expr;
+      const res = await request.get(url, {
         method: RequestMethod.Get,
       });
       const dat = res.dat || [];
