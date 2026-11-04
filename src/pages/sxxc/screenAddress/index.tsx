@@ -59,7 +59,7 @@ const ApiService = () => {
                     style={{ backgroundColor: '#76D183', border: 'none' }}
                     type='primary'
                     onClick={() => {
-                      history.push(`address/add`);
+                      history.push(`/bigscreen/address/add`);
                     }}
                   >
                     新建
@@ -99,7 +99,7 @@ const ApiService = () => {
                     {
                       (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/detail")) &&
                       <div className='items' onClick={(e) => {
-                        history.push(`address/${record.id}`);
+                        history.push(`/bigscreen/address/${record.id}`);
                       }}>
                         <FileSearchOutlined />
                         <span className='text'>查看</span>
@@ -108,7 +108,7 @@ const ApiService = () => {
                     {
                       (profile.roles?.includes("Admin") || permList.includes("/bigscreen/address/put")) &&
                       <div className='items' onClick={(e) => {
-                        history.push(`address/${record.id}/edit`);
+                        history.push(`/bigscreen/address/${record.id}/edit`);
                       }}>
                         <EditOutlined />
                         <span className='text'>编辑</span>

@@ -60,7 +60,7 @@ const ApiService = () => {
                   <Button
                     type='primary'
                     onClick={() => {
-                      history.push(`api-service/add`);
+                      history.push(`/bigScreen/api-service/add`);
                     }}
                   >
                     新建
@@ -94,14 +94,14 @@ const ApiService = () => {
                     {
                       (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/detail")) && <SearchOutlined
                         onClick={() => {
-                          history.push(`api-service/${record.id}`);
+                          history.push(`/bigScreen/api-service/${record.id}`);
                         }}
                       ></SearchOutlined>
                     }
                     {
                       (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/put")) && <EditOutlined
                         onClick={() => {
-                          history.push(`api-service/${record.id}/edit`);
+                          history.push(`/bigScreen/api-service/${record.id}/edit`);
                         }}
                       />
                     }
