@@ -17,7 +17,7 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-const profileApi = 'api/takin/self/profile';
+const profileApi = '/api/takin/self/profile';
 // 修改个人信息
 // ---- N36 批 H1 第 14 条（后端第十份第三节 1，待办 `LN-USER-CONTACTS-SELF-01`）：
 // 这条请求必须带 `contacts`。后端在 `POST /api/takin/users` 与 `PUT /api/takin/user/:id/profile`
@@ -27,7 +27,7 @@ const profileApi = 'api/takin/self/profile';
 // 组装处 `src/pages/account/info.tsx:109-142` 的 `contacts` 来自表单，表单里没填就是 undefined，
 // `JSON.stringify` 会把 undefined 的键直接丢掉 —— 所以在这里（只有这一条请求走得到的地方）兜一次 `{}`。
 export const UpdateProfile = function (data: object) {
-  return request(`/${profileApi}`, {
+  return request(profileApi, {
     method: RequestMethod.Put,
     data: {
       ...data,
@@ -37,28 +37,28 @@ export const UpdateProfile = function (data: object) {
 };
 
 export const GetProfile = function () {
-  return request(`/${profileApi}`, {
+  return request(profileApi, {
     method: RequestMethod.Get,
   });
 };
 
-const secretApi = 'api/takin/self/token';
+const secretApi = '/api/takin/self/token';
 // 获取个人秘钥
 export const GetSecret = function () {
-  return request(`/${secretApi}`, {
+  return request(secretApi, {
     method: RequestMethod.Get,
   });
 };
 
 export const UpdateSecret = function (data: object) {
-  return request(`/${secretApi}`, {
+  return request(secretApi, {
     method: RequestMethod.Put,
     data,
   });
 };
 
 export const CreateSecret = function () {
-  return request(`/${secretApi}`, {
+  return request(secretApi, {
     method: RequestMethod.Post,
   });
 };
