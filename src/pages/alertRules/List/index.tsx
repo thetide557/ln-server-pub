@@ -339,7 +339,7 @@ export default function List(props: ListProps) {
                   //   history.push(`alert-rules/edit/${record.id}`);
                   // }}
                 onClick={() => {
-                  history.push(`alert-rules/edit/${record.strategy_id}`);
+                  history.push(`/alert-rules/edit/${record.strategy_id}`);
                 }}
                 rev={undefined}
               />
