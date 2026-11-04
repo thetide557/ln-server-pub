@@ -278,7 +278,7 @@ const getMenuList = (t) => {
           label: t('拓扑管理'),
         },
         {
-          key: '/bigscreen/api-service',
+          key: '/bigScreen/api-service',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('接口管理'),
         },
