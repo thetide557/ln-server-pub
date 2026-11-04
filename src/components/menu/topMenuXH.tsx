@@ -798,7 +798,7 @@ export default function () {//{ selectMenu?:any }
         )}
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
-            <img src={imageUrl ? imageUrl : '/image/avatar1.png'} alt='' />
+            <img src={imageUrl ? imageUrl : (profile?.portrait ? (/^[1-8]$/.test(String(profile.portrait)) ? `/image/avatar${profile.portrait}.png` : profile.portrait) : '/image/avatar1.png')} alt='' />
             <span className='display-name'>{profile.nickname || profile.username}</span>
             <DownOutlined />
           </span>
