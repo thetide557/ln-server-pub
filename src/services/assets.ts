@@ -394,7 +394,7 @@ export const getAssetstypesNew = function (params: any) {
 // 监控指标组织树列表
 export const getMonitortree = function (params: any) {
   // return request('/api/takin/assets/monitortree', {
-  return request("/api/takin/assetss/monitortrees", {
+  return request("/api/takin/assets/monitortree", {
     method: RequestMethod.Get,
     params,
   });
