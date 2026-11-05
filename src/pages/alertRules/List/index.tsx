@@ -285,7 +285,7 @@ export default function List(props: ListProps) {
                       bgid &&
                         updateAlertRulesStatus(
                           {
-                            strategyids: [strategy_id],
+                            strategyids: [String(strategy_id || record.id)],
                             fields: {
                               disabled: !disabled ? 1 : 0,
                             },
@@ -368,7 +368,7 @@ export default function List(props: ListProps) {
                     onOk: () => {
                       // 删除告警规则
                       bgid &&
-                        deleteAlertRules(record.strategy_id, bgid).then(
+                        deleteAlertRules(String(record.strategy_id || record.id), bgid).then(
                           () => {
                             message.success("删除成功");
                             getAlertRules(params);
