@@ -61,7 +61,7 @@ export default function Title(props: IProps) {
   const { t, i18n } = useTranslation('dashboard');
   const { t: tAiChat } = useTranslation(AI_CHAT_NS);
   const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome, handlePanelChange } = props;
-  const showAiAnalysis = !isPreview && !isBuiltin && !!dashboard?.id;
+  const showAiAnalysis = (!isPreview || isHome) && !isBuiltin && !!dashboard?.id;
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
