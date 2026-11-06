@@ -1,8 +1,9 @@
 const en_US = {
   flash_button: {
     label: 'AI Assistant',
-    dashboard_analysis: 'AI Analysis',
-    event_analysis: 'AI Analysis',
+    dashboard_analysis: 'AI Analyze Dashboard',
+    event_analysis: 'AI Analyze Alert',
+    query_generator: 'AI Generate Query',
     event_analysis_content: 'Analyze the root cause of this alert event',
   },
   toolbar: {
@@ -75,7 +76,7 @@ const en_US = {
     execute_disabled: 'Execution callback is not provided. Copy only.',
   },
   action: {
-    query_generator: 'Generate query',
+    query_generator: 'AI Generate Query',
   },
   message: {
     generating: 'Thinking...',
@@ -187,7 +188,7 @@ const en_US = {
     prompt_search_service_query: 'Find the recent logs of one service',
     prompt_search_timeout: 'Logs mentioning a timeout',
     prompt_search_timeout_query: 'Find the logs that mention timeout',
-    open: 'Ask AI for a query',
+    open: 'AI Generate Query',
     close: 'Close',
     expand: 'Show',
     collapse: 'Hide',

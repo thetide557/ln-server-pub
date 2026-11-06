@@ -52,7 +52,7 @@ interface Options {
  * always had, as `chatButton`.
  */
 export function usePrometheusAiDock({ datasourceValue, onTakeOver, onQuery }: Options) {
-  const { i18n } = useTranslation(AI_CHAT_NS);
+  const { t, i18n } = useTranslation(AI_CHAT_NS);
   // This panel's own box: panels on one page can each be on a different data
   // source, so the assistant is handed the box, not a page-wide lookup.
   const controlRef = useRef<PromGraphControl | null>(null);
@@ -69,7 +69,9 @@ export function usePrometheusAiDock({ datasourceValue, onTakeOver, onQuery }: Op
         queryAction={{ key: 'query_generator', param: { datasource_type: 'prometheus', datasource_id: datasourceValue } }}
         promptList={getExplorerPrompts(i18n.language)}
         onExecuteQueryForQueryContent={(promql) => onQuery(promql)}
-      />
+      >
+        {t('action.query_generator')}
+      </AiButton>
     ),
   };
 }

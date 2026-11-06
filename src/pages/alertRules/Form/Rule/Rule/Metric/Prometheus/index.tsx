@@ -27,6 +27,7 @@ import Inhibit from '@/pages/alertRules/Form/components/Inhibit';
 import { FormStateContext } from '@/pages/alertRules/Form';
 import { AiButton } from '@/components/AiChatNG/FlashAiButton';
 import { buildPageFrom, getExplorerPrompts } from '@/components/AiChatNG/recommend';
+import { NAME_SPACE as aiChatNS } from '@/components/AiChatNG/constants';
 import './style.less';
 
 const DATASOURCE_ALL = 0;
@@ -38,6 +39,7 @@ function getFirstDatasourceId(datasourceIds: number[] = [], datasourceList: { id
 export default function index(props: { datasourceCate: string; datasourceValue: number[]; includes: string[]; excludes: string[] ;field:any }) {
   const { datasourceCate, datasourceValue, includes, excludes, field: outerField } = props;
   const { t, i18n } = useTranslation('alertRules');
+  const { t: tAiChat } = useTranslation(aiChatNS);
   const form = Form.useFormInstance();
   const { groupedDatasourceList } = useContext(CommonStateContext);
   const { disabled } = useContext(FormStateContext);
@@ -101,7 +103,9 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                           },
                         ]);
                       }}
-                    />
+                    >
+                      {tAiChat('action.query_generator')}
+                    </AiButton>
                   </Col>
                 </Row>
                 <div>

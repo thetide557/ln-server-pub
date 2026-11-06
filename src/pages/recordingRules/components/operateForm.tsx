@@ -10,6 +10,7 @@ import DatasourceValueSelect from '@/pages/alertRules/Form/components/Datasource
 import { CommonStateContext } from '@/App';
 import { AiButton } from '@/components/AiChatNG/FlashAiButton';
 import { buildPageFrom, getExplorerPrompts } from '@/components/AiChatNG/recommend';
+import { NAME_SPACE as aiChatNS } from '@/components/AiChatNG/constants';
 
 const DATASOURCE_ALL = 0;
 
@@ -34,6 +35,7 @@ function getFirstDatasourceId(datasourceIds = [], datasourceList: { id: number }
 
 const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
   const { t, i18n } = useTranslation('recordingRules');
+  const { t: tAiChat } = useTranslation(aiChatNS);
   const history = useHistory(); // 创建的时候默认选中的值
   const [form] = Form.useForm();
   const { groupedDatasourceList, curBusiId } = useContext(CommonStateContext);
@@ -198,7 +200,9 @@ const operateForm: React.FC<Props> = ({ type, detail = {}, isEdit }) => {
                           prom_ql: promql,
                         });
                       }}
-                    />
+                    >
+                      {tAiChat('action.query_generator')}
+                    </AiButton>
                   </Form.Item>
                 </div>
               );

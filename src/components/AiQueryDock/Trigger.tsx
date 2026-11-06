@@ -19,12 +19,13 @@ export function AiQueryDockTrigger({ open, onClick }: AiQueryDockTriggerProps) {
         type='button'
         aria-label={t('dock.open')}
         aria-pressed={open}
-        className={`inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary ${
+        className={`inline-flex h-5 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded border-0 px-1.5 text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary ${
           open ? 'bg-fc-200/80' : 'bg-transparent hover:bg-fc-200/80'
         }`}
         onClick={onClick}
       >
         <img src='/image/ai-chat/ai.gif' alt='' className='h-[14px] w-[14px]' />
+        <span>{t('dock.open')}</span>
       </button>
     </Tooltip>
   );

@@ -99,12 +99,14 @@ function AiButtonContent(props: {
   onExecuteQueryForQueryContent?: AiChatExecuteQueryForQueryContent;
   children?: React.ReactNode;
 }) {
+  const { t } = useTranslation(NAME_SPACE);
   const { openAiChat } = useAiChatContext();
   const { size, queryPageFrom, queryAction, promptList, initialMessage, onExecuteQueryForQueryContent, children } = props;
+  const content = children ?? (queryAction?.key === 'query_generator' ? t('action.query_generator') : undefined);
 
   return (
     <Button
-      icon={<img src='/image/ai-chat/ai.gif' className={`w-[14px] h-[14px] mb-1 ${children ? 'mr-2' : ''}`} />}
+      icon={<img src='/image/ai-chat/ai.gif' className={`w-[14px] h-[14px] mb-1 ${content ? 'mr-2' : ''}`} />}
       size={size}
       onClick={() => {
         openAiChat({
@@ -116,7 +118,7 @@ function AiButtonContent(props: {
         });
       }}
     >
-      {children}
+      {content}
     </Button>
   );
 }
@@ -130,19 +132,21 @@ export function AiButton(props: {
   onExecuteQueryForQueryContent?: AiChatExecuteQueryForQueryContent;
   children?: React.ReactNode;
 }) {
+  const { t } = useTranslation(NAME_SPACE);
   const { size, queryPageFrom, queryAction, promptList, initialMessage, onExecuteQueryForQueryContent, children } = props;
+  const content = children ?? (queryAction?.key === 'query_generator' ? t('action.query_generator') : undefined);
 
   const handleEntClick = useAiEntClickHandler({ onExecuteQueryForQueryContent, promptList, queryPageFrom, queryAction });
 
   if (IS_ENT) {
     return (
-      <Button icon={<img src='/image/ai-chat/ai.gif' className={`w-[14px] h-[14px] mb-1 ${children ? 'mr-2' : ''}`} />} size={size} onClick={handleEntClick}>
-        {children}
+      <Button icon={<img src='/image/ai-chat/ai.gif' className={`w-[14px] h-[14px] mb-1 ${content ? 'mr-2' : ''}`} />} size={size} onClick={handleEntClick}>
+        {content}
       </Button>
     );
   }
 
-  return <AiButtonContent {...props} />;
+  return <AiButtonContent {...props} children={content} />;
 }
 
 export function CustomAiButtonWrap({

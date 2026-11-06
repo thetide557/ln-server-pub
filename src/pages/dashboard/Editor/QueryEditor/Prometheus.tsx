@@ -13,11 +13,13 @@ import { replaceExpressionVars } from '../../VariableConfig/constant';
 import { PromQLInputWithSelect } from '@/components/PromQLInput/PromQLInputWithSelect';
 import { AiButton } from '@/components/AiChatNG/FlashAiButton';
 import { buildPageFrom, getExplorerPrompts } from '@/components/AiChatNG/recommend';
+import { NAME_SPACE as aiChatNS } from '@/components/AiChatNG/constants';
 
 const alphabet = 'ABCDEFGHIGKLMNOPQRSTUVWXYZ'.split('');
 
 export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
   const { t, i18n } = useTranslation('dashboard');
+  const { t: tAiChat } = useTranslation(aiChatNS);
 
   return (
     <Form.List name='targets'>
@@ -105,7 +107,9 @@ export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
                                       targets,
                                     });
                                   }}
-                                />
+                                >
+                                  {tAiChat('action.query_generator')}
+                                </AiButton>
                               </Form.Item>
                             </>
                           );

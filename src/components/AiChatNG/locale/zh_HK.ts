@@ -1,8 +1,9 @@
 const zh_HK = {
   flash_button: {
     label: 'AI 助手',
-    dashboard_analysis: 'AI 分析',
-    event_analysis: 'AI 分析',
+    dashboard_analysis: 'AI分析儀表盤',
+    event_analysis: 'AI分析告警',
+    query_generator: 'AI生成查詢語句',
     event_analysis_content: '分析這條告警事件的根因',
   },
   toolbar: {
@@ -75,7 +76,7 @@ const zh_HK = {
     execute_disabled: '未傳入執行回調，僅支持複製',
   },
   action: {
-    query_generator: '生成查詢語句',
+    query_generator: 'AI生成查詢語句',
   },
   message: {
     generating: '思考中...',
@@ -187,7 +188,7 @@ const zh_HK = {
     prompt_search_service_query: '幫我查某個服務最近的日誌',
     prompt_search_timeout: '包含逾時的日誌',
     prompt_search_timeout_query: '幫我找出包含 timeout 的日誌',
-    open: '用 AI 生成查詢',
+    open: 'AI生成查詢語句',
     close: '關閉',
     expand: '展開',
     collapse: '收起',
