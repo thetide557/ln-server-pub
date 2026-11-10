@@ -6,7 +6,7 @@ interface UnitCardsProps {
 }
 
 /** 服务类型 → 标签样式（"-" / 未知类型不展示标签） */
-const CHARGE_CLASS: Record<string, string> = { 商用: 'commercial', 试用: 'trial' };
+const CHARGE_CLASS: Record<string, string> = { 商用: 'commercial', 试用: 'trial', 自用: 'self' };
 
 /** 截断到小数点后两位（不四舍五入），整数千分位，小数保留两位 */
 const formatNumber = (value: number) => {

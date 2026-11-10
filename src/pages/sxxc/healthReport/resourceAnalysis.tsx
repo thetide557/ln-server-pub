@@ -211,12 +211,18 @@ const ResourceAnalysis: React.FC = () => {
       const files: { name: string; blob: Blob }[] = [];
       for (let i = 0; i < unitNames.length; i += 1) {
         const unitName = unitNames[i];
+        const tenantQuery = { ...query, tenant: unitName };
+        const [overviewCards, resourceUsage, detailItems, unitDetails] = await Promise.all([
+          getAnalysisOverview(tenantQuery),
+          getAnalysisResourceUsage(tenantQuery),
+          getAnalysisDetail(tenantQuery),
+          getAnalysisUnitDetail(tenantQuery),
+        ]);
         const tenantReport: ReportData = {
-          overviewCards: report.overviewCards,
-          resourceUsage: report.resourceUsage,
-          detailItems: report.detailItems,
-          // 按单位导出：明细与排名图只保留该单位
-          unitDetails: report.unitDetails.filter((item) => item.name === unitName),
+          overviewCards,
+          resourceUsage,
+          detailItems,
+          unitDetails,
         };
         setExportReport(tenantReport);
         // 摘要中租户字段替换为当前导出的单位名

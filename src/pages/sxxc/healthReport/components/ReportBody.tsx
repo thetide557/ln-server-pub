@@ -12,11 +12,11 @@ import { parseRate } from '../resourceAnalysisData';
 import type { ReportData } from '../resourceAnalysisData';
 
 /** 指标卡数值配色，浅底上保证对比度 */
-const METRIC_COLORS = ['#12b3a6', '#22b35c', '#1668dc', '#7e4ce0', '#d9822b'];
+const METRIC_COLORS = ['#12b3a6', '#22b35c', '#1668dc', '#5b3fa8', '#d9822b', '#7e4ce0'];
 /** 对比 / 堆叠柱状图配色：总量 / 已分配 / 剩余 */
 const COMPARE_COLORS = { total: '#1668dc', allocated: '#3ba0f5', rest: '#a9d3f7' };
-/** 存储分配进度配色（标存 / SSD / 对象存） */
-const STORAGE_POOL_COLORS = ['#1668dc', '#5b3fa8', '#0e8f82'];
+/** 存储分配进度配色（vCPU / 内存 / 标存 / SSD / 对象存） */
+const STORAGE_POOL_COLORS = ['#1668dc', '#5b3fa8', '#0e8f82', '#d9822b', '#7e4ce0'];
 /** 租户排行 / 三维对比配色：主机（绿）/ CPU（蓝）/ 存储（紫） */
 const TENANT_COLORS = { hosts: '#22b35c', cpu: '#3ba0f5', storage: '#8a63e0' };
 
