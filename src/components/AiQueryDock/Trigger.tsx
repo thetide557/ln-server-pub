@@ -24,7 +24,7 @@ export function AiQueryDockTrigger({ open, onClick }: AiQueryDockTriggerProps) {
         }`}
         onClick={onClick}
       >
-        <img src='/image/ai-chat/ai.gif' alt='' className='h-[14px] w-[14px]' />
+        <img src='/image/ai-chat/ai.png' alt='' className='ai-chat-png h-[14px] w-[14px]' />
         <span>{t('dock.open')}</span>
       </button>
     </Tooltip>

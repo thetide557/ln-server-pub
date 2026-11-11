@@ -18,7 +18,7 @@ export default function LayoutHeaderAiBtn(props) {
         icon={
           <span className='ai-chat-btn'>
             {/* <img src={aiChatIcon} className='ai-chat-icon' /> */}
-            <img src={aiChatGif} className='ai-chat-gif fc-theme-dark-circle-gif' />
+            <img src='/image/ai-chat/ai.png' className='ai-chat-png fc-theme-dark-circle-png w-[14px] h-[14px]' />
           </span>
         }
         size='small'

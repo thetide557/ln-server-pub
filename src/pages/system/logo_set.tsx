@@ -111,8 +111,8 @@ export default function () {
         getLogInfo().then(({ dat }) => {
           setTheme({
             title: dat.login_title,
-            logo: normalizeLogoUrl(dat.logo_top),
-            icon: normalizeLogoUrl(dat.logo_title)
+            logo: normalizeLogoUrl(dat.logo_top) || '',
+            icon: normalizeLogoUrl(dat.logo_title) || '',
           });
           confirm({
             title: '系统提醒',

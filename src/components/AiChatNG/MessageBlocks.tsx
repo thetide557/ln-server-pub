@@ -345,7 +345,7 @@ export function EmptyConversation({ prompts, onPromptClick, children }: { prompt
       <div className={cn('w-full flex justify-center items-center', hasCustomContent ? 'shrink-0' : 'h-[40%]')}>
         <div className='text-l4 font-bold'>
           <Space align='baseline'>
-            <img src='/image/ai-chat/ai.gif' className='w-[24px] h-[24px]' />
+            <img src='/image/ai-chat/robot.png' className='w-[24px] h-[24px]' />
             <TypedGreeting prefix={greetingPrefix} brand={greetingBrand} />
           </Space>
         </div>

@@ -159,28 +159,25 @@ export default function Title(props: IProps) {
         <div className='title' style={{ width: '205px' }}>
           {dashboard.name}
         </div>
-        {showAiAnalysis && (
-          <span style={{ marginLeft: 8, display: 'inline-flex' }}>
-            <AiButton
-              size='small'
-              queryAction={{
-                param: {
-                  dashboard_id: dashboard.id,
-                  variables: _.map(variableConfig, (v: any) => ({ name: v.name, value: v.value })),
-                  range: timeRangeUnix(range),
-                },
-              }}
-              promptList={getDashboardDetailPrompts(i18n.language)}
-              initialMessage={getDashboardDetailPrompts(i18n.language)[0]}
-            >
-              {tAiChat('flash_button.dashboard_analysis')}
-            </AiButton>
-          </span>
-        )}
       </div>
       {
         <div className='dashboard-detail-header-right' style={{ display: isHome ? 'none' : '' }}>
           <Space>
+            {showAiAnalysis && !isHome && (
+              <AiButton
+                queryAction={{
+                  param: {
+                    dashboard_id: dashboard.id,
+                    variables: _.map(variableConfig, (v: any) => ({ name: v.name, value: v.value })),
+                    range: timeRangeUnix(range),
+                  },
+                }}
+                promptList={getDashboardDetailPrompts(i18n.language)}
+                initialMessage={getDashboardDetailPrompts(i18n.language)[0]}
+              >
+                {tAiChat('flash_button.dashboard_analysis')}
+              </AiButton>
+            )}
             {isAuthorized && (
               <Dropdown
                 trigger={['click']}
@@ -279,7 +276,24 @@ export default function Title(props: IProps) {
         </div>
       }
       {isHome && (profile.roles?.includes("Admin") || permList.includes("/home/setBoards")) && (
-        <div className='dashboard-detail-header-right'>
+        <div className='dashboard-detail-header-right' style={{ display: 'flex', alignItems: 'center' }}>
+          {showAiAnalysis && (
+            <span style={{ marginRight: 8, display: 'inline-flex' }}>
+              <AiButton
+                queryAction={{
+                  param: {
+                    dashboard_id: dashboard.id,
+                    variables: _.map(variableConfig, (v: any) => ({ name: v.name, value: v.value })),
+                    range: timeRangeUnix(range),
+                  },
+                }}
+                promptList={getDashboardDetailPrompts(i18n.language)}
+                initialMessage={getDashboardDetailPrompts(i18n.language)[0]}
+              >
+                {tAiChat('flash_button.dashboard_analysis')}
+              </AiButton>
+            </span>
+          )}
           <Button
             loading={loading}
             onClick={() => {

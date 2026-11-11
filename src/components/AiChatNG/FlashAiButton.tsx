@@ -73,8 +73,8 @@ function FlashAiButtonContent() {
 
   return (
     <Button
-      className='border-violet-600 text-violet-1100 bg-violet-300 hover:border-violet-700 hover:bg-violet-400'
-      icon={<img src='/image/ai-chat/ai.gif' className='w-[14px] h-[14px] mr-2' />}
+      className='border-white text-white bg-transparent hover:border-white hover:text-white mr-2 flex items-center justify-center'
+      icon={<img src='/image/ai-chat/ai.png' className={`ai-chat-png w-[14px] h-[14px] mr-2`} />}
       size='small'
       onClick={handleClick}
     >
@@ -106,7 +106,7 @@ function AiButtonContent(props: {
 
   return (
     <Button
-      icon={<img src='/image/ai-chat/ai.gif' className={`w-[14px] h-[14px] mb-1 ${content ? 'mr-2' : ''}`} />}
+      icon={<img src='/image/ai-chat/ai.png' className={`ai-chat-png w-[14px] h-[14px] mb-1 ${content ? 'mr-2' : ''}`} />}
       size={size}
       onClick={() => {
         openAiChat({
@@ -140,7 +140,7 @@ export function AiButton(props: {
 
   if (IS_ENT) {
     return (
-      <Button icon={<img src='/image/ai-chat/ai.gif' className={`w-[14px] h-[14px] mb-1 ${content ? 'mr-2' : ''}`} />} size={size} onClick={handleEntClick}>
+      <Button icon={<img src='/image/ai-chat/ai.png' className={`ai-chat-png w-[14px] h-[14px] mb-1 ${content ? 'mr-2' : ''}`} />} size={size} onClick={handleEntClick}>
         {content}
       </Button>
     );
