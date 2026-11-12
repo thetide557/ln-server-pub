@@ -296,7 +296,6 @@ export default function () {
 
     if (assetType) {
       setParams(assetType.form || []); // 显示form表单
-      console.log('assetType.form===', assetType.form)
       // http服务鉴权字段处理
       if (currentType == 'HTTP服务') {
         let formData = form.getFieldsValue(true);
@@ -410,7 +409,6 @@ export default function () {
           });
           delete dat.exps;
         }
-        console.log("dat===", dat)
         const passwordFields = dat?.params?.fields_with_a_password_entered || [];
         const formData = _.cloneDeep(dat);
         passwordFields.forEach((fieldName) => {
@@ -428,7 +426,6 @@ export default function () {
   };
 
   const handleChange = useCallback((value: string, option?: any) => {
-    console.log("handleChange", value)
     // 页面无 IP 表单项，选择/变更探针时直接把探针资产的 ip 作为未注册字段写入 form store，
     // 保存时由 form.getFieldsValue(true) 一并提交（清空探针时同步清空）
     const ip = option && !Array.isArray(option) ? option.ip : undefined;
@@ -485,7 +482,7 @@ export default function () {
         type: v.type,
         ip: v.ip,
       })).sort((a, b) => localeCompare(a.label, b.label))
-        .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
+        .filter(item => item.type === "物理服务器" || item.type === "虚拟服务器"); 
       setAssetOptions(options);
       setAssetList(res.dat?.list.reduce((acc, v) => ({ ...acc, [v.id]: v }), {}));
       if (id) {
@@ -531,8 +528,6 @@ export default function () {
     if (submitData.is_shelf === true) {
       submitData.shelf_reason = ''
     }
-    console.log(submitData);
-
     // return false
     if (editType !== 'edit') {
       await insertXHAsset(submitData);
@@ -653,7 +648,6 @@ export default function () {
     }
     if (form.getFieldsValue() && form.getFieldsValue().type && form.getFieldsValue().type == '宿主机'
       && v.name === 'user') {
-      console.log("suzhuji", v.name)
       return (
         <>
           <Input
