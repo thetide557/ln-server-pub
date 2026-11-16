@@ -17,17 +17,15 @@ describe('trapAnnotationUtils SRE deduplication and dynamic kv splitting', () =>
       { key: '阈值规则名称', value: '[预置]FusionSphere, OpenStack带宽规则' },
     ]);
 
-    const semiRes = parseTrapKvPairs(
-      'Key=391519_https://172.18.8.149:26335;ServiceName=ManageOne;MicroServiceName=MOA Console Website;',
-    );
+    const semiRes = parseTrapKvPairs('K1=V1;K2=V2_https://10.0.0.1:8443;K3=V3 Value;');
     expect(semiRes.hasKvStructure).toBe(true);
     expect(semiRes.pairs).toEqual([
-      { key: 'Key', value: '391519_https://172.18.8.149:26335' },
-      { key: 'ServiceName', value: 'ManageOne' },
-      { key: 'MicroServiceName', value: 'MOA Console Website' },
+      { key: 'K1', value: 'V1' },
+      { key: 'K2', value: 'V2_https://10.0.0.1:8443' },
+      { key: 'K3', value: 'V3 Value' },
     ]);
 
-    const plainRes = parseTrapKvPairs('证书将于 7 天后过期，请及时更换');
+    const plainRes = parseTrapKvPairs('plain-non-kv-text');
     expect(plainRes.hasKvStructure).toBe(false);
     expect(plainRes.pairs).toEqual([]);
   });
@@ -75,52 +73,47 @@ describe('trapAnnotationUtils SRE deduplication and dynamic kv splitting', () =>
     expect(keys.indexOf('IP地址')).toBeLessThan(keys.indexOf('告警类型'));
   });
 
-  it('handles slimmed 55B ManageOne service Trap: keeps distinct 设备名称 & 设备IP, filters "-" placeholders, splits ";" kv, and keeps 可能原因/修复建议', () => {
-    const serviceTrap = {
-      设备名称: 'ManageOne',
-      设备IP: '172.18.8.149',
-      trap来源IP: '172.18.0.155',
-      告警流水号: '29387998',
+  it('handles slimmed 16-key Trap format: keeps distinct 设备名称 & 设备IP, filters "-" placeholders, and splits ";" kv pairs', () => {
+    const slimTrap = {
+      设备名称: 'dev-node-01',
+      设备IP: '10.10.0.10',
+      trap来源IP: '10.10.0.1',
+      告警流水号: '27401495',
       弹性IP名称: '-',
       门限值: '-',
-      附加信息: 'Key=391519_https://172.18.8.149:26335;ServiceName=ManageOne;MicroServiceName=MOA Console Website',
-      扩展定位信息: 'region=sa-fb-1',
-      告警类型: '2 (设备告警)',
+      附加信息: 'K1=V1;K2=V2',
+      扩展定位信息: 'K3=V3;K4=-',
+      告警类型: '4 (业务质量告警)',
       源端告警级别: '2 (重要)',
-      可能原因: '证书文件已过期或即将过期。',
-      修复建议: '登录ManageOne维护面更换证书。',
-      描述: '设备 ManageOne 上报 2 (设备告警)（告警流水号 29387998，源端级别 2 (重要)）',
+      描述: '设备 dev-node-01 上报 4 (业务质量告警)（告警流水号 27401495，源端级别 2 (重要)）',
     };
 
-    const rows = buildEventAnnotationRows(serviceTrap);
+    const rows = buildEventAnnotationRows(slimTrap);
     expect(rows).toEqual([
-      { key: '设备名称', value: 'ManageOne' },
-      { key: '设备IP', value: '172.18.8.149' },
-      { key: 'trap来源IP', value: '172.18.0.155' },
-      { key: '告警流水号', value: '29387998' },
-      { key: 'Key', value: '391519_https://172.18.8.149:26335' },
-      { key: 'ServiceName', value: 'ManageOne' },
-      { key: 'MicroServiceName', value: 'MOA Console Website' },
-      { key: 'region', value: 'sa-fb-1' },
-      { key: '告警类型', value: '2 (设备告警)' },
+      { key: '设备名称', value: 'dev-node-01' },
+      { key: '设备IP', value: '10.10.0.10' },
+      { key: 'trap来源IP', value: '10.10.0.1' },
+      { key: '告警流水号', value: '27401495' },
+      { key: 'K1', value: 'V1' },
+      { key: 'K2', value: 'V2' },
+      { key: 'K3', value: 'V3' },
+      { key: '告警类型', value: '4 (业务质量告警)' },
       { key: '源端告警级别', value: '2 (重要)' },
-      { key: '可能原因', value: '证书文件已过期或即将过期。' },
-      { key: '修复建议', value: '登录ManageOne维护面更换证书。' },
     ]);
   });
 
-  it('preserves plain-text 附加信息 and genuine non-redundant 描述, and leaves non-Trap annotations untouched', () => {
+  it('preserves plain-text 附加信息 and non-redundant 描述, and leaves non-Trap annotations untouched', () => {
     const customTrap = {
       设备IP: '10.0.0.1',
       告警流水号: '10001',
-      附加信息: '远端光模块收光功率偏低告警说明',
-      描述: '光衰超过阈值，请检查尾纤弯曲半径。',
+      附加信息: 'raw-additional-note',
+      描述: 'custom-note-text',
     };
     expect(buildEventAnnotationRows(customTrap)).toEqual([
       { key: '设备IP', value: '10.0.0.1' },
       { key: '告警流水号', value: '10001' },
-      { key: '附加信息', value: '远端光模块收光功率偏低告警说明' },
-      { key: '描述', value: '光衰超过阈值，请检查尾纤弯曲半径。' },
+      { key: '附加信息', value: 'raw-additional-note' },
+      { key: '描述', value: 'custom-note-text' },
     ]);
 
     const normalPromEvent = {
@@ -133,6 +126,6 @@ describe('trapAnnotationUtils SRE deduplication and dynamic kv splitting', () =>
       { key: '空属性', value: '-' },
     ]);
     expect(isRedundantTrapDescription('设备 1.1.1.1 上报 通信告警')).toBe(true);
-    expect(isRedundantTrapDescription('CPU 使用率持续高于 90%')).toBe(false);
+    expect(isRedundantTrapDescription('CPU > 90%')).toBe(false);
   });
 });

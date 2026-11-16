@@ -33,14 +33,11 @@ const META_KEYS = [
   'SNMP版本',
 ] as const;
 
-const TAIL_CAUSE_KEYS = ['可能原因', '修复建议'] as const;
-
 const KNOWN_TRAP_TOP_KEYS = new Set<string>([
   ...HEAD_KEYS,
   ...LEGACY_PRE_SPLIT_KEYS,
   ...DYNAMIC_KV_CONTAINER_KEYS,
   ...META_KEYS,
-  ...TAIL_CAUSE_KEYS,
   '描述',
 ]);
 
@@ -236,13 +233,7 @@ export function buildEventAnnotationRows(annotations?: Record<string, any> | nul
     pushUniqueRow(key, annotations[key], true);
   }
 
-  // 6. 底部 `可能原因`、`修复建议` 与非拼凑版 `描述`
-  for (const key of TAIL_CAUSE_KEYS) {
-    if (Object.prototype.hasOwnProperty.call(annotations, key)) {
-      pushUniqueRow(key, annotations[key], false);
-    }
-  }
-
+  // 6. 底部非拼凑复读版 `描述`
   if (Object.prototype.hasOwnProperty.call(annotations, '描述')) {
     const descVal = String(annotations['描述'] ?? '').trim();
     if (!isEmptyOrDash(descVal) && !isRedundantTrapDescription(descVal)) {
