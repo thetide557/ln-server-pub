@@ -1,6 +1,9 @@
 const en_US = {
   user: {
     title: 'User Management',
+    // N36-I: same as zh_CN — spell out that disabling takes effect immediately.
+    status_tip_enabled: 'Enabled. Click to disable; once disabled, the account\'s signed-in sessions are revoked immediately',
+    status_tip_disabled: 'Disabled (the account\'s signed-in sessions were revoked immediately). Click to enable',
     search_placeholder: 'Username, email or phone number',
     create: 'Create User',
     edit: 'Edit User',

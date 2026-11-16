@@ -271,11 +271,11 @@ export default function (props: IProps) {
         <div className='table-content'>
           <div className='table-header'>
             <Space>
-              <RefreshIcon
+              {/* <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
-              />
+              /> */}
               <div className='table-handle-search'>
                 <Input
                   className={'searchInput'}

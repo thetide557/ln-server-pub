@@ -31,7 +31,7 @@ export const addDataCenter = function (data) {
 };
 
 export const getDataCenterById = function (id) {
-  return request('api/takin/datacenter/'+id, {
+  return request('/api/takin/datacenter/'+id, {
     method: RequestMethod.Get
   });
 };

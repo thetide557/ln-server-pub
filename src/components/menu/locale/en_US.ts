@@ -7,6 +7,8 @@ const en_US = {
   快捷视图: 'Quick View',
   记录规则: 'Record Rule',
   日志分析: 'Log Analysis',
+  // n23（用户 M264 ③）：照上游 fe ee48e701 src/components/SideMenu/locale/en_US.ts:32 的 `logs_explorer: 'Logs'`。
+  日志: 'Logs',
   索引模式: 'Index Patterns',
   链路追踪: 'Tracing',
   拓扑分析: 'Dependencies',

@@ -1,45 +1,128 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
 import { useDebounceFn } from 'ahooks';
-import { useTranslation, Trans } from 'react-i18next';
-import { Space, Input, Tooltip, Form, Select, Button } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
+import { Form, Select, Button, Space, Row, Col } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import TimeRangePicker from '@/components/TimeRangePicker';
-import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
-import { getFields } from './services';
+
+// step6f（ES 升级轮）：原来是 `import TimeRangePicker from '@/components/TimeRangePicker'`。
+// fe v9.1.0 的时间选择器多两个 props：`ajustTimeOptions`（往下拉里插「最近 5/15/30 秒」这几档）
+// 和 `showMillisecond`（时间精确到毫秒）；羚牛 pub 那份还是老版，两个都没有
+//（pub `src/components/TimeRangePicker/index.tsx`）。pub 现有共享文件不许改，
+// 这里把组件的类型放宽成 any 让 tsc 过去——运行时这两个 props 会被 pub 的组件忽略，
+// 也就是 ES 查询栏里没有秒级快捷档、时间不显示毫秒，其余照常。已登记。
+import _TimeRangePicker from '@/components/TimeRangePicker';
+const TimeRangePicker: any = _TimeRangePicker;
+import { getESIndexPatterns, standardizeFieldConfig } from '@/pages/log/IndexPatterns/services';
+// step6f（ES 升级轮）：原来指向 '@/components/InputGroupWithFormItem'。pub 那个公共组件是老版、不支持 addonAfter，
+// pub 现有共享文件不许改，改指本层的本地副本（原因见该文件开头）。已登记。
+import InputGroupWithFormItem from './components/InputGroupWithFormItem';
+import { useIsAuthorized } from '@/components/AuthorizationWrapper';
+import KQLInput from '@/components/KQLInput';
+import IndexPatternSettingsBtn from '@/pages/explorer/Elasticsearch/components/IndexPatternSettingsBtn';
+import ConditionHistoricalRecords from '@/components/HistoricalRecords/ConditionHistoricalRecords';
+
+import { getFullFields, Field } from './services';
+import InputFilter from './InputFilter';
+import { CACHE_KEY_MAP, SYNTAX_OPTIONS } from './index';
 
 interface Props {
   onExecute: () => void;
   datasourceValue?: number;
   form: any;
-  setFields: (fields: string[]) => void;
+  setFields: (fields: Field[]) => void;
   onIndexChange: () => void;
+  loading: boolean;
+  setHistory: () => void;
+  resetFilters: () => void;
 }
 
 export default function QueryBuilder(props: Props) {
   const { t } = useTranslation('explorer');
-  const { onExecute, datasourceValue, form, setFields, onIndexChange } = props;
+  const params = new URLSearchParams(useLocation().search);
+  const { onExecute, datasourceValue, form, setFields, onIndexChange, loading, setHistory, resetFilters } = props;
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
+  const indexPattern = Form.useWatch(['query', 'indexPattern']);
+  const indexPatternObj = _.find(indexPatterns, (item) => item.id === indexPattern);
+  const date_field = Form.useWatch(['query', 'date_field']);
+  const syntax = Form.useWatch(['query', 'syntax']);
+  const indexPatternsAuthorized = useIsAuthorized(['/log/index-patterns']);
+  const [allFields, setAllFields] = useState<Field[]>([]);
+  const refInputFilter = useRef<any>();
   const { run: onIndexPatternChange } = useDebounceFn(
     (indexPattern) => {
       if (datasourceValue && indexPattern) {
-        getFields(datasourceValue, indexPattern.name, undefined, indexPattern.allow_hide_system_indices).then((res) => {
-          setFields(res.allFields);
-        });
+        const finded = indexPatterns.find((i) => i.id === indexPattern || i.name === indexPattern); //从url上带过来时indexPattern不是id，是name，兼容下这种情况
+        if (finded) {
+          const formValuesQuery = form.getFieldValue('query');
+          formValuesQuery.date_field = finded.time_field;
+          formValuesQuery.index = finded.name;
+          form.setFieldsValue({
+            query: formValuesQuery,
+          });
+          onIndexChange();
+          getFullFields(datasourceValue, finded.name, {
+            allowHideSystemIndices: finded.allow_hide_system_indices,
+            crossClusterEnabled: finded.cross_cluster_enabled === 1,
+          }).then((res) => {
+            setFields(res.allFields);
+            setAllFields(res.allFields);
+          });
+        }
       }
     },
     {
       wait: 500,
     },
   );
+  const fetchESIndexPatterns = (callback?: (res) => void) => {
+    getESIndexPatterns(datasourceValue).then((res) => {
+      setIndexPatterns(res);
+      callback && callback(res);
+    });
+  };
 
   useEffect(() => {
     if (datasourceValue) {
-      getESIndexPatterns(datasourceValue).then((res) => {
-        setIndexPatterns(res);
+      fetchESIndexPatterns((res) => {
+        if (params.get('index_pattern')) {
+          const indexPattern = _.find(res, (item) => item.name === params.get('index_pattern'));
+          if (indexPattern) {
+            const formValuesQuery = form.getFieldValue('query');
+            let fieldConfig;
+            try {
+              if (indexPattern.fields_format) {
+                fieldConfig = standardizeFieldConfig(JSON.parse(indexPattern.fields_format));
+              }
+            } catch (error) {
+              console.warn(error);
+            }
+
+            formValuesQuery.date_field = indexPattern.time_field;
+            formValuesQuery.index = indexPattern.name;
+            form.setFieldsValue({
+              query: formValuesQuery,
+              fieldConfig,
+            });
+            onExecute();
+          }
+        }
       });
     }
   }, [datasourceValue]);
+
+  useEffect(() => {
+    if (indexPattern) {
+      onIndexPatternChange(indexPattern);
+    }
+  }, [indexPattern]);
+
+  useEffect(() => {
+    if (params.get('__execute__')) {
+      onExecute();
+    }
+  }, []);
 
   return (
     <>
@@ -52,106 +135,205 @@ export default function QueryBuilder(props: Props) {
       <Form.Item name={['fieldConfig']} hidden>
         <div />
       </Form.Item>
-      <Space>
-        <Input.Group compact>
-          <span
-            className='ant-input-group-addon'
-            style={{
-              width: 'max-content',
-              height: 32,
-              lineHeight: '32px',
-            }}
-          >
-            {t('datasource:es.indexPatterns')}
-          </span>
-          <Form.Item
-            name={['query', 'indexPattern']}
-            rules={[
-              {
-                required: true,
-                message: t('datasource:es.indexPattern_msg'),
-              },
-            ]}
-            validateTrigger='onBlur'
-            style={{ width: 190 }}
-          >
-            <Select
-              options={_.map(indexPatterns, (item) => {
-                return {
-                  label: item.name,
-                  value: item.id,
-                };
-              })}
-              style={{ minWidth: 100 }}
-              dropdownMatchSelectWidth={false}
-              onChange={(val) => {
-                const indexPattern = _.find(indexPatterns, (item) => item.id === val);
-                if (indexPattern) {
-                  onIndexPatternChange(indexPattern);
-                  const formValuesQuery = form.getFieldValue('query');
-                  let fieldConfig;
-                  try {
-                    if (indexPattern.fields_format) {
-                      fieldConfig = JSON.parse(indexPattern.fields_format);
-                    }
-                  } catch (error) {
-                    console.warn(error);
-                  }
-
-                  formValuesQuery.date_field = indexPattern.time_field;
-                  formValuesQuery.index = indexPattern.name;
-                  form.setFieldsValue({
-                    query: formValuesQuery,
-                    fieldConfig,
-                  });
-                  onIndexChange();
-                }
-              }}
-            />
-          </Form.Item>
-        </Input.Group>
-        <Input.Group compact>
-          <span
-            className='ant-input-group-addon'
-            style={{
-              width: 90,
-              height: 32,
-              lineHeight: '32px',
-            }}
-          >
-            {t('datasource:es.filter')}{' '}
-            <a href='https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax ' target='_blank'>
-              <QuestionCircleOutlined />
-            </a>
-          </span>
-          <Form.Item name={['query', 'filter']} style={{ minWidth: 300 }}>
-            <Input
-              onKeyDown={(e) => {
-                if (e.keyCode === 13) {
-                  onExecute();
-                }
-              }}
-            />
-          </Form.Item>
-        </Input.Group>
-        <div style={{ display: 'flex' }}>
-          <Space>
-            <Form.Item name={['query', 'range']} initialValue={{ start: 'now-1h', end: 'now' }}>
-              <TimeRangePicker />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                type='primary'
-                onClick={() => {
-                  onExecute();
-                }}
+      <Row gutter={8}>
+        <Col flex='none'>
+          <div style={{ width: 290 }}>
+            <InputGroupWithFormItem
+              label={t('datasource:es.indexPatterns')}
+              addonAfter={
+                indexPatternsAuthorized && (
+                  <IndexPatternSettingsBtn
+                    onReload={() => {
+                      fetchESIndexPatterns();
+                    }}
+                  />
+                )
+              }
+            >
+              <Form.Item
+                name={['query', 'indexPattern']}
+                rules={[
+                  {
+                    required: true,
+                    message: t('datasource:es.indexPattern_msg'),
+                  },
+                ]}
+                validateTrigger='onBlur'
               >
-                {t('query_btn')}
-              </Button>
-            </Form.Item>
-          </Space>
-        </div>
-      </Space>
+                <Select
+                  options={_.map(indexPatterns, (item) => {
+                    return {
+                      label: (
+                        <Space>
+                          <span>{item.name}</span>
+                          <span
+                            style={{
+                              color: 'var(--fc-text-3)',
+                            }}
+                          >
+                            {item.note}
+                          </span>
+                        </Space>
+                      ),
+                      originLabel: item.name,
+                      searchIndex: `${item.name} ${item.note}`,
+                      value: item.id,
+                    };
+                  })}
+                  dropdownMatchSelectWidth={false}
+                  showSearch
+                  optionFilterProp='searchIndex'
+                  optionLabelProp='originLabel'
+                />
+              </Form.Item>
+            </InputGroupWithFormItem>
+          </div>
+        </Col>
+        <Col flex='auto'>
+          <InputGroupWithFormItem
+            label={
+              <>
+                {t('datasource:es.filter')}{' '}
+                <a
+                  href={
+                    syntax === 'Lucene'
+                      ? 'https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax'
+                      : 'https://www.elastic.co/guide/en/kibana/current/kuery-query.html'
+                  }
+                  target='_blank'
+                >
+                  <QuestionCircleOutlined />
+                </a>
+              </>
+            }
+            addonAfter={
+              <Form.Item name={['query', 'syntax']} noStyle initialValue='kuery'>
+                <Select
+                  bordered={false}
+                  options={SYNTAX_OPTIONS}
+                  dropdownMatchSelectWidth={false}
+                  onChange={() => {
+                    form.setFieldsValue({
+                      query: {
+                        filter: '',
+                      },
+                    });
+                  }}
+                />
+              </Form.Item>
+            }
+          >
+            {syntax === 'lucene' ? (
+              <Form.Item name={['query', 'filter']}>
+                <InputFilter
+                  fields={allFields}
+                  ref={refInputFilter}
+                  onExecute={() => {
+                    setHistory();
+                    onExecute();
+                  }}
+                />
+              </Form.Item>
+            ) : (
+              <Form.Item name={['query', 'filter']}>
+                <KQLInput
+                  datasourceValue={datasourceValue}
+                  query={{
+                    index: indexPatternObj?.name,
+                    date_field: date_field,
+                  }}
+                  historicalRecords={[]}
+                  onEnter={() => {
+                    setHistory();
+                    onExecute();
+                  }}
+                />
+              </Form.Item>
+            )}
+          </InputGroupWithFormItem>
+        </Col>
+        <Col flex='none'>
+          <Form.Item name={['query', 'range']} initialValue={{ start: 'now-1h', end: 'now' }} hidden={!date_field}>
+            <TimeRangePicker
+              onChange={() => {
+                if (refInputFilter.current) {
+                  refInputFilter.current.onCallback();
+                }
+                setHistory();
+                onExecute();
+              }}
+              ajustTimeOptions={(options) => {
+                return _.concat(
+                  [
+                    { start: 'now-5s', end: 'now', display: 'Last 5 seconds' },
+                    { start: 'now-15s', end: 'now', display: 'Last 15 seconds' },
+                    { start: 'now-30s', end: 'now', display: 'Last 30 seconds' },
+                  ],
+                  options,
+                );
+              }}
+              showMillisecond
+            />
+          </Form.Item>
+        </Col>
+        <Col flex='none'>
+          <ConditionHistoricalRecords
+            localKey={CACHE_KEY_MAP['index-patterns']}
+            datasourceValue={datasourceValue!}
+            renderItem={(item) => {
+              return (
+                <div
+                  className='flex flex-wrap items-center gap-y-1 cursor-pointer hover:bg-[var(--fc-fill-3)] p-1 rounded leading-[1.1] mb-1'
+                  key={JSON.stringify(item)}
+                  onClick={() => {
+                    form.setFieldsValue({
+                      query: {
+                        ...item,
+                        indexPattern: _.toNumber(item.indexPattern),
+                      },
+                    });
+                    resetFilters();
+                    onExecute();
+                  }}
+                >
+                  {_.map(_.pick(item, ['indexPattern', 'filter', 'syntax']), (value, key) => {
+                    if (!value) return <span key={key} />;
+                    return (
+                      <span key={key}>
+                        <span className='bg-[var(--fc-fill-1)] inline-block p-1 mr-1'>{t(`datasource:es.${key}`)}:</span>
+                        <span className='pr-1'>
+                          {key === 'indexPattern'
+                            ? _.find(indexPatterns, { id: _.toNumber(value) })?.name ?? value
+                            : key === 'syntax'
+                            ? _.find(SYNTAX_OPTIONS, { value: value as string })?.label ?? value
+                            : value}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </div>
+              );
+            }}
+          />
+        </Col>
+        <Col flex='none'>
+          <Form.Item>
+            <Button
+              loading={loading}
+              type='primary'
+              onClick={() => {
+                if (refInputFilter.current) {
+                  refInputFilter.current.onCallback();
+                }
+                setHistory();
+                onExecute();
+              }}
+            >
+              {t('query_btn')}
+            </Button>
+          </Form.Item>
+        </Col>
+      </Row>
     </>
   );
 }

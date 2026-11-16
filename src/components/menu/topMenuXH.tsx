@@ -12,6 +12,7 @@ import { getMyPortrait } from '@/services/log_set';
 import './topMenu.less';
 import './locale';
 import { Logout } from '@/services/login';
+import { AI_CHAT_CACHED_SESSION_KEY } from '@/components/AiChatNG/context';
 import { useLocalStorageState } from 'ahooks';
 import { useLocalStorage } from 'react-use';
 import { getBigScreen, getBigScreen2 } from '@/services/sxxc/bigScreen';
@@ -19,6 +20,7 @@ import { getDictDataListByType } from '@/services/system/dict';
 import { downloadTemplet } from '@/services/menu';
 import Cookies from 'js-cookie';
 import moment from 'moment';
+import FlashAiButton from '@/components/AiChatNG/FlashAiButton';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -86,11 +88,22 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('监控指标'),
         },
-        // {
-        //   key: '/dashboards-built-in',
-        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
-        //   label: t('仪表盘'),
-        // },
+        // N33 批 A-5（lead 拍板 L-09，用户原话「11 就加上，把注释去掉」）：
+        // 两条路由本来就挂着（src/routers/index.tsx:205 的 /dashboards、:206 的 /dashboards-built-in），
+        // 只是在用的这份菜单里没有入口，只能手敲地址栏进（N29 结论正本 B-10、拿不准-W5.md U-W5-1）。
+        // label 用的两个中文 key 在 src/components/menu/locale/{zh_CN,zh_HK,en_US}.ts 里都已经有了
+        //（`仪表盘` 与 `内置仪表盘`，各 locale 的 :2 与 :4），不用加键。
+        // 位置照原注释块：放在「监控指标」之后、「即时查询」之前。
+        {
+          key: '/dashboards',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('仪表盘'),
+        },
+        {
+          key: '/dashboards-built-in',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('内置仪表盘'),
+        },
         {
           key: '/metric/explorer',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
@@ -265,7 +278,7 @@ const getMenuList = (t) => {
           label: t('拓扑管理'),
         },
         {
-          key: '/bigscreen/api-service',
+          key: '/bigScreen/api-service',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('接口管理'),
         },
@@ -350,7 +363,7 @@ const getMenuList = (t) => {
           children: [
             {
               key: '/log/explorer',
-              label: t('即时查询'),
+              label: t('日志'),
             },
             {
               key: '/log/index-patterns',
@@ -411,6 +424,20 @@ const getMenuList = (t) => {
             //   key: '/system/upgrade',
             //   label: t('系统升级'),
             // },
+            // 第六步d：AI 配置三页。key 必须与后端权限点字符串一字不差（ln:center/router/router.go:1307,1314；ops.yaml），
+            // 非 Admin 由本文件 :471-489 已有的 permList 过滤自动显隐；/ai-config/agents 不是权限点，非 Admin 自动被滤掉（后端是 rt.admin()）。
+            {
+              key: '/ai-config/llm-configs',
+              label: t('AI 模型'),
+            },
+            {
+              key: '/ai-config/skills',
+              label: t('AI 技能'),
+            },
+            {
+              key: '/ai-config/agents',
+              label: t('AI Agent'),
+            },
           ],
         },
         {
@@ -444,6 +471,22 @@ const getMenuList = (t) => {
         //   icon: <IconFont type='icon-Menu_Infrastructure' />,
         //   label: t('安全认证'),
         // },
+         {
+          key: "/sxxc/deploymentManagement",
+          icon: <ProfileOutlined />,
+          label: t("管理后台"),
+          children: [
+            // {
+            //   key: "/sxxc/deploymentManagement",
+            //   label: "项目管理",
+            // },
+            {
+              key: "/sxxc/dutyManage",
+              // icon: <IconFont type="icon-Menu_Infrastructure" />,
+              label: t("值班管理"),
+            },
+          ],
+        },
       ],
     },
 
@@ -597,6 +640,8 @@ export default function () {//{ selectMenu?:any }
     // 新增: 判断 access_token 与 refresh_token 是否存在
     if (!Cookies.get('access_token') && !Cookies.get('refresh_token')) {
       Logout().then((res) => {
+        // 登出时清掉本地缓存的 AI 会话 id（todo①）
+        localStorage.removeItem(AI_CHAT_CACHED_SESSION_KEY);
         if (res?.dat?.logout_url) {
           Cookies.remove('access_token');
           Cookies.remove('refresh_token');
@@ -665,6 +710,8 @@ export default function () {//{ selectMenu?:any }
       <Menu.Item
         onClick={() => {
           Logout().then((res) => {
+            // 登出时清掉本地缓存的 AI 会话 id（todo①）
+            localStorage.removeItem(AI_CHAT_CACHED_SESSION_KEY);
             if (res?.dat?.logout_url) {
               Cookies.remove('access_token');
               Cookies.remove('refresh_token');
@@ -722,11 +769,12 @@ export default function () {//{ selectMenu?:any }
           <Icon type="bell" />
         </span>
         {/* 临时用户使用时长 */}
-        {profile.roles?.includes("临时用户") && (
+        {profile.roles?.includes("Guest") && (
           <div className={'top-header-desc'}>剩余使用时长：{profile?.temp_remaining_days}天</div>
         )}
+        <FlashAiButton />
         {/* 帮助文档 - 临时用户和有使用期限的用户不显示 */}
-        {!profile.roles?.includes("临时用户") && !profile.temp_remaining_days && (
+        {!profile.roles?.includes("Guest") && !profile.temp_remaining_days && (
           <Dropdown 
             overlay={
               <Menu>
@@ -788,7 +836,7 @@ export default function () {//{ selectMenu?:any }
         )}
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
-            <img src={imageUrl ? imageUrl : '/image/avatar1.png'} alt='' />
+            <img src={imageUrl ? imageUrl : (profile?.portrait ? (/^[1-8]$/.test(String(profile.portrait)) ? `/image/avatar${profile.portrait}.png` : profile.portrait) : '/image/avatar1.png')} alt='' />
             <span className='display-name'>{profile.nickname || profile.username}</span>
             <DownOutlined />
           </span>

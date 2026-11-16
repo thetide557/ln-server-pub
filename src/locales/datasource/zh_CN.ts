@@ -1,5 +1,6 @@
 const zh_CN = {
   es: {
+    indexPatterns_manage: '管理索引模式', // N20（新日志浏览）加，值照 fe ee48e701 src/locales/datasource/locale/zh_CN.ts:19；只加不改（D-27）
     ref: '名称',
     index: '索引',
     index_tip: `
@@ -16,6 +17,12 @@ const zh_CN = {
     indexPatterns: '索引模式',
     indexPattern_msg: '索引模式不能为空',
     filter: '过滤条件',
+    // 第六步 第4段 W3a（ES 组 U-ES-01）：v9 ES 告警编辑器要用、pub 这份 v6 时代语言包里没有的 key，
+    // 值逐字抄 fe v9.1.0 src/locales/datasource/locale/zh_CN.ts（只加不改，pub 原有的 key 一个没动）。
+    index_placeholder: '索引 log-*（支持通配符）',
+    index_pattern_placeholder: '选择索引模式',
+    filter_placeholder: '过滤条件 status:500 AND method:GET',
+    offset_tip: '用于查询指定时间段之前的数据，类似 PromQL 中的 offset，单位为秒',
     time_label: '时间颗粒度',
     date_field: '日期字段',
     date_field_msg: '日期字段不能为空',
@@ -27,6 +34,9 @@ const zh_CN = {
       more: '高级设置',
       size: '匹配个数',
       min_value: '文档最小值',
+      // 第六步 第4段 W3a（ES 组 U-ES-01）：v9 的 Terms / Histgram 用的是 min_doc_count 这个 key，
+      // 值同 fe v9.1.0；pub 原有的 min_value 是羚牛存量、还有别处在用，保留不动。
+      min_doc_count: '文档最小值',
     },
     raw: {
       limit: '日志条数',
@@ -49,7 +59,43 @@ const zh_CN = {
       delay: '延迟执行',
     },
     event: {
-      groupBy: `根据 {{field}} 分组，匹配个数 {{size}}, 文档最小值 {{min_value}}`,
+      // ---- N19 W-A：插值名由 {{min_value}} 改成 {{min_doc_count}}，与 fe ee48e701
+      // src/locales/datasource/locale/zh_CN.ts:64 一致 —— 消费它的 src/plugins/elasticsearch/Event/index.tsx:64
+      // 传进来的字段名就是 min_doc_count，不改这里会原样显示 {{min_value}} 这串占位符。
+      // 全仓只有那一个消费点（grep 'es.event.groupBy' 1 命中），所以改插值名不影响别处。
+      groupBy: `根据 {{field}} 分组，匹配个数 {{size}}, 文档最小值 {{min_doc_count}}`,
+    },
+  },
+  // ---- 第六步 L1（多数据源）：doris / clickHouse 数据源表单的高级设置用 t('datasource:datasource.xxx')，
+  // 键值原样取自 fe v9.1.0 src/locales/datasource/locale/zh_CN.ts:81-88。
+  datasource: {
+    max_query_rows: '单次请求允许检索的最大行数',
+    max_idle_conns: '最大空闲连接数',
+    max_open_conns: '最大打开连接数',
+    conn_max_lifetime: '连接最大生存时间（单位: 秒）',
+    timeout: '超时时间（单位: 秒）',
+    timeout_ms: '超时时间（单位: 毫秒）',
+  },
+  // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器上 `datasource:query.title` 这一串
+  // 直接把键名原文显示出来了（引用点 `src/plugins/doris/AlertRule/index.tsx:91` / `:124`，
+  // 还有 `src/plugins/TDengine/AlertRule/Queries/index.tsx:62`、`src/plugins/clickHouse/AlertRule/Queries/index.tsx:77`）。
+  // pub 这份词条里原来根本没有顶层的 `query` 段，所以整段按上游 fe `ee48e701:src/locales/datasource/locale/<lang>.ts`
+  // 的 `query` 段**逐字抄**过来（只加不改，pub 原有的键一个没动）。
+  query: {
+    title: '查询统计',
+    execute: '查询',
+    query: '查询条件',
+    query_required: '查询条件不能为空',
+    query_placeholder: '输入 SQL 进行查询，按 Shift+Enter 换行',
+    query_placeholder2: '按 Shift+Enter 换行',
+    advancedSettings: {
+      title: '辅助配置',
+      tags_placeholder: '回车输入多个',
+      valueKey: '值字段',
+      valueKey_tip: 'SQL 查询结果通常包含多个列，您可以指定哪些列的值作为曲线展示在图表上',
+      valueKey_required: '值字段不能为空',
+      labelKey: '标签字段',
+      labelKey_tip: 'SQL 查询结果通常包含多个列，您可以指定哪些列作为曲线的标签元信息',
     },
   },
 };

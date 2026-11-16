@@ -144,3 +144,45 @@ export const getLegendValues = (series: any[], { unit, decimals, dateFormat }, h
 };
 
 export default getCalculatedValuesBySeries;
+
+// ---- n20 块 0（新日志浏览）在这里加的，只加不改 ----
+// 谁要它：src/pages/dashboard/Renderer/Renderer/TimeSeriesNG/utils/getLegendData.ts:5。
+// fe 出处：fe ee48e701 同路径 :156-180（整个函数逐字抄；fe 在 :18 import stringToRegex）。
+// 羚牛这份 getCalculatedValuesBySeries.ts 是从 izuna 分支合来的自己的版本（与 fe diff 292 行），
+// 不覆盖；函数里要的 stringToRegex 羚牛已经有（src/pages/dashboard/Variables/utils/stringToRegex.ts，
+// 与 fe 同路径逐字相同，diff 0 行），只是本文件原来没 import 它——import 放在文件末尾（ESM 的
+// import 会被提升，效果与放文件头一样），这样这个边界文件的 diff 里只有 `+` 行、没有 `-` 行。
+// 函数用到的 IValueMapping 类型本文件 :19 已经 import 过，不用补。
+import stringToRegex from '../../Variables/utils/stringToRegex';
+
+export const getMappedTextObj = (textValue: string, valueMappings?: IValueMapping[]) => {
+  if (typeof textValue === 'string') {
+    const matchedValueMapping = _.find(valueMappings, (item) => {
+      // 与 fe 的差：fe 的 IValueMapping（fe types.ts:86-99）的 type 联合里有 'textValue'、match 里有
+      // textValue 字段；羚牛那版（types.ts:62-73）两者都没有。羚牛这份 IValueMapping 是仪表盘的公共
+      // 类型（撞点表 #7 点名「不能覆盖」），**不去改它的已有行**（改联合类型就必然产生 `-` 行、
+      // 破掉 B 类只加不改的门禁），改成在这里按宽类型解构一次，逻辑与 fe 一字不差。
+      // 后果：羚牛的值映射界面里配不出 type === 'textValue' 的映射，所以这个分支实际走不到，
+      // getMappedTextObj 恒返回 { text: textValue }——与 fe 在「没配文本映射」时的结果相同。
+      const { type, match } = item as unknown as { type?: string; match?: { textValue?: string } };
+      if (type === 'textValue') {
+        if (textValue === match?.textValue) return true;
+        const reg = stringToRegex(match?.textValue);
+        if (reg && reg.test(textValue)) return true;
+        return false;
+      }
+      return false;
+    });
+    if (matchedValueMapping) {
+      return {
+        // origin: textValue,
+        text: matchedValueMapping?.result?.text || textValue,
+        color: matchedValueMapping?.result?.color,
+      };
+    }
+  }
+  return {
+    // origin: textValue,
+    text: textValue,
+  };
+};

@@ -11,11 +11,13 @@ import Collapse, { Panel } from '../Components/Collapse';
 import getFirstUnusedLetter from '../../Renderer/utils/getFirstUnusedLetter';
 import { replaceExpressionVars } from '../../VariableConfig/constant';
 import { PromQLInputWithSelect } from '@/components/PromQLInput/PromQLInputWithSelect';
+import { AiButton } from '@/components/AiChatNG/FlashAiButton';
+import { buildPageFrom, getExplorerPrompts } from '@/components/AiChatNG/recommend';
 
 const alphabet = 'ABCDEFGHIGKLMNOPQRSTUVWXYZ'.split('');
 
 export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
-  const { t } = useTranslation('dashboard');
+  const { t, i18n } = useTranslation('dashboard');
 
   return (
     <Form.List name='targets'>
@@ -56,20 +58,56 @@ export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
                           let datasourceValue = getFieldValue('datasourceValue');
                           datasourceValue = variableConfig ? replaceExpressionVars(datasourceValue, variableConfig, variableConfig.length, dashboardId) : datasourceValue;
                           return (
-                            <Form.Item
-                              label='PromQL'
-                              {...field}
-                              name={[field.name, 'expr']}
-                              validateTrigger={['onBlur']}
-                              rules={[
-                                {
-                                  required: true,
-                                },
-                              ]}
-                              style={{ flex: 1 }}
-                            >
-                              <PromQLInputWithSelect validateTrigger={['onBlur']} datasourceValue={datasourceValue} />
-                            </Form.Item>
+                            <>
+                              <Form.Item
+                                label='PromQL'
+                                {...field}
+                                name={[field.name, 'expr']}
+                                validateTrigger={['onBlur']}
+                                rules={[
+                                  {
+                                    required: true,
+                                  },
+                                ]}
+                                style={{ flex: 1 }}
+                              >
+                                <PromQLInputWithSelect validateTrigger={['onBlur']} datasourceValue={datasourceValue} />
+                              </Form.Item>
+                              <Form.Item label=' ' style={{ marginLeft: 8 }}>
+                                <AiButton
+                                  queryPageFrom={buildPageFrom({
+                                    param: {
+                                      datasource_type: 'prometheus',
+                                      datasource_id: _.toNumber(datasourceValue),
+                                    },
+                                  })}
+                                  queryAction={{
+                                    key: 'query_generator',
+                                    param: {
+                                      datasource_type: 'prometheus',
+                                      datasource_id: _.toNumber(datasourceValue),
+                                    },
+                                  }}
+                                  promptList={getExplorerPrompts(i18n.language)}
+                                  onExecuteQueryForQueryContent={(promql) => {
+                                    const targets = [...(chartForm.getFieldValue('targets') || [])];
+
+                                    if (!targets[field.name]) {
+                                      return;
+                                    }
+
+                                    targets[field.name] = {
+                                      ...targets[field.name],
+                                      expr: promql,
+                                    };
+
+                                    chartForm.setFieldsValue({
+                                      targets,
+                                    });
+                                  }}
+                                />
+                              </Form.Item>
+                            </>
                           );
                         }}
                       </Form.Item>

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useDebounceFn } from 'ahooks';
 import { getFields } from '@/pages/explorer/Elasticsearch/services';
 import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
+import { generateQueryName, generateQueryNameByIndex } from '@/components/QueryName/utils';
 
 interface IProps {
   prefixField?: any;
@@ -16,7 +17,6 @@ interface IProps {
   valueRefVisible?: boolean;
 }
 
-const alphabet = 'ABCDEFGHIGKLMNOPQRSTUVWXYZ'.split('');
 const functions = ['count', 'avg', 'sum', 'max', 'min', 'p90', 'p95', 'p99', 'rawData'];
 const functionsLabelMap = {
   count: 'count',
@@ -58,7 +58,7 @@ export default function index({ prefixField = {}, prefixFields = [], prefixNameF
   }, [datasourceValue, index]);
 
   return (
-    <Form.List {...prefixField} name={[...prefixNameField, 'query', 'values']}>
+    <Form.List {...prefixField} name={[...prefixNameField, 'query', 'values']} initialValue={[{ func: 'count' }]}>
       {(fields, { add, remove }) => (
         <div>
           <Form.Item
@@ -82,7 +82,7 @@ export default function index({ prefixField = {}, prefixFields = [], prefixNameF
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
                       add({
-                        ref: alphabet[fields.length],
+                        ref: generateQueryNameByIndex(fields.length),
                         func: functions[0],
                         field: undefined,
                       });
@@ -106,7 +106,7 @@ export default function index({ prefixField = {}, prefixFields = [], prefixNameF
                           <Row gutter={10}>
                             <Col span={func === 'count' ? 24 : 12}>
                               <Input.Group>
-                                {valueRefVisible && <span className='ant-input-group-addon'>{alphabet[index]}</span>}
+                                {valueRefVisible && <span className='ant-input-group-addon'>{generateQueryNameByIndex(index)}</span>}
                                 <Form.Item {...field} name={[field.name, 'func']}>
                                   <Select
                                     style={{ width: '100%' }}
@@ -141,7 +141,7 @@ export default function index({ prefixField = {}, prefixFields = [], prefixNameF
                             {func !== 'count' && func !== 'rawData' && (
                               <Col span={12}>
                                 <InputGroupWithFormItem label='Field key' labelWidth={80}>
-                                  <Form.Item {...field} name={[field.name, 'field']} rules={[{ required: true, message: '必须填写 field key' }]}>
+                                  <Form.Item {...field} name={[field.name, 'field']} rules={[{ required: true, message: t('dashboard:query.es.field_key_msg') }]}>
                                     <AutoComplete
                                       options={_.filter(fieldsOptions, (item) => {
                                         if (search) {

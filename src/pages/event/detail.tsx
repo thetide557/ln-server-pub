@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '@/components/pageLayout';
 import { getAlertEventsById, getHistoryEventsById } from '@/services/warning';
-import { priorityColor } from '@/utils/constant';
+import { priorityColor, DatasourceCateEnum } from '@/utils/constant';
 import { deleteAlertEventsModal } from '.';
 import { parseValues } from '@/pages/alertRules/utils';
 import { CommonStateContext } from '@/App';
@@ -37,12 +37,43 @@ import PlusPreview from 'plus:/parcels/Event/Preview';
 import PlusLogsDetail from 'plus:/parcels/Event/LogsDetail';
 import PrometheusDetail from './Detail/Prometheus';
 import Host from './Detail/Host';
+// ---- N19 W-A：告警事件详情「按源回查」。照 fe ee48e701 src/pages/event/DetailNG/eventDetailByCate.tsx
+// 的分发表，把各数据源的 Event 组件接进本页下面的 descriptionInfo 数组（老结构：按 cate 展开一段详情项）。
+// 不走 `import { Event as X } from '@/plugins/<源>'` 的聚合导出（羚牛各插件 index.ts 形态不一、es 连 index.ts 都没有），
+// 一律直接 import 文件，风格照上面 PrometheusDetail 那行。
+import ElasticsearchDetail from '@/plugins/elasticsearch/Event';
+import TDengineDetail from '@/plugins/TDengine/Event';
+import LokiDetail from './Detail/Loki';
+import MySQLDetail from '@/plugins/mysql/Event';
+import PgsqlDetail from '@/plugins/pgsql/Event';
+import DorisDetail from '@/plugins/doris/Event';
+import VictorialogsDetail from '@/plugins/victorialogs/Event';
+// clickhouse 这一格上游开源自己不分发（fe ee48e701 的 eventDetailByCate.tsx 没有 ck 分支，
+// 组件只被 plugins/clickHouse/index.ts:9 导出、零消费，开源把 ck 的事件回查甩给了商业 parcel）。
+// 羚牛这里主动接上，立场与 ck / doris 的既有口径一致（拍板 D-1）。
+import ClickHouseDetail from '@/plugins/clickHouse/Event';
+import { getESIndexPatterns } from '@/pages/log/IndexPatterns/services';
+// 各插件自己的词条由 src/plugins/<源>/locale/index.ts 调 addResourceBundle 注册，而那几个文件
+// 原先只被告警规则表单、仪表盘编辑器 import（见 src/pages/alertRules/Form/Rule/Rule/Metric/index.tsx:53-59），
+// 本页不经过 —— 所以这里逐个补只做注册的 import，写法照那个文件。
+import '@/plugins/TDengine/locale';
+import '@/plugins/mysql/locale';
+import '@/plugins/pgsql/locale';
+import '@/plugins/clickHouse/locale';
+// es 组件里用到 `alertRules:nodata_trigger.title`，而 alertRules 这个命名空间只在
+// src/pages/alertRules/index.tsx:30 注册，本页的 import 链不经过它 —— 这里补一行只做注册的 import。
+import '@/pages/alertRules/locale';
 import './detail.less';
+import GyyTrapPropertyRows from './GyyTrapPropertyRows';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import Solution from './Solution'
+import { AiButton } from '@/components/AiChatNG/FlashAiButton';
+import { buildPageFrom, getAlertEventDetailPrompts } from '@/components/AiChatNG/recommend';
+import { NAME_SPACE as AI_CHAT_NS } from '@/components/AiChatNG/constants';
 const { Paragraph } = Typography;
 const EventDetailPage: React.FC = () => {
-  const { t } = useTranslation('AlertCurEvents');
+  const { t, i18n } = useTranslation('AlertCurEvents');
+  const { t: tAiChat } = useTranslation(AI_CHAT_NS);
   const { busiId, eventId } = useParams<{ busiId: string; eventId: string }>();
   const tagsHelpDescription = '告警发生时，系统自动采集并附加在告警事件上的结构化标签信息，用于完整描述告警的上下文环境、关联资产和监控指标维度。';
   const renderHelpLabel = (label: React.ReactNode, field: React.ReactNode, description: React.ReactNode) => (
@@ -79,7 +110,20 @@ const EventDetailPage: React.FC = () => {
   const history = useHistory();
   const isHistory = history.location.pathname.includes('alert-his-events') || history.location.pathname.includes('alert-events-shanshu-his');
   const isShanshuRoute = history.location.pathname.includes('alert-events-shanshu');
+  const detailScope = `${isHistory ? 'history' : 'current'}:${eventId}`;
+  const [loadedDetailScope, setLoadedDetailScope] = useState('');
   const [eventDetail, setEventDetail] = useState<any>();
+  // ---- N19 W-A：ES 事件详情要把 index_pattern 的 id 换成名字显示，所以先把索引模式列表拉下来。
+  // 照 fe ee48e701 src/pages/event/DetailNG/index.tsx:46-61，但羚牛这张老详情页没有分享链接的 token 场景，
+  // 所以不带 params、直接调羚牛已有的 getESIndexPatterns（src/pages/log/IndexPatterns/services.ts:20）。
+  const [indexPatterns, setIndexPatterns] = useState<{ id: number; name: string }[]>([]);
+  useEffect(() => {
+    if (eventDetail?.cate === DatasourceCateEnum.elasticsearch) {
+      getESIndexPatterns().then((res) => {
+        setIndexPatterns(res);
+      });
+    }
+  }, [eventDetail?.cate]);
   if (eventDetail) eventDetail.cate = eventDetail.cate || 'prometheus'; // TODO: 兼容历史的告警事件
   const parsedEventDetail = parseValues(eventDetail);
 
@@ -273,9 +317,28 @@ const EventDetailPage: React.FC = () => {
       key: 'rule_name',
       render(content, { rule_id, asset_name }) {
         const displayName = asset_name ? `[${asset_name}] ${content}` : content;
-        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          !isShanshuRoute && history.push("/alert-rules/edit/" + eventDetail.strategy_id + "?mode=view")
-        }}>{displayName}</div>;
+        const eventIdNum = Number(eventId);
+        return (
+          <Space>
+            <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+              !isShanshuRoute && history.push("/alert-rules/edit/" + (eventDetail.strategy_id || eventDetail.rule_id) + "?mode=view")
+            }}>{displayName}</div>
+            {!isShanshuRoute && <AiButton
+              size='small'
+              queryPageFrom={buildPageFrom({ param: { event_id: eventIdNum } })}
+              queryAction={{
+                content: tAiChat('flash_button.event_analysis_content'),
+                prefillOnly: false,
+                key: 'troubleshooting',
+                param: { event_id: eventIdNum },
+              }}
+              promptList={getAlertEventDetailPrompts(i18n.language)}
+              initialMessage={getAlertEventDetailPrompts(i18n.language)[0]}
+            >
+              {tAiChat('flash_button.event_analysis')}
+            </AiButton>}
+          </Space>
+        );
       },
     },
     // 告警策略名称
@@ -371,6 +434,17 @@ const EventDetailPage: React.FC = () => {
     //   label: t('detail.cate'),
     //   key: 'cate',
     // },
+    // ---- N19 W-A：按源回查的分发分支，顺序与写法照 fe ee48e701 eventDetailByCate.tsx:38-56。
+    // 用 DatasourceCateEnum 而不是字面量，是为了 clickhouse 那条不写错成 'clickhouse'（真值是 'ck'）。
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.elasticsearch ? ElasticsearchDetail({ indexPatterns }) : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.opensearch ? ElasticsearchDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.tdengine ? TDengineDetail(t) : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.loki ? LokiDetail({ eventDetail, history }) : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.mysql ? MySQLDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.pgsql ? PgsqlDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.doris ? DorisDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.victorialogs ? VictorialogsDetail() : [false]),
+    ...(!isShanshuRoute && eventDetail?.cate === DatasourceCateEnum.ck ? ClickHouseDetail() : [false]),
     // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
     // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
@@ -455,39 +529,41 @@ const EventDetailPage: React.FC = () => {
   }
 
   useEffect(() => {
+    let active = true;
+    let redirectTimer: ReturnType<typeof setTimeout> | undefined;
+    setEventDetail(undefined);
+    setLoadedDetailScope('');
     const requestPromise = isHistory ? getHistoryEventsById(eventId) : getAlertEventsById(eventId);
     requestPromise.then(async (res) => {
-      let detailInfo = res.dat;
-      let ruleIds = new Array<number>();
-      ruleIds.push(detailInfo.rule_id)
-      await getStrategiesByRuleIds(ruleIds).then((result) => {
-        let rules = {};
-        result.dat.forEach(rule => {
-          return rules[rule.id] = rule;
-        });
-        if (rules[detailInfo.rule_id]) {
-          detailInfo["rule_config_cn"] = rules[detailInfo.rule_id].rule_config_cn;
-          detailInfo["strategy_id"] = rules[detailInfo.rule_id].strategy_id;
-        }
-      })
+      if (!active) return;
+      const detailInfo = res.dat;
+      const result = await getStrategiesByRuleIds([detailInfo.rule_id]);
+      if (!active) return;
+      const rule = result.dat.find((item) => item.id === detailInfo.rule_id);
+      if (rule) {
+        detailInfo.rule_config_cn = rule.rule_config_cn;
+        detailInfo.strategy_id = rule.strategy_id;
+      }
       setEventDetail(detailInfo);
+      setLoadedDetailScope(detailScope);
     }).catch(() => {
-      setTimeout(() => {
-        if (isShanshuRoute) {
-          history.push('/alert-events-shanshu-cur');
-        } else {
-          history.push('/alert-cur-events');
-        } 
+      if (!active) return;
+      redirectTimer = setTimeout(() => {
+        if (active) history.push(isShanshuRoute ? '/alert-events-shanshu-cur' : '/alert-cur-events');
       }, 1500);
     });
-  }, [busiId, eventId]);
+    return () => {
+      active = false;
+      if (redirectTimer !== undefined) clearTimeout(redirectTimer);
+    };
+  }, [busiId, eventId, isHistory]);
 
   return (
     // <PageLayout title={t('detail.title')} showBack backPath={isHistory ? '/alert-his-events' : '/alert-cur-events'}>
     <PageLayout title={t('detail.title')} showBack>
       <div className='event-detail-container'>
 
-        <Spin spinning={!eventDetail}>
+        <Spin spinning={!eventDetail || loadedDetailScope !== detailScope}>
           <Card
             size='small'
             className='desc-container'
@@ -533,7 +609,7 @@ const EventDetailPage: React.FC = () => {
               </div>,
             ]}
           >
-            {eventDetail && (
+            {eventDetail && loadedDetailScope === detailScope && (
               <div>
                 <PlusPreview data={parsedEventDetail} />
                 {descriptionInfo
@@ -550,6 +626,11 @@ const EventDetailPage: React.FC = () => {
                       </div>
                     );
                   })}
+                <GyyTrapPropertyRows
+                  eventId={eventId}
+                  isHistory={isHistory}
+                  enabled={eventDetail.has_gyy_trap_properties === true}
+                />
                 <Solution ruleId={eventDetail.rule_id} />
               </div>
             )}

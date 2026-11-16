@@ -47,7 +47,8 @@ function containerWidthToColumn(width: number): number {
 function Card(props: Props, ref) {
   const { t } = useTranslation('AlertCurEvents');
   const { filter, header, refreshFlag } = props;
-  const { groupedDatasourceList, busiGroups } = useContext(CommonStateContext);
+  // N36-B：多取一个 profile，用来照抄后端「Admin 带空 gid 合法」的判法（见下面 reloadCard）
+  const { groupedDatasourceList, busiGroups, profile } = useContext(CommonStateContext);
   const groupIds = busiGroups?.map(item => item.id)
   const Ref = useRef<HTMLDivElement>(null);
   const history = useHistory();
@@ -70,14 +71,26 @@ function Card(props: Props, ref) {
       if (filter.query == null || filter.query.length == 0) {
         delete filter.query;
       }
-      if (filter.start <= 0) {
+      if (filter.start <= 0 || filter.start === '') {
         delete filter.start;
       }
-      if (filter.end <= 0) {
+      if (filter.end <= 0 || filter.end === '') {
         delete filter.end;
+      }
+      if (!filter.start && !filter.end) {
+        filter['all_time'] = 1;
       }
       filter['group_id'] = groupId.trim();
       filter['gid'] = groupIds?.toString()
+      // N36-B：业务组列表为空时 gid 是空串，后端 `router_alert_cur_event.go:166-168` 对
+      // `gid == "" && !admin` 直接回 400「gid 参数为空」（A13 OBS-T5-4）。
+      // 后端取参是 ginx.QueryStr(c, "gid", "")，「不带参数」和「带空值」一样会 400，所以只能不发请求、显示空卡片。
+      // 守卫条件照抄后端那一行，Admin 的行为一行不变。
+      const isAdminUser = !!profile?.roles?.includes('Admin');
+      if (!isAdminUser && !filter['gid']) {
+        setCardList([]);
+        return;
+      }
       getAlertCards(filter).then((res) => {
         setCardList(res.dat);
       });

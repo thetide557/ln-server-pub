@@ -51,6 +51,8 @@ export default function TableCpt(props: IProps) {
   const { t } = useTranslation('AlertCurEvents');
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [pageSize, setPageSize] = useLocalStorage('events_current_page', 10);
+  // N36-B：取 profile 用来照抄后端「Admin 带空 gid 合法」的判法（见下面 fetchData）
+  const { profile } = useContext(CommonStateContext);
 
 
 
@@ -220,11 +222,20 @@ export default function TableCpt(props: IProps) {
   const fetchData = () => {
     filterObj["alert_type"] = 1;
     let current = localStorage.getItem('events_current_from') ? parseInt("" + localStorage.getItem('events_current_from')) : 1;
+    // N36-B：业务组列表为空时 App.tsx:318 会把 localStorage 的 groupIds 写成空串，后端
+    // `router_alert_cur_event.go:525-527` 对 `gid == "" && !admin` 回 400「gid 不能为空」（A13 OBS-T5-4）。
+    // 后端取参是 ginx.QueryStr(c, "gid", "")，「不带参数」和「带空值」一样会 400，所以只能不发请求，
+    // 给 useAntdTable 回一个空结果让表格显示空态。守卫条件照抄后端那一行，Admin 的行为一行不变。
+    const gid = localStorage.getItem('groupIds');
+    const isAdminUser = !!profile?.roles?.includes('Admin');
+    if (!isAdminUser && !gid) {
+      return Promise.resolve({ total: 0, list: [] });
+    }
     return getEvents({
       page: current,
       limit: pageSize,
       ...filterObj,
-      gid: localStorage.getItem('groupIds'),
+      gid,
     }).then(async (res) => {
 
       let list = res.dat.list;

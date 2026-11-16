@@ -18,6 +18,9 @@ import { message } from 'antd';
 import React, { ReactNode, Component } from 'react';
 import { useLocation } from 'react-router-dom';
 import { IStore } from '@/store/common';
+// ---- 第六步 L1（多数据源）：下面两个 import 只服务本文件末尾新加的 scrollToFirstError / RSAEncrypt。
+import i18next from 'i18next';
+import JSEncrypt from 'jsencrypt';
 export { getDefaultDatasourceValue, setDefaultDatasourceValue } from './datasource';
 
 export const isPromise = (obj) => {
@@ -190,3 +193,38 @@ export function warning(message: string) {
     console.error(`Warning: ${message}`);
   }
 }
+
+// ---- 第六步 L1（多数据源）：从 fe v9.1.0 src/utils/index.ts:207-233 原样搬来的两个函数。
+// scrollToFirstError：九张新数据源表单的 onFinishFailed 用它把页面滚到第一个报错的表单项。
+export const scrollToFirstError = (rootSelector?: string) => {
+  setTimeout(() => {
+    const root = (rootSelector ? document.querySelector(rootSelector) : null) ?? document;
+    root.querySelector('.ant-form-item-has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+};
+
+// RSAEncrypt：被 src/plugins/mysql/Datasource/utils.ts 的 shardRSAEncrypt 引用。
+// 注意：本轮九张表单都没有调用它——mysql / pgsql 的 settings 密码按后端口径明文提交
+// （见 来自后端侧的交接-多数据源前端待办-2026-09-07.md 3.0(c)），这里补上只是让类型检查通过。
+export const RSAEncrypt = (str: string): string => {
+  if (!str) return '';
+  var encrypt = new JSEncrypt();
+  let result: string | boolean = '';
+  encrypt.setPublicKey(`-----BEGIN PUBLIC KEY-----
+  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoEyQB7GhjPdmHZ7gpvG7
+  QMuI224WL3L+CGEtl6E0ypxp1czaLV2TN8POSmRZmjsmaHthkIHiZg2uRvijYX+F
+  2a7XrRh3xZ+s51dtxrbhufYhMvYQFmXpAkYUjMrKn3hGzssONBoOxauJyec3bIFj
+  lcz2nnTRT/xW+mqCoFPoAx2fwOhVurRQSvP2d4mBEDjmCt+frDTj1EW1HjA1QujX
+  XX55KvL+VUmqjU8auj4Pm/4yn8tL8mkv2wCOrYOwylwEYNx1oc2Rczze4B6Rup6B
+  wAQBLBZ/TQPFtUDBF/b3i+nWrR77onffeDplXrzXgfmOE5TclMFfhELBRCoiTvSY
+  YQIDAQAB
+  -----END PUBLIC KEY-----`);
+  result = encrypt.encrypt(str);
+  if (result === false) {
+    message.error(i18next.t('common:password_too_long', { num: 64 }));
+    throw new Error('密码过长，加密失败');
+  }
+  // fe 那边这一行是 `return encrypt.encrypt(str);`；pub 装的 jsencrypt 3.3.2 里 encrypt() 的返回类型是
+  // string | false，TS 4.3 会报 TS2322，所以补一个 as string（上面已经把 false 的情况抛出去了）。
+  return encrypt.encrypt(str) as string;
+};

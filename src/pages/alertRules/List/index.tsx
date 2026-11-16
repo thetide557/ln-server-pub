@@ -106,7 +106,8 @@ export default function List(props: ListProps) {
           <Link
             className='table-text'
             to={{
-              pathname: `/alert-rules/edit/${record.strategy_id}?mode=view`,
+              pathname: `/alert-rules/edit/${record.strategy_id || record.id}`,
+              search: '?mode=view',
             }}
           >
             {name}
@@ -284,7 +285,7 @@ export default function List(props: ListProps) {
                       bgid &&
                         updateAlertRulesStatus(
                           {
-                            strategyids: [strategy_id],
+                            strategyids: [String(strategy_id || record.id)],
                             fields: {
                               disabled: !disabled ? 1 : 0,
                             },
@@ -309,7 +310,8 @@ export default function List(props: ListProps) {
                   //   pathname: `/alert-rules/edit/${record.id}?mode=clone`,
                   // }}
                 to={{
-                  pathname: `/alert-rules/edit/${record.strategy_id}?mode=clone`,
+                  pathname: `/alert-rules/edit/${record.strategy_id || record.id}`,
+                  search: '?mode=clone',
                 }}
                 target="_self"
               >
@@ -325,7 +327,7 @@ export default function List(props: ListProps) {
                   // }}
                 onClick={() => {
                   history.push(
-                    `alert-rules/edit/${record.strategy_id}?mode=view`
+                    `/alert-rules/edit/${record.strategy_id || record.id}?mode=view`
                   );
                 }}
                 rev={undefined}
@@ -339,7 +341,7 @@ export default function List(props: ListProps) {
                   //   history.push(`alert-rules/edit/${record.id}`);
                   // }}
                 onClick={() => {
-                  history.push(`alert-rules/edit/${record.strategy_id}`);
+                  history.push(`/alert-rules/edit/${record.strategy_id || record.id}`);
                 }}
                 rev={undefined}
               />
@@ -366,7 +368,7 @@ export default function List(props: ListProps) {
                     onOk: () => {
                       // 删除告警规则
                       bgid &&
-                        deleteAlertRules(record.strategy_id, bgid).then(
+                        deleteAlertRules(String(record.strategy_id || record.id), bgid).then(
                           () => {
                             message.success("删除成功");
                             getAlertRules(params);
@@ -407,26 +409,28 @@ export default function List(props: ListProps) {
 
   // 合并相同的告警规则名称单元格、操作列、选择列 合并单元格
   const processData = (data) => {
-    // 1. 按 strategy_id 分组
+    // 1. 按 strategy_id 分组（空 strategy_id 按单条 id 独立分组，避免被合并成一行）
     const grouped = data.reduce((acc, item) => {
-      if (!acc[item.strategy_id]) {
-        acc[item.strategy_id] = [];
+      const groupKey = item.strategy_id || `__id_${item.id}`;
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
       }
-      acc[item.strategy_id].push(item);
+      acc[groupKey].push(item);
       return acc;
     }, {});
   
     // 生成 strategy_id 到 ids 的映射
     const strategyIdToIds = {};
-    Object.values(grouped).forEach(group => {
+    Object.values(grouped).forEach((group: any) => {
       if (group.length > 0) {
-        strategyIdToIds[group[0].strategy_id] = group.map(item => item.id);
+        const groupKey = group[0].strategy_id || `__id_${group[0].id}`;
+        strategyIdToIds[groupKey] = group.map(item => item.id);
       }
     });
 
     // 2. 为每个组的第一项设置 rowSpan
     const processedData = [];
-    Object.values(grouped).forEach(group => {
+    Object.values(grouped).forEach((group: any) => {
       group.forEach((item, index) => {
         processedData.push({
           ...item,
@@ -448,7 +452,8 @@ export default function List(props: ListProps) {
       return { children: originNode, props: { rowSpan: record.rowSpan } };
     },
     onSelect: (record, selected) => {
-      const groupIds = strategyIdToIds[record.strategy_id];
+      const groupKey = record.strategy_id || `__id_${record.id}`;
+      const groupIds = strategyIdToIds[groupKey] || [record.id];
       let newSelectedRowKeys = [...selectRowKeys];
       if (selected) {
         newSelectedRowKeys = Array.from(new Set([...newSelectedRowKeys, ...groupIds]));
@@ -566,11 +571,11 @@ export default function List(props: ListProps) {
       <Row justify='space-between'>
         <Col span={20}>
           <Space>
-            <RefreshIcon
+            {/* <RefreshIcon
               onClick={() => {
                 getAlertRules(params);
               }}
-            />
+            /> */}
             <Select
               placeholder='选择过滤器'
               style={{ width: 120 }}

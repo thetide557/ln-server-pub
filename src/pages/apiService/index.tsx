@@ -45,11 +45,11 @@ const ApiService = () => {
         <div className='table-content'>
           <div className='table-header'>
             <Space>
-              <RefreshIcon
+              {/* <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
-              />
+              /> */}
               {/* <div className='table-header-search'>
                 <Input className={'searchInput'} value={searchVal} onChange={(e) => setSearchVal(e.target.value)} prefix={<SearchOutlined />} placeholder={'搜索'} />
               </div> */}
@@ -60,7 +60,7 @@ const ApiService = () => {
                   <Button
                     type='primary'
                     onClick={() => {
-                      history.push(`api-service/add`);
+                      history.push(`/bigScreen/api-service/add`);
                     }}
                   >
                     新建
@@ -94,14 +94,14 @@ const ApiService = () => {
                     {
                       (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/detail")) && <SearchOutlined
                         onClick={() => {
-                          history.push(`api-service/${record.id}`);
+                          history.push(`/bigScreen/api-service/${record.id}`);
                         }}
                       ></SearchOutlined>
                     }
                     {
                       (profile.roles?.includes("Admin") || permList.includes("/bigscreen/api-service/put")) && <EditOutlined
                         onClick={() => {
-                          history.push(`api-service/${record.id}/edit`);
+                          history.push(`/bigScreen/api-service/${record.id}/edit`);
                         }}
                       />
                     }

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Select, Button, Input, InputNumber, AutoComplete } from 'antd';
+import { Row, Col, Form, Select, Button, InputNumber, AutoComplete } from 'antd';
 import { VerticalRightOutlined, VerticalLeftOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
 import _ from 'lodash';
-import { groupByCates, groupByCatesMap } from './configs';
+import { groupByCates } from './configs';
 
 export default function Terms({ prefixField, fieldsOptions, values }) {
   const { t } = useTranslation('alertRules');
@@ -20,7 +20,7 @@ export default function Terms({ prefixField, fieldsOptions, values }) {
               <Select style={{ width: '100%' }}>
                 {groupByCates.map((func) => (
                   <Select.Option key={func} value={func}>
-                    {func} ({groupByCatesMap[func]})
+                    {func} ({t(`datasource:es.${func}.label`)})
                   </Select.Option>
                 ))}
               </Select>
@@ -28,8 +28,9 @@ export default function Terms({ prefixField, fieldsOptions, values }) {
           </Col>
           <Col span={expanded ? 6 : 12}>
             <InputGroupWithFormItem label='Field key' labelWidth={80}>
-              <Form.Item {...prefixField} name={[prefixField.name, 'field']} rules={[{ required: true, message: '必须填写 field key' }]}>
+              <Form.Item {...prefixField} name={[prefixField.name, 'field']} rules={[{ required: true, message: t('dashboard:query.es.field_key_msg') }]}>
                 <AutoComplete
+                  dropdownMatchSelectWidth={false}
                   options={_.filter(fieldsOptions, (item) => {
                     if (search) {
                       return item.value.includes(search);
@@ -47,13 +48,13 @@ export default function Terms({ prefixField, fieldsOptions, values }) {
               <Col span={6}>
                 <InputGroupWithFormItem label={t('datasource:es.terms.size')}>
                   <Form.Item {...prefixField} name={[prefixField.name, 'size']} noStyle>
-                    <InputNumber style={{ width: '100%' }} />
+                    <InputNumber style={{ width: '100%' }} min={0} />
                   </Form.Item>
                 </InputGroupWithFormItem>
               </Col>
               <Col span={6}>
-                <InputGroupWithFormItem label={t('datasource:es.terms.min_value')}>
-                  <Form.Item {...prefixField} name={[prefixField.name, 'min_value']} noStyle>
+                <InputGroupWithFormItem label={t('datasource:es.terms.min_doc_count')}>
+                  <Form.Item {...prefixField} name={[prefixField.name, 'min_doc_count']} noStyle>
                     <InputNumber style={{ width: '100%' }} />
                   </Form.Item>
                 </InputGroupWithFormItem>
@@ -70,7 +71,7 @@ export default function Terms({ prefixField, fieldsOptions, values }) {
               </Col>
               <Col span={6}>
                 <InputGroupWithFormItem label='OrderBy'>
-                  <Form.Item {...prefixField} name={[prefixField.name, 'orderBy']}>
+                  <Form.Item {...prefixField} name={[prefixField.name, 'order_by']}>
                     <Select>
                       <Select.Option value='_key'>Term value</Select.Option>
                       <Select.Option value='_count'>Count</Select.Option>

@@ -44,11 +44,11 @@ export default function Header(props: IProps) {
         }}
       >
         <Space>
-          <RefreshIcon
+          {/* <RefreshIcon
             onClick={() => {
               refreshList();
             }}
-          />
+          /> */}
           <Input
             className={'searchInput'}
             value={searchVal}

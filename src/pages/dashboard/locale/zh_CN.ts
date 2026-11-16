@@ -29,7 +29,7 @@ const zh_CN = {
     import: '导入仪表盘 JSON',
     label: '仪表盘 JSON',
     import_grafana: '导入 Grafana 仪表盘 JSON',
-    import_grafana_tip: '目前只支持导入 v8+ 版本的仪表盘配置，导入完的图表只支持夜莺目前支持的图表类型和功能',
+    import_grafana_tip: '目前只支持导入 v8+ 版本的仪表盘配置，导入完的图表只支持羚牛目前支持的图表类型和功能',
     import_grafana_tip_version_error: '不支持导入小于 v7 版本的仪表盘配置',
     import_grafana_tip_version_warning: '导入小于 v8 版本的仪表盘配置，可能会有部分图表不支持，以及图表无法正常渲染问题',
     continueToImport: '继续导入',
@@ -295,6 +295,11 @@ const zh_CN = {
   },
   query: {
     title: '查询条件',
+    // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：仪表盘面板编辑器的「添加查询条件 / 添加表达式」两个按钮
+    //（`src/pages/dashboard/Editor/Components/AddQueryButtons/index.tsx:22` / `:30`）显示键名原文；
+    // 值逐字抄上游 fe `ee48e701:src/pages/dashboard/locale/<lang>.ts:683-684`。
+    add_query_btn: '添加查询条件',
+    add_expression_btn: '添加表达式',
     transform: '数据转换',
     datasource_placeholder: '请选择数据源',
     datasource_msg: '请选择数据源',

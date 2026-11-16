@@ -1,0 +1,62 @@
+/* 夜莺 AI 浮窗（AiChatNG）专用样式入口。第六步迁入。
+ * 1. --fc-* 变量：fe src/theme/variable.css 原样。
+ * 2. tailwind 三层：只扫 tailwind.config.js content 里的目录，preflight 关闭，important 开。
+ * 3. utilities 层补丁 + best-looking-scroll：抄自 fe src/theme/index.less / default.less，preflight 关闭时 border 没有 solid 样式，靠这段补。
+ */
+@import './variable.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .border { border-style: solid !important; }
+  .border-t { border-top-style: solid !important; }
+  .border-r { border-right-style: solid !important; }
+  .border-b { border-bottom-style: solid !important; }
+  .border-l { border-left-style: solid !important; }
+  .fc-border {
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: var(--fc-border-color) !important;
+  }
+}
+
+.best-looking-scroll {
+  --best-looking-scrollbar-thumb: color-mix(in srgb, var(--fc-text-1) 22%, transparent);
+
+  overflow: auto; // 隐藏滚动条
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px; // 竖向滚动条宽度
+    height: 6px; // 横向滚动条高度
+    visibility: hidden;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+    visibility: hidden;
+  }
+
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
+
+  &:hover {
+    scrollbar-color: var(--best-looking-scrollbar-thumb) transparent;
+
+    &::-webkit-scrollbar {
+      visibility: visible;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--best-looking-scrollbar-thumb);
+      visibility: visible;
+    }
+  }
+}

@@ -28,6 +28,22 @@ import elasticsearchQuery from './elasticsearch';
 // @ts-ignore
 import plusDatasource from 'plus:/parcels/Dashboard/datasource';
 import apiServicequery from './apiservice';
+// ---- 第六步 L3（多数据源）：三行只加的 import，走直达路径不 import 裸目录（拍板-02）。
+// fe 走的是 `import { datasource as iotdbQuery } from '@/plugins/iotdb'`
+// （fe src/pages/dashboard/Renderer/datasource/useQuery.tsx:23-25），那是裸目录，会把 AlertRule / Explorer 带进来。
+import iotdbQuery from '@/plugins/iotdb/Dashboard/datasource';
+import tdengineQuery from '@/plugins/TDengine/Dashboard/datasource';
+import ckQuery from '@/plugins/clickHouse/Dashboard/datasource';
+// ---- 第六步 B1（多数据源补搬轮）：doris 一行，写法同上。开源 fe v9.1.0 的 useQuery.tsx 里没有 doris
+// （doris 落在 plus:/parcels/Dashboard/datasource），这条是用户拍板要补的，照 ck 的写法加。
+import dorisQuery from '@/plugins/doris/Dashboard/datasource';
+// 2026-10-05 N16 摞二：mysql / pgsql 仪表盘取数（照 doris 接法）。
+import mysqlQuery from '@/plugins/mysql/Dashboard/datasource';
+import pgsqlQuery from '@/plugins/pgsql/Dashboard/datasource';
+// 2026-10-07 N34-var：把当前看板变量与时间范围写进 Variables 垫片的全局状态。新套
+// `Variables/utils/replaceTemplateVariables.ts` 在取数时读它来替换 SQL / ES filter 里的
+// ${var} / $var / [[var]]；不写就只有内置的 $__from / $__to 有效（原因见 n9eShim.ts 文件头）。
+import { setGlobalState as setVariablesGlobalState, toVariablesWithOptions } from '../../Variables/utils/n9eShim';
 
 interface IProps {
   id?: string;
@@ -55,11 +71,42 @@ export default function useQuery(props: IProps) {
     prometheus: prometheusQuery,
     elasticsearch: elasticsearchQuery,
     api: apiServicequery,
+    // ---- 第六步 L3（多数据源）：三条只加的 map 项，key 就是守卫，对现有类型恒假。
+    // fe 的 plugins/<t>/Dashboard/datasource 返回的是 { series, query } 对象（fe 同文件 :77 解构了它），
+    // 而 pub 这里的 .then((res: any[]) => setSeries(res)) 期望的是数组，所以每条都用 .then 取出 series
+    // （顾问意见 X-6 (b)）。query 是给「查询详情」面板看的，pub 没有那个面板，丢掉。
+    iotdb: (p) => iotdbQuery(p).then((r: any) => r.series),
+    tdengine: (p) => tdengineQuery(p).then((r: any) => r.series),
+    ck: (p) => ckQuery(p).then((r: any) => r.series),
+    doris: (p) => dorisQuery(p).then((r: any) => r.series), // 第六步 B1：同上，用户拍板要补
     ...plusDatasource,
+    // 2026-10-05 N16 摞二：mysql / pgsql 放在 ...plusDatasource 之后，确保迁来的真实现不被版本 A 的 plus 占位覆盖（接法照 doris；见 拿不准-W2.md U-2）。
+    mysql: (p) => mysqlQuery(p).then((r: any) => r.series),
+    pgsql: (p) => pgsqlQuery(p).then((r: any) => r.series),
   };
   const { run: fetchData } = useDebounceFn(
     () => {
       if (!datasourceCate) return;
+      // 2026-10-07 N34-var：发请求前把变量与时间范围写进垫片存储。这里是所有仪表盘面板取数的唯一入口
+      // （仪表盘详情页 / Board / sxxc 两份 / 面板编辑器预览 / 分享图表页都经过它），写在这里顺序也最稳：
+      // 同一次调用里后面才轮到 replaceTemplateVariables 去读。
+      // 变量的当前值重新从 url / localStorage 取一遍（`getVaraiableSelected`），和老套 prometheus 取数
+      // 读的是同一个来源（`Renderer/datasource/prometheus.ts:41,57` → `VariableConfig/constant.tsx:199`），
+      // 免得用上 props 里还没传下来的旧值；取不到（null / undefined）才退回 props 里的 value。
+      if (variableConfig) {
+        setVariablesGlobalState(
+          'variablesWithOptions',
+          toVariablesWithOptions(
+            _.map(variableConfig, (item) => {
+              const selected = getVaraiableSelected(item.name, item.type, dashboardId);
+              return { ...item, value: selected === null || selected === undefined ? item.value : selected };
+            }),
+          ),
+        );
+      }
+      if (time) {
+        setVariablesGlobalState('range', time);
+      }
       setLoading(true);
       fetchQueryMap[datasourceCate](props)
         .then((res: any[]) => {

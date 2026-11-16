@@ -1,5 +1,6 @@
 const en_US = {
   es: {
+    indexPatterns_manage: 'Manage index patterns', // N20（新日志浏览）加，值照 fe ee48e701 src/locales/datasource/locale/en_US.ts:19；只加不改（D-27）
     ref: 'Name',
     index: 'Index',
     index_tip: `
@@ -16,6 +17,12 @@ const en_US = {
     indexPatterns: 'Index Patterns',
     indexPattern_msg: 'Index Pattern is required',
     filter: 'Filter',
+    // 第六步 第4段 W3a（ES 组 U-ES-01）：v9 ES 告警编辑器要用、pub 这份 v6 时代语言包里没有的 key，
+    // 值逐字抄 fe v9.1.0 src/locales/datasource/locale/en_US.ts（只加不改，pub 原有的 key 一个没动）。
+    index_placeholder: 'Index log-* (wildcards supported)',
+    index_pattern_placeholder: 'Select index pattern',
+    filter_placeholder: 'Filter status:500 AND method:GET',
+    offset_tip: 'Used to query data before a specified time period, similar to offset in PromQL, unit is seconds',
     time_label: 'Time',
     date_field: 'Date Field',
     date_field_msg: 'Date Field is required',
@@ -27,6 +34,9 @@ const en_US = {
       more: 'More',
       size: 'Size',
       min_value: 'Min Doc Count',
+      // 第六步 第4段 W3a（ES 组 U-ES-01）：v9 的 Terms / Histgram 用的是 min_doc_count 这个 key，
+      // 值同 fe v9.1.0；pub 原有的 min_value 是羚牛存量、还有别处在用，保留不动。
+      min_doc_count: 'Min doc count',
     },
     raw: {
       limit: 'Limit',
@@ -49,7 +59,42 @@ const en_US = {
       delay: 'Delay',
     },
     event: {
-      groupBy: `Group by {{field}}, number of matches {{size}}, document minimum value {{min_value}}`,
+      // ---- N19 W-A：插值名由 {{min_value}} 改成 {{min_doc_count}}，与 fe ee48e701
+      // src/locales/datasource/locale/en_US.ts:64 一致 —— 消费它的 src/plugins/elasticsearch/Event/index.tsx:64
+      // 传进来的字段名就是 min_doc_count，不改这里会原样显示 {{min_value}} 这串占位符。
+      // 全仓只有那一个消费点（grep 'es.event.groupBy' 1 命中），所以改插值名不影响别处。
+      groupBy: `Group by {{field}}, number of matches {{size}}, document minimum value {{min_doc_count}}`,
+    },
+  },
+  // ---- 第六步 L1（多数据源）：见 zh_CN 同段说明；取自 fe v9.1.0 src/locales/datasource/locale/en_US.ts。
+  datasource: {
+    max_query_rows: 'Maximum number of rows allowed to be retrieved in a single request',
+    max_idle_conns: 'Maximum idle connections',
+    max_open_conns: 'Maximum open connections',
+    conn_max_lifetime: 'Maximum connection lifetime (unit: seconds)',
+    timeout: 'Timeout (unit: seconds)',
+    timeout_ms: 'Timeout (unit: milliseconds)',
+  },
+  // ---- N36 批 H1 第 6 条（后端第十份第二节 3）：doris 告警规则编辑器上 `datasource:query.title` 这一串
+  // 直接把键名原文显示出来了（引用点 `src/plugins/doris/AlertRule/index.tsx:91` / `:124`，
+  // 还有 `src/plugins/TDengine/AlertRule/Queries/index.tsx:62`、`src/plugins/clickHouse/AlertRule/Queries/index.tsx:77`）。
+  // pub 这份词条里原来根本没有顶层的 `query` 段，所以整段按上游 fe `ee48e701:src/locales/datasource/locale/<lang>.ts`
+  // 的 `query` 段**逐字抄**过来（只加不改，pub 原有的键一个没动）。
+  query: {
+    title: 'Queries',
+    execute: 'Execute',
+    query: 'Query',
+    query_required: 'Query is required',
+    query_placeholder: 'Enter SQL to query. Press Shift+Enter for a new line',
+    query_placeholder2: 'Press Shift+Enter for a new line',
+    advancedSettings: {
+      title: 'Auxiliary settings',
+      tags_placeholder: 'Enter multiple tags by pressing Enter',
+      valueKey: 'Value field',
+      valueKey_tip: 'SQL query results usually contain multiple columns; specify which columns are displayed as series on the chart',
+      valueKey_required: 'Value field is required',
+      labelKey: 'Label field',
+      labelKey_tip: 'SQL query results usually contain multiple columns; specify which columns are used as label metadata for series',
     },
   },
 };

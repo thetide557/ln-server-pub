@@ -30,13 +30,13 @@ export const getDeviceModelByCondition = function (data) {
 };
 // updateDeviceModel,addDeviceModel,getDeviceModelByCondition
 export const updateDeviceModel = function (data) {
-  return request('api/takin/device-model/', {
+  return request('/api/takin/device-models', {
     method: RequestMethod.Put,
     data
   });
 };
 export const addDeviceModel = function (data) {
-  return request('api/takin/device-model', {
+  return request('/api/takin/device-models', {
     method: RequestMethod.Post,
     data
   });

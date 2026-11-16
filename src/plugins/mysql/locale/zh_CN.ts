@@ -1,0 +1,64 @@
+const zh_CN = {
+  精确: '精确',
+  正则: '正则',
+  preview: '数据预览',
+  query: {
+    title: '查询统计',
+    execute: '查询',
+    query: 'SQL',
+    query_required: 'SQL不能为空',
+    // ---- N36 批 H1 第 9 条（后端第九份第二节 8、第十份第二节 6）：面板 SQL 写法提示。羚牛自写，上游 fe 无。
+    dashboard_sql_tip:
+      '时间列要起别名 `AS time`（后端只认 time / __time__ 两个列名，漏了别名图是空的、还不报错）；时序模式下「辅助配置」的「值字段」必填。',
+    query_placeholder: '输入 SQL 进行查询，按 Shift+Enter 换行',
+    query_placeholder2: '按 Shift+Enter 换行',
+    advancedSettings: {
+      title: '辅助配置',
+      tags_placeholder: '回车输入多个',
+      valueKey: '值字段',
+      valueKey_tip: 'SQL 查询结果通常包含多个列，您可以指定哪些列的值作为曲线展示在图表上',
+      valueKey_required: '值字段不能为空',
+      labelKey: '标签字段',
+      labelKey_tip: 'SQL 查询结果通常包含多个列，您可以指定哪些列作为曲线的标签元信息',
+    },
+    schema: '元信息',
+    document: '使用文档',
+    dashboard: {
+      mode: {
+        label: '查询模式',
+        table: '非时序数据',
+        timeSeries: '时序数据',
+      },
+    },
+    historicalRecords: {
+      button: '历史记录',
+      searchPlaceholder: '搜索历史记录',
+    },
+    compass_btn_tip: '点击查看表数据',
+  },
+  trigger: {
+    title: '告警条件',
+    value_msg: '请输入表达式值',
+  },
+  datasource: {
+    shards: {
+      title: '数据源基本信息',
+      title_tip: '数据库是否能够连通依赖DBA是否已给相应DB用户授权，如因此未能连通仍可先继续完成后面的设置，后续再做验证。',
+      addr: '数据库地址',
+      addr_tip: '数据库地址需唯一',
+      db: '数据库',
+      user: '用户名',
+      password: '密码',
+      help: '说明：账号需对相应数据库有读权限才可继续后续操作，如修改为其它账号请尽量使用只读权限账号。',
+    },
+    max_query_rows: '单次请求允许检索的最大行数',
+    max_idle_conns: '最大空闲连接数',
+    max_open_conns: '最大打开连接数',
+    conn_max_lifetime: '连接最大生存时间（单位: 秒）',
+    timeout: '超时时间（单位: 秒）',
+    // ---- N36 批 H1 第 1 条：mysql 的 DSN 额外参数（后端键 `mysql.dsn_extra_params`）。上游 fe 无此栏，文案自写。
+    dsn_extra_params: 'DSN 额外参数',
+    dsn_extra_params_tip: '拼在数据库连接串后面的参数，写法同 go-sql-driver，多个用 & 隔开。默认 loc=Local：不填这个的话驱动按 UTC 解析时间列，查出来的时间会整体偏 8 小时。',
+  },
+};
+export default zh_CN;

@@ -162,8 +162,14 @@ const Event: React.FC = () => {
     })
     setFilterOptions({ ...filterOptions })
     const parsedRange = parseRange(range);
-    filter["start"] = moment(parsedRange.start).unix();
-    filter["end"] = moment(parsedRange.end).unix();
+    if (!parsedRange.start && !parsedRange.end) {
+      delete filter["start"];
+      delete filter["end"];
+      filter["all_time"] = 1;
+    } else {
+      filter["start"] = moment(parsedRange.start).unix();
+      filter["end"] = moment(parsedRange.end).unix();
+    }
     setFilter({ ...filter });
     // if (startTime != null && endTime != null) {
     //   filter["start"] = moment(startTime).unix()
@@ -174,8 +180,14 @@ const Event: React.FC = () => {
 
   useEffect(() => {
     const parsedRange = parseRange(range);
-    filter["start"] = moment(parsedRange.start).unix();
-    filter["end"] = moment(parsedRange.end).unix();
+    if (!parsedRange.start && !parsedRange.end) {
+      delete filter["start"];
+      delete filter["end"];
+      filter["all_time"] = 1;
+    } else {
+      filter["start"] = moment(parsedRange.start).unix();
+      filter["end"] = moment(parsedRange.end).unix();
+    }
     setFilter({ ...filter });
 
   }, [JSON.stringify(range)])

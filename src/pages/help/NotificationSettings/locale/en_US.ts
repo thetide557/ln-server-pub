@@ -11,7 +11,7 @@ const en_US = {
     skip_verify: 'Skip SSL verification',
     add: 'Add',
     help: `
-      Dear Nightingale users, if you want to forward all Nightingale alarm events to another platform for processing, you can do it with callbacks.
+      Dear Takin users, if you want to forward all Takin alarm events to another platform for processing, you can do it with callbacks.
       <br />
       <br />
       FlashDuty from the Flashcat Team is an OnCall product that has started public testing. You can push the alarm events of each monitoring system to FlashDuty, and enjoy the one-stop experience of alarm aggregation, noise reduction, scheduling, claiming, upgrading, and collaborative processing.

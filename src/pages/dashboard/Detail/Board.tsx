@@ -193,6 +193,10 @@ const Board = (props: IProps) => {
     }
   }, [id]);
 
+  /*
+   * 2026-10-05 N16 todo②（用户 M229 ④）：羚牛自研轮询（fe v9.1.0 与最新均无）；后端免登录入口对私有看板一律 403
+   * （router_board.go:121-122），.then() 从不执行、editable 从未被它改过；注释掉以免每 2 秒刷一条 403。
+   * 保留不删，便于将来公开看板需要时恢复。
   useInterval(() => {
     if (import.meta.env.PROD && dashboard.id) {
       getDashboardPure(_.toString(dashboard.id)).then((res) => {
@@ -204,6 +208,7 @@ const Board = (props: IProps) => {
       });
     }
   }, 2000);
+  */
 
   return (
     <PageLayout

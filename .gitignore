@@ -15,3 +15,12 @@ build.sh
 scripts/n9e_locale.json
 src/plus
 Tree.md
+
+# B-local material and agent state never belong in project Git.
+local/
+codex-work/
+.codex/
+.claude/
+.env
+.env.*
+!.env.example

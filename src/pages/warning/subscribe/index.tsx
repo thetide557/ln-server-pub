@@ -281,11 +281,11 @@ const Shield: React.FC = () => {
               }}
             >
               <Space>
-                <RefreshIcon
+                {/* <RefreshIcon
                   onClick={() => {
                     refreshList();
                   }}
-                />
+                /> */}
                 <ProdSelect style={{ width: 90 }} value={prod} onChange={setProd} />
                 <DatasourceSelect
                   style={{ width: 100 }}

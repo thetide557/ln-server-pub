@@ -494,12 +494,12 @@ export default function List(props: IProps) {
     <div>
       <div className='table-operate-box'>
         <Space>
-          <Button
+          {/* <Button
             icon={<ReloadOutlined />}
             onClick={() => {
               setRefreshFlag(_.uniqueId('refreshFlag_'));
             }}
-          />
+          /> */}
           {/* <Input
             className='search-input'
             allowClear

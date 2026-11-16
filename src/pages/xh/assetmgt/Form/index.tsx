@@ -80,6 +80,7 @@ export default function () {
   const [manufacturerSearch, setManufacturerSearch] = useState('');
   const [manufacturerLoading, setManufacturerLoading] = useState(false);
   const [addingManufacturer, setAddingManufacturer] = useState(false);
+  const addingManufacturerRef = useRef(false);
   // const [assetOptions1, setAssetOptions1] = useState<any[]>([]);
   const [maintenanceRecordModalOpen, setMaintenanceRecordModalOpen] = useState(false);
   const [maintenanceHistoryModalOpen, setMaintenanceHistoryModalOpen] = useState(false);
@@ -212,6 +213,12 @@ export default function () {
     loadManufacturerOptions();
   }, [loadManufacturerOptions]);
 
+  const debouncedSetManufacturerSearch = useMemo(
+    () => _.debounce((value: string) => {
+      setManufacturerSearch(value);
+    }, 300),
+    [],
+  );
   useEffect(() => {
     let active = true;
     setRegionLoading(true);
@@ -226,6 +233,10 @@ export default function () {
   }, []);
 
   const handleAddManufacturer = useCallback(async () => {
+    if (addingManufacturerRef.current) {
+      return;
+    }
+
     const nextManufacturer = _.trim(manufacturerSearch);
     if (!nextManufacturer) {
       return;
@@ -234,9 +245,11 @@ export default function () {
     const exists = manufacturerOptions.some((item) => item.value === nextManufacturer);
     if (exists) {
       form.setFieldsValue({ manufacturers: nextManufacturer });
+      setAssetData((prev) => ({ ...prev, manufacturers: nextManufacturer }));
       return;
     }
 
+    addingManufacturerRef.current = true;
     setAddingManufacturer(true);
     try {
       await addDictDataBySingle({
@@ -251,15 +264,29 @@ export default function () {
         setManufacturerOptions((prev) => prev.concat([{ value: nextManufacturer, label: nextManufacturer }]));
       }
       form.setFieldsValue({ manufacturers: nextManufacturer });
+      setAssetData((prev) => ({ ...prev, manufacturers: nextManufacturer }));
       setManufacturerSearch('');
       message.success('厂商新增成功');
     } catch (error: any) {
       await loadManufacturerOptions(false);
       message.error(error?.message || '厂商新增失败');
     } finally {
+      addingManufacturerRef.current = false;
       setAddingManufacturer(false);
     }
   }, [form, loadManufacturerOptions, manufacturerOptions, manufacturerSearch]);
+
+  const debouncedAddManufacturer = useMemo(
+    () => _.debounce(handleAddManufacturer, 300, { leading: true, trailing: false }),
+    [handleAddManufacturer],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSetManufacturerSearch.cancel();
+      debouncedAddManufacturer.cancel();
+    };
+  }, [debouncedAddManufacturer, debouncedSetManufacturerSearch]);
 
   const manufacturerNotFoundContent = useMemo(() => {
     if (manufacturerLoading) {
@@ -283,12 +310,12 @@ export default function () {
         }}
       >
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='没有匹配的厂商' />
-        <Button type='link' icon={<PlusOutlined />} loading={addingManufacturer} onClick={handleAddManufacturer}>
+        <Button type='link' icon={<PlusOutlined />} loading={addingManufacturer} disabled={addingManufacturer} onClick={debouncedAddManufacturer}>
           新增厂商 "{nextManufacturer}"
         </Button>
       </div>
     );
-  }, [addingManufacturer, handleAddManufacturer, manufacturerLoading, manufacturerSearch]);
+  }, [addingManufacturer, debouncedAddManufacturer, manufacturerLoading, manufacturerSearch]);
 
   useEffect(() => {
     // 根据选择资产类型生成表单
@@ -475,14 +502,13 @@ export default function () {
 
       const param = { limit: -1, types };
       const res = await getAssetsByConditionSimple(param);
-      const options = res.dat?.list.filter(item => item.type === "物理服务器" || item.type === "虚拟服务器")
-        .map((v) => ({
-          id: v.id,
-          value: v.ident,
-          label: `[${v.type}]-[${v.ip}]-${v.ident}`,
-          type: v.type,
-          ip: v.ip,
-        })).sort((a, b) => localeCompare(a.label, b.label))
+      const options = res.dat?.list.filter(item => item.type === "物理服务器" || item.type === "虚拟服务器").map((v) => ({
+        id: v.id,
+        value: v.ident,
+        label: `[${v.type}]-[${v.ip}]-${v.ident}`,
+        type: v.type,
+        ip: v.ip,
+      })).sort((a, b) => localeCompare(a.label, b.label))
       setAssetOptions(options);
       setAssetList(res.dat?.list.reduce((acc, v) => ({ ...acc, [v.id]: v }), {}));
       if (id) {
@@ -513,13 +539,11 @@ export default function () {
   };
 
   const submitForm = async (values = {}) => {
-    // setFieldsValue 编程式写入的字段（如选择/变更探针时联动写入的 ip）不会触发 onValuesChange，
-    // assetData 中会缺失；提交前统一用 form store 当前值补齐，保证 ip 等字段随接口入参提交
-    Object.assign(assetData, form.getFieldsValue(true), values);
     const submitData = {
       ...assetData,
+      ...form.getFieldsValue(true),
+      ...values,
     };
-
     if (!isServerAssetType(submitData.type)) {
       submitData.cpu_arch = '';
     }
@@ -1036,14 +1060,7 @@ export default function () {
 
                 {/* 第 2 行：区域 / 租户 / 资产类型 */}
                 <Col span={12}>
-                  <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请输入区域' }]}>
-                    {/* <Select
-                      showSearch
-                      optionFilterProp='label'
-                      options={regionOptions}
-                      loading={regionLoading}
-                      placeholder='请选择区域'
-                    /> */}
+<Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请选择区域' }]}>
                     <Input placeholder='请输入区域' />
                   </Form.Item>
                 </Col>
@@ -1080,9 +1097,10 @@ export default function () {
                       filterOption
                       optionFilterProp={"label"}
                       onSearch={(value) => {
-                        setManufacturerSearch(value);
+                        debouncedSetManufacturerSearch(value);
                       }}
                       onBlur={() => {
+                        debouncedSetManufacturerSearch.cancel();
                         setManufacturerSearch('');
                       }}
                       notFoundContent={manufacturerNotFoundContent}

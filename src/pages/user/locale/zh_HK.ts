@@ -1,6 +1,9 @@
 const zh_HK = {
   user: {
     title: '使用者管理',
+    // N36-I：同 zh_CN，補一句「禁用是立刻生效的」。
+    status_tip_enabled: '已啟用。點擊可禁用；禁用後該帳號已登入的工作階段立即失效',
+    status_tip_disabled: '已禁用（該帳號已登入的工作階段已立即失效）。點擊可啟用',
     search_placeholder: '使用者名稱、郵箱或手機',
     create: '建立使用者',
     edit: '編輯使用者',

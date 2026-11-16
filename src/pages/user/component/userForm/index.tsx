@@ -193,8 +193,8 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
               <Select
                 mode='multiple'
                 onChange={(values) => {
-                  if (values.includes('临时用户')) {
-                    form.setFieldsValue({ roles: ['临时用户'] });
+                  if (values.includes('Guest')) {
+                    form.setFieldsValue({ roles: ['Guest'] });
                   }
                 }}
               >
@@ -305,7 +305,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
                 shouldUpdate={(prevValues, currentValues) => prevValues.roles !== currentValues.roles}
               >
                 {({ getFieldValue }) =>
-                  getFieldValue('roles')?.includes('临时用户') ? (
+                  getFieldValue('roles')?.includes('Guest') ? (
                     <Form.Item name="temp_user_expire_at" label={t('使用期限至')} rules={[
                       {
                         required: true,

@@ -20,28 +20,38 @@ import { useTranslation } from 'react-i18next';
 
 interface IProps {
   triggersKey: string;
+  // 第六步 第4段 W0（lead 拍板-11 ①）：rule_config 的**绝对**路径，缺省 ['rule_config'] = 原来的行为。
+  // 背景：羚牛把告警表单改成了「一条规则最多 5 个策略」（Form/index.tsx:198 的 Form.List name="strategies"），
+  // 每条策略自己一份 rule_config；本组件却一直读写顶层的 ['rule_config', ...]，取到的永远是 undefined，
+  // 所以 triggers.length > 1 这个条件永远不成立，「抑制」开关在多策略表单里从来没显示过。
+  // 这里只给组件加一个可选参数（缺省行为一字不变），由调用方决定传不传；
+  // pub 自己的 Prometheus / XHindex / Host 三处调用**本轮不动**，行为与现在完全一致。
+  prefixName?: (string | number)[];
 }
 
 export default function index(props: IProps) {
   const { t } = useTranslation('alertRules');
-  const { triggersKey } = props;
+  const { triggersKey, prefixName = ['rule_config'] } = props;
 
   return (
     <Form.Item shouldUpdate noStyle>
-      {({ getFieldValue, setFieldsValue }) => {
-        const triggers = getFieldValue(['rule_config', triggersKey]);
+      {({ getFieldValue, setFields }) => {
+        const triggers = getFieldValue([...prefixName, triggersKey]);
         if (triggers && triggers.length > 1) {
           return (
             <Space>
               {t('inhibit')}
               <Switch
-                checked={getFieldValue(['rule_config', 'inhibit'])}
+                checked={getFieldValue([...prefixName, 'inhibit'])}
                 onChange={(checked) => {
-                  setFieldsValue({
-                    rule_config: {
-                      inhibit: checked,
+                  // 第六步 第4段 W0：原来这里用 setFieldsValue 写了一整个顶层 rule_config 对象——
+                  // 那样写只能写顶层，而且会把 rule_config 里别的键一起替换掉。改成按全路径只写 inhibit 这一个键。
+                  setFields([
+                    {
+                      name: [...prefixName, 'inhibit'],
+                      value: checked,
                     },
-                  });
+                  ]);
                 }}
               />
             </Space>
