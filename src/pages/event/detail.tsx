@@ -65,6 +65,7 @@ import '@/plugins/clickHouse/locale';
 import '@/pages/alertRules/locale';
 import './detail.less';
 import GyyTrapPropertyRows from './GyyTrapPropertyRows';
+import { buildEventAnnotationRows } from './trapAnnotationUtils';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import Solution from './Solution'
 import { AiButton } from '@/components/AiChatNG/FlashAiButton';
@@ -510,49 +511,24 @@ const EventDetailPage: React.FC = () => {
   ];
 
   if (eventDetail?.annotations) {
-    const trapAnnotationOrder: Record<string, number> = {
-      '设备名称': 1,
-      '设备IP': 2,
-      'trap来源IP': 3,
-      '告警流水号': 4,
-      '所属区域': 5,
-      '弹性IP名称': 6,
-      '弹性IPID': 7,
-      '阈值规则名称': 8,
-      '门限值': 9,
-      '触发当前值': 10,
-      '附加信息': 11,
-      '扩展定位信息': 12,
-      '告警类型': 13,
-      '源端告警级别': 14,
-      '源端确认状态': 15,
-      '设备自报时间': 16,
-      'Trap接收时间': 17,
-      '告警ID(整型)': 18,
-      'Trap OID': 19,
-      'SNMP引擎ID': 20,
-      'SNMP版本': 21,
-      '描述': 22,
-    };
-    const annotationKeys = Object.keys(eventDetail.annotations).sort((a, b) => {
-      const oa = trapAnnotationOrder[a] ?? 999;
-      const ob = trapAnnotationOrder[b] ?? 999;
-      return oa !== ob ? oa - ob : 0;
-    });
-    _.forEach(annotationKeys, (key) => {
-      const value = String(eventDetail.annotations[key] ?? '');
+    const annotationRows = buildEventAnnotationRows(eventDetail.annotations);
+    _.forEach(annotationRows, ({ key, value }) => {
       descriptionInfo.push({
         label: key,
         key,
         render: () => {
           if (value.indexOf('http') === 0) {
             return (
-              <a href={value} target='_blank'>
+              <a href={value} target='_blank' style={{ wordBreak: 'break-all' }}>
                 {value}
               </a>
             );
           }
-          return <span>{value}</span>;
+          return (
+            <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+              {value}
+            </span>
+          );
         },
       });
     });
