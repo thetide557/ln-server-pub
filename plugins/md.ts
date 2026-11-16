@@ -16,6 +16,9 @@
  */
 import { createFilter } from '@rollup/pluginutils';
 
+// 提到模块级复用，避免对每个模块 transform 时都新建一次 filter（大项目下可省大量分配）
+const mdFilter = createFilter(/\.md$/);
+
 export function md() {
   return {
     name: 'react-markdown',
@@ -27,14 +30,12 @@ export function md() {
       }
     },
     load(id) {
-      const filter = createFilter(/\.md$/);
-      if (filter(id)) {
+      if (mdFilter(id)) {
         // console.log(id, 'filter');
       }
     },
     transform(code, id, ssr) {
-      const filter = createFilter(/\.md$/);
-      if (filter(id)) {
+      if (mdFilter(id)) {
         return {
           code: `export default ${JSON.stringify(code)}`,
           map: null,

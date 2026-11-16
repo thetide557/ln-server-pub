@@ -175,9 +175,12 @@ export default defineConfig(({ mode }) => ({
     target: "chrome63",
     outDir: "pub",
     chunkSizeWarningLimit: 650,
-    sourcemap: true,
+    // 生产构建默认不生成 sourcemap：全量 sourcemap 是本项目打包慢、且在渲染 chunk
+    // 阶段触发 OOM（heap out of memory）的主因。需要排障时以 SOURCE_MAP=true 开启。
+    sourcemap: process.env.SOURCE_MAP === "true",
     rollupOptions: {
-      plugins: [visualizer()],
+      // 体积分析可视化插件仅按需启用（ANALYZE=true），避免拖慢常规打包并额外产出 stats.html
+      plugins: process.env.ANALYZE === "true" ? [visualizer()] : [],
       output: {
         manualChunks: {
           vendor: chunk1,
