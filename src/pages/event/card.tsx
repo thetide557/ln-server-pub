@@ -71,11 +71,14 @@ function Card(props: Props, ref) {
       if (filter.query == null || filter.query.length == 0) {
         delete filter.query;
       }
-      if (filter.start <= 0) {
+      if (filter.start <= 0 || filter.start === '') {
         delete filter.start;
       }
-      if (filter.end <= 0) {
+      if (filter.end <= 0 || filter.end === '') {
         delete filter.end;
+      }
+      if (!filter.start && !filter.end) {
+        filter['all_time'] = 1;
       }
       filter['group_id'] = groupId.trim();
       filter['gid'] = groupIds?.toString()

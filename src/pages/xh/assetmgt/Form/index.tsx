@@ -174,7 +174,7 @@ export default function () {
       label: 'X86',
       value: 'X86'
     },
-    
+
   ]
   const loadManufacturerOptions = useCallback(async (showError = true) => {
     setManufacturerLoading(true);
@@ -505,14 +505,14 @@ export default function () {
 
       const param = { limit: -1, types };
       const res = await getAssetsByConditionSimple(param);
-      const options = res.dat?.list.map((v) => ({
+      const options = res.dat?.list.filter(item => item.type === "物理服务器" || item.type === "虚拟服务器").map((v) => ({
         id: v.id,
         value: v.ident,
         label: `[${v.type}]-[${v.ip}]-${v.ident}`,
         type: v.type,
         ip: v.ip,
       })).sort((a, b) => localeCompare(a.label, b.label))
-        .filter(item => item.type.includes('服务器') || item.type.includes('虚拟'));
+        
       setAssetOptions(options);
       setAssetList(res.dat?.list.reduce((acc, v) => ({ ...acc, [v.id]: v }), {}));
       if (id) {
@@ -548,7 +548,6 @@ export default function () {
       ...form.getFieldsValue(true),
       ...values,
     };
-
     if (!isServerAssetType(submitData.type)) {
       submitData.cpu_arch = '';
     }
@@ -1069,13 +1068,7 @@ export default function () {
                 {/* 第 2 行：区域 / 租户 / 资产类型 */}
                 <Col span={12}>
                   <Form.Item {...basicItemLayout} label='区域' name='region' rules={[{ required: true, message: '请选择区域' }]}>
-                    <Select
-                      showSearch
-                      optionFilterProp='label'
-                      options={regionOptions}
-                      loading={regionLoading}
-                      placeholder='请选择区域'
-                    />
+                    <Input placeholder='请输入区域' />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -1124,7 +1117,7 @@ export default function () {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                   <Form.Item label='资产IP' name='asset_ip' rules={[{ validator: validateIP }]}>
+                  <Form.Item label='资产IP' name='asset_ip' rules={[{ validator: validateIP }]}>
                     <Input placeholder='请输入资产IP，为空时默认填充 IP 地址' />
                   </Form.Item>
 

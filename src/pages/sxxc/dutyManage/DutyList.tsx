@@ -441,11 +441,11 @@ export default function () {
       <div className="operate">
         <div className="table-content">
           <Space size={"small"}>
-            <RefreshIcon
+            {/* <RefreshIcon
               onClick={() => {
                 setRefreshKey(_.uniqueId("refreshKey_"));
               }}
-            />
+            /> */}
 
             {/* <div className="table-handle-search"> */}
             {/* <Space> */}

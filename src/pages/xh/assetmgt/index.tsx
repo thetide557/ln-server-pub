@@ -1640,11 +1640,11 @@ export default function () {
         <div className='asset-operate_xh'>
           <div className='table-content_xh'>
             <Space>
-              <RefreshIcon
+              {/* <RefreshIcon
                 onClick={() => {
                   getAssetTree();
                 }}
-              />
+              /> */}
               <div className='table-handle-search'>
                 <Space>
                   <Select

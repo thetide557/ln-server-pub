@@ -359,11 +359,11 @@ const PageTable: React.FC<Props> = ({ bgid }) => {
     <div className='strategy-table-content'>
       <div className='strategy-table-search'>
         <Space>
-          <RefreshIcon
+          {/* <RefreshIcon
             onClick={() => {
               refreshList();
             }}
-          />
+          /> */}
           <Select
             allowClear
             placeholder={t('common:datasource.name')}

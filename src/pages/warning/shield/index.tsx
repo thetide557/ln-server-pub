@@ -372,11 +372,11 @@ const Shield: React.FC = () => {
           <div className='shield-index' style={{ height: '100%', overflowY: 'auto' }}>
             <div className='header'>
               <Space>
-                <RefreshIcon
+                {/* <RefreshIcon
                   onClick={() => {
                     refreshList();
                   }}
-                />
+                /> */}
                 <ProdSelect style={{ width: 90 }} value={prod} onChange={setProd} />
                 <DatasourceSelect
                   style={{ width: 100 }}

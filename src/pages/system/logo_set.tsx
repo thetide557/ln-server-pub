@@ -79,8 +79,8 @@ export default function () {
         };
         setTheme({
           title: normalizedDat.login_title,
-          icon: normalizedDat.logo_title,
-          logo: normalizedDat.logo_top,
+          icon: normalizedDat.logo_title || '',
+          logo: normalizedDat.logo_top || '',
         });
         form.setFieldsValue(normalizedDat)
         if (normalizedDat.logo_top != null && normalizedDat.logo_top.length > 0) {
@@ -111,8 +111,8 @@ export default function () {
         getLogInfo().then(({ dat }) => {
           setTheme({
             title: dat.login_title,
-            logo: normalizeLogoUrl(dat.logo_top),
-            icon: normalizeLogoUrl(dat.logo_title)
+            logo: normalizeLogoUrl(dat.logo_top) || '',
+            icon: normalizeLogoUrl(dat.logo_title) || ''
           });
           confirm({
             title: '系统提醒',

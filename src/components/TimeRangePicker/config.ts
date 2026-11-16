@@ -27,6 +27,7 @@ export const spans: { [key: string]: { display: string } } = {
 };
 
 export const rangeOptions: ITimeOption[] = [
+  { start: '', end: '',display: 'All_time' },
   { start: 'now-1m', end: 'now', display: 'Last 1 minute' },
   { start: 'now-2m', end: 'now', display: 'Last 2 minutes' },
   { start: 'now-3m', end: 'now', display: 'Last 3 minutes' },
