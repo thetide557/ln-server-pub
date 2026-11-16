@@ -16,6 +16,7 @@ const zh_CN = {
     year: '年',
   },
   rangeOptions: {
+    'All_time': '全部',
     'Last 1 minute': '最近 1 分钟',
     'Last 2 minutes': '最近 2 分钟',
     'Last 3 minutes': '最近 3 分钟',
