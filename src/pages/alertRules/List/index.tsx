@@ -571,11 +571,11 @@ export default function List(props: ListProps) {
       <Row justify='space-between'>
         <Col span={20}>
           <Space>
-            <RefreshIcon
+            {/* <RefreshIcon
               onClick={() => {
                 getAlertRules(params);
               }}
-            />
+            /> */}
             <Select
               placeholder='选择过滤器'
               style={{ width: 120 }}

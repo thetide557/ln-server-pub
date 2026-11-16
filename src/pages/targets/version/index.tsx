@@ -398,11 +398,11 @@ export default function () {
         </div>
         <div style={{ textAlign: 'right' }}>
           <Space style={{ marginRight: '5px' }}>
-            <RefreshIcon
+            {/* <RefreshIcon
               onClick={() => {
                 loadingVersions();
               }}
-            />
+            /> */}
           </Space>
           {
             (profile.roles?.includes("Admin") || permList.includes("/target/version/upload")) && <Upload {...props} showUploadList={false} beforeUpload={beforeUpload}>

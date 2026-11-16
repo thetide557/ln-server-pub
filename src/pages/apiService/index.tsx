@@ -45,11 +45,11 @@ const ApiService = () => {
         <div className='table-content'>
           <div className='table-header'>
             <Space>
-              <RefreshIcon
+              {/* <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
-              />
+              /> */}
               {/* <div className='table-header-search'>
                 <Input className={'searchInput'} value={searchVal} onChange={(e) => setSearchVal(e.target.value)} prefix={<SearchOutlined />} placeholder={'搜索'} />
               </div> */}

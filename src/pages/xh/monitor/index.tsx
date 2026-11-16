@@ -1175,11 +1175,11 @@ export default function () {
         <div className='monitor-operate_xh'>
           <div className='table-content_xh'>
             <Space size={"small"}>
-              <RefreshIcon
+              {/* <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
-              />
+              /> */}
 
               <div className='table-handle-search'>
                 <Select

@@ -751,11 +751,11 @@ export default function () {
         <div className="asset-operate_xh">
           <div className="table-content_xh">
             <Space>
-              <RefreshIcon
+              {/* <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
-              />
+              /> */}
               <div className="table-handle-search">
                 <Space>
                   {/* 资产清单过滤条件 */}

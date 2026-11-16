@@ -59,7 +59,7 @@ const x6Chunk = [
   "@antv/x6-plugin-transform",
 ];
 const antvChunk = ["@ant-design/graphs", "@ant-design/plots"];
-const baseUrl = "http://127.0.0.1:17000/";
+const baseUrl = "http://20.25.102.244:17000/";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({

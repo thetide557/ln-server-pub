@@ -199,11 +199,11 @@ const Resource: React.FC = () => {
         <div className='user-content'>
           <Row className='event-table-search'>
             <div className='event-table-search-left'>
-            <RefreshIcon
+            {/* <RefreshIcon
                 onClick={() => {
                   setRefreshFlag(_.uniqueId('refresh_'));
                 }}
-              />
+              /> */}
               <Input className={'searchInput'}  value={filter.name} prefix={<SearchOutlined />}
                 onChange={(e) => {
                   setFilter({

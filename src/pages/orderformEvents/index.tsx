@@ -189,11 +189,11 @@ const Event: React.FC = () => {
     return (
       <div className='table-operate-box'>
         <Space>
-          <RefreshIcon
+          {/* <RefreshIcon
             onClick={() => {
               setRefreshFlag(_.uniqueId('refresh_'));
             }}
-          />
+          /> */}
           <Select
             style={{ minWidth: 80 }}
             value={filter.hours}
