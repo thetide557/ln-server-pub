@@ -196,6 +196,8 @@ export default function () {
   const [manufacturerOptions, setManufacturerOptions] = useState<{ value: string; label: string }[]>([]);
   // 物理资源下的设备类型
   const [oidTreeList, setOidTreeList] = useState<any[]>([]);
+  // 当前选中的范围树资产类型节点名称（如「网络设备」），用于判断是否展示 oid 扩展属性导入
+  const [scopeSelectedCategory, setScopeSelectedCategory] = useState<string>('');
   const [scopeTreeFilter, setScopeTreeFilter] = useState<Record<string, any>>({});
   const scopeSelectionRef = useRef<Record<string, any>>({});
   const scopeTreeRequestId = useRef(0);
@@ -924,13 +926,34 @@ export default function () {
       if (selected || !hasSearch) {
         const activeNode = selected || nodes[0];
         scopeSelectionRef.current = activeNode.scopeValues;
+        setScopeSelectedCategory(activeNode.node_type === 'asset_category' ? activeNode.name : '');
         setScopeTreeFilter((prev) => _.isEqual(prev, activeNode.scopeValues) ? prev : activeNode.scopeValues);
         localStorage.setItem('left_asset_type', activeNode.id);
       } else {
+        setScopeSelectedCategory('');
         localStorage.removeItem('left_asset_type');
       }
       setTreeList(nodes);
-      setOidTreeList([]);
+      // 与 dev 分支保持一致：同步获取「物理资源」下的设备类型，供「oid扩展属性导入」判断
+      const oidParams = {
+        status: 0,
+        query: searchVal ? searchVal : undefined,
+        filter: filterParam ? filterParam : undefined,
+      };
+      getAssetstypesNew(oidParams)
+        .then((oidRes) => {
+          if (requestId !== scopeTreeRequestId.current) return;
+          const oidProcessDat = sortAndProcessTypeList(oidRes?.dat || []);
+          const oidTypes = oidProcessDat
+            .find((item) => item.id == -1)
+            ?.sub_groups?.find((item) => item.name == '物理资源')
+            ?.type_list?.filter((item) => item.name != '物理服务器' && item.name != '宿主机')
+            ?.map((item) => item.name);
+          setOidTreeList(oidTypes || []);
+        })
+        .catch(() => {
+          if (requestId === scopeTreeRequestId.current) setOidTreeList([]);
+        });
       if (!assetTreeInitialExpandDone.current) {
         assetTreeInitialExpandDone.current = true;
         setAssetTreeExpandedIds(new Set(collectScopeTreeExpandedIds(nodes)));
@@ -1275,6 +1298,7 @@ export default function () {
       setScopeTreeFilter(item.scopeValues || {});
       setCurrent(1);
       setIsAllAssets(item.node_type === 'root');
+      setScopeSelectedCategory(item.node_type === 'asset_category' ? item.name : '');
       setTypeId('0');
       removeParId();
       setTissueId(-1);
@@ -1286,6 +1310,7 @@ export default function () {
     // console.log('isAllAssets', isAllAssets)
     // 是否是全部资产下的节点点击
     setIsAllAssets(isAllAssets)
+    setScopeSelectedCategory('');
 
     if (par) {
       setParId(par.id)
@@ -1786,7 +1811,8 @@ export default function () {
                           items={[
                             { key: OperateType.AssetBatchImport, label: '导入设备' },
                             // 仅当选中组织树下某一叶子类型「网络设备」时出现（点了父级/全部资产会清 parId，避免 localStorage 残留 typeId 误判）
-                            ...(oidTreeList.includes(typeId) && parId != null && parId !== ''
+                            ...((oidTreeList.includes(typeId) && parId != null && parId !== '')
+                              || (!!scopeSelectedCategory && oidTreeList.includes(scopeSelectedCategory))
                               ? [{ key: OperateType.AssetOidBatchImport, label: 'oid扩展属性导入' }]
                               : []),
                             { key: OperateType.AssetBatchExport, label: '导出设备' },
