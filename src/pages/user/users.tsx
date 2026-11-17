@@ -63,6 +63,8 @@ const Resource: React.FC = () => {
   const pagination = usePagination({ PAGESIZE_KEY: 'users' });
   const [pageNum, setPageNum] = useState(1)
   const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
+  // 记录已点击"查看"的行，用于手机号展示
+  const [revealedPhones, setRevealedPhones] = useState<any[]>([]);
   const [groupMap, setGroupMap] = useState({});
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedRows, setSelectedRows] = useState<any>();
@@ -191,7 +193,23 @@ const Resource: React.FC = () => {
     {
       title: t('account:profile.phone'),
       dataIndex: 'phone',
-      render: (text: string, record) => record.phone || '-',
+      render: (text: string, record) => {
+        if (!record.phone || record.phone === ' ') {
+          return '-';
+        }
+        const rowKey = record.id ?? record.username;
+        if (revealedPhones.includes(rowKey)) {
+          return record.phone;
+        }
+        return (
+          <a
+            style={{ color: '#2b7ee5' }}
+            onClick={() => setRevealedPhones((prev) => [...prev, rowKey])}
+          >
+            点击查看
+          </a>
+        );
+      },
     },
     {
       title: '所属团队',
