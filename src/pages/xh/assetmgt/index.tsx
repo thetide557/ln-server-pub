@@ -874,6 +874,7 @@ export default function () {
   }
 
 
+  
   // 递归处理树形结构，排序、处理type_list
   function sortAndProcessTypeList(nodes) {
     if (!nodes || nodes.length === 0) {
