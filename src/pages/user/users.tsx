@@ -66,6 +66,8 @@ const Resource: React.FC = () => {
   const [groupMap, setGroupMap] = useState({});
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedRows, setSelectedRows] = useState<any>();
+  // 记录已点击"查看"的行，用于手机号展示
+  const [revealedPhones, setRevealedPhones] = useState<any[]>([]);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [roleList, setRoleList] = useState<any[]>([]);
   const [teamInfo, setTeamInfo] = useState<Team>();
@@ -186,7 +188,23 @@ const Resource: React.FC = () => {
     {
       title: t('account:profile.phone'),
       dataIndex: 'phone',
-      render: (text: string, record) => record.phone || '-',
+      render: (text: string, record) => {
+        if (!record.phone || record.phone === ' ') {
+          return '-';
+        }
+        const rowKey = record.id ?? record.username;
+        if (revealedPhones.includes(rowKey)) {
+          return record.phone;
+        }
+        return (
+          <a
+            style={{ color: '#2b7ee5' }}
+            onClick={() => setRevealedPhones((prev) => [...prev, rowKey])}
+          >
+            点击查看
+          </a>
+        );
+      },
     },
     {
       title: '所属团队',
