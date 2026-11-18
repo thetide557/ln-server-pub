@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { Link, useLocation } from 'react-router-dom';
 import { getAssetBoard, getXhAsset } from '@/services/assets';
 import { getDictDataListByType } from '@/services/system/dict';
+import { getBusiGroups } from '@/services/common';
 import queryString from 'query-string';
 import { getAssetstypes } from '@/services/assets';
 import Board from '@/pages/dashboard/Detail/Board';
@@ -31,6 +32,7 @@ export default function () {
     properties: [],
   });
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
+  const [busiGroupMap, setBusiGroupMap] = useState<Record<number, string>>({});
   const { search } = useLocation();
   const { id, action } = queryString.parse(search);
   const [assetInfo, setAssetInfo] = useState<any>({});
@@ -63,6 +65,18 @@ export default function () {
       .catch(() => {
         setManufacturerImageMap({});
       });
+  }, []);
+
+  useEffect(() => {
+    getBusiGroups()
+      .then(({ dat }) => {
+        const map: Record<number, string> = {};
+        (dat || []).forEach((g: any) => {
+          map[g.id] = g.name;
+        });
+        setBusiGroupMap(map);
+      })
+      .catch(() => {});
   }, []);
 
   const genForm = (type: string, theme: string) => {
@@ -277,7 +291,10 @@ export default function () {
                       </Tag>
                     )}
                   </div>
-                  <div className='theme1'></div>
+                  <div className='theme1'>
+                    <div className='title'>业务组：</div>
+                    {assetInfo.group_id != null ? busiGroupMap[assetInfo.group_id] || assetInfo.group_id : '-'}
+                  </div>
                   <div className='theme1'></div>
                 </div>
               </div>
