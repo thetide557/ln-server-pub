@@ -65,6 +65,7 @@ import '@/plugins/clickHouse/locale';
 import '@/pages/alertRules/locale';
 import './detail.less';
 import GyyTrapPropertyRows from './GyyTrapPropertyRows';
+import { buildEventAnnotationRows } from './trapAnnotationUtils';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import Solution from './Solution'
 import { AiButton } from '@/components/AiChatNG/FlashAiButton';
@@ -510,19 +511,24 @@ const EventDetailPage: React.FC = () => {
   ];
 
   if (eventDetail?.annotations) {
-    _.forEach(eventDetail.annotations, (value, key) => {
+    const annotationRows = buildEventAnnotationRows(eventDetail.annotations);
+    _.forEach(annotationRows, ({ key, value }) => {
       descriptionInfo.push({
         label: key,
         key,
         render: () => {
           if (value.indexOf('http') === 0) {
             return (
-              <a href={value} target='_blank'>
+              <a href={value} target='_blank' style={{ wordBreak: 'break-all' }}>
                 {value}
               </a>
             );
           }
-          return <span>{value}</span>;
+          return (
+            <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+              {value}
+            </span>
+          );
         },
       });
     });
