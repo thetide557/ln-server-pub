@@ -44,7 +44,7 @@ function normalizeNode(node: any, parentId: string, index: number, level: number
     group_level: level,
     scopeValues,
     sub_groups: Array.isArray(children) ? children.map((child, childIndex) => normalizeNode(child, id, childIndex, level + 1, scopeValues)) : [],
-    type_list: [],
+    type_list: Array.isArray(node.type_list) ? node.type_list : [],
     isScopeTreeNode: true,
   };
 }

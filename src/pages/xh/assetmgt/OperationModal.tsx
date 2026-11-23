@@ -10,7 +10,7 @@ import { exportTemplet } from '@/services/assets/asset';
 import Icon from '@ant-design/icons';
 import moment from 'moment';
 import './style.less'
-import { getOrganizationTree,importXhAssetSetData } from '@/services/assets';
+import { getOrganizationTree, importXhAssetSetData } from '@/services/assets';
 
 export const OperationModal = ({ operateType, setOperateType, assets, names, reloadList }) => {
   const { t } = useTranslation('assets');
@@ -23,12 +23,12 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   const [fileList, setFileList] = useState<any[]>([]);
   const detailProp = operateType === OperateType.UnbindTag ? tagsList : busiGroups;
   const [treeData, setTreeData] = useState([]);
-  const [ids,setIds] =useState<string>();
-  const [ftype,setFtype] = useState<number>(1)
+  const [ids, setIds] = useState<string>();
+  const [ftype, setFtype] = useState<number>(1)
 
-  const style ={
-    style1:{
-       width: "150px",
+  const style = {
+    style1: {
+      width: "150px",
     }
 
   }
@@ -42,35 +42,35 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       console.log(file)
       let { name } = file;
       var fileExtension = name.substring(name.lastIndexOf('.') + 1);//截取文件后缀名
-      if(fileExtension=="xls" || fileExtension=="xlsx"){
+      if (fileExtension == "xls" || fileExtension == "xlsx") {
         setFileName(name);
         let newList = new Array();
         newList.push(file)
         fileList.concat(...newList);
         setFileList(newList)
         return false;
-      }else{
+      } else {
         message.error("文件格式错误，系统支持excel格式xls、xlsx");
       }
-      
+
     },
     fileList,
   };
 
   useEffect(() => {
-    console.log("initData",assets)
-    if(operateType === OperateType.ChangeOrganize){
+    console.log("initData", assets)
+    if (operateType === OperateType.ChangeOrganize) {
       getOrganizationTree({}).then(({ dat }) => {
         setTreeData(dat)
       });
-    }else if (operateType != OperateType.None) {
-          setAssetsList(assets);
-          setIds(assets.join('\n'));
-          form.setFieldsValue({
-            ids: assets.join('\n'),
-          });
+    } else if (operateType != OperateType.None) {
+      setAssetsList(assets);
+      setIds(assets.join('\n'));
+      form.setFieldsValue({
+        ids: assets.join('\n'),
+      });
     }
-  },[operateType,assets]);
+  }, [operateType, assets]);
   // 绑定标签弹窗内容
   const bindTagDetail = () => {
     // 校验单个标签格式是否正确
@@ -121,7 +121,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
         return (
           <>
             <Form.Item name='ids' rules={[{ required: true }]} hidden>
-              <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} onBlur={formatValue} defaultValue={assets}/>
+              <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} onBlur={formatValue} defaultValue={assets} />
             </Form.Item>
             <Form.Item label={t('assets')} name='names' rules={[{ required: true }]}>
               <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} placeholder={'关联资产信息'} onBlur={formatValue} readOnly />
@@ -167,18 +167,18 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       isFormItem: false,
       render() {
         return (
-        <>
-        <Form.Item name='ids' rules={[{ required: true }]} hidden>
-          <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} onBlur={formatValue} />
-        </Form.Item>
-        <Form.Item  labelCol={{ span:2 }}  label={t('assets')} name='names' rules={[{ required: true }]}>
-          <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} placeholder={'关联资产信息'} onBlur={formatValue} readOnly />
-        </Form.Item>
-        <Form.Item label={''}>
-            <Alert message={t('remove_busi.msg')} type='error' />;
-        </Form.Item>
-       
-        </>
+          <>
+            <Form.Item name='ids' rules={[{ required: true }]} hidden>
+              <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} onBlur={formatValue} />
+            </Form.Item>
+            <Form.Item labelCol={{ span: 2 }} label={t('assets')} name='names' rules={[{ required: true }]}>
+              <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} placeholder={'关联资产信息'} onBlur={formatValue} readOnly />
+            </Form.Item>
+            <Form.Item label={''}>
+              <Alert message={t('remove_busi.msg')} type='error' />;
+            </Form.Item>
+
+          </>
         )
       },
     };
@@ -192,27 +192,60 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       isFormItem: false,
       render() {
         return (
-        <>
-         <>
-           {assets.length > 0 ? (
-              <div className='tip_title'>确认要导出所选中的资产记录吗?</div>
-           ):(
-               <div className='tip_title' >确认要导出所有的资产记录吗？</div>
-           )}         
-         </>
-         <Radio.Group  style={{width:'100%',display:"flex",justifyContent:'center'}} defaultValue={ftype}>
-               <Radio value={1} onChange={e=>{                  
-                  setFtype(parseInt(""+e.target.value))
-               }}>Excel</Radio>
-               <Radio value={2} onChange={e=>{
-                  setFtype(parseInt(""+e.target.value))
-               }}>Xml</Radio>
-               <Radio value={3} onChange={e=>{
-                  setFtype(parseInt(""+e.target.value))
-               }}>Txt</Radio>
-          </Radio.Group>
-       
-        </>
+          <>
+            <>
+              {assets.length > 0 ? (
+                <div className='tip_title'>确认要导出所选中的资产记录吗?</div>
+              ) : (
+                <div className='tip_title' >确认要导出所有的资产记录吗？</div>
+              )}
+            </>
+            <Radio.Group style={{ width: '100%', display: "flex", justifyContent: 'center' }} defaultValue={ftype}>
+              <Radio value={1} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>Excel</Radio>
+              <Radio value={2} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>Xml</Radio>
+              <Radio value={3} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>Txt</Radio>
+            </Radio.Group>
+
+          </>
+        )
+      },
+    };
+  };
+  // 网络设备 OID 导出弹窗内容
+  const assetOidBatchExportDetail = () => {
+    return {
+      operateTitle: "网络设备导出",
+      requestFunc: moveTargetBusi,
+      isFormItem: false,
+      render() {
+        return (
+          <>
+            <>
+              {assets.length > 0 ? (
+                <div className='tip_title'>确认要导出所选中的网络设备记录吗?</div>
+              ) : (
+                <div className='tip_title' >确认要导出所有的网络设备记录吗？</div>
+              )}
+            </>
+            <Radio.Group style={{ width: '100%', display: "flex", justifyContent: 'center' }} defaultValue={ftype}>
+              <Radio value={1} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>Excel</Radio>
+              <Radio value={2} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>Xml</Radio>
+              <Radio value={3} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>Txt</Radio>
+            </Radio.Group>
+
+          </>
         )
       },
     };
@@ -240,7 +273,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       },
     };
   };
-  
+
   const changeOrganizeDetail = () => {
     return {
       operateTitle: t('变更资产所属组织树'),
@@ -430,6 +463,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
     changeOrganizeDetail,
     deleteDetail,
     assetBatchExportDetail,
+    assetOidBatchExportDetail,
     noneDetail: () => ({
       operateTitle: '',
       requestFunc() {
@@ -459,24 +493,22 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
 
   // 提交表单
   function submitForm() {
-
-     
-    if(operateType === OperateType.AssetBatchImport){
-      if(fileList==null || fileList.length==0){
+    if (operateType === OperateType.AssetBatchImport) {
+      if (fileList == null || fileList.length == 0) {
         message.error("请选择要导入的文件")
-        return 
+        return
       }
       let formData = new FormData();
       formData.append("file", fileList[0]);
       let url = "/api/takin/xh/asset/import-xls";
-      console.log("批量导入",url);
+      console.log("批量导入", url);
       importXhAssetSetData(url, formData).then((res) => {
         message.success('批量导入成功');
         setFileName("");
         setFileList([]);
-        reloadList(null,operateType);
-      })   
-    
+        reloadList(null, operateType);
+      })
+
     } else if (operateType === OperateType.AssetOidBatchImport) {
       if (fileList == null || fileList.length == 0) {
         message.error('请选择要导入的文件');
@@ -491,18 +523,16 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
         setFileList([]);
         reloadList(null, operateType);
       });
-    } else if(operateType === OperateType.AssetBatchExport) {
-      console.log(assetsList,names);
-      let params:any = {};
-      // params.ftype = 1;
-      if(assetsList!=null && assetsList.length>0){
-          params.ids = assetsList;
-      }else{
-          delete names.limit;
-          delete names.page;
-          params = {...params,...names}         
+    } else if (operateType === OperateType.AssetBatchExport) {
+      let params: any = {};
+      if (assetsList != null && assetsList.length > 0) {
+        params.ids = assetsList;
+      } else {
+        delete names.limit;
+        delete names.page;
+        params = { ...params, ...names }
       }
-      let url = "/api/takin/xh/asset/export-xls?ftype="+ftype;
+      let url = "/api/takin/xh/asset/export-xls?ftype=" + ftype;
       let exportTitle = "资产";
       exportTemplet(url, params).then((res) => {
         const url = window.URL.createObjectURL(new Blob([res],
@@ -511,11 +541,11 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
         const link = document.createElement('a');
         link.href = url;
         let fileType = ".xls"
-        if(ftype===1){
-           fileType = ".xls"
-        }else if(ftype===2){
-           fileType = ".xml"
-        }else if(ftype===3){
+        if (ftype === 1) {
+          fileType = ".xls"
+        } else if (ftype === 2) {
+          fileType = ".xml"
+        } else if (ftype === 3) {
           fileType = ".txt"
         }
         const fileName = exportTitle + "数据_" + moment().format('MMDDHHmmss') + fileType //decodeURI(res.headers['filename']);
@@ -523,20 +553,49 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
         document.body.appendChild(link);
         link.click();
       })
-      
-    }else{
+    } else if (operateType === OperateType.AssetOidBatchExport) {
+      let params: any = {};
+      if (assetsList != null && assetsList.length > 0) {
+        params.ids = assetsList;
+      } else {
+        delete names.limit;
+        delete names.page;
+        params = { ...params, ...names }
+      }
+      let url = "/api/takin/xh/asset-oid/export-xls?ftype=" + ftype;
+      let exportTitle = "网络设备";
+      exportTemplet(url, params).then((res) => {
+        const url = window.URL.createObjectURL(new Blob([res],
+          // 设置该文件的mime类型，这里对应的mime类型对应为.xlsx格式                          
+          { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+        const link = document.createElement('a');
+        link.href = url;
+        let fileType = ".xls"
+        if (ftype === 1) {
+          fileType = ".xls"
+        } else if (ftype === 2) {
+          fileType = ".xml"
+        } else if (ftype === 3) {
+          fileType = ".txt"
+        }
+        const fileName = exportTitle + "数据_" + moment().format('MMDDHHmmss') + fileType //decodeURI(res.headers['filename']);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+      })
+    } else {
       form.validateFields().then((data) => {
-      // setConfirmLoading(true);
-      data.ids = data.ids.split('\n');
-      requestFunc(data)
-        .then(() => {
-          setOperateType(OperateType.None);
-          reloadList();
-          form.resetFields();
-          setConfirmLoading(false);
-        })
-        .catch(() => setConfirmLoading(false));
-    });
+        // setConfirmLoading(true);
+        data.ids = data.ids.split('\n');
+        requestFunc(data)
+          .then(() => {
+            setOperateType(OperateType.None);
+            reloadList();
+            form.resetFields();
+            setConfirmLoading(false);
+          })
+          .catch(() => setConfirmLoading(false));
+      });
     }
   }
 
@@ -558,11 +617,11 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   useEffect(() => {
     if (operateType !== OperateType.None) {
       setAssetsList(assets);
-      if(operateType !== OperateType.AssetBatchExport){
+      if (operateType !== OperateType.AssetBatchExport && operateType !== OperateType.AssetOidBatchExport) {
         form.setFieldsValue({
           names: names.join('\n'),
         });
-      }      
+      }
       form.setFieldsValue({
         ids: assets.join('\n'),
       });
